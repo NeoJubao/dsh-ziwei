@@ -51,7 +51,12 @@
   Windows 的两处兼容问题（动态 import 的 file:// URL、npm.cmd 调用）已在主分支修复。
 - 已加 topics：`dsh-plugin`、`dsh`、`deepseek-harness`、`ziwei`、`ziwei-doushu`。
 - 发布 tarball 由 `node scripts/release-pack.mjs` 生成（`dist/`，gitignored）。
-- **仓库仍为 private**；转 public 需先完成真机视觉验收 + 真实截图 + 开启私密漏洞报告。
+- **仓库已 public**（2026-11-08）；真机验收、真实截图、私密漏洞报告均已完成。
+- **DSH 插件市场提交**：2026-11-08 已向 dsh-plugin.org 提交收录 issue
+  `https://github.com/dshplugin/dsh-plugin-hub/issues/682`（含 repo / 一句话价值 / 分类 /
+  安装命令 / npm 包 / License / 自检项）。审核与索引刷新由对方流程决定。
+- **awesome-dsh-plugin / dshmarket.com**：其规则要求仓库满 1 天，本仓库创建于 2026-11-08，
+  需次日再提 PR（文件格式 `data/plugins/<owner>__<repo>.yml`，category: ui）。
 
 ## 0.7 命名分层（为什么仓库叫 dsh-ziwei，而 package.json 还叫 @local/*）
 
