@@ -24,9 +24,21 @@ official DeepSeek product.
 
 ## 界面预览
 
-![紫微斗数 Pro 在 DSH 宿主中的本命盘工作台（macOS 浅色主题）](docs/assets/screenshot-light.png)
+真实 DSH 宿主截图（macOS，浅色主题，1280×820 窗口 @2x）。
 
-> 真实 DSH 宿主截图。深色主题与四档宽度的渲染预览见 [docs/design/assets/](docs/design/assets/)；
+**本命盘工作台**：确定性排盘 + 左栏命主信息 / 命盘库，右侧十二宫与宫位详情。
+
+![紫微斗数 Pro 在 DSH 宿主中的本命盘工作台](docs/assets/screenshot-light.png)
+
+**紫微师 · 直接聊**：命盘自动带入，用已配置的模型回答；示例问「这个大限要注意什么」。
+
+![紫微师直接聊：命盘自动带入，回答大限问题](docs/assets/screenshot-ai.png)
+
+**侧栏入口**（DSH 左侧栏中的「紫微斗数 Pro」）：
+
+![DSH 侧栏中的紫微斗数 Pro 入口](docs/assets/screenshot-sidebar.png)
+
+> 深色主题与四档宽度的渲染预览见 [docs/design/assets/](docs/design/assets/)；
 > 截图规范见 [docs/assets/README.md](docs/assets/README.md)。
 
 ## 功能
