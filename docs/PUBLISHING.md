@@ -25,7 +25,7 @@
       捕获（20 用例），作者确认可公开；如需更保守，可改用 iztro（MIT）重生成。
 - [x] 私密路径脱敏：`verify/runner-path.mjs` 已改为 env / `.ziwei-runner/` / `~/ziwei-runner/`；
       内部审计底稿 已 gitignore，不进入公开仓库。
-- [x] **仓库元信息确认**：owner `NeoJubao`，仓库 `https://github.com/NeoJubao/ziwei-workbench`
+- [x] **仓库元信息确认**：owner `NeoJubao`，仓库 `https://github.com/NeoJubao/dsh-plugin-ziwei-workbench`
       （private）；发布名默认 `dsh-plugin-ziwei-workbench`；版权人 `Neo / 2026`。
       本机 `gh api user` 实际登录为 `NeoJubao`（keyring 标签显示旧名，属显示问题）。
 - [ ] **联系方式**：在 GitHub 仓库 Settings → Code security 手动开启 Private vulnerability reporting /
@@ -39,12 +39,27 @@
 
 - 本地 `git init -b main`，首次提交 `75ec44f`；`audit/`、`dist/`、`*.log`、`.ref/`、
   `.ziwei-runner/` 均被 gitignore，未入库（62 文件 / 约 2.35 万行）。
-- 已创建 **private** 仓库并推送 `main`：`https://github.com/NeoJubao/ziwei-workbench`。
+- 已创建 **private** 仓库并推送 `main`：`https://github.com/NeoJubao/dsh-plugin-ziwei-workbench`。
 - **CI 已绿**：三平台 × Node 22/24（run `42480774977`，workflow `ci.yml`）；
   Windows 的两处兼容问题（动态 import 的 file:// URL、npm.cmd 调用）已在主分支修复。
 - 已加 topics：`dsh-plugin`、`dsh`、`deepseek-harness`、`ziwei`、`ziwei-doushu`。
 - 发布 tarball 由 `node scripts/release-pack.mjs` 生成（`dist/`，gitignored）。
 - **仓库仍为 private**；转 public 需先完成真机视觉验收 + 真实截图 + 开启私密漏洞报告。
+
+## 0.7 命名分层（为什么仓库叫 dsh-plugin-*，而 package.json 还叫 @local/*）
+
+DSH 生态的命名约定：npm 包用 `dsh-plugin-<name>`（或 `@user/dsh-<name>`），GitHub 仓库加
+`dsh-plugin` topic。本仓库有四个名字，各有各的用途，不要混：
+
+| 层 | 名字 | 作用 | 是否对外 |
+|---|---|---|---|
+| GitHub 仓库 | `NeoJubao/dsh-plugin-ziwei-workbench` | 代码托管与发现 | 是 |
+| npm 发布包 | `dsh-plugin-ziwei-workbench` | `dsh plugin add` / 插件索引 | 是 |
+| 仓库内 package.json | `@local/ziwei-workbench`（`private: true`） | 本机 profile `link:` 挂载的前提；**不能改**，改了正在用的插件会失效 | 否 |
+| 插件显示名 | 紫微斗数 Pro / 紫微斗数工作台（`locale/*.json`） | Plugins 页、侧栏入口 | 是 |
+
+发布脚本会在 `dist/` 副本里把仓库内包名改写成 npm 发布名，并同步 `cordis.patch.yml` 与
+`client.js` 的模块 id；仓库文件一个字节不改。
 
 ## 1. 发布包名
 
@@ -179,8 +194,8 @@ DSH 没有官方插件市场，但 `plugin_market` / Plugins → Discover 支持
       "title": "紫微斗数工作台",
       "icon": "https://example.com/icon.svg",
       "author": "Neo",
-      "homepage": "https://github.com/NeoJubao/ziwei-workbench#readme",
-      "repository": "https://github.com/NeoJubao/ziwei-workbench",
+      "homepage": "https://github.com/NeoJubao/dsh-plugin-ziwei-workbench#readme",
+      "repository": "https://github.com/NeoJubao/dsh-plugin-ziwei-workbench",
       "metadata": { "categories": ["astrology"], "labels": ["ziwei"] },
       "dist-tags": { "latest": "1.2.0" },
       "versions": [
