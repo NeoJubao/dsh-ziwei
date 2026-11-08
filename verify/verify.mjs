@@ -10,7 +10,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import vm from 'node:vm';
 import { EventEmitter } from 'node:events';
 import { resolveRunner, runnerMissingHint } from './runner-path.mjs';
@@ -154,7 +154,7 @@ const fakeCtx = {
   logger: { warn: (m) => logs.push(m) }
 };
 
-const plugin = await import(join(root, 'index.js') + '?v=' + Date.now());
+const plugin = await import(pathToFileURL(join(root, 'index.js')).href + '?v=' + Date.now());
 plugin.apply(fakeCtx);
 
 ok('注册 4 个工具', registered.size === 4 && ['ziwei_paipan', 'ziwei_check', 'ziwei_context', 'ziwei_templates'].every((n) => registered.has(n)),

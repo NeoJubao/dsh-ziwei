@@ -19,30 +19,31 @@
 
 - [ ] **真机视觉验收**：按 `docs/design/v3-review-checklist.md` 在真实 DSH 宿主走查浅/深色、
       darwin 侧栏折叠、窄屏、键盘；本机渲染 harness 的截图不能替代这一步。
-- [ ] **内容再分发授权**：「紫微师」人设 / 九诀 / 鲲鹏 14 部分 / 红线（`src/ziwei-core.js`、
-      `index.js` 的系统提示词）由作者确认有权随 MIT 仓库分发。
-- [ ] **差分 fixture 来源确认**：`verify/fixtures/paipan-reference.json` 是从来源产品 runner
-      捕获的 20 用例输出；确认该数据可公开，或改用 iztro（MIT）重新生成 fixture。
+- [x] **内容再分发授权**：2026-11-08 作者确认「紫微师 / 金聚」为自有内容，可随 MIT 仓库分发
+      （人设 / 九诀 / 鲲鹏 14 部分 / 红线，见 `src/ziwei-core.js` 与 `index.js` 系统提示词）。
+- [x] **差分 fixture 来源确认**：`verify/fixtures/paipan-reference.json` 由自有「紫微师」产品 runner
+      捕获（20 用例），作者确认可公开；如需更保守，可改用 iztro（MIT）重生成。
 - [x] 私密路径脱敏：`verify/runner-path.mjs` 已改为 env / `.ziwei-runner/` / `~/ziwei-runner/`；
       内部审计底稿 已 gitignore，不进入公开仓库。
-- [ ] **仓库元信息确认**：GitHub owner/repo URL、发布名（默认 `dsh-plugin-ziwei-workbench`）、
-      版权人署名与年份。注意：本机 `gh auth status` 已登录账号是 `0xNeoTian` / `Neo2025new`，
-      与 `package.json` 里写的 `NeoJubao` **不一致**，推远端前必须确认。
-- [ ] **联系方式**：开启 GitHub Security Advisories / Private vulnerability reporting；
-      SECURITY.md 与 CODE_OF_CONDUCT.md 不再留占位邮箱。
+- [x] **仓库元信息确认**：owner `NeoJubao`，仓库 `https://github.com/NeoJubao/ziwei-workbench`
+      （private）；发布名默认 `dsh-plugin-ziwei-workbench`；版权人 `Neo / 2026`。
+      本机 `gh api user` 实际登录为 `NeoJubao`（keyring 标签显示旧名，属显示问题）。
+- [ ] **联系方式**：在 GitHub 仓库 Settings → Code security 手动开启 Private vulnerability reporting /
+      Security Advisories（REST API 对 private repo 返回 404，需网页操作）；文档已不再留占位邮箱。
 - [x] **干净环境安装冒烟（配置层）**：2026-11-08 用 `DSH_HOME=/tmp/dsh-smoke-home` 新建 `smoke` profile，
       对发布 tarball 执行 `dsh plugin --profile smoke add <tgz>`，`dsh --profile smoke --dump-config`
       已出现 `# == dsh-plugin-ziwei-workbench` 与 bundle 行；**未做 GUI 启动/点击**。
       正式发布前建议再做一次带界面的启动冒烟（同样用临时 DSH_HOME，不碰现有 profile）。
 
-## 0.6 本地仓库状态（2026-11-08）
+## 0.6 远端仓库状态（2026-11-08）
 
-- 已在 `ziwei-workbench/` 执行 `git init -b main` 并完成首次提交：`75ec44f`。
-- `.gitignore` 生效：`audit/`、`dist/`、`*.log`、`.ref/`、`.ziwei-runner/` 均不入库；
-  提交共 62 个文件 / 约 2.35 万行。
-- **未创建远端仓库、未 push**。原因：`gh` 已登录账号（`0xNeoTian` / `Neo2025new`）与
-  `package.json` 的 `NeoJubao` 不一致；推之前需确认 owner 与仓库名。
+- 本地 `git init -b main`，首次提交 `75ec44f`；`audit/`、`dist/`、`*.log`、`.ref/`、
+  `.ziwei-runner/` 均被 gitignore，未入库（62 文件 / 约 2.35 万行）。
+- 已创建 **private** 仓库并推送 `main`：`https://github.com/NeoJubao/ziwei-workbench`
+  （初始 CI run 42480485600）。
+- 已加 topics：`dsh-plugin`、`dsh`、`deepseek-harness`、`ziwei`、`ziwei-doushu`。
 - 发布 tarball 由 `node scripts/release-pack.mjs` 生成（`dist/`，gitignored）。
+- **仓库仍为 private**；转 public 需先完成真机视觉验收 + 真实截图 + 开启私密漏洞报告。
 
 ## 1. 发布包名
 

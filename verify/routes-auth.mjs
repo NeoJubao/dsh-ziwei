@@ -11,7 +11,7 @@
  */
 import { EventEmitter } from 'node:events';
 import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 let pass = 0, fail = 0;
@@ -21,7 +21,7 @@ const ok = (name, cond, detail) => {
 };
 const section = (t) => console.log(`\n== ${t} ==`);
 
-const plugin = await import(join(root, 'index.js') + '?v=' + Date.now());
+const plugin = await import(pathToFileURL(join(root, 'index.js')).href + '?v=' + Date.now());
 
 /* ---------------- 最小 HTTP 桩 ---------------- */
 function makeRes() {

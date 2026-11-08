@@ -14,7 +14,7 @@ process.env.ZIWEI_DIAG = '0';
  */
 import { EventEmitter } from 'node:events';
 import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
@@ -34,7 +34,7 @@ new vm.Script(readFileSync(join(root, 'engine-built.js'), 'utf8')).runInContext(
 new vm.Script(readFileSync(join(root, 'src', 'ziwei-core.js'), 'utf8')).runInContext(cx);
 const core = sb.ZWCore;
 
-const { handleInterpret } = await import(join(root, 'index.js') + '?v=' + Date.now());
+const { handleInterpret } = await import(pathToFileURL(join(root, 'index.js')).href + '?v=' + Date.now());
 
 /* 真实的 http 风格 req/res */
 const makeRes = () => {

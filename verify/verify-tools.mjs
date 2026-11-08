@@ -49,9 +49,10 @@ let toolsLib = null;
 const SKIP_OK = process.env.ZIWEI_ALLOW_SKIP === '1';
 /* 专用跳过退出码: 让聚合器认退出码而不是认文案（文案改了就静默退绿的坑） */
 const EXIT_SKIPPED = 3;
-try { toolsLib = TOOLS_LIB ? await import(pathToFileURL(TOOLS_LIB).href) : null; } catch (e) { toolsLib = null; }
+let toolsLibError = null;
+try { toolsLib = TOOLS_LIB ? await import(pathToFileURL(TOOLS_LIB).href) : null; } catch (e) { toolsLibError = e; toolsLib = null; }
 if (!toolsLib) {
-  const msg = `无法加载真实 dsh-tools：${String(e.message).split('\n')[0]}`;
+  const msg = `无法加载真实 dsh-tools：${String((toolsLibError && toolsLibError.message) || (TOOLS_LIB ? '未知错误' : '本机未找到 @deepseek-ai/dsh-tools'))}`;
   if (SKIP_OK) { console.log(`⚠️  SKIPPED（ZIWEI_ALLOW_SKIP=1）: ${msg}`); process.exit(EXIT_SKIPPED); }
   console.error(`❌ ${msg}`);
   console.error('   真实 ToolRuntime/ToolSchema 校验是拦住"工具静默全部不注册"的唯一哨兵；');
@@ -66,7 +67,7 @@ const routes = new Map();
 const promptSections = [];
 const warnings = [];
 
-const plugin = await import(join(root, 'index.js') + '?v=' + Date.now());
+const plugin = await import(pathToFileURL(join(root, 'index.js')).href + '?v=' + Date.now());
 
 /* 真实 ToolRuntime + SystemPrompt：让 dsh-tools 自己的校验真正跑起来 */
 let realTools = null;

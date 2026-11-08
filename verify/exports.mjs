@@ -11,7 +11,7 @@
 process.env.ZIWEI_DIAG = '0';
 
 import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 let pass = 0, fail = 0;
@@ -29,7 +29,7 @@ const ROUTE_INJECT = ['webServer', 'llm'];
 const OPTIONAL_SERVICES = ['agentDefaultModel', 'sessionController', 'workspaceRegistry'];
 
 section('宿主入口导出');
-const plugin = await import(join(root, 'index.js') + '?v=' + Date.now());
+const plugin = await import(pathToFileURL(join(root, 'index.js')).href + '?v=' + Date.now());
 
 ok("导入 index.js 露出 apply", typeof plugin.apply === 'function', typeof plugin.apply);
 ok("name === 'ziwei-workbench'", plugin.name === 'ziwei-workbench', String(plugin.name));
