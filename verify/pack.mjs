@@ -32,10 +32,13 @@ console.log('== 打包完整性（npm pack --dry-run --json） ==');
 /* 用独立缓存目录：机器上的 ~/.npm/_cacache 一旦出现 root 属主文件，
    npm 会以 EPERM 直接退出，这条自检就变成环境事故而不是包内容问题。 */
 const tmpCache = join(tmpdir(), 'ziwei-pack-cache');
-const r = spawnSync('npm', ['pack', '--dry-run', '--json', '--ignore-scripts'], {
+/* Windows 下 npm 是 .cmd，必须经 shell 才能 spawn（否则 ENOENT）。 */
+const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+const r = spawnSync(npmCmd, ['pack', '--dry-run', '--json', '--ignore-scripts'], {
   cwd: root,
   encoding: 'utf8',
   timeout: 120000,
+  shell: process.platform === 'win32',
   env: Object.assign({}, process.env, { npm_config_cache: tmpCache })
 });
 
