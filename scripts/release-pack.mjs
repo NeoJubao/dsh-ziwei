@@ -7,7 +7,7 @@
  *   profile 用 link: 挂载它；改名会直接搞坏正在运行的插件。对外发布时不能改
  *   仓库里的 package.json，只能在 dist/ 里生成一个「发布用副本」：
  *
- *     - name 改成可发布名（默认 dsh-plugin-ziwei-workbench，可用 --name 覆盖）
+ *     - name 改成可发布名（默认 dsh-ziwei，可用 --name 覆盖）
  *     - private=false、publishConfig.access=public
  *     - files 增补 LICENSE / THIRD_PARTY_NOTICES.md / CHANGELOG.md（ISC 要求
  *       许可声明随副本分发；npm 只会自动带 README + LICENSE）
@@ -31,7 +31,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const DEFAULT_PUBLISH_NAME = 'dsh-plugin-ziwei-workbench';
+const DEFAULT_PUBLISH_NAME = 'dsh-ziwei';
 /* 必附文件：package.json 是发布清单本身；其余四个是许可/说明，npm 只会自动带 README+LICENSE */
 const ALWAYS_INCLUDE = ['package.json', 'README.md', 'LICENSE', 'THIRD_PARTY_NOTICES.md', 'CHANGELOG.md'];
 const TEXT_EXT = new Set(['.md', '.json', '.js', '.mjs', '.yml', '.yaml', '.txt']);

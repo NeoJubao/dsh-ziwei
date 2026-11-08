@@ -25,36 +25,37 @@
       捕获（20 用例），作者确认可公开；如需更保守，可改用 iztro（MIT）重生成。
 - [x] 私密路径脱敏：`verify/runner-path.mjs` 已改为 env / `.ziwei-runner/` / `~/ziwei-runner/`；
       内部审计底稿 已 gitignore，不进入公开仓库。
-- [x] **仓库元信息确认**：owner `NeoJubao`，仓库 `https://github.com/NeoJubao/dsh-plugin-ziwei-workbench`
-      （private）；发布名默认 `dsh-plugin-ziwei-workbench`；版权人 `Neo / 2026`。
+- [x] **仓库元信息确认**：owner `NeoJubao`，仓库 `https://github.com/NeoJubao/dsh-ziwei`
+      （private）；发布名默认 `dsh-ziwei`；版权人 `Neo / 2026`。
       本机 `gh api user` 实际登录为 `NeoJubao`（keyring 标签显示旧名，属显示问题）。
 - [ ] **联系方式**：在 GitHub 仓库 Settings → Code security 手动开启 Private vulnerability reporting /
       Security Advisories（REST API 对 private repo 返回 404，需网页操作）；文档已不再留占位邮箱。
 - [x] **干净环境安装冒烟（配置层）**：2026-11-08 用 `DSH_HOME=/tmp/dsh-smoke-home` 新建 `smoke` profile，
       对发布 tarball 执行 `dsh plugin --profile smoke add <tgz>`，`dsh --profile smoke --dump-config`
-      已出现 `# == dsh-plugin-ziwei-workbench` 与 bundle 行；**未做 GUI 启动/点击**。
+      已出现 `# == dsh-ziwei` 与 bundle 行；**未做 GUI 启动/点击**。
       正式发布前建议再做一次带界面的启动冒烟（同样用临时 DSH_HOME，不碰现有 profile）。
 
 ## 0.6 远端仓库状态（2026-11-08）
 
 - 本地 `git init -b main`，首次提交 `75ec44f`；`audit/`、`dist/`、`*.log`、`.ref/`、
   `.ziwei-runner/` 均被 gitignore，未入库（62 文件 / 约 2.35 万行）。
-- 已创建 **private** 仓库并推送 `main`：`https://github.com/NeoJubao/dsh-plugin-ziwei-workbench`。
+- 已创建 **private** 仓库并推送 `main`：`https://github.com/NeoJubao/dsh-ziwei`。
 - **CI 已绿**：三平台 × Node 22/24（run `42480774977`，workflow `ci.yml`）；
   Windows 的两处兼容问题（动态 import 的 file:// URL、npm.cmd 调用）已在主分支修复。
 - 已加 topics：`dsh-plugin`、`dsh`、`deepseek-harness`、`ziwei`、`ziwei-doushu`。
 - 发布 tarball 由 `node scripts/release-pack.mjs` 生成（`dist/`，gitignored）。
 - **仓库仍为 private**；转 public 需先完成真机视觉验收 + 真实截图 + 开启私密漏洞报告。
 
-## 0.7 命名分层（为什么仓库叫 dsh-plugin-*，而 package.json 还叫 @local/*）
+## 0.7 命名分层（为什么仓库叫 dsh-ziwei，而 package.json 还叫 @local/*）
 
-DSH 生态的命名约定：npm 包用 `dsh-plugin-<name>`（或 `@user/dsh-<name>`），GitHub 仓库加
-`dsh-plugin` topic。本仓库有四个名字，各有各的用途，不要混：
+DSH 社区里插件命名没有强制前缀：既有 `dsh-plugin-<name>`，也有很多直接用 `dsh-<name>`
+（GitHub topic `dsh-plugin` 才是官方推荐的发现方式）。本项目从 2026-11-08 起统一用短名
+`dsh-ziwei`（作者决定），插件显示名仍是「紫微斗数 Pro」。四个名字各有用途，不要混：
 
 | 层 | 名字 | 作用 | 是否对外 |
 |---|---|---|---|
-| GitHub 仓库 | `NeoJubao/dsh-plugin-ziwei-workbench` | 代码托管与发现 | 是 |
-| npm 发布包 | `dsh-plugin-ziwei-workbench` | `dsh plugin add` / 插件索引 | 是 |
+| GitHub 仓库 | `NeoJubao/dsh-ziwei` | 代码托管与发现 | 是 |
+| npm 发布包 | `dsh-ziwei` | `dsh plugin add` / 插件索引 | 是 |
 | 仓库内 package.json | `@local/ziwei-workbench`（`private: true`） | 本机 profile `link:` 挂载的前提；**不能改**，改了正在用的插件会失效 | 否 |
 | 插件显示名 | 紫微斗数 Pro / 紫微斗数工作台（`locale/*.json`） | Plugins 页、侧栏入口 | 是 |
 
@@ -67,10 +68,10 @@ DSH 生态的命名约定：npm 包用 `dsh-plugin-<name>`（或 `@user/dsh-<nam
 
 | 方案 | 名字 | 优缺点 |
 | --- | --- | --- |
-| **A（默认）** | `dsh-plugin-ziwei-workbench` | 无 scope，任何有 npm 账号的人都能直接发布；名字本身带 `dsh-plugin`，利于搜索 |
-| B | `@neojubao/ziwei-workbench` | 需要拥有对应 npm scope；更短，但需要额外维护 scope 权限 |
+| **A（默认）** | `dsh-ziwei` | 无 scope，任何有 npm 账号的人都能直接发布；短、好记，配合 GitHub topic `dsh-plugin` 被发现 |
+| B | `@neojubao/dsh-ziwei` | 需要拥有对应 npm scope；适合作者名下多插件统一管理 |
 
-切换方式：`node scripts/release-pack.mjs --name @neojubao/ziwei-workbench`，
+切换方式：`node scripts/release-pack.mjs --name @neojubao/dsh-ziwei`，
 或修改脚本顶部 `DEFAULT_PUBLISH_NAME`。显示名与图标不取决于包名：
 Plugins 页和插件索引读的是 `locale/*.json` 的 `meta.title/meta.description` 与 `icon`。
 
@@ -105,13 +106,13 @@ node scripts/release-pack.mjs
 产物示例：
 
 ```text
-dist/dsh-plugin-ziwei-workbench/
+dist/dsh-ziwei/
 ├── package.json          # 发布名 / private=false / access=public
 ├── cordis.patch.yml      # name 已同步
 ├── client.js             # 模块 id 已同步
 ├── index.js, engine-built.js, src/…, locale/…, icon.svg
 ├── LICENSE, THIRD_PARTY_NOTICES.md, README.md, CHANGELOG.md
-└── dsh-plugin-ziwei-workbench-1.2.0.tgz
+└── dsh-ziwei-1.2.0.tgz
 ```
 
 ## 3. 发布前必须完成的一次性配置（npm OIDC）
@@ -156,7 +157,7 @@ runner 上标「已跳过」）→ 生成 dist 发布副本 → 校验 `v<versio
 ```bash
 node build.mjs
 node scripts/release-pack.mjs
-npm publish "./dist/dsh-plugin-ziwei-workbench" --access public
+npm publish "./dist/dsh-ziwei" --access public
 ```
 
 > 手动发布没有 `--provenance` 证明，安全性弱于 OIDC；发布后建议在 npm 页面补上
@@ -166,11 +167,11 @@ npm publish "./dist/dsh-plugin-ziwei-workbench" --access public
 
 ```bash
 # 1) npm 上确实有该版本
-npm view dsh-plugin-ziwei-workbench version dist-tags
+npm view dsh-ziwei version dist-tags
 
 # 2) 装进一个一次性 profile 并确认 bundle 层生效（不要用生产 profile）
-dsh plugin --profile oss-test add dsh-plugin-ziwei-workbench@<version>
-dsh --profile oss-test --dump-config | grep -F "# == dsh-plugin-ziwei-workbench"
+dsh plugin --profile oss-test add dsh-ziwei@<version>
+dsh --profile oss-test --dump-config | grep -F "# == dsh-ziwei"
 
 # 3) 启动一次，确认侧栏出现「紫微斗数 Pro」
 ```
@@ -190,12 +191,12 @@ DSH 没有官方插件市场，但 `plugin_market` / Plugins → Discover 支持
   "metadata": { "categories": ["astrology"], "labels": ["ziwei"], "sortKeys": ["ziwei-workbench"] },
   "plugins": [
     {
-      "name": "dsh-plugin-ziwei-workbench",
+      "name": "dsh-ziwei",
       "title": "紫微斗数工作台",
       "icon": "https://example.com/icon.svg",
       "author": "Neo",
-      "homepage": "https://github.com/NeoJubao/dsh-plugin-ziwei-workbench#readme",
-      "repository": "https://github.com/NeoJubao/dsh-plugin-ziwei-workbench",
+      "homepage": "https://github.com/NeoJubao/dsh-ziwei#readme",
+      "repository": "https://github.com/NeoJubao/dsh-ziwei",
       "metadata": { "categories": ["astrology"], "labels": ["ziwei"] },
       "dist-tags": { "latest": "1.2.0" },
       "versions": [

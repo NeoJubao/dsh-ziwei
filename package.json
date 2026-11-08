@@ -11,11 +11,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/NeoJubao/dsh-plugin-ziwei-workbench.git"
+    "url": "git+https://github.com/NeoJubao/dsh-ziwei.git"
   },
-  "homepage": "https://github.com/NeoJubao/dsh-plugin-ziwei-workbench#readme",
+  "homepage": "https://github.com/NeoJubao/dsh-ziwei#readme",
   "bugs": {
-    "url": "https://github.com/NeoJubao/dsh-plugin-ziwei-workbench/issues"
+    "url": "https://github.com/NeoJubao/dsh-ziwei/issues"
   },
   "keywords": [
     "dsh-plugin",

@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: 安装 / 使用文档
-    url: https://github.com/NeoJubao/dsh-plugin-ziwei-workbench/blob/main/docs/INSTALL.md
+    url: https://github.com/NeoJubao/dsh-ziwei/blob/main/docs/INSTALL.md
     about: 安装、卸载、重启生效与兼容性说明，先看这里
   - name: 安全问题（请勿公开）
-    url: https://github.com/NeoJubao/dsh-plugin-ziwei-workbench/security/advisories/new
+    url: https://github.com/NeoJubao/dsh-ziwei/security/advisories/new
     about: 漏洞请通过 GitHub Security Advisories 私密报告，不要开公开 issue

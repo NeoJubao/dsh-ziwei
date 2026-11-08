@@ -3,10 +3,10 @@
 > 一个 DSH（DeepSeek Harness）插件：**确定性紫微斗数排盘** + **面板内直接解读**。
 > 前面看盘，后面直接聊。排盘走独立引擎，解读走 Harness 会话模型。
 
-[![CI](https://github.com/NeoJubao/dsh-plugin-ziwei-workbench/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/NeoJubao/dsh-plugin-ziwei-workbench/actions/workflows/ci.yml)
+[![CI](https://github.com/NeoJubao/dsh-ziwei/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/NeoJubao/dsh-ziwei/actions/workflows/ci.yml)
 ![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)
 ![DSH plugin](https://img.shields.io/badge/DSH-plugin-4b5563)
-[![GitHub](https://img.shields.io/badge/GitHub-NeoJubao%2Fdsh--plugin--ziwei--workbench-181717?logo=github)](https://github.com/NeoJubao/dsh-plugin-ziwei-workbench)
+[![GitHub](https://img.shields.io/badge/GitHub-NeoJubao%2Fdsh--ziwei-181717?logo=github)](https://github.com/NeoJubao/dsh-ziwei)
 ![DSH plugin](https://img.shields.io/badge/DSH-plugin-4b5563)
 
 **English summary:** A single-package plugin for DeepSeek Harness that computes Zi Wei
@@ -21,15 +21,15 @@ official DeepSeek product.
 
 ---
 
-## 截图（待补）
+## 界面预览
 
-> 仓库暂时没有界面截图：README 不放占位假图。录制方法、建议尺寸与命名见
-> [docs/assets/README.md](docs/assets/README.md)。补图后把这里替换成：
->
-> ```markdown
-> ![浅色主题：排盘工作台](docs/assets/screenshot-light.png)
-> ![深色主题](docs/assets/screenshot-dark.png)
-> ```
+> 下面是用真实 `client.js` 组件树 + 无头 Chrome 渲染的界面预览（非占位图）。
+> 真实 DSH 宿主截图（浅 / 深色、侧栏展开与折叠）在发布前补齐，规范见
+> [docs/assets/README.md](docs/assets/README.md)。
+
+![浅色主题 · 中宽工作台](docs/design/assets/v3-ui-mid-1160.png)
+
+![深色主题 · 中宽工作台](docs/design/assets/v3-ui-dark-1160.png)
 
 ## 功能
 

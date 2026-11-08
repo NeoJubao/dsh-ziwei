@@ -62,7 +62,7 @@ dsh --profile <profile> --dump-config | grep -F "# == @local/ziwei-workbench"
 ```text
 plugin_manager({
   action: 'install_bundle',
-  target: '/绝对路径/dist/dsh-plugin-ziwei-workbench/dsh-plugin-ziwei-workbench-1.2.0.tgz'
+  target: '/绝对路径/dist/dsh-ziwei/dsh-ziwei-1.2.0.tgz'
 })
 ```
 
@@ -70,7 +70,7 @@ plugin_manager({
 
 > tarball 由 `node scripts/release-pack.mjs` 生成（会先要求 `node build.mjs` 产物就绪）。
 > 发布名与仓库内名不同：仓库内是 `@local/ziwei-workbench`，tarball 里是发布名
-> （默认 `dsh-plugin-ziwei-workbench`）。两者不要混用。
+> （默认 `dsh-ziwei`）。两者不要混用。
 
 ---
 
@@ -82,11 +82,11 @@ plugin_manager({
 ### 3.1 从 npm 安装
 
 ```bash
-dsh plugin --profile <profile> add dsh-plugin-ziwei-workbench@<version>
+dsh plugin --profile <profile> add dsh-ziwei@<version>
 ```
 
 或在 DSH Web **Settings → Plugins → Add plugin** 里输入包名安装。装完**手动重启 DSH**，
-并在 `dsh --profile <profile> --dump-config` 里确认出现 `# == dsh-plugin-ziwei-workbench`。
+并在 `dsh --profile <profile> --dump-config` 里确认出现 `# == dsh-ziwei`。
 
 ### 3.2 通过插件索引（Discover）
 
@@ -103,7 +103,7 @@ dsh plugin --profile <profile> add dsh-plugin-ziwei-workbench@<version>
 ## 卸载
 
 ```bash
-dsh plugin --profile <profile> remove dsh-plugin-ziwei-workbench
+dsh plugin --profile <profile> remove dsh-ziwei
 # 本地 link 安装时用仓库名：
 dsh plugin --profile <profile> remove @local/ziwei-workbench
 ```
