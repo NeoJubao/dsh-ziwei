@@ -349,6 +349,11 @@ ok('client.js 含新 UI 文案与组件', /zp-chat-thread/.test(client) && /交�
 ok('client 不再持久化 API Key（已无消费方）',
   !/localStorage\.setItem\('ziwei-workbench\.apikey'/.test(client) && !/type: 'password'/.test(client) && /removeItem\('ziwei-workbench\.apikey'\)/.test(client));
 /* P1-1: 可见文案必须走官方 Client locale 服务（register + bind），不再读私有 tr.i18n */
+/* v1.3.3: 旧持久化表单的一次性月柱口径迁移 */
+ok('v1.3.3: localStorage 旧默认一次性迁移到节气',
+  /ziwei-pro\.formV133/.test(client) && /monthDivide === 'normal'/.test(client) &&
+  /JSON\.stringify\(init\)/.test(client));
+
 /* v3.1: 深色白字填充专用色（对比度 ≥4.5）与 mid 详情/窄屏头部微调 */
 ok('v3.1: 深色白字填充走 --zp-fill-accent*（不再拿亮 accent 配白字）',
   /--zp-fill-accent: #7c5cf0/.test(client) && /--zp-fill-accent: #6a4fe0/.test(client) &&

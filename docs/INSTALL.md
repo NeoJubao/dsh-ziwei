@@ -100,6 +100,30 @@ dsh plugin --profile <profile> add dsh-ziwei@1.3.1
 
 ---
 
+## 更新
+
+插件是普通 npm 包，更新走 DSH 的插件管理（底层是 pnpm），不会自动更新：
+
+```bash
+# 更新到当前主版本内的最新补丁/次版本（profile 里存的是 ^1.3.x 时）
+dsh plugin --profile <profile> update dsh-ziwei
+
+# 指定版本（强制装到某一版）
+dsh plugin --profile <profile> add dsh-ziwei@1.3.3
+```
+
+也可以在 **DSH Web → Settings → Plugins** 里看到已装版本；插件市场/Discover 有新版时会提供
+更新入口（取决于你配置的索引源）。
+
+更新后：
+
+- **Host 半（工具 / 提示词 / 路由）改动 → 重启 DSH**；
+- **只改浏览器半（面板 UI）→ 刷新页面即可**；
+- 本插件 1.3.3 起会对旧版本持久化的「月柱=农历月」默认值做一次迁移，刷新后自动改写为「节气」。
+
+> 插件**不会**自己检查更新、也不会在后台联网。是否升级由你在 DSH 插件管理里决定；
+> 我们不希望一个排盘插件偷偷向外部发请求。
+
 ## 卸载
 
 ```bash

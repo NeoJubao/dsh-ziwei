@@ -3396,6 +3396,18 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
             if (saved.settings && typeof saved.settings === 'object') init.settings = Object.assign({}, init.settings, saved.settings);
           }
         } catch (e) { /* ignore */ }
+        /* v1.3.3 一次性迁移：旧版把默认 monthDivide='normal'（农历月）连同表单一起持久化，
+           升级后仅改默认值不会生效；这里把「旧默认」改写成节气并写回，只做一次。
+           迁移之后用户显式选择的「农历月」不会再被覆盖。 */
+        try {
+          if (!localStorage.getItem('ziwei-pro.formV133')) {
+            if (init.settings && init.settings.monthDivide === 'normal') {
+              init.settings = Object.assign({}, init.settings, { monthDivide: 'exact' });
+              try { localStorage.setItem('ziwei-pro.form', JSON.stringify(init)); } catch (e) { /* ignore */ }
+            }
+            localStorage.setItem('ziwei-pro.formV133', '1');
+          }
+        } catch (e) { /* ignore */ }
         return init;
       });
       var setForm = function (patch) {

@@ -79,6 +79,9 @@ dash plugin --profile <profile> add dsh-ziwei@1.3.1
 dash plugin --profile <profile> add "/绝对路径/到/ziwei-workbench"
 ```
 
+> **更新**：`dsh plugin --profile <profile> update dsh-ziwei`（或 `add dsh-ziwei@<version>`）；
+> 插件不会自动更新，也不会后台检查更新。
+
 > **Host 半（工具 / 提示词 / 路由）装完或更新后必须手动重启 DSH**；只改浏览器半
 > （面板 UI）刷新页面即可。插件不会自己重启 DSH。
 >
