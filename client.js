@@ -1692,7 +1692,7 @@ window.__ModuleLoader__.load({
     const { useState, useEffect, useMemo, useRef } = React;
     const E = window.ZWEngine;
     /* 构建时由 build.mjs 注入 package.json 的版本号；未构建的源码里保留占位符。 */
-    const APP_VERSION = "1.5.1";
+    const APP_VERSION = "1.5.2";
 
     /* ---------------- i18n ---------------- */
     const DICT = {
@@ -1980,10 +1980,13 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
 .zp-side { display: flex; flex-direction: column; gap: 12px; min-width: 0 }
 /* 窄面板: 左栏拆开重排 —— 出盘前生辰输入在上；出盘后盘面在前（见 data-chart 规则），命主信息/命盘库沉底 */
 .zp-root[data-w="narrow"] .zp-side { display: contents }
-.zp-input-card { order: 1 }
-.zp-stage { order: 2 }
-.zp-summary-card { order: 3 }
-.zp-lib-card { order: 4 }
+/* 这些 order 只服务 narrow 的 display:contents 重排；放在全局会在宽/中/紧凑档的
+   flex 左栏里覆盖 DOM 顺序（1.5.1 把摘要移到 DOM 前面后，格局卡会被顶到最上面）。 */
+.zp-root[data-w="narrow"] .zp-input-card { order: 1 }
+.zp-root[data-w="narrow"] .zp-stage { order: 2 }
+.zp-root[data-w="narrow"] .zp-summary-card { order: 3 }
+.zp-root[data-w="narrow"] .zp-patterns-card { order: 3 }
+.zp-root[data-w="narrow"] .zp-lib-card { order: 4 }
 .zp-root[data-w="narrow"][data-chart="1"] .zp-stage { order: 1 }
 .zp-root[data-w="narrow"][data-chart="1"] .zp-input-card { order: 2 }
 .zp-stage { min-width: 0; outline: none; border-radius: 14px }

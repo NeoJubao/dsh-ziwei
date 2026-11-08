@@ -355,6 +355,11 @@ ok('v1.3.3: localStorage 旧默认一次性迁移到节气',
   /ziwei-pro\.formV133/.test(client) && /monthDivide === 'normal'/.test(client) &&
   /JSON\.stringify\(init\)/.test(client));
 
+/* v1.5.2: order 重排只允许在 narrow 生效，不能覆盖宽/中/紧凑档的 DOM 顺序 */
+ok('v1.5.2: 左栏 order 规则已收窄到 narrow', /\[data-w="narrow"\] \.zp-input-card \{ order: 1 \}/.test(client) &&
+  /\[data-w="narrow"\] \.zp-patterns-card \{ order: 3 \}/.test(client) &&
+  !/(?:^|\n)\.zp-input-card \{ order: 1 \}/.test(client));
+
 /* v1.5.1: 左栏阅读顺序 = 命主信息 → 格局摘要 → 排盘输入 → 命盘库 */
 {
   const iSummary = client.indexOf('h(Summary, { chart');
