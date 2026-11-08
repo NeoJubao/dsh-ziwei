@@ -46,9 +46,10 @@
 - 仓库已从 private 转为 **public**：`https://github.com/NeoJubao/dsh-ziwei`（2026-11-08）。
 - 公开版本：**v1.3.0**（首个公开 tag）、**v1.3.1**（首个 npm 发布版）、**v1.3.2**（四柱月柱
   默认口径修复）。三个 tag 均已推远端，GitHub Release 均含 tarball 附件。
-- **npm 已发布 `dsh-ziwei@1.3.2`**（latest，publisher `neomemoryai`，2026-11-08 15:40Z）。
-  已在临时 `DSH_HOME` 用 npm 包安装并验证：`dsh plugin --profile smoke add dsh-ziwei@1.3.2`
-  → `--dump-config` 出现 `# == dsh-ziwei`；安装后的引擎默认月柱为「己未」。
+- **npm 已发布 `dsh-ziwei@1.3.3`**（latest，publisher `neomemoryai`）。1.3.3 含旧缓存月柱迁移。
+- **`dsh-ziwei@1.4.0` 待发布**（GitHub tag/Release 已就绪，tarball 已通过临时 profile 安装冒烟：
+  `APP_VERSION = "1.4.0"`）；含手动「检查更新」与 1.3.3 迁移。发布命令：
+  `npm publish dist/dsh-ziwei/dsh-ziwei-1.4.0.tgz --access public`（需 2FA）。
 - **CI 已绿**：三平台 × Node 22/24（run `42480774977`，workflow `ci.yml`）；
   Windows 的两处兼容问题（动态 import 的 file:// URL、npm.cmd 调用）已在主分支修复。
 - 已加 topics：`dsh-plugin`、`dsh`、`deepseek-harness`、`ziwei`、`ziwei-doushu`。
