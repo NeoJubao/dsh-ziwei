@@ -17,6 +17,8 @@
 
 以下 7 项**不由脚本代替判断**。工程侧已完成项用 `[x]`，需要人确认的保持 `[ ]`：
 
+- [x] **README 真实截图**：2026-11-08 补入 `docs/assets/screenshot-light.png`（真实 DSH 宿主，
+      浅色主题，本命盘工作台）；深色/窄屏截图待补。
 - [x] **真机视觉验收**：2026-11-08 作者在真实 DSH 宿主按 `docs/design/v3-review-checklist.md`
       走查浅/深色、侧栏展开/折叠、窄屏与键盘，确认无阻塞问题（记录见 CHANGELOG / Release v1.3.1）。
       后续发现问题按 patch 版本修。

@@ -24,13 +24,10 @@ official DeepSeek product.
 
 ## 界面预览
 
-> 下面是用真实 `client.js` 组件树 + 无头 Chrome 渲染的界面预览（非占位图）。
-> 真实 DSH 宿主截图（浅 / 深色、侧栏展开与折叠）后续补齐（欢迎 PR），规范见
-> [docs/assets/README.md](docs/assets/README.md)。
+![紫微斗数 Pro 在 DSH 宿主中的本命盘工作台（macOS 浅色主题）](docs/assets/screenshot-light.png)
 
-![浅色主题 · 中宽工作台](docs/design/assets/v3-ui-mid-1160.png)
-
-![深色主题 · 中宽工作台](docs/design/assets/v3-ui-dark-1160.png)
+> 真实 DSH 宿主截图。深色主题与四档宽度的渲染预览见 [docs/design/assets/](docs/design/assets/)；
+> 截图规范见 [docs/assets/README.md](docs/assets/README.md)。
 
 ## 功能
 
