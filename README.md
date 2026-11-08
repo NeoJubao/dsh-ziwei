@@ -25,7 +25,7 @@ official DeepSeek product.
 ## 界面预览
 
 > 下面是用真实 `client.js` 组件树 + 无头 Chrome 渲染的界面预览（非占位图）。
-> 真实 DSH 宿主截图（浅 / 深色、侧栏展开与折叠）在发布前补齐，规范见
+> 真实 DSH 宿主截图（浅 / 深色、侧栏展开与折叠）后续补齐（欢迎 PR），规范见
 > [docs/assets/README.md](docs/assets/README.md)。
 
 ![浅色主题 · 中宽工作台](docs/design/assets/v3-ui-mid-1160.png)

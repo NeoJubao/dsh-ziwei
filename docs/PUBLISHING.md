@@ -17,9 +17,9 @@
 
 以下 7 项**不由脚本代替判断**。工程侧已完成项用 `[x]`，需要人确认的保持 `[ ]`：
 
-- [ ] **真机视觉验收（公开前唯一未完成项）**：按 `docs/design/v3-review-checklist.md` 在真实 DSH
-      宿主走查浅/深色、darwin 侧栏折叠、窄屏、键盘；本机渲染 harness 的截图不能替代这一步。
-      仓库已公开，但**界面改动尚未经真机确认**，发现的问题用 patch 版本修。
+- [x] **真机视觉验收**：2026-11-08 作者在真实 DSH 宿主按 `docs/design/v3-review-checklist.md`
+      走查浅/深色、侧栏展开/折叠、窄屏与键盘，确认无阻塞问题（记录见 CHANGELOG / Release v1.3.1）。
+      后续发现问题按 patch 版本修。
 - [x] **内容再分发授权**：2026-11-08 作者确认「紫微师 / 金聚」为自有内容，可随 MIT 仓库分发
       （人设 / 九诀 / 鲲鹏 14 部分 / 红线，见 `src/ziwei-core.js` 与 `index.js` 系统提示词）。
 - [x] **差分 fixture 来源确认**：`verify/fixtures/paipan-reference.json` 由自有「紫微师」产品 runner

@@ -18,6 +18,11 @@
 - 作者联系邮箱 `neo2025new@gmail.com` 写入 README / SECURITY / CODE_OF_CONDUCT / package.json / Issue 模板。
 - README 增加界面预览（真实组件树本地渲染，非占位图）。
 
+### Verified
+
+- 2026-11-08 作者在真实 DSH 宿主完成 v3 界面验收（浅/深色、侧栏展开/折叠、窄屏、键盘），
+  无阻塞问题；npm `dsh-ziwei@1.3.1` 与 GitHub v1.3.1 同日发布。
+
 ### Changed
 
 - 仓库与 npm 名称统一为 `dsh-ziwei`；GitHub release v1.3.0 为首个公开 tag。
