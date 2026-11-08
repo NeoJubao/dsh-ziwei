@@ -44,14 +44,16 @@
 - 本地 `git init -b main`，首次提交 `75ec44f`；`audit/`、`dist/`、`*.log`、`.ref/`、
   `.ziwei-runner/` 均被 gitignore，未入库（62 文件 / 约 2.35 万行）。
 - 仓库已从 private 转为 **public**：`https://github.com/NeoJubao/dsh-ziwei`（2026-11-08）。
-- 公开版本 **v1.3.0**（首个公开版）：tag `v1.3.0`，GitHub Release 含 tarball 附件。
-- **npm 尚未发布**：本机 `npm whoami` 返回 401（未登录/无有效 token）；需要维护者执行
-  `npm login` 后再 `npm publish dist/dsh-ziwei/dsh-ziwei-1.3.0.tgz --access public`。
+- 公开版本：**v1.3.0**（首个公开 tag）、**v1.3.1**（首个 npm 发布版）、**v1.3.2**（四柱月柱
+  默认口径修复）。三个 tag 均已推远端，GitHub Release 均含 tarball 附件。
+- **npm 已发布 `dsh-ziwei@1.3.1`**（latest，publisher `neomemoryai`，2026-11-08）。
+  `dsh-ziwei@1.3.2` 的 tarball 已由 `release-pack` 生成并通过本地安装冒烟，
+  等待维护者 2FA 后执行：`npm publish dist/dsh-ziwei/dsh-ziwei-1.3.2.tgz --access public`。
 - **CI 已绿**：三平台 × Node 22/24（run `42480774977`，workflow `ci.yml`）；
   Windows 的两处兼容问题（动态 import 的 file:// URL、npm.cmd 调用）已在主分支修复。
 - 已加 topics：`dsh-plugin`、`dsh`、`deepseek-harness`、`ziwei`、`ziwei-doushu`。
 - 发布 tarball 由 `node scripts/release-pack.mjs` 生成（`dist/`，gitignored）。
-- **仓库已 public**（2026-11-08）；真机验收、真实截图、私密漏洞报告均已完成。
+- 真机验收、真实截图、私密漏洞报告均已完成。
 - **DSH 插件市场提交**：2026-11-08 已向 dsh-plugin.org 提交收录 issue
   `https://github.com/dshplugin/dsh-plugin-hub/issues/682`（含 repo / 一句话价值 / 分类 /
   安装命令 / npm 包 / License / 自检项）。审核与索引刷新由对方流程决定。
