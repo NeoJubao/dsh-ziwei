@@ -39,8 +39,9 @@
 
 - 本地 `git init -b main`，首次提交 `75ec44f`；`audit/`、`dist/`、`*.log`、`.ref/`、
   `.ziwei-runner/` 均被 gitignore，未入库（62 文件 / 约 2.35 万行）。
-- 已创建 **private** 仓库并推送 `main`：`https://github.com/NeoJubao/ziwei-workbench`
-  （初始 CI run 42480485600）。
+- 已创建 **private** 仓库并推送 `main`：`https://github.com/NeoJubao/ziwei-workbench`。
+- **CI 已绿**：三平台 × Node 22/24（run `42480774977`，workflow `ci.yml`）；
+  Windows 的两处兼容问题（动态 import 的 file:// URL、npm.cmd 调用）已在主分支修复。
 - 已加 topics：`dsh-plugin`、`dsh`、`deepseek-harness`、`ziwei`、`ziwei-doushu`。
 - 发布 tarball 由 `node scripts/release-pack.mjs` 生成（`dist/`，gitignored）。
 - **仓库仍为 private**；转 public 需先完成真机视觉验收 + 真实截图 + 开启私密漏洞报告。

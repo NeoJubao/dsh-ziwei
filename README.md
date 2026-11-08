@@ -3,10 +3,10 @@
 > 一个 DSH（DeepSeek Harness）插件：**确定性紫微斗数排盘** + **面板内直接解读**。
 > 前面看盘，后面直接聊。排盘走独立引擎，解读走 Harness 会话模型。
 
-<!-- 徽章位：仓库公开后把 <owner> 换成实际 GitHub 账号，并取消下一行 CI 徽章注释。
-     CI 状态徽章不要凭空写死，等仓库真正跑过 Actions 后再启用。 -->
-<!-- [![CI](https://github.com/<owner>/ziwei-workbench/actions/workflows/ci.yml/badge.svg)](https://github.com/<owner>/ziwei-workbench/actions/workflows/ci.yml) -->
+[![CI](https://github.com/NeoJubao/ziwei-workbench/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/NeoJubao/ziwei-workbench/actions/workflows/ci.yml)
 ![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)
+![DSH plugin](https://img.shields.io/badge/DSH-plugin-4b5563)
+[![GitHub](https://img.shields.io/badge/GitHub-NeoJubao%2Fziwei--workbench-181717?logo=github)](https://github.com/NeoJubao/ziwei-workbench)
 ![DSH plugin](https://img.shields.io/badge/DSH-plugin-4b5563)
 
 **English summary:** A single-package plugin for DeepSeek Harness that computes Zi Wei
