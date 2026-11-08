@@ -313,6 +313,12 @@ v3 做两次分离：
   说明与来源链接同样在 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 - 未打包任何字体；图标为本项目自绘（来源确认 TODO 见 notices）。
 
+## 联系作者
+
+- 功能问题、安装问题、使用反馈：优先开 [GitHub Issue](https://github.com/NeoJubao/dsh-ziwei/issues)。
+- 安全漏洞：请走 [SECURITY.md](SECURITY.md) 的 GitHub 私密报告渠道，**不要开公开 issue**。
+- 其他联系（合作 / 授权 / 媒体）：`neo2025new@gmail.com`（公开邮箱，可能被爬虫抓取；请勿发送生辰等个人数据）。
+
 ## 贡献 / 安全 / 版本
 
 - 贡献前读 [CONTRIBUTING.md](CONTRIBUTING.md)：构建命令、`ZIWEI_ALLOW_SKIP` 语义、

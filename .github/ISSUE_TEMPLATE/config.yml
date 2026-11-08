@@ -6,3 +6,6 @@ contact_links:
   - name: 安全问题（请勿公开）
     url: https://github.com/NeoJubao/dsh-ziwei/security/advisories/new
     about: 漏洞请通过 GitHub Security Advisories 私密报告，不要开公开 issue
+  - name: 联系作者（非安全问题）
+    url: mailto:neo2025new@gmail.com
+    about: 合作 / 授权 / 媒体等非安全问题；功能与安装问题请优先开 Issue

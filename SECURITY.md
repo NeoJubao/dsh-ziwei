@@ -13,9 +13,8 @@
 **GitHub Security Advisories**（仓库 → Security → Report a vulnerability），
 这样报告、讨论和修复都在私下进行，修复发布后再公开。
 
-发布前请维护者在 **Settings → Code security and analysis** 开启
-**Private vulnerability reporting / Security Advisories**。如果开放平台暂时不可用，请通过
-维护者 GitHub 主页列出的私密联系方式联系，并在标题写 `[SECURITY]`；**不要用公开 issue**。
+Private vulnerability reporting 已在本仓库开启。如果 GitHub 入口暂时不可用，可邮件联系
+**neo2025new@gmail.com**（标题写 `[SECURITY]`）；**不要用公开 issue**。
 
 请在报告里尽量包含：受影响的版本、DSH 版本与操作系统、复现步骤、影响面（数据泄露 / 命令执行 /
 拒绝服务等）、以及你希望的处理方式。**不要在报告里附带真实用户的生辰数据**，用黄金用例复现即可。

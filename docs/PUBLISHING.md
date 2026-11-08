@@ -30,7 +30,8 @@
       （private）；发布名默认 `dsh-ziwei`；版权人 `Neo / 2026`。
       本机 `gh api user` 实际登录为 `NeoJubao`（keyring 标签显示旧名，属显示问题）。
 - [x] **联系方式**：Private vulnerability reporting 已启用（`GET repos/.../private-vulnerability-reporting`
-      返回 `{"enabled":true}`）；文档不再留占位邮箱。
+      返回 `{"enabled":true}`）；公开联系邮箱 `neo2025new@gmail.com` 已写入 README / SECURITY /
+      CODE_OF_CONDUCT / package.json（注意：公开邮箱会被爬虫抓取）。
 - [x] **干净环境安装冒烟（配置层）**：2026-11-08 用 `DSH_HOME=/tmp/dsh-smoke-home` 新建 `smoke` profile，
       对发布 tarball 执行 `dsh plugin --profile smoke add <tgz>`，`dsh --profile smoke --dump-config`
       已出现 `# == dsh-ziwei` 与 bundle 行；**未做 GUI 启动/点击**。
