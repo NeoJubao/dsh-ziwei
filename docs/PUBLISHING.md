@@ -26,11 +26,23 @@
 - [x] 私密路径脱敏：`verify/runner-path.mjs` 已改为 env / `.ziwei-runner/` / `~/ziwei-runner/`；
       内部审计底稿 已 gitignore，不进入公开仓库。
 - [ ] **仓库元信息确认**：GitHub owner/repo URL、发布名（默认 `dsh-plugin-ziwei-workbench`）、
-      版权人署名与年份。
+      版权人署名与年份。注意：本机 `gh auth status` 已登录账号是 `0xNeoTian` / `Neo2025new`，
+      与 `package.json` 里写的 `NeoJubao` **不一致**，推远端前必须确认。
 - [ ] **联系方式**：开启 GitHub Security Advisories / Private vulnerability reporting；
       SECURITY.md 与 CODE_OF_CONDUCT.md 不再留占位邮箱。
-- [ ] **干净环境安装冒烟**：用发布 tarball 在一个**新建的临时 DSH profile** 里安装并启动一次
-      （不改现有 profile）；确认插件出现在 Plugins 列表、工具与面板可用。本机尚未执行。
+- [x] **干净环境安装冒烟（配置层）**：2026-11-08 用 `DSH_HOME=/tmp/dsh-smoke-home` 新建 `smoke` profile，
+      对发布 tarball 执行 `dsh plugin --profile smoke add <tgz>`，`dsh --profile smoke --dump-config`
+      已出现 `# == dsh-plugin-ziwei-workbench` 与 bundle 行；**未做 GUI 启动/点击**。
+      正式发布前建议再做一次带界面的启动冒烟（同样用临时 DSH_HOME，不碰现有 profile）。
+
+## 0.6 本地仓库状态（2026-11-08）
+
+- 已在 `ziwei-workbench/` 执行 `git init -b main` 并完成首次提交：`75ec44f`。
+- `.gitignore` 生效：`audit/`、`dist/`、`*.log`、`.ref/`、`.ziwei-runner/` 均不入库；
+  提交共 62 个文件 / 约 2.35 万行。
+- **未创建远端仓库、未 push**。原因：`gh` 已登录账号（`0xNeoTian` / `Neo2025new`）与
+  `package.json` 的 `NeoJubao` 不一致；推之前需确认 owner 与仓库名。
+- 发布 tarball 由 `node scripts/release-pack.mjs` 生成（`dist/`，gitignored）。
 
 ## 1. 发布包名
 
