@@ -172,6 +172,7 @@ plugin.apply(fakeCtx);
 ok('注册 4 个工具', registered.size === 4 && ['ziwei_paipan', 'ziwei_check', 'ziwei_context', 'ziwei_templates'].every((n) => registered.has(n)),
   [...registered.keys()].join(','));
 ok('注册 /ziwei/interpret 与 /ziwei/context', routes.has('/ziwei/interpret') && routes.has('/ziwei/context'));
+ok('注册 /ziwei/version（手动检查更新）', routes.has('/ziwei/version'));
 ok('注册 systemPrompt 段落并声明铁律', promptSections.length === 1 && /排盘的唯一来源/.test(promptSections[0].text) && /绝不手工排盘/.test(promptSections[0].text));
 ok('注册过程无警告', logs.length === 0, logs.join(' | '));
 
@@ -354,6 +355,15 @@ ok('v1.3.3: localStorage 旧默认一次性迁移到节气',
   /ziwei-pro\.formV133/.test(client) && /monthDivide === 'normal'/.test(client) &&
   /JSON\.stringify\(init\)/.test(client));
 
+/* v1.4.0: 手动检查更新（无轮询、无后台联网） */
+{
+  const pkgVersion = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).version;
+  ok('v1.4.0: client 注入版本号且接通 /ziwei/version',
+    new RegExp("APP_VERSION = ['\"]" + pkgVersion.replace(/\./g, '\\.') + "['\"]").test(client) && client.includes('/ziwei/version') &&
+    client.includes('检查更新') && !client.includes('__ZIWEI_VERSION__'));
+  ok('v1.4.0: 版本检查无轮询定时器', !/setInterval\(/.test(client));
+}
+
 /* v3.1: 深色白字填充专用色（对比度 ≥4.5）与 mid 详情/窄屏头部微调 */
 ok('v3.1: 深色白字填充走 --zp-fill-accent*（不再拿亮 accent 配白字）',
   /--zp-fill-accent: #7c5cf0/.test(client) && /--zp-fill-accent: #6a4fe0/.test(client) &&
@@ -394,12 +404,14 @@ ok('engine-built.js 与内核解耦（不含 UI）', !/__ModuleLoader__/.test(re
   const eng = readFileSync(join(root, 'engine-built.js'), 'utf8');
   const zc = readFileSync(join(root, 'src', 'ziwei-core.js'), 'utf8');
   const ui = readFileSync(join(root, 'src', 'ui-pro.js'), 'utf8');
+  const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
+  const uiBuilt = ui.replace("'__ZIWEI_VERSION__'", JSON.stringify(pkg.version));
   const headEnd = client.indexOf(eng);
   const tailStart = headEnd + eng.length + 1 + zc.length;
   const fresh = headEnd > 0
     && client.slice(0, headEnd).includes('function __ziweiBootstrapKernel()')
     && client.slice(tailStart).startsWith('\n}\n')
-    && client.endsWith(ui);
+    && client.endsWith(uiBuilt);
   ok('client.js = 懒加载内核包装 + engine-built + ziwei-core + ui-pro（产物未过期）', fresh);
   ok('engine-built.js 已注入农历数据（无占位符残留）',
     !/\/\*__LUNAR_INFO__\*\//.test(eng) && !/\/\*__LTERM_INFO__\*\//.test(eng) && /lunarInfo|LUNAR_INFO/.test(eng));

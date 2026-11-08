@@ -2,7 +2,7 @@
  * verify/routes-auth.mjs — 路由方法 / 鉴权 / JSON Content-Type 守卫 (A3)
  *
  * 覆盖:
- *  - 4 条路由注册齐全；
+ *  - 5 条路由注册齐全；
  *  - 有 connection 服务: connection.admit 拒绝 → 401/403；GET 写路由 → 405；非 JSON POST → 415；
  *  - 无 connection（非 Web 组合）: Host / Origin / sec-fetch-site fallback fence + 只 warn 一次；
  *  - 合法请求进入 handler 且**不触发 LLM**（/ziwei/interpret 用空命盘，在 llm.stream 之前 400）。
@@ -10,6 +10,7 @@
  * 运行: node verify/routes-auth.mjs
  */
 import { EventEmitter } from 'node:events';
+import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -21,6 +22,7 @@ const ok = (name, cond, detail) => {
 };
 const section = (t) => console.log(`\n== ${t} ==`);
 
+process.env.ZIWEI_UPDATE_DISABLED = '1'; /* 路由测试不访问 npm registry */
 const plugin = await import(pathToFileURL(join(root, 'index.js')).href + '?v=' + Date.now());
 
 /* ---------------- 最小 HTTP 桩 ---------------- */
@@ -86,7 +88,7 @@ function makeCtx({ connection = null, omit = [] } = {}) {
   plugin.apply(ctx);
   return { routes, logs, llmCalls, injections, stats };
 }
-const ROUTES = ['/ziwei/interpret', '/ziwei/context', '/ziwei/handoff', '/ziwei/workspace'];
+const ROUTES = ['/ziwei/interpret', '/ziwei/context', '/ziwei/handoff', '/ziwei/workspace', '/ziwei/version'];
 
 /* ================================================================== *
  * 1. 启动健康日志
@@ -127,7 +129,7 @@ const connection = {
   }
 };
 const { routes, llmCalls } = makeCtx({ connection });
-ok('注册 4 条 ziwei 路由', ROUTES.every((p) => routes.has(p)), [...routes.keys()].join(','));
+ok('注册 5 条 ziwei 路由', ROUTES.every((p) => routes.has(p)), [...routes.keys()].join(','));
 
 let r = await call(routes, '/ziwei/interpret', { method: 'POST', headers: { 'content-type': 'application/json' } });
 ok('无 cookie POST /ziwei/interpret → 401', r.statusCode === 401 && /未授权/.test(r.body), `${r.statusCode} ${r.body}`);
@@ -157,6 +159,21 @@ ok('合法 POST /ziwei/interpret 进入 handler 且未触发 LLM（空盘 → 40
 
 r = await call(routes, '/ziwei/handoff', { method: 'POST', headers: { cookie: 'session=cookie', 'content-type': 'application/json' }, body: '{}' });
 ok('合法 POST /ziwei/handoff 进入 handler（空盘 → 400）', r.statusCode === 400 && /命盘内容为空/.test(r.body), `${r.statusCode} ${r.body}`);
+
+r = await call(routes, '/ziwei/version', { method: 'GET', body: '' });
+ok('无 cookie GET /ziwei/version → 401', r.statusCode === 401, `${r.statusCode} ${r.body}`);
+
+r = await call(routes, '/ziwei/version', { method: 'POST', headers: { cookie: 'session=cookie' } });
+ok('POST /ziwei/version → 405 且 Allow: GET', r.statusCode === 405 && r.headers.allow === 'GET', `${r.statusCode} allow=${r.headers.allow}`);
+
+r = await call(routes, '/ziwei/version', { method: 'GET', headers: { cookie: 'session=cookie' }, body: '' });
+ok('带 cookie GET /ziwei/version → 200（测试环境禁用外网，返回当前版本）', (() => {
+  try {
+    const j = JSON.parse(r.body);
+    const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
+    return r.statusCode === 200 && j.ok === true && j.current === pkg.version && j.disabled === true && j.latest === null;
+  } catch (e) { return false; }
+})(), `${r.statusCode} ${r.body}`);
 
 r = await call(routes, '/ziwei/workspace', { method: 'GET', headers: { cookie: 'session=cookie' }, body: '' });
 ok('带 cookie GET /ziwei/workspace → 200 JSON', (() => {

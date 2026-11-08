@@ -23,6 +23,8 @@ export const name = 'ziwei-workbench';
 export const inject = ['tools', 'systemPrompt'];
 
 const HERE = dirname(fileURLToPath(import.meta.url));
+const PKG = (() => { try { return JSON.parse(readFileSync(join(HERE, 'package.json'), 'utf8')); } catch (e) { return {}; } })();
+const VERSION = PKG.version || '0.0.0';
 const ENGINE_FILE = join(HERE, 'engine-built.js');
 const CORE_FILE = join(HERE, 'src', 'ziwei-core.js');
 const DIAG_FILE = join(HERE, 'host-diag.log');
@@ -392,6 +394,50 @@ export function apply(ctx) {
     });
   };
 
+  /* ---------------- 版本检查（仅用户点击时触发，不后台轮询） ----------------
+     客户端设置里点「检查更新」才请求 npm registry 一次；成功结果缓存 10 分钟，
+     不记录生辰数据、不写日志。离线/失败如实返回错误，不假装最新。 */
+  let versionCache = null;
+  const VERSION_CACHE_MS = 10 * 60 * 1000;
+  const isNewerVersion = (latest, current) => {
+    const a = String(latest || '').split('.').map((n) => parseInt(n, 10) || 0);
+    const b = String(current || '').split('.').map((n) => parseInt(n, 10) || 0);
+    for (let i = 0; i < 3; i++) {
+      if (a[i] !== b[i]) return a[i] > b[i];
+    }
+    return false;
+  };
+  const checkLatestVersion = async () => {
+    if (process.env.ZIWEI_UPDATE_DISABLED === '1') {
+      return { ok: true, current: VERSION, latest: null, updateAvailable: false, disabled: true };
+    }
+    if (versionCache && Date.now() - versionCache.at < VERSION_CACHE_MS) return versionCache.payload;
+    if (typeof fetch !== 'function') throw new Error('当前 Node 不支持 fetch');
+    const ac = new AbortController();
+    const timer = setTimeout(() => ac.abort(), 6000);
+    try {
+      const res = await fetch('https://registry.npmjs.org/dsh-ziwei/latest', {
+        signal: ac.signal,
+        headers: { accept: 'application/json' }
+      });
+      if (!res.ok) throw new Error('npm registry HTTP ' + res.status);
+      const pkg = await res.json();
+      const latest = String((pkg && pkg.version) || '');
+      if (!latest) throw new Error('npm registry 返回缺少 version');
+      const payload = {
+        ok: true, current: VERSION, latest,
+        updateAvailable: isNewerVersion(latest, VERSION),
+        checkedAt: new Date().toISOString()
+      };
+      versionCache = { at: Date.now(), payload };
+      return payload;
+    } catch (e) {
+      throw new Error(e && e.name === 'AbortError' ? '检查超时（6 秒）' : String((e && e.message) || e));
+    } finally {
+      clearTimeout(timer);
+    }
+  };
+
   const registerInterpretRoute = (routeCtx) => {
     const ws = routeCtx.get('webServer');
     if (!ws || typeof ws.register !== 'function') return;
@@ -492,6 +538,28 @@ export function apply(ctx) {
           json(200, { ok: true, sessionId, bytes: text.length });
         } catch (e) {
           json(500, { ok: false, reason: String((e && e.message) || e) });
+        }
+      }
+    }));
+
+    /* 手动版本检查：客户端设置里点「检查更新」才调用，不后台轮询 */
+    disposers.push(ws.register({
+      kind: 'exact',
+      path: '/ziwei/version',
+      handler: async (req, res) => {
+        if (!guard(req, res, { methods: ['GET'] })) return;
+        const json = (status, payload) => {
+          try {
+            res.statusCode = status;
+            res.setHeader('Content-Type', 'application/json; charset=utf-8');
+            res.end(JSON.stringify(payload));
+          } catch (e) { /* 已发送 */ }
+        };
+        try {
+          const payload = await checkLatestVersion();
+          json(200, payload);
+        } catch (e) {
+          json(502, { ok: false, current: VERSION, reason: String((e && e.message) || e) });
         }
       }
     }));

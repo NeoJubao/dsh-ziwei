@@ -1691,6 +1691,8 @@ window.__ModuleLoader__.load({
     const h = React.createElement;
     const { useState, useEffect, useMemo, useRef } = React;
     const E = window.ZWEngine;
+    /* 构建时由 build.mjs 注入 package.json 的版本号；未构建的源码里保留占位符。 */
+    const APP_VERSION = "1.4.0";
 
     /* ---------------- i18n ---------------- */
     const DICT = {
@@ -1754,6 +1756,10 @@ window.__ModuleLoader__.load({
         aiRetry: '重新解读',
         autoOpen: '启动时自动打开工作台', showAdjSet: '宫格默认显示杂曜',
         settingsTitle: '设置', close: '关闭', about: '关于',
+        versionLabel: '版本', checkUpdate: '检查更新', checking: '检查中…',
+        updateHint: '仅点击时检查一次，不后台联网；更新需你自己执行命令。',
+        upToDate: '已是最新（{version}）', updateAvailable: '发现新版本 {latest}；更新：',
+        updateFailed: '检查失败：{reason}',
         backToConversation: '返回会话',
         aboutText: '紫微斗数 Pro · 算法依据《紫微斗数全书》安星诀，与开源库 iztro 逐字段交叉验证。真太阳时校正含经度差与均时差。本工具仅供研究参考。',
         libTitle: '命盘库', libName: '盘名', libSave: '保存', libEmpty: '暂无保存的命盘', libDelete: '删除',
@@ -1823,6 +1829,10 @@ window.__ModuleLoader__.load({
         aiRetry: 'Retry',
         autoOpen: 'Open workbench on launch', showAdjSet: 'Show adjective stars in cells by default',
         settingsTitle: 'Settings', close: 'Close', about: 'About',
+        versionLabel: 'Version', checkUpdate: 'Check for updates', checking: 'Checking…',
+        updateHint: 'Manual check only — no background polling; updates are installed by you.',
+        upToDate: 'Up to date ({version})', updateAvailable: 'Version {latest} available. Update with:',
+        updateFailed: 'Check failed: {reason}',
         backToConversation: 'Back to conversation',
         aboutText: 'Zi Wei Dou Shu Pro. Algorithm verified field-by-field against the open-source iztro library. True solar time correction included.',
         libTitle: 'Chart Library', libName: 'Name', libSave: 'Save', libEmpty: 'No saved charts', libDelete: 'Delete',
@@ -2487,6 +2497,12 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   display: flex; flex-direction: column; gap: 4px;
 }
 .zp-settings-about b { color: var(--dsw-alias-label-primary); font-size: 11px; letter-spacing: 1px }
+.zp-update { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--dsw-alias-border-l1); display: flex; flex-direction: column; gap: 8px }
+.zp-update-row { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--dsw-alias-label-secondary) }
+.zp-update-row b { font-size: 12px; color: var(--dsw-alias-label-primary) }
+.zp-update-cmd { display: block; padding: 8px; border-radius: 8px; background: var(--dsw-alias-bg-layer-2); font-size: 11px; line-height: 1.6; color: var(--dsw-alias-label-primary); word-break: break-all; font-family: ui-monospace, SFMono-Regular, Menlo, monospace }
+.zp-update-new { font-size: 11px; line-height: 1.6; color: var(--dsw-alias-state-warn-primary) }
+.zp-update-ok { font-size: 11px; line-height: 1.6; color: var(--dsw-alias-label-secondary) }
 
 @keyframes zp-slide-in { from { transform: translateX(24px); opacity: .55 } to { transform: none; opacity: 1 } }
 @keyframes zp-fade-in { from { opacity: 0 } to { opacity: 1 } }
@@ -3358,6 +3374,15 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
     function SettingsModal(props) {
       var t = props.t;
       var boxRef = useDialogFocus();
+      var [update, setUpdate] = useState(null);
+      var checkVersion = function () {
+        if (update && update.checking) return;
+        setUpdate({ checking: true });
+        fetch('/ziwei/version', { method: 'GET', headers: { accept: 'application/json' } })
+          .then(function (r) { return r.json().then(function (j) { return { status: r.status, j: j }; }); })
+          .then(function (out) { setUpdate({ result: out.j || {} }); })
+          .catch(function (e) { setUpdate({ error: String((e && e.message) || e) }); });
+      };
       return h('div', { className: 'zp-overlay' },
         h('div', { className: 'zp-overlay-mask', onClick: props.onClose, 'aria-hidden': true }),
         h('div', { className: 'zp-overlay-center' },
@@ -3376,6 +3401,29 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
               h('label', { className: 'zp-check' },
                 h('input', { type: 'checkbox', checked: props.showAdj, onChange: function (ev) { props.setShowAdj(ev.target.checked); } }),
                 h('span', null, t('showAdjSet'))),
+              h('div', { className: 'zp-update' },
+                h('div', { className: 'zp-update-row' },
+                  h('span', null, t('versionLabel')),
+                  h('b', null, APP_VERSION),
+                  h('button', {
+                    className: 'zp-mini-btn', type: 'button',
+                    disabled: !!(update && update.checking),
+                    onClick: checkVersion
+                  }, update && update.checking ? t('checking') : t('checkUpdate'))),
+                h('div', { className: 'zp-settings-hint' }, t('updateHint')),
+                update && update.error
+                  ? h('div', { className: 'zp-update-new' }, t('updateFailed').replace('{reason}', update.error))
+                  : null,
+                update && update.result && update.result.ok
+                  ? (update.result.updateAvailable
+                    ? h('div', null,
+                      h('div', { className: 'zp-update-new' }, t('updateAvailable').replace('{latest}', update.result.latest || '?')),
+                      h('code', { className: 'zp-update-cmd' }, 'dsh plugin --profile <profile> update dsh-ziwei'))
+                    : h('div', { className: 'zp-update-ok' }, t('upToDate').replace('{version}', update.result.current || APP_VERSION)))
+                  : null,
+                update && update.result && !update.result.ok
+                  ? h('div', { className: 'zp-update-new' }, t('updateFailed').replace('{reason}', update.result.reason || 'unknown'))
+                  : null),
               h('div', { className: 'zp-settings-about' },
                 h('b', null, t('about')),
                 h('span', null, t('aboutText')))))));

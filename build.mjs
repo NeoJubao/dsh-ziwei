@@ -41,12 +41,15 @@ const ltCount = (lTermInfo.match(/'[^']+'/g) || []).length;
 console.log(`lunarInfo entries: ${liCount} (expect 201), lTermInfo entries: ${ltCount} (expect 201)`);
 if (liCount !== 201 || ltCount !== 201) throw new Error('data table extraction failed');
 
+const PKG_VERSION = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).version;
+if (!PKG_VERSION) throw new Error('package.json version missing');
 const engine = readFileSync(join(srcDir, 'engine-core.js'), 'utf8')
   .replace('/*__LUNAR_INFO__*/', lunarInfo)
   .replace('/*__LTERM_INFO__*/', lTermInfo);
 
 const zcore = readFileSync(join(srcDir, 'ziwei-core.js'), 'utf8');
-const ui = readFileSync(join(srcDir, 'ui-pro.js'), 'utf8');
+const ui = readFileSync(join(srcDir, 'ui-pro.js'), 'utf8')
+  .replace("'__ZIWEI_VERSION__'", JSON.stringify(PKG_VERSION));
 
 // 引擎单独文件(供 Node 测试与 host 沙箱): 带数据
 writeFileSync(join(root, 'engine-built.js'), engine);
