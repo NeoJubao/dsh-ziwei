@@ -43,6 +43,8 @@ official DeepSeek product.
 
 ## 功能
 
+- **格局摘要**：左栏命主信息下方直接显示检测到的格局（名称/等级/一句话，最多 4 条），
+  「查看全部」进入完整格局分析页；窄屏仍走顶部入口。
 - **手动检查更新**：设置弹层显示当前版本与「检查更新」；只在点击时经 Host 路由请求 npm registry
   一次，不后台轮询、不记录生辰数据。
 - **四柱月柱默认按节气**（八字通行口径），可在「排盘设置 → 月柱」切回「农历月」；
@@ -291,7 +293,7 @@ v3 做两次分离：
    解读抽屉仍限宽 464，不会因为 DSH 侧栏折叠而铺满屏幕。
 5. **深色可读性与细节**：白字填充改用专用 `--zp-fill-accent*`（深色白字对比度 2.72:1 → 5.52:1）；
    mid/窄档详情卡限宽 760 居中；窄屏头部补命主摘要；空态收窄居中。
-6. **结构契约**：`data-region` 13/13 接线，`docs/ui-contract/layout.md` 的 TABBAR → TIMEBAR、
+6. **结构契约**：`data-region` 14/14 接线，`docs/ui-contract/layout.md` 的 TABBAR → TIMEBAR、
    新增 BOTTOMBAR；完整设计与待办见 **[docs/design/v3-ui-redesign.md](docs/design/v3-ui-redesign.md)**，
    可点击线框 **[docs/design/v3-wireframe.html](docs/design/v3-wireframe.html)**，
    人眼验收清单 **[docs/design/v3-review-checklist.md](docs/design/v3-review-checklist.md)**。

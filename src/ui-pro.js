@@ -860,6 +860,16 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
 .zp-root[data-w="narrow"] .zp-overlay-center { padding: 18px 12px }
 /* ---------------- 格局 / 词典 / 空态 ---------------- */
 .zp-patterns { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 10px }
+/* 左栏「格局摘要」：命主信息下面的只读结论（完整页仍在 PatternsView） */
+.zp-patterns-card { margin-top: 12px }
+.zp-patterns-card-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px }
+.zp-patterns-count { font-size: 11px; color: var(--dsw-alias-label-tertiary) }
+.zp-patterns-all { margin-left: auto }
+.zp-pattern-mini { display: flex; flex-direction: column; gap: 2px; padding: 6px 0; border-top: 1px dashed var(--dsw-alias-border-l1) }
+.zp-pattern-mini:first-of-type { border-top: none; padding-top: 0 }
+.zp-pattern-mini-head { display: flex; align-items: baseline; gap: 6px; font-size: 12px; font-weight: 700; color: var(--dsw-alias-brand-primary) }
+.zp-pattern-mini-level { font-size: 10.5px; font-weight: 600; color: var(--dsw-alias-label-tertiary) }
+.zp-pattern-mini-desc { font-size: 11px; line-height: 1.55; color: var(--dsw-alias-label-secondary); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden }
 .zp-pattern-card {
   border: 1px solid var(--dsw-alias-border-l1); border-radius: 12px; padding: 12px 14px;
   margin-bottom: 0; background: var(--dsw-alias-bg-layer-1);
@@ -1432,6 +1442,29 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
     }
 
     /* ---------------- 格局分析 / 星曜词典 ---------------- */
+    /* 左栏摘要：只读，最多 4 条；完整描述与多列布局仍在 PatternsView（顶部入口） */
+    function PatternsSummary(props) {
+      var t = props.t;
+      var items = (props.patterns || []).slice(0, 4);
+      return h('div', { className: 'zp-card zp-patterns-card', 'data-region': 'SIDE_PATTERNS' },
+        h('div', { className: 'zp-patterns-card-head' },
+          h('div', { className: 'zp-card-title', style: { marginBottom: 0 } }, t('patternTitle')),
+          h('span', { className: 'zp-patterns-count' }, items.length + (props.patterns.length > 4 ? '+' : '')),
+          h('button', {
+            className: 'zp-mini-btn zp-patterns-all', type: 'button',
+            onClick: props.onOpen
+          }, t('openPatterns') + ' ›')),
+        items.length
+          ? items.map(function (p, i) {
+            return h('div', { key: i, className: 'zp-pattern-mini' },
+              h('div', { className: 'zp-pattern-mini-head' },
+                h('span', null, p.name),
+                p.level ? h('span', { className: 'zp-pattern-mini-level' }, p.level) : null),
+              h('div', { className: 'zp-pattern-mini-desc' }, p.desc));
+          })
+          : h('div', { className: 'zp-pattern-mini-desc' }, t('patternEmpty')));
+    }
+
     function PatternsView(props) {
       var t = props.t;
       if (!props.patterns.length) {
@@ -2470,6 +2503,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
                 onToggleCollapse: function () { setFormCollapsed(!formCollapsed); }
               }),
               chart ? h(Summary, { chart: chart, t: t }) : null,
+              chart ? h(PatternsSummary, { patterns: patterns, t: t, onOpen: function () { setView('patterns'); } }) : null,
               h(Library, { items: library, current: currentLibId, t: t, onSave: saveChart, onLoad: loadSaved, onDelete: deleteSaved })),
             h('div', { className: 'zp-stage', tabIndex: chart ? 0 : -1, onKeyDown: onStageKeyDown },
               timebar,

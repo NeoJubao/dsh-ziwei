@@ -4,7 +4,7 @@
 
 - **本文是什么**：可评审、可实施的设计规格。**不是实现**；实现由 Lead 并行做，本文不修改 `src/`。
 - **依据快照**：`src/ui-pro.js` **2648 行**（2026-11-08 15:44 读取；v3 已有一版实现进行中）。源码还在改，**行号会漂移**——本文所有落点以**类名 / 组件名 / 函数名**为锚点，行号只作"当时在哪"的参考。
-- **实现状态（2026-11-08 15:5x，Lead 同步）**：v3 已由 Lead 落地——TimeBar + 可收起左栏 + 工具视图 + 窄屏底栏 + `data-region` 13/13 + 契约更新，全量自检 218 项全绿。**本文是设计与验收依据，不再对齐逐行实现**；§10 的 as-built 对照保留为写稿时快照（可能已过期，以代码为准）。
+- **实现状态（2026-11-08 15:5x，Lead 同步）**：v3 已由 Lead 落地——TimeBar + 可收起左栏 + 工具视图 + 窄屏底栏 + `data-region` 14/14 + 契约更新，全量自检 218 项全绿。**本文是设计与验收依据，不再对齐逐行实现**；§10 的 as-built 对照保留为写稿时快照（可能已过期，以代码为准）。
 - **上一版契约**：`docs/ui-contract/layout.md`（v2，12 个 RegionId）与 `内部设计审查底稿（不随仓库发布）`。本文是 v3，**取代 layout.md 的结构部分**（迁移见 §8.5 与 §10）。
 - **读者**：Lead（实施）/ Neo（拍板，见 Appendix B）/ 后续评审。
 
@@ -786,7 +786,7 @@ meta: {
 
 ## 10. 与当前实现的对照（as-built delta）
 
-> 快照：2026-11-08 15:44，`src/ui-pro.js` 2648 行。写稿时 Lead 正并行推进 v3-lite；**其后 Lead 已确认 v3 落地**（TimeBar / 可收起左栏 / 工具视图 / 窄屏底栏 / `data-region` 13/13 / 契约更新 / 218 项自检全绿）。因此本节保留为「写稿时差异记录」，**D6/D7/D8/D15 等可能已在落地版本中解决，一律以代码为准**；下表的价值是给出验收时应逐项复核的清单，而不是当前缺陷清单。
+> 快照：2026-11-08 15:44，`src/ui-pro.js` 2648 行。写稿时 Lead 正并行推进 v3-lite；**其后 Lead 已确认 v3 落地**（TimeBar / 可收起左栏 / 工具视图 / 窄屏底栏 / `data-region` 14/14 / 契约更新 / 218 项自检全绿）。因此本节保留为「写稿时差异记录」，**D6/D7/D8/D15 等可能已在落地版本中解决，一律以代码为准**；下表的价值是给出验收时应逐项复核的清单，而不是当前缺陷清单。
 
 | # | 目标（本文） | 当前工作树 | 处置 |
 |---|---|---|---|
@@ -897,7 +897,7 @@ meta: {
 | 格局/词典移出主 tab | ✅ TimeBar 右侧工具入口 + `TOOLPAGE` + 「返回盘面」 |
 | 左栏可收起、窄屏贴底行动条 | ✅ `data-rail=open/closed`、`aria-expanded/aria-controls`、`.zp-bottombar`（窄屏有盘时） |
 | 唯一主行动 | ✅ 有盘后「排 盘」降为次按钮；HEAD 只保留「紫微师解读」 |
-| 区域标记 | ✅ `data-region` **13/13**：HEAD / SIDE_FORM / SIDE_PROFILE / SIDE_LIBRARY / TIMEBAR / BOARD / INSPECTOR / TOOLPAGE / EMPTY / DRAWER / PREVIEW / MODAL / BOTTOMBAR |
+| 区域标记 | ✅ `data-region` **13/13**：HEAD / SIDE_FORM / SIDE_PROFILE / SIDE_PATTERNS / SIDE_LIBRARY / TIMEBAR / BOARD / INSPECTOR / TOOLPAGE / EMPTY / DRAWER / PREVIEW / MODAL / BOTTOMBAR |
 | 契约同步 | ✅ `docs/ui-contract/layout.md`：TABBAR → TIMEBAR、新增 BOTTOMBAR、13 区、页型矩阵与 §11 as-built 更新 |
 | 解读联动 | ✅ 保留 `decadalFocus`，新增 `yearlyFocus`；`buildRequest` 增加流年聚焦句；大限/流年意图互斥，避免误判 |
 | 防回退 | ✅ `verify/verify.mjs` 新增 8 条 v3 断言；全量 **225** 项通过 |
@@ -910,7 +910,7 @@ meta: {
 | 参数化断点 952 / 1436 / 1536 | 保留 1072 / 1394 与 296/304/720/300/464 | 与 `layout.md` 参数表、audit C13 公式、`ui-contract` 既有测量值一致；一次性改尺寸会把「契约→审计→测试」三层同时翻掉，风险高于收益 |
 | 全宽盘面 800（xwide） | 保持 720 | 待 Q2 拍板 + 真机看单宫密度 |
 | 抽屉 520 | 保持 464 | 同上，属尺寸参数，不与本次结构改动混做 |
-| 9 区合并命名（APP_BAR/CONTEXT_RAIL…） | 先保留 13 个 RegionId | 契约按「区域白名单」运作，改名要同时改三处（表 / `data-region` / 未来联合类型）；等 v3.1 再统一 |
+| 9 区合并命名（APP_BAR/CONTEXT_RAIL…） | 先保留 13 个 RegionId，v1.5.0 增补 SIDE_PATTERNS 为 14 个 | 契约按「区域白名单」运作，改名要同时改三处（表 / `data-region` / 未来联合类型）；等 v3.1 再统一 |
 | `timeFocus` 结构化 payload | 用 `currentAge/currentYear/decadalFocus/yearlyFocus` 四个字段 | 足够驱动 prompt；等服务端契约稳定再收成一个对象 |
 | audit C17–C20 | 未新增 | 现有 C1–C16 + verify v3 断言已覆盖本次改动；新增规则随 v3.1 一起做 |
 

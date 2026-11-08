@@ -355,6 +355,10 @@ ok('v1.3.3: localStorage 旧默认一次性迁移到节气',
   /ziwei-pro\.formV133/.test(client) && /monthDivide === 'normal'/.test(client) &&
   /JSON\.stringify\(init\)/.test(client));
 
+/* v1.5.0: 左栏格局摘要（命主信息下方）+ SIDE_PATTERNS 区域 */
+ok('v1.5.0: 左栏格局摘要接通 SIDE_PATTERNS', /data-region': 'SIDE_PATTERNS'/.test(client) &&
+  /function PatternsSummary/.test(client) && /h\(PatternsSummary/.test(client));
+
 /* v1.4.0: 手动检查更新（无轮询、无后台联网） */
 {
   const pkgVersion = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).version;
