@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>紫微斗数 Pro · v3 线框（低 fidelity / 结构示意）</title>
+<style>
+  :root{
+    --bg:#eef0f3; --surface:#ffffff; --surface2:#f6f7f9; --line:#d7dbe1; --line2:#c2c8d0;
+    --ink:#1f2430; --ink2:#5b6472; --ink3:#8a93a1; --fill:#2b3340; --fill-ink:#ffffff;
+    --focus:#111827; --warn:#8a4b2a; --radius:8px; --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  }
+  .app[data-theme="dark"]{
+    --bg:#15181d; --surface:#1c2027; --surface2:#232830; --line:#333a45; --line2:#414a57;
+    --ink:#e8ebf0; --ink2:#a9b2bf; --ink3:#7b8593; --fill:#e8ebf0; --fill-ink:#15181d; --focus:#f3f4f6;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font)}
+  /* ---------- 控制条（不属于线框本体） ---------- */
+  .ctl{position:sticky;top:0;z-index:99;display:flex;flex-wrap:wrap;align-items:center;gap:8px;
+       padding:10px 16px;background:#0f1216;color:#e5e7eb;font-size:12px}
+  .ctl b{font-weight:600;letter-spacing:.5px;margin-right:4px}
+  .ctl .group{display:inline-flex;gap:2px;padding:2px;border:1px solid #39404b;border-radius:8px;background:#171b21}
+  .ctl button{border:0;background:transparent;color:#c3cad4;font:inherit;padding:4px 8px;border-radius:6px;cursor:pointer}
+  .ctl button:hover{background:#252b34;color:#fff}
+  .ctl button.on{background:#e5e7eb;color:#111827;font-weight:600}
+  .ctl .sp{width:8px}
+  .ctl .hint{color:#8b94a3;margin-left:auto}
+  .stage{width:100%;overflow:hidden;padding:16px 0 24px}
+  #fit{position:relative;width:100%}
+  /* ---------- 线框本体：.app ---------- */
+  .app{position:absolute;top:0;left:50%;transform-origin:top center;
+       display:flex;flex-direction:column;height:840px;overflow:hidden;
+       background:var(--bg);color:var(--ink);font-size:13px;line-height:1.5;
+       border:1px solid #0f1216;box-shadow:0 18px 60px rgba(15,18,22,.22)}
+  .app [data-region]{position:relative}
+  .app[data-labels="1"] [data-region]{outline:1px dashed #f59e0b}
+  .app[data-labels="1"] [data-region]::after{content:attr(data-region);position:absolute;top:0;left:0;z-index:60;
+       background:#f59e0b;color:#111;font:10px/1.4 var(--mono);padding:0 4px;border-radius:0 0 4px 0;pointer-events:none}
+  /* AppBar */
+  .appbar{flex:none;height:56px;display:flex;align-items:center;gap:10px;padding:0 20px;
+          background:var(--surface);border-bottom:1px solid var(--line)}
+  .br{font-size:19px;font-weight:650;letter-spacing:.2px;white-space:nowrap}
+  .pro{font-size:10px;border:1px solid var(--line2);border-radius:4px;padding:0 5px;color:var(--ink2)}
+  .chip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:999px;
+        background:var(--surface2);padding:2px 9px;font-size:11px;color:var(--ink2);white-space:nowrap}
+  .chip b{color:var(--ink);font-weight:600}
+  .spacer{flex:1}
+  .ico{width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;border:1px solid transparent;
+       border-radius:8px;background:transparent;color:var(--ink2);font:inherit;font-size:12px;cursor:pointer;gap:5px;padding:0 8px}
+  .ico:hover{background:var(--surface2);border-color:var(--line);color:var(--ink)}
+  .ico.sq{width:32px;padding:0}
+  .sep{width:1px;height:18px;background:var(--line)}
+  .btn{height:32px;padding:0 13px;border:1px solid var(--line);border-radius:8px;background:var(--surface2);
+       color:var(--ink);font:inherit;font-size:12px;cursor:pointer;white-space:nowrap}
+  .btn:hover{border-color:var(--line2)}
+  .btn.sm{height:28px;padding:0 10px;font-size:12px}
+  .btn.pri{background:var(--fill);border-color:var(--fill);color:var(--fill-ink);font-weight:650}
+  .btn[disabled]{opacity:.45;cursor:default}
+  /* 主体 */
+  .main{flex:1;min-height:0;display:flex}
+  .rail{width:320px;flex:none;background:var(--surface);border-right:1px solid var(--line);
+        display:flex;flex-direction:column;overflow:auto}
+  .railsec{padding:14px 20px;border-bottom:1px solid var(--line)}
+  .railsec h3{margin:0 0 10px;font-size:12px;font-weight:650;color:var(--ink2);letter-spacing:.3px}
+  .work{flex:1;min-width:0;display:flex;flex-direction:column}
+  /* TimeBar */
+  .timebar{flex:none;min-height:48px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+           padding:6px 24px;background:var(--surface);border-bottom:1px solid var(--line)}
+  .segs{display:inline-flex;padding:2px;gap:2px;background:var(--surface2);border:1px solid var(--line);border-radius:8px}
+  .segs button{height:28px;padding:0 14px;border:0;border-radius:6px;background:transparent;color:var(--ink2);
+               font:inherit;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+  .segs button.on{background:var(--fill);color:var(--fill-ink)}
+  .tgroup{display:inline-flex;align-items:center;gap:6px;min-width:0}
+  .step{width:28px;height:28px;padding:0;border:1px solid var(--line);border-radius:999px;background:var(--surface2);
+        color:var(--ink2);font:inherit;font-size:14px;line-height:1;cursor:pointer}
+  .step[disabled]{opacity:.4;cursor:default}
+  .sel{height:28px;max-width:250px;padding:0 8px;border:1px solid var(--line);border-radius:8px;
+       background:var(--surface2);color:var(--ink);font:inherit;font-size:12px}
+  .now{height:28px;padding:0 9px;border:1px solid var(--line2);border-radius:999px;background:transparent;
+       color:var(--ink);font:inherit;font-size:11px;font-weight:650;cursor:pointer}
+  .tchip{font-size:11px;color:var(--ink2);white-space:nowrap}
+  .tool{height:28px;padding:0 10px;border:1px solid var(--line);border-radius:999px;background:transparent;
+        color:var(--ink2);font:inherit;font-size:11px;font-weight:600;cursor:pointer}
+  .tool.on{color:var(--ink);border-color:var(--line2);background:var(--surface2)}
+  .toggle{height:28px;padding:0 10px;border:1px solid var(--line);border-radius:999px;background:transparent;
+          color:var(--ink2);font:inherit;font-size:11px;cursor:pointer}
+  .toggle.on{color:var(--ink);border-color:var(--line2);background:var(--surface2)}
+  /* 内容区 */
+  .content{flex:1;min-height:0;display:flex}
+  .stagewrap{flex:1;min-width:0;overflow:auto;padding:24px}
+  .cluster{max-width:1044px;margin:0 auto;display:flex;gap:24px;align-items:flex-start}
+  .chart{flex:1;min-width:0}
+  .chartcap{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:11px;color:var(--ink3)}
+  .board{border:1px solid var(--line2);border-radius:14px;background:var(--surface2);padding:5px}
+  .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:minmax(104px,auto);
+        gap:3px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .cell{position:relative;background:var(--surface);padding:7px 8px;display:flex;flex-direction:column;gap:2px;cursor:pointer;min-width:0}
+  .cell:hover{background:var(--surface2)}
+  .cell.on{box-shadow:inset 0 0 0 2px var(--focus);background:var(--surface2)}
+  .celltop{display:flex;justify-content:space-between;gap:4px;align-items:baseline;flex-wrap:wrap}
+  .pname{font-size:13px;font-weight:700;letter-spacing:.3px}
+  .gz{font-family:var(--mono);font-size:9.5px;color:var(--ink3);letter-spacing:.5px}
+  .stars{font-size:12px;font-weight:650;line-height:1.45;word-break:break-all}
+  .stars .b{font-family:var(--mono);font-size:9px;color:var(--ink3);border:1px solid var(--line2);border-radius:3px;padding:0 2px;margin-left:2px;font-weight:600}
+  .mu{display:inline-block;font-family:var(--mono);font-size:9px;font-weight:700;border-radius:3px;padding:0 2px;margin-left:2px;
+      border:1px solid var(--line2);color:var(--ink);background:var(--surface2)}
+  .minor{font-size:11px;color:var(--ink2);line-height:1.4}
+  .scope{font-size:9.5px;color:var(--ink3);margin-top:1px}
+  .cellfoot{margin-top:auto;display:flex;justify-content:space-between;gap:4px;font-size:9px;color:var(--ink3);font-family:var(--mono)}
+  .mk{display:inline-block;font-size:8.5px;font-weight:700;border-radius:3px;padding:0 3px;margin-left:3px;
+      border:1px solid var(--line2);color:var(--ink);background:var(--surface2);vertical-align:1px}
+  .center{grid-column:2/4;grid-row:2/4;display:flex;flex-direction:column;align-items:center;justify-content:center;
+          gap:5px;background:var(--surface2);padding:10px;text-align:center}
+  .taiji{width:34px;height:34px;border-radius:50%;border:1px solid var(--line2);
+         background:conic-gradient(from 0deg,var(--ink) 0 50%,var(--surface) 50% 100%)}
+  .cname{font-size:14px;font-weight:750;letter-spacing:1px}
+  .cchips{display:flex;flex-wrap:wrap;gap:4px;justify-content:center}
+  .cchip{font-size:9.5px;border:1px solid var(--line);border-radius:999px;padding:0 6px;color:var(--ink2);background:var(--surface)}
+  .csub{font-size:10.5px;color:var(--ink2)}
+  /* Inspector */
+  .inspector{width:300px;flex:none;border-left:1px solid var(--line);padding:2px 0 0 20px;overflow:auto}
+  .inshead{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+  .inshead .t{font-size:15px;font-weight:750;letter-spacing:.5px}
+  .insnav{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .sec{margin-top:14px}
+  .seclabel{font-size:11px;font-weight:650;color:var(--ink3);letter-spacing:.4px;margin-bottom:5px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .kchip{font-size:11px;border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:2px 7px}
+  .kbdhint{margin-top:14px;font-size:10.5px;color:var(--ink3)}
+  /* 工具视图 */
+  .utility{display:none;width:100%;max-width:760px;margin:0 auto}
+  .utility h2{font-size:14px;font-weight:650;margin:0 0 12px}
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px}
+  .pcard{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:10px 12px}
+  .pcard b{display:block;font-size:13px;margin-bottom:4px}
+  .pcard p{margin:0;font-size:12px;color:var(--ink2);line-height:1.6}
+  .dict{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+  .ditem{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:9px 11px}
+  .ditem b{font-size:13px}
+  .ditem p{margin:3px 0 0;font-size:11px;color:var(--ink2);line-height:1.55}
+  /* BottomBar */
+  .bottombar{display:none;flex:none;height:56px;align-items:center;gap:8px;padding:0 12px;
+             background:var(--surface);border-top:1px solid var(--line)}
+  .bottombar .btn{height:40px;flex:1}
+  .bottombar .ico{height:40px;width:auto;padding:0 12px;border:1px solid var(--line);background:var(--surface2)}
+  /* 表单元素 */
+  .field{margin-bottom:8px}
+  .field label{display:block;font-size:11px;color:var(--ink2);margin-bottom:4px}
+  .inp{width:100%;height:32px;border:1px solid var(--line);border-radius:8px;background:var(--surface2);
+       color:var(--ink);font:inherit;font-size:13px;padding:0 9px}
+  .row{display:flex;gap:6px}
+  .row .inp{flex:1;min-width:0}
+  .birthline{display:flex;align-items:center;gap:8px;flex-wrap:wrap;border:1px solid var(--line);
+             border-radius:8px;background:var(--surface2);padding:7px 9px;font-size:11.5px;color:var(--ink2)}
+  .kv{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;padding:2px 0}
+  .kv span{color:var(--ink3)}
+  .kv b{font-weight:600}
+  .pillars{display:flex;gap:5px;margin-bottom:8px}
+  .pillar{flex:1;text-align:center;border:1px solid var(--line);border-radius:6px;background:var(--surface2);
+          font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:1px;padding:3px 0}
+  .libitem{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:6px;
+           padding:5px 8px;margin-bottom:5px;font-size:11.5px;background:var(--surface2)}
+  .libitem .sub{margin-left:auto;color:var(--ink3);font-size:10.5px}
+  .libitem.on{box-shadow:inset 0 0 0 1px var(--line2)}
+  /* 空态 / 错误 */
+  .empty{max-width:640px;margin:8vh auto;text-align:center;border:1px dashed var(--line2);border-radius:14px;
+         padding:64px 24px;background:var(--surface)}
+  .empty h2{margin:12px 0 6px;font-size:15px}
+  .empty p{margin:0 0 14px;font-size:12px;color:var(--ink2)}
+  .err{display:flex;gap:8px;align-items:flex-start;border:1px solid var(--line2);border-left:3px solid var(--warn);
+       border-radius:6px;background:var(--surface2);padding:6px 9px;font-size:11.5px;color:var(--warn);margin-top:8px}
+  /* Drawer */
+  .drawer-layer{display:none;position:absolute;inset:0;z-index:100}
+  .app[data-drawer="1"] .drawer-layer{display:block}
+  .mask{position:absolute;inset:0;background:rgba(20,24,30,.32)}
+  .drawer{position:absolute;top:0;right:0;bottom:0;width:min(520px,100%);background:var(--surface);
+          border-left:1px solid var(--line2);display:flex;flex-direction:column}
+  .dhead{flex:none;display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .dtitle{font-size:13px;font-weight:700}
+  .dsub{width:100%;font-size:10.5px;color:var(--ink3)}
+  .dbody{flex:1;min-height:0;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+  .bubble{border:1px solid var(--line);border-radius:10px;background:var(--surface2);padding:8px 11px;font-size:12px;line-height:1.65}
+  .bubble.me{align-self:flex-end;max-width:88%}
+  .bubble h4{margin:0 0 4px;font-size:12px}
+  .dctx{font-size:10.5px;color:var(--ink2);border:1px solid var(--line);border-radius:999px;padding:1px 8px;background:var(--surface2)}
+  .dfoot{flex:none;border-top:1px solid var(--line);padding:9px 12px;display:flex;flex-direction:column;gap:7px}
+  .dtools{display:flex;gap:6px;flex-wrap:wrap}
+  .mini{height:26px;padding:0 8px;border:1px solid var(--line);border-radius:7px;background:transparent;
+        color:var(--ink2);font:inherit;font-size:11px;cursor:pointer}
+  .composer{display:flex;gap:7px;align-items:flex-end}
+  .composer textarea{flex:1;height:52px;resize:none;border:1px solid var(--line);border-radius:8px;background:var(--surface2);
+                     color:var(--ink);font:inherit;font-size:12px;padding:7px 9px}
+  .send{width:36px;height:36px;flex:none;border:0;border-radius:9px;background:var(--fill);color:var(--fill-ink);font-size:12px;cursor:pointer}
+  .disc{font-size:10px;color:var(--ink3);line-height:1.5}
+  /* tier 规则 */
+  .app[data-tier="mid"] .inspector{display:none}
+  .app[data-tier="mid"] .cluster{max-width:720px;display:block}
+  .app[data-tier="narrow"] .rail{display:none}
+  .app[data-tier="narrow"] .inspector{display:none}
+  .app[data-tier="narrow"] .bottombar{display:flex}
+  .app[data-tier="narrow"] .timebar{padding:6px 16px;min-height:88px;align-content:flex-start}
+  .app[data-tier="narrow"] .stagewrap{padding:16px}
+  .app[data-tier="narrow"] .cluster{max-width:720px;display:block}
+  .app[data-tier="narrow"] .br{font-size:17px}
+  .app[data-tier="narrow"] .appbar{padding:0 14px;gap:6px}
+  .app[data-tier="narrow"] .appbar .hide-narrow{display:none}
+  .app[data-tier="narrow"] .chartcap{font-size:10.5px}
+  /* wide / xwide 限制盘面宽 */
+  .app[data-tier="wide"] .chart{max-width:720px}
+  .app[data-tier="xwide"] .chart{max-width:800px}
+  .app[data-tier="xwide"] .inspector{width:320px}
+  /* 视图切换 */
+  .app[data-view="chart"] .utility{display:none}
+  .app[data-view="patterns"] .chart,.app[data-view="dict"] .chart{display:none}
+  .app[data-view="patterns"] .inspector,.app[data-view="dict"] .inspector{display:none}
+  .app[data-view="patterns"] .utility,.app[data-view="dict"] .utility{display:block}
+  .app[data-view="patterns"] .t-nav,.app[data-view="dict"] .t-nav{display:none}
+  .app[data-view="patterns"] .tool-patterns,.app[data-view="dict"] .tool-dict{color:var(--ink);border-color:var(--line2);background:var(--surface2)}
+  .app[data-view="chart"] .tool-back{display:none}
+  .app[data-view="patterns"] .tool-back,.app[data-view="dict"] .tool-back{display:inline-flex}
+  .app[data-view="patterns"] .segwrap,.app[data-view="dict"] .segwrap{display:none}
+  .app[data-mode="natal"] .nav-decadal,.app[data-mode="natal"] .nav-yearly{display:none}
+  .app[data-mode="decadal"] .nav-yearly,.app[data-mode="yearly"] .nav-decadal{display:none}
+  .app[data-mode="natal"] .ctx-decadal,.app[data-mode="natal"] .ctx-yearly{display:none}
+  .app[data-mode="decadal"] .ctx-yearly,.app[data-mode="yearly"] .ctx-decadal{display:none}
+  .app[data-mode="natal"] .ins-decadal,.app[data-mode="natal"] .ins-yearly{display:none}
+  .app[data-mode="decadal"] .ins-yearly,.app[data-mode="yearly"] .ins-decadal{display:none}
+  .app[data-mode="natal"] .cell .scopeb,.app[data-mode="natal"] .cell .scopen{display:none}
+  .app[data-mode="decadal"] .cell .scopey,.app[data-mode="yearly"] .cell .scoped{display:none}
+  /* 空态 */
+  .app[data-chart="0"] .board,.app[data-chart="0"] .inspector,.app[data-chart="0"] .timebar .t-nav,
+  .app[data-chart="0"] .tool,.app[data-chart="0"] .toggle,.app[data-chart="0"] .bottombar .morebtn{display:none}
+  .app[data-chart="0"] .empty{display:block}
+  .app[data-chart="1"] .empty{display:none}
+  .app[data-chart="0"] .chartcap,.app[data-chart="0"] .cluster{display:none}
+  .app[data-chart="0"] .formbody{display:block}
+  .app[data-chart="0"] .birthline{display:none}
+  .app[data-chart="1"] .formbody{display:none}
+  .app[data-chart="0"] .profile,.app[data-chart="0"] .libsec{opacity:.35;pointer-events:none}
+  .app[data-chart="0"] .btn-ai-appbar{background:var(--surface2);border-color:var(--line);color:var(--ink3);pointer-events:none}
+  .app[data-chart="0"] .bottombar .pri{flex:1}
+  .t-draw{display:none}
+  .app[data-chart="0"] .bottombar .t-ai{display:none}
+  .app[data-chart="0"] .bottombar .t-draw{display:inline}
+</style>
+</head>
+<body>
+<!-- 控制条：不属于线框本体，只用于演示状态 -->
+<div class="ctl">
+  <b>v3 线框</b>
+  <span class="group" id="tierGroup">
+    <button data-tier="xwide">1600 超宽</button>
+    <button data-tier="wide" class="on">1440 宽</button>
+    <button data-tier="mid">1200 中</button>
+    <button data-tier="narrow">700 窄</button>
+  </span>
+  <span class="sp"></span>
+  <span class="group" id="viewGroup">
+    <button data-view="chart" data-mode="natal" class="on">本命</button>
+    <button data-view="chart" data-mode="decadal">大限</button>
+    <button data-view="chart" data-mode="yearly">流年</button>
+    <button data-view="patterns">工具</button>
+  </span>
+  <span class="group">
+    <button id="drawerBtn">抽屉 开/合</button>
+    <button id="themeBtn">深色</button>
+    <button id="labelBtn">区域标注</button>
+    <button id="chartBtn">有盘/无盘</button>
+  </span>
+  <span class="hint">低 fidelity · 只用中性灰 · 示例数据仅示意布局（1992-05-03 09:30 男 105.97°E）</span>
+</div>
+
+<div class="stage" id="stage"><div id="fit">
+<div class="app" data-tier="wide" data-view="chart" data-mode="natal" data-drawer="0" data-labels="0" data-theme="light" data-chart="1" id="app">
+
+  <!-- ============ APP_BAR ============ -->
+  <header class="appbar" data-region="APP_BAR">
+    <button class="ico sq" title="返回会话" aria-label="返回会话">←</button>
+    <span class="sep"></span>
+    <span class="br">紫微斗数 <span class="pro">Pro</span></span>
+    <span class="chip hide-narrow"><b>陈默</b> · 壬申 乙巳 己卯 戊辰</span>
+    <span class="spacer"></span>
+    <button class="ico" title="复制命盘" aria-label="复制命盘">复制</button>
+    <button class="ico" title="写入上下文" aria-label="写入上下文">写入</button>
+    <span class="sep"></span>
+    <button class="btn pri btn-ai-appbar" title="紫微师解读" aria-label="紫微师解读">✦ 紫微师解读</button>
+    <button class="ico sq" title="设置" aria-label="设置">⚙</button>
+  </header>
+
+  <div class="main">
+    <!-- ============ CONTEXT_RAIL ============ -->
+    <aside class="rail" data-region="CONTEXT_RAIL" id="zp-rail">
+      <div class="railsec">
+        <h3>排盘输入　<span style="float:right;font-weight:400;color:var(--ink3)">收起</span></h3>
+        <div class="birthline">
+          <b style="color:var(--ink)">陈默</b> 　1992-05-03 09:30 · 男 · 105.97°E
+          <button class="btn sm" style="margin-left:auto">改生辰</button>
+          <button class="btn sm">排 盘</button>
+        </div>
+        <div class="formbody">
+          <div class="row">
+            <div class="field" style="flex:1"><label>姓名</label><input class="inp" value="陈默"></div>
+            <div class="field" style="flex:1"><label>历法</label>
+              <div class="segs" style="width:100%"><button class="on" style="flex:1">公历</button><button style="flex:1">农历</button></div>
+            </div>
+          </div>
+          <div class="field"><label>年 / 月 / 日</label>
+            <div class="row"><input class="inp" value="1992"><input class="inp" value="5" style="max-width:64px"><input class="inp" value="3" style="max-width:64px"></div>
+          </div>
+          <div class="field"><label>出生时间 · 性别</label>
+            <div class="row"><input class="inp" value="09" style="max-width:64px"><input class="inp" value="30" style="max-width:64px">
+              <div class="segs" style="flex:1"><button class="on" style="flex:1">男</button><button style="flex:1">女</button></div></div>
+          </div>
+          <div class="field"><label>出生地经度</label><input class="inp" value="105.97"></div>
+          <button class="btn pri" style="width:100%">排 盘</button>
+          <div class="err" hidden>请检查出生时间：…</div>
+        </div>
+      </div>
+
+      <div class="railsec profile" data-slot="profile">
+        <h3>命主</h3>
+        <div class="pillars"><span class="pillar">壬申</span><span class="pillar">乙巳</span><span class="pillar">己卯</span><span class="pillar">戊辰</span></div>
+        <div class="kv"><span>公历</span><b>1992-05-03 辰时</b></div>
+        <div class="kv"><span>农历</span><b>1992 年四月初一</b></div>
+        <div class="kv"><span>真太阳时</span><b>08:37（105.97°E）</b></div>
+        <div class="kv"><span>命宫 / 身宫</span><b>丑 · 酉</b></div>
+        <div class="kv"><span>五行局</span><b>木三局</b></div>
+        <div class="kv"><span>命主 / 身主</span><b>巨门 · 天相</b></div>
+        <div class="kv"><span>起运</span><b>3 岁</b></div>
+        <div class="kv"><span>四化</span><b>天梁禄 紫微权 左辅科 武曲忌</b></div>
+      </div>
+
+      <div class="railsec libsec" data-slot="library">
+        <h3>命盘库</h3>
+        <div class="row" style="margin-bottom:8px"><input class="inp" placeholder="盘名"><button class="btn sm">保存</button></div>
+        <div class="libitem on"><b>陈默</b><span class="sub">1992-05-03</span><button class="ico sq" style="min-width:20px;height:20px;padding:0" title="删除">×</button></div>
+        <div class="libitem"><b>示例盘</b><span class="sub">1990-06-15</span><button class="ico sq" style="min-width:20px;height:20px;padding:0" title="删除">×</button></div>
+        <div style="font-size:10.5px;color:var(--ink3);margin-top:6px">显示全部 (2)</div>
+      </div>
+    </aside>
+
+    <!-- ============ WORK ============ -->
+    <div class="work">
+      <!-- ============ TIME_BAR ============ -->
+      <div class="timebar" data-region="TIME_BAR">
+        <div class="segs segwrap" role="tablist" aria-label="命盘时间维度">
+          <button role="tab" aria-selected="true" class="on" data-setmode="natal">本命</button>
+          <button role="tab" aria-selected="false" data-setmode="decadal">大限</button>
+          <button role="tab" aria-selected="false" data-setmode="yearly">流年</button>
+        </div>
+        <div class="tgroup t-nav nav-decadal ctx-decadal" role="group" aria-label="大限导航">
+          <button class="step" title="上一个大限" aria-label="上一个大限">‹</button>
+          <select class="sel" aria-label="跳转大限">
+            <option>第1段 · 3–12 岁 · 癸丑 · 命宫</option>
+            <option>第2段 · 13–22 岁 · 壬寅 · 父母</option>
+            <option>第3段 · 23–32 岁 · 癸卯 · 福德</option>
+            <option selected>第4段 · 33–42 岁 · 甲辰 · 田宅（当前）</option>
+            <option>第5段 · 43–52 岁 · 乙巳 · 官禄</option>
+          </select>
+          <button class="step" title="下一个大限" aria-label="下一个大限">›</button>
+          <span class="tchip">当前</span>
+        </div>
+        <div class="tgroup t-nav nav-yearly ctx-yearly" role="group" aria-label="流年导航">
+          <button class="step" title="上一年" aria-label="上一年">‹</button>
+          <select class="sel" aria-label="跳转流年"><option selected>2026</option><option>2027</option></select>
+          <button class="step" title="下一年" aria-label="下一年">›</button>
+          <span class="tchip">丙午 · 虚岁 35</span>
+          <span class="tchip">今年</span>
+        </div>
+        <span class="spacer"></span>
+        <button class="tool tool-back" title="返回盘面">← 返回盘面</button>
+        <button class="tool tool-patterns" title="格局分析">格局</button>
+        <button class="tool tool-dict" title="星曜词典">词典</button>
+        <button class="toggle" aria-pressed="false" title="显示杂曜">杂曜</button>
+        <button class="toggle" aria-pressed="false" title="专注看盘">专注</button>
+      </div>
+
+      <div class="content">
+        <!-- ============ CHART_STAGE ============ -->
+        <div class="stagewrap" data-region="CHART_STAGE">
+          <div class="cluster">
+            <div class="chart" data-slot="board">
+              <div class="chartcap"><span>本命盘</span><span id="ctxLabel" style="color:var(--ink3)">· 当前定位 2026 年 · 虚岁 35</span></div>
+              <div class="board"><div class="grid" role="grid" aria-label="十二宫命盘">
+                <!-- 4 行 12 宫 + 中宫；数据来自本仓库引擎样例盘 -->
+                <div class="cell" role="button" aria-pressed="false"><div class="celltop"><span class="pname">父母</span><span class="gz">壬寅</span></div><div class="stars">贪狼<span class="b">平</span></div><div class="minor">天马 铃星</div><div class="cellfoot"><span>13–22</span><span>临官</span></div></div>
+                <div class="cell" role="button" aria-pressed="false"><div class="celltop"><span class="pname">福德</span><span class="gz">癸卯</span></div><div class="stars">天机<span class="b">旺</span> 巨门<span class="b">庙</span></div><div class="minor">天魁 地劫</div><div class="cellfoot"><span>23–32</span><span>帝旺</span></div></div>
+                <div class="cell" role="button" aria-pressed="false"><div class="celltop"><span class="pname">田宅</span><span class="gz">甲辰</span></div><div class="stars">紫微<span class="b">得</span><span class="mu">权</span> 天相<span class="b">得</span></div><div class="cellfoot"><span>33–42</span><span>衰</span></div></div>
+                <div class="cell" role="button" aria-pressed="false"><div class="celltop"><span class="pname">官禄</span><span class="gz">乙巳</span></div><div class="stars">天梁<span class="b">陷</span><span class="mu">禄</span></div><div class="minor">天钺</div><div class="cellfoot"><span>43–52</span><span>病</span></div></div>
+                <div class="cell" role="button" aria-pressed="false"><div class="celltop"><span class="pname">仆役</span><span class="gz">丙午</span></div><div class="stars">七杀<span class="b">旺</span></div><div class="minor">文昌 火星</div><div class="cellfoot"><span>53–62</span><span>死</span></div></div>
+                <div class="center">
+                  <div class="taiji" aria-hidden="true"></div>
+                  <div class="cname">陈默</div>
+                  <div class="cchips"><span class="cchip">命宫 丑</span><span class="cchip">身宫 酉</span><span class="cchip">木三局</span><span class="cchip">猴</span></div>
+                  <div class="csub">命主 巨门 · 身主 天相</div>
+                  <div class="csub" style="color:var(--ink3)">3 岁起运</div>
+                </div>
+                <div class="cell" role="button" aria-pressed="false"><div class="celltop"><span class="pname">迁移</span><span class="gz">丁未</span></div><div class="minor">左辅<span class="mu">科</span> 右弼 地空</div><div class="cellfoot"><span>63–72</span><span>墓</span></div></div>
+                <div class="cell" role="button" aria-pressed="false"><div class="celltop"><span class="pname">疾厄</span><span class="gz">戊申</span></div><div class="stars">廉贞<span class="b">庙</span></div><div class="minor">文曲</div><div class="cellfoot"><span>73–82</span><span>绝</span></div></div>
+                <div class="cell" role="button" aria-pressed="false"><div class="celltop"><span class="pname">财帛</span><span class="gz">己酉</span></div><div class="minor">（空宫）</div><div class="cellfoot"><span>83–92</span><span>胎</span></div></div>
+                <div class="cell" role="button" aria-pressed="false"><div class="celltop"><span class="pname">子女</span><span class="gz">庚戌</span></div><div class="stars">破军<span class="b">旺</span></div><div class="minor">陀罗</div><div class="cellfoot"><span>93–102</span><span>养</span></div></div>
+                <div class="cell" role="button" aria-pressed="false"><div class="celltop"><span class="pname">夫妻</span><span class="gz">辛亥</span></div><div class="stars">天同<span class="b">庙</span></div><div class="minor">禄存</div><div class="cellfoot"><span>103–112</span><span>长生</span></div></div>
+                <div class="cell" role="button" aria-pressed="false"><div class="celltop"><span class="pname">兄弟</span><span class="gz">壬子</span></div><div class="stars">武曲<span class="b">旺</span><span class="mu">忌</span> 天府<span class="b">庙</span></div><div class="minor">擎羊</div><div class="cellfoot"><span>113–122</span><span>沐浴</span></div></div>
+                <div class="cell on" role="button" aria-pressed="true"><div class="celltop"><span class="pname">命宫<span class="mk">命</span></span><span class="gz">癸丑</span></div><div class="stars">太阳<span class="b">不</span> 太阴<span class="b">庙</span></div><div class="cellfoot"><span>3–12</span><span>冠带</span></div></div>
+              </div></div>
+              <div class="chartcap" style="margin-top:8px">点宫位 → 详情（窄档为底部 sheet）；盘面最小 560，低于则横向滚动</div>
+            </div>
+
+            <!-- ============ INSPECTOR ============ -->
+            <aside class="inspector" data-region="INSPECTOR">
+              <div class="inshead"><span class="t">命宫</span><span class="gz">癸丑</span><span class="mk">命</span></div>
+              <div class="insnav"><button class="btn sm">对宫 · 迁移</button><button class="btn sm">三合 · 官禄</button><button class="btn sm">三合 · 财帛</button></div>
+              <div class="sec"><div class="seclabel">主星</div><div class="stars">太阳<span class="b">不</span> 太阴<span class="b">庙</span></div></div>
+              <div class="sec"><div class="seclabel">辅星</div><div class="minor">—</div></div>
+              <div class="sec"><div class="seclabel">大限 · 小限 · 十二神</div>
+                <div class="chips"><span class="kchip">大限 癸丑 3–12 岁</span><span class="kchip">小限 4, 16, 28 …</span><span class="kchip">冠带 · 青龙</span></div>
+              </div>
+              <div class="sec ins-decadal"><div class="seclabel">本限四化</div>
+                <div class="chips"><span class="kchip">破军化禄 · 田宅</span><span class="kchip">巨门化权 · 福德</span><span class="kchip">太阴化科 · 命宫</span><span class="kchip">贪狼化忌 · 父母</span></div>
+              </div>
+              <div class="sec ins-yearly"><div class="seclabel">流年四化（2026 丙午）</div>
+                <div class="chips"><span class="kchip">天同化禄 · 夫妻</span><span class="kchip">天机化权 · 福德</span><span class="kchip">文昌化科 · 仆役</span><span class="kchip">廉贞化忌 · 疾厄</span></div>
+              </div>
+              <div class="kbdhint">点盘面后：←→ 切换宫位 · ↑↓ 跳对宫</div>
+            </aside>
+          </div>
+
+          <!-- 空态（无盘） -->
+          <div class="empty">
+            <div class="taiji" aria-hidden="true" style="margin:0 auto"></div>
+            <h2>紫微斗数 Pro</h2>
+            <p>填写出生信息，点击「排 盘」开始</p>
+            <button class="btn">用示例生辰先排一盘</button>
+          </div>
+
+          <!-- ============ UTILITY_VIEW ============ -->
+          <div class="utility" data-region="UTILITY_VIEW">
+            <div class="patterns">
+              <h2>格局分析 · 4 条</h2>
+              <div class="cards">
+                <div class="pcard"><b>日月同宫 · 吉</b><p>日月同守一宫（丑未），性格刚柔并济，早年顺遂，得父母长辈之荫。</p></div>
+                <div class="pcard"><b>双禄交流 · 吉</b><p>禄存与化禄同宫或对拱，财禄双美，进财顺遂，理财有方。</p></div>
+                <div class="pcard"><b>铃贪格 · 吉</b><p>铃星与贪狼同宫，主突发横财，蓄势而发，机遇多在暗中酝酿。</p></div>
+                <div class="pcard"><b>左右同宫 · 吉</b><p>左辅右弼同宫，辅佐之星齐聚，主得人缘、多助力，贵人多而有力。</p></div>
+              </div>
+            </div>
+            <div class="dict" style="display:none">
+              <h2>星曜词典 · 紫微</h2>
+              <div class="ditem"><b>紫微</b><p>己土 · 阴 · 化气为尊（帝座）。帝王之星，统御全局，主贵气、领导力与自尊。</p></div>
+              <div class="ditem"><b>天机</b><p>乙木 · 阴 · 化气为善（益算）。智慧之星，主谋略、机变与思考。</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ BOTTOM_BAR ============ -->
+      <div class="bottombar" data-region="BOTTOM_BAR">
+        <button class="ico" title="生辰">生辰</button>
+        <button class="ico sq morebtn" title="更多">⋯</button>
+        <button class="btn pri"><span class="t-ai">✦ 紫微师解读</span><span class="t-draw">排 盘</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ DRAWER ============ -->
+  <div class="drawer-layer" data-region="DRAWER">
+    <div class="mask" id="mask"></div>
+    <aside class="drawer" role="dialog" aria-modal="true" aria-label="紫微师解读">
+      <div class="dhead">
+        <div class="dtitle">紫微师解读</div>
+        <span class="dctx" id="drawerCtx">大限 第4段 33–42岁 · 甲辰 · 田宅</span>
+        <span class="spacer"></span>
+        <button class="ico sq" title="关闭" aria-label="关闭" id="drawerClose">×</button>
+        <div class="dsub">命盘已自动带上 · 由当前会话模型回答</div>
+      </div>
+      <div class="dbody">
+        <div class="bubble me">这个大限要注意什么？</div>
+        <div class="bubble">
+          <h4>一、本限总纲</h4>
+          甲辰限落田宅宫，紫微化权坐守——这十年的主战场是「资产与根基」，控制权比收益更值得争取。
+          <h4>二、节奏</h4>
+          本限三方四正见天梁化禄与左辅化科，前五年宜借势、后五年宜收口；廉贞化忌落疾厄，作息与边界要说清。
+        </div>
+      </div>
+      <div class="dfoot">
+        <div class="dtools">
+          <button class="mini">复制</button><button class="mini">预览</button><button class="mini">导出 HTML</button>
+          <button class="mini" style="margin-left:auto;border-color:var(--line2)">新会话继续</button>
+        </div>
+        <div class="composer"><textarea placeholder="追问：如「重点讲事业与财运」（Enter 发送）"></textarea><button class="send" title="发送">➤</button></div>
+        <div class="disc">本内容基于中华传统文化（紫微斗数）体系生成，非现代科学结论，仅供参考。</div>
+      </div>
+    </aside>
+  </div>
+</div>
+</div></div>
+
+<script>
+(function(){
+  var W = {xwide:1600, wide:1440, mid:1200, narrow:700};
+  var app = document.getElementById('app');
+  var fit = document.getElementById('fit');
+  var stage = document.getElementById('stage');
+  var curTier = 'wide';
+
+  function relayout(){
+    var w = W[curTier];
+    var avail = stage.clientWidth - 32;
+    var s = Math.min(1, avail / w);
+    app.style.width = w + 'px';
+    app.style.left = '50%';
+    app.style.marginLeft = (-w/2) + 'px';
+    app.style.transform = 'scale(' + s + ')';
+    fit.style.height = (840 * s + 16) + 'px';
+  }
+  window.addEventListener('resize', relayout);
+
+  document.getElementById('tierGroup').addEventListener('click', function(e){
+    var b = e.target.closest('button'); if(!b) return;
+    curTier = b.dataset.tier;
+    [].forEach.call(this.children, function(x){ x.classList.toggle('on', x === b); });
+    app.dataset.tier = curTier;
+    relayout();
+  });
+
+  document.getElementById('viewGroup').addEventListener('click', function(e){
+    var b = e.target.closest('button'); if(!b) return;
+    [].forEach.call(this.children, function(x){ x.classList.toggle('on', x === b); });
+    if (b.dataset.view === 'patterns') { app.dataset.view = 'patterns'; return; }
+    app.dataset.view = 'chart';
+    if (b.dataset.mode) setMode(b.dataset.mode);
+  });
+
+  function setMode(m){
+    app.dataset.mode = m;
+    var segs = app.querySelectorAll('.segs[role="tablist"] button');
+    [].forEach.call(segs, function(x){
+      var on = x.dataset.setmode === m;
+      x.classList.toggle('on', on);
+      x.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    var label = { natal:'· 当前定位 2026 年 · 虚岁 35', decadal:'· 大限 第4段 33–42岁 · 甲辰 · 田宅', yearly:'· 流年 2026 丙午 · 虚岁 35' }[m];
+    document.getElementById('ctxLabel').textContent = label;
+    var ctx = { natal:'本命', decadal:'大限 第4段 33–42岁 · 甲辰 · 田宅', yearly:'流年 2026 丙午 · 虚岁 35' }[m];
+    document.getElementById('drawerCtx').textContent = ctx;
+  }
+  app.querySelector('.segs[role="tablist"]').addEventListener('click', function(e){
+    var b = e.target.closest('button[data-setmode]'); if(!b) return;
+    setMode(b.dataset.setmode);
+    var vg = document.getElementById('viewGroup');
+    [].forEach.call(vg.children, function(x){ x.classList.remove('on'); });
+    var target = vg.querySelector('[data-mode="' + b.dataset.setmode + '"]');
+    if (target) target.classList.add('on');
+  });
+
+  document.getElementById('drawerBtn').addEventListener('click', function(){
+    app.dataset.drawer = app.dataset.drawer === '1' ? '0' : '1';
+  });
+  document.getElementById('drawerClose').addEventListener('click', function(){ app.dataset.drawer = '0'; });
+  document.getElementById('mask').addEventListener('click', function(){ app.dataset.drawer = '0'; });
+  document.getElementById('themeBtn').addEventListener('click', function(){
+    app.dataset.theme = app.dataset.theme === 'dark' ? 'light' : 'dark';
+    this.classList.toggle('on', app.dataset.theme === 'dark');
+  });
+  document.getElementById('labelBtn').addEventListener('click', function(){
+    app.dataset.labels = app.dataset.labels === '1' ? '0' : '1';
+    this.classList.toggle('on', app.dataset.labels === '1');
+  });
+  document.getElementById('chartBtn').addEventListener('click', function(){
+    app.dataset.chart = app.dataset.chart === '1' ? '0' : '1';
+    this.classList.toggle('on', app.dataset.chart === '0');
+  });
+
+  var toolP = app.querySelector('.tool-patterns'), toolD = app.querySelector('.tool-dict');
+  toolP.addEventListener('click', function(){ app.dataset.view = app.dataset.view === 'patterns' ? 'chart' : 'patterns';
+    app.querySelector('.patterns').style.display = 'block'; app.querySelector('.dict').style.display = 'none'; });
+  toolD.addEventListener('click', function(){ app.dataset.view = app.dataset.view === 'dict' ? 'chart' : 'dict';
+    app.querySelector('.patterns').style.display = 'none'; app.querySelector('.dict').style.display = 'block'; });
+  app.querySelector('.tool-back').addEventListener('click', function(){ app.dataset.view = 'chart'; });
+
+  // 宫位选中（只用选中环演示点击）
+  app.querySelectorAll('.cell').forEach(function(c){
+    c.addEventListener('click', function(){
+      app.querySelectorAll('.cell').forEach(function(x){ x.classList.remove('on'); x.setAttribute('aria-pressed','false'); });
+      c.classList.add('on'); c.setAttribute('aria-pressed','true');
+      var name = c.querySelector('.pname').childNodes[0].textContent.trim();
+      app.querySelector('.inspector .inshead .t').textContent = name;
+      var gz = c.querySelector('.gz').textContent;
+      app.querySelector('.inspector .inshead .gz').textContent = gz;
+    });
+  });
+
+  relayout();
+})();
+</script>
+</body>
+</html>

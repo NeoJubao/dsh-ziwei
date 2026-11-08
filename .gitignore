@@ -1,0 +1,30 @@
+# 依赖与构建产物
+node_modules/
+dist/
+*.tgz
+
+# 运行时诊断日志（插件排障用，绝不进包/进仓库）
+host-diag.log
+interpret-diag.log
+*.log
+
+# 本机参考数据（第三方包副本，用于生成数据表；开源仓库不放）
+.ref/
+src/_legacy*
+
+# 编辑器 / 系统
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# 本地发布凭据（不要提交任何 token）
+.env
+.env.*
+.npmrc.local
+
+# 本机审计底稿（含私人路径与内部判断，不入公开仓库）
+audit/
+# 可选的来源产品 runner（本地差分用，绝不入库）
+.ziwei-runner/

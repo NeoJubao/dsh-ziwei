@@ -1,0 +1,57 @@
+name: 功能建议
+description: 想新增或改进排盘、面板、解读的能力
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        请先说明要解决的**真实问题**，再谈方案。本项目范围有意保持很小：
+        只做「确定性排盘 + 界面内解读」，不做历法推算服务、不做在线运势/付费产品。
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 要解决的问题
+      description: 现在做哪一步很别扭 / 做不到？谁在什么场景下遇到？
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 期望的做法
+      description: 你希望看到什么行为？可以是交互描述或草图。
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 考虑过的替代方案（可选）
+    validations:
+      required: false
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: 涉及范围
+      options:
+        - 排盘引擎 / 数据口径
+        - 面板界面（布局 / 交互 / 主题）
+        - 解读与报告
+        - 工具与提示词
+        - 文档 / 安装 / 发布
+        - 其他
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: 补充确认
+      options:
+        - label: 我愿意提交 PR 实现（若不确定是否符合范围，可先在 issue 里讨论）
+          required: false
+        - label: 这涉及 UI 改动，我会按 CONTRIBUTING 的要求附浅色/深色截图或录屏
+          required: false

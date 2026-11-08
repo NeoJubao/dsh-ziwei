@@ -1,0 +1,117 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  DSH_TELEMETRY_DISABLED: '1'
+  # 差分测试已随仓库带 fixture（verify/fixtures/paipan-reference.json），无 runner 时
+  # 自动走 fixture，不会跳过。这里设 ZIWEI_ALLOW_SKIP=1 只影响 verify-tools：干净 runner
+  # 上没有本机 DSH 的真实 dsh-tools，它按既有退出码 3 语义标「已跳过，未验证」，
+  # 而不是伪造通过。详见 CONTRIBUTING.md。
+  ZIWEI_ALLOW_SKIP: '1'
+
+jobs:
+  # 1) 纯 Node 门槛：快、零依赖、可跑满三平台
+  verify:
+    name: verify / ${{ matrix.os }} / node ${{ matrix.node }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        node: [22, 24]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      # 本插件零运行期依赖：不需要 npm ci / npm install。
+      - name: Build
+        run: node build.mjs
+
+      # 构建产物（client.js / engine-built.js）已提交：源码改了却没重建，必须红。
+      # 只在 Linux 上查，避免 Windows/macOS 检出时的行尾差异造成误报
+      # （仓库用 .gitattributes 统一 LF；这里仍是双保险）。
+      - name: Build must be reproducible
+        if: runner.os == 'Linux'
+        run: git diff --exit-code -- client.js engine-built.js
+
+      - name: Verify all (kernel / host / routes / SSE / pack)
+        run: node verify/all.mjs
+
+      - name: Release pack plan (dry run)
+        run: node scripts/release-pack.mjs --dry
+
+  # 2) 包形态：npm 实际会带哪些文件（运行时缺文件是历史 P0）
+  package:
+    name: npm package shape
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Build
+        run: node build.mjs
+
+      - name: Package completeness (npm pack --dry-run)
+        run: node verify/pack.mjs
+
+      # 只做发布计划：不写 dist/、不执行 npm pack、不发布。
+      - name: Release candidate plan (dry run)
+        run: node scripts/release-pack.mjs --dry
+
+  # 3) 可选：真实 DSH 安装 / 兼容矩阵。默认不跑 —— 在仓库 Variables 里设置
+  #    ENABLE_DSH_COMPAT=1 才启用。原因：要从 npm 安装 DSH CLI（DSH 是 preview，
+  #    版本随时变动），属于「发布前人工开启」的门槛，不适合每个 PR 都跑。
+  #    命令若有变化，以 DSH 官方 CLI 文档为准。
+  compat:
+    name: compat / dsh ${{ matrix.dsh }}
+    if: vars.ENABLE_DSH_COMPAT == '1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        dsh: ['0.2.1-rc.5', '0.2.2-rc.1']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install pinned DSH CLI
+        run: npm install -g @deepseek-ai/dsh@${{ matrix.dsh }}
+
+      - name: Install plugin into a throwaway profile and assert the bundle layer
+        run: |
+          dsh plugin --profile compat add "$GITHUB_WORKSPACE"
+          dsh --profile compat --dump-config | grep -F "# == $(node -p "require('./package.json').name")"
+
+      - name: Boot smoke test (config dump only)
+        run: timeout 60 dsh --profile compat --dump-config > /dev/null

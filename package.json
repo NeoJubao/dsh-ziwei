@@ -1,0 +1,77 @@
+{
+  "name": "@local/ziwei-workbench",
+  "version": "1.2.0",
+  "private": true,
+  "type": "module",
+  "description": "紫微斗数排盘工作台（DSH 插件）：确定性排盘、十二宫/四化/大限与面板内解读。A Zi Wei Dou Shu (Purple Star Astrology) workbench plugin for DeepSeek Harness.",
+  "license": "MIT",
+  "author": {
+    "name": "Neo",
+    "url": "https://github.com/NeoJubao"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NeoJubao/ziwei-workbench.git"
+  },
+  "homepage": "https://github.com/NeoJubao/ziwei-workbench#readme",
+  "bugs": {
+    "url": "https://github.com/NeoJubao/ziwei-workbench/issues"
+  },
+  "keywords": [
+    "dsh-plugin",
+    "dsh",
+    "deepseek-harness",
+    "ziwei",
+    "紫微斗数",
+    "astrology",
+    "ziwei-doushu"
+  ],
+  "engines": {
+    "node": ">=22.0.0",
+    "dsh": ">=0.2.1-rc.5 <0.3.0"
+  },
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "engine-built.js",
+    "build.mjs",
+    "src/engine-core.js",
+    "src/lunar-data.js",
+    "src/ziwei-core.js",
+    "locale/*.json",
+    "icon.svg",
+    "verify/*.mjs",
+    "verify/fixtures/*.json",
+    "THIRD_PARTY_NOTICES.md",
+    "scripts/audit-ui.mjs",
+    "scripts/vendor-lunar-data.mjs",
+    "docs/ui-contract/audit-baseline.json",
+    "docs/ui-contract/*.md"
+  ],
+  "icon": "./icon.svg",
+  "scripts": {
+    "build": "node build.mjs",
+    "verify": "node verify/all.mjs"
+  },
+  "dsh": {
+    "manifestVersion": 1,
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-layout",
+        "@deepseek-ai/dsh-client-ui-sidebar"
+      ]
+    }
+  }
+}

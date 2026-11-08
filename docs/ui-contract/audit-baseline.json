@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "generatedAt": "2026-11-08T12:14:47.100Z",
+  "note": "ui-contract 棘轮基线：只许下降。由 node scripts/audit-ui.mjs --update-baseline 生成。",
+  "source": {
+    "srcLines": 2694,
+    "srcBytes": 154187
+  },
+  "counts": {
+    "C1": 13,
+    "C2": 41,
+    "C3": 103,
+    "C4": 16,
+    "C15": 0,
+    "C16": 53
+  }
+}

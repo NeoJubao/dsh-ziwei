@@ -1,0 +1,87 @@
+name: Release
+
+# 默认不会发布任何东西。本工作流只支持手动触发，并且必须同时满足以下条件：
+#   1) 手动触发时输入 confirm = PUBLISH；
+#   2) 仓库 Variables 里设置 RELEASE_ENABLED = '1'；
+#   3) HEAD 上存在与发布副本版本一致的 v<version> 标签；
+#   4) GitHub Environment "npm-publish" 的审批通过（建议配置 Required reviewers）；
+#   5) npm 包已配置 Trusted Publishing，指向 <owner>/<repo> 的 release.yml。
+# 逐条前置与开通步骤见 docs/PUBLISHING.md。少任何一条，本工作流都不会执行发布。
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: '确认发布：请输入 PUBLISH（其他值会直接跳过）'
+        required: true
+        type: string
+      npm_tag:
+        description: 'npm dist-tag（默认 latest；预发可用 next/alpha）'
+        required: false
+        default: latest
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: publish to npm (OIDC + provenance)
+    if: inputs.confirm == 'PUBLISH' && vars.RELEASE_ENABLED == '1'
+    runs-on: ubuntu-latest
+    environment: npm-publish
+    timeout-minutes: 20
+    permissions:
+      id-token: write   # npm Trusted Publishing（OIDC，无需长期 token）
+      contents: write   # 创建 GitHub Release
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Build
+        run: node build.mjs
+
+      - name: Verify all
+        run: node verify/all.mjs
+        env:
+          # 差分走仓库内 fixture（不跳过）；该 env 只让 verify-tools 在无本机 DSH 的
+          # runner 上按退出码 3 标「已跳过」。
+          ZIWEI_ALLOW_SKIP: '1'
+
+      # 生成 dist/ 发布副本（改名、private=false、access=public、同步 patch/client id），
+      # 并执行 npm pack 得到 tarball。脚本自身不会发布。
+      - name: Build release candidate (dist/)
+        id: pack
+        run: |
+          node scripts/release-pack.mjs
+          node -e "const fs=require('fs');const names=fs.readdirSync('dist').filter((n)=>fs.existsSync('dist/'+n+'/package.json'));if(names.length!==1)throw new Error('dist 下应恰有一个发布目录，实际: '+names.join(','));fs.appendFileSync(process.env.GITHUB_OUTPUT,'name='+names[0]+'\n')"
+
+      - name: Require v<version> tag on HEAD
+        env:
+          PKG: ${{ steps.pack.outputs.name }}
+        run: |
+          VERSION=$(node -p "require('./dist/' + process.env.PKG + '/package.json').version")
+          echo "release version: $VERSION"
+          git tag --points-at HEAD | grep -qx "v$VERSION"
+
+      # 发布的是 dist/ 发布副本，不是仓库根目录（根目录是 private + @local 名）。
+      - name: Publish with provenance (no long-lived token)
+        env:
+          PKG: ${{ steps.pack.outputs.name }}
+        run: npm publish "./dist/$PKG" --provenance --access public --tag "${{ inputs.npm_tag }}"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PKG: ${{ steps.pack.outputs.name }}
+        run: |
+          VERSION=$(node -p "require('./dist/' + process.env.PKG + '/package.json').version")
+          gh release create "v$VERSION" "dist/$PKG"/*.tgz --generate-notes --title "v$VERSION"
