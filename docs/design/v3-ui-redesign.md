@@ -120,7 +120,7 @@
 | v2（layout.md） | v3 | 说明 |
 |---|---|---|
 | `HEAD` | `APP_BAR` | 改名；去掉与命主卡重复的五行局 chip；左栏开关并入 |
-| `SIDE_FORM` / `SIDE_PROFILE` / `SIDE_LIBRARY` | `CONTEXT_RAIL` | 三合一 + 子槽；窄档整栏折叠 |
+| `SIDE_PROFILE` / `SIDE_PATTERNS` / `SIDE_FORM` / `SIDE_LIBRARY` | `CONTEXT_RAIL` | 四合一 + 子槽；阅读优先（有盘时摘要在上），窄档整栏折叠 |
 | `TABBAR` | `TIME_BAR` | 语义升级；杂曜/专注/工具并入 |
 | `BOARD` | `CHART_STAGE` | 改名；保留盘面本体 |
 | `INSPECTOR` | `INSPECTOR` | 保留；新增运限四化段 |
@@ -897,7 +897,7 @@ meta: {
 | 格局/词典移出主 tab | ✅ TimeBar 右侧工具入口 + `TOOLPAGE` + 「返回盘面」 |
 | 左栏可收起、窄屏贴底行动条 | ✅ `data-rail=open/closed`、`aria-expanded/aria-controls`、`.zp-bottombar`（窄屏有盘时） |
 | 唯一主行动 | ✅ 有盘后「排 盘」降为次按钮；HEAD 只保留「紫微师解读」 |
-| 区域标记 | ✅ `data-region` **13/13**：HEAD / SIDE_FORM / SIDE_PROFILE / SIDE_PATTERNS / SIDE_LIBRARY / TIMEBAR / BOARD / INSPECTOR / TOOLPAGE / EMPTY / DRAWER / PREVIEW / MODAL / BOTTOMBAR |
+| 区域标记 | ✅ `data-region` **14/14**：HEAD / SIDE_PROFILE / SIDE_PATTERNS / SIDE_FORM / SIDE_LIBRARY / TIMEBAR / BOARD / INSPECTOR / TOOLPAGE / EMPTY / DRAWER / PREVIEW / MODAL / BOTTOMBAR |
 | 契约同步 | ✅ `docs/ui-contract/layout.md`：TABBAR → TIMEBAR、新增 BOTTOMBAR、13 区、页型矩阵与 §11 as-built 更新 |
 | 解读联动 | ✅ 保留 `decadalFocus`，新增 `yearlyFocus`；`buildRequest` 增加流年聚焦句；大限/流年意图互斥，避免误判 |
 | 防回退 | ✅ `verify/verify.mjs` 新增 8 条 v3 断言；全量 **225** 项通过 |

@@ -355,6 +355,17 @@ ok('v1.3.3: localStorage 旧默认一次性迁移到节气',
   /ziwei-pro\.formV133/.test(client) && /monthDivide === 'normal'/.test(client) &&
   /JSON\.stringify\(init\)/.test(client));
 
+/* v1.5.1: 左栏阅读顺序 = 命主信息 → 格局摘要 → 排盘输入 → 命盘库 */
+{
+  const iSummary = client.indexOf('h(Summary, { chart');
+  const iPatterns = client.indexOf('h(PatternsSummary,');
+  const iInput = client.indexOf('h(InputForm, {');
+  const iLib = client.indexOf('h(Library, {');
+  ok('v1.5.1: 左栏顺序 命主信息 → 格局摘要 → 排盘输入 → 命盘库',
+    iSummary > 0 && iSummary < iPatterns && iPatterns < iInput && iInput < iLib,
+    `${iSummary}/${iPatterns}/${iInput}/${iLib}`);
+}
+
 /* v1.5.0: 左栏格局摘要（命主信息下方）+ SIDE_PATTERNS 区域 */
 ok('v1.5.0: 左栏格局摘要接通 SIDE_PATTERNS', /data-region': 'SIDE_PATTERNS'/.test(client) &&
   /function PatternsSummary/.test(client) && /h\(PatternsSummary/.test(client));

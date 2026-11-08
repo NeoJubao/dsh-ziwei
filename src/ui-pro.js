@@ -2497,13 +2497,15 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
               }, h(Icon, { name: 'settings' })))),
           h('div', { className: 'zp-body' },
             h('div', { className: 'zp-side', id: 'zp-rail' },
+              /* 阅读优先：有盘时 命主信息 → 格局摘要 → 排盘输入 → 命盘库；
+                 无盘时 Summary/Patterns 不渲染，输入自然回到顶部。 */
+              chart ? h(Summary, { chart: chart, t: t }) : null,
+              chart ? h(PatternsSummary, { patterns: patterns, t: t, onOpen: function () { setView('patterns'); } }) : null,
               h(InputForm, {
                 form: form, setForm: setForm, t: t, onCompute: compute, error: error, hasChart: !!chart,
                 collapsed: formCollapsed,
                 onToggleCollapse: function () { setFormCollapsed(!formCollapsed); }
               }),
-              chart ? h(Summary, { chart: chart, t: t }) : null,
-              chart ? h(PatternsSummary, { patterns: patterns, t: t, onOpen: function () { setView('patterns'); } }) : null,
               h(Library, { items: library, current: currentLibId, t: t, onSave: saveChart, onLoad: loadSaved, onDelete: deleteSaved })),
             h('div', { className: 'zp-stage', tabIndex: chart ? 0 : -1, onKeyDown: onStageKeyDown },
               timebar,

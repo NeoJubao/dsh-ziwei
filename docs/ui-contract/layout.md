@@ -102,9 +102,9 @@ Q3 它属于哪个切面？
 | Region | 职责（Responsibility） | 对应选择器 / JSX 位置 | 允许放（Must hold） | 禁止放（Must not hold） |
 |---|---|---|---|---|
 | `HEAD` | 全局页头：品牌、当前命主上下文、唯一主行动、全局入口 | `.zp-head`（CSS 238 / JSX 2153） | 页面标题、命主摘要 chip、返回会话出口（`.zp-exit`，HEAD 的第一个控件）、复制/写入会话、唯一主行动「紫微师解读」、设置入口 | 表单字段、设置项正文、第二个 brand 填充按钮、危险操作（删除/清空）、命盘库管理 |
-| `SIDE_FORM` | 生辰输入与排盘 | `.zp-input-card`（CSS 279 / JSX 1109） | 11 个字段、历法/性别分段、流派折叠 `<details>`、排盘按钮、错误条 | 已保存盘列表、解读入口、命主摘要、命盘库 |
 | `SIDE_PROFILE` | 当前命盘只读摘要 | `.zp-summary-card`（CSS 281 / JSX 1132） | 四柱、生肖/星座、命宫身宫、五行局、命主身主、起运、真太阳时、四化 strip | 任何可编辑控件、任何按钮、已保存盘列表 |
 | `SIDE_PATTERNS` | 命主信息下方的格局摘要（只读） | `.zp-patterns-card`（v1.5.0） | 格局名、等级、一句话说明、查看全部入口（最多 4 条） | 完整格局正文、可编辑控件、盘面内容 |
+| `SIDE_FORM` | 生辰输入与排盘 | `.zp-input-card`（CSS 279 / JSX 1109） | 11 个字段、历法/性别分段、流派折叠 `<details>`、排盘按钮、错误条 | 已保存盘列表、解读入口、命主摘要、命盘库 |
 | `SIDE_LIBRARY` | 命盘资产管理 | `.zp-lib-card`（CSS 282 / JSX 1160） | 保存输入、盘列表（每项最多 1 个删除按钮）、当前选中态 | 编辑盘名（保存时输入）、批量操作、导入导出、解读正文 |
 | `TIMEBAR` | 时间维度切换、运限导航、工具入口与视图级开关 | `.zp-timebar` / `.zp-tabs` / `.zp-time-nav`（v3） | 本命/大限/流年 3 个模式页签；大限「‹ 段位 干支 宫位 › + 回到当前 + 下拉」；流年「‹ 年份 › + 今年」；格局/词典工具入口；杂曜/专注开关 | 状态告警、主行动、设置、盘面内容、第二套导航条、把十二大限列表或年份输入堆在盘面上方 |
 | `BOTTOMBAR` | 窄屏（`data-w="narrow"`）贴底行动条 | `.zp-bottombar`（v3，仅窄屏有盘时渲染） | 「生辰」（展开左栏并回到顶部）、唯一主行动「紫微师解读」 | 第三个动作、设置、复制/写入会话（这些在 HEAD 或 TIMEBAR）、盘面内容 |
@@ -395,7 +395,7 @@ wide（详情并列）
 
 | # | 契约要求 | 现状 | 处置 |
 |---|---|---|---|
-| A1 | `data-region` 14 处与 §2 一一对应 | v1.5.0 已接 **14/14**（HEAD/SIDE_FORM/SIDE_PROFILE/SIDE_PATTERNS/SIDE_LIBRARY/TIMEBAR/BOARD/INSPECTOR/TOOLPAGE/EMPTY/DRAWER/PREVIEW/MODAL/BOTTOMBAR） | 已接线；改区域名须同步本文与源码 |
+| A1 | `data-region` 14 处与 §2 一一对应 | v1.5.0 已接 **14/14**（HEAD/SIDE_PROFILE/SIDE_PATTERNS/SIDE_FORM/SIDE_LIBRARY/TIMEBAR/BOARD/INSPECTOR/TOOLPAGE/EMPTY/DRAWER/PREVIEW/MODAL/BOTTOMBAR） | 已接线；改区域名须同步本文与源码 |
 | A2 | `RegionId` 联合类型 | 无 `src/ui-region.js` | 待接线 |
 | A3 | `COMPACT`/`MID`/`WIDE` 由参数公式计算 | 仍为字面量 `908`/`1072`/`1394`（与公式一致）；compact 档为 v3.1 新增 | P1-5 待做；audit C13 已对账 |
 | A4 | `BOARD_MIN 560` + 盘面横向滚动 | `.zp-board` 只有 `max-width:720`，无 `min-width` | P0-3 待做 |
