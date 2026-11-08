@@ -9,6 +9,19 @@
 > 本轮开源源就绪改动先记在 `Unreleased`；具体发版版本号由维护者按 SemVer 决定
 > （`package.json` 当前仍为 `1.2.0`，本次不擅自升版）。
 
+## [1.3.1] — 2026-11-08
+
+首个 npm 发布版本。
+
+### Added
+
+- 作者联系邮箱 `neo2025new@gmail.com` 写入 README / SECURITY / CODE_OF_CONDUCT / package.json / Issue 模板。
+- README 增加界面预览（真实组件树本地渲染，非占位图）。
+
+### Changed
+
+- 仓库与 npm 名称统一为 `dsh-ziwei`；GitHub release v1.3.0 为首个公开 tag。
+
 ## [1.3.0] — 2026-11-08
 
 > 首个公开版本（此前 1.2.0 为私有开发版）。
