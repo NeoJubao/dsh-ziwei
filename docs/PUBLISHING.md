@@ -17,8 +17,9 @@
 
 以下 7 项**不由脚本代替判断**。工程侧已完成项用 `[x]`，需要人确认的保持 `[ ]`：
 
-- [ ] **真机视觉验收**：按 `docs/design/v3-review-checklist.md` 在真实 DSH 宿主走查浅/深色、
-      darwin 侧栏折叠、窄屏、键盘；本机渲染 harness 的截图不能替代这一步。
+- [ ] **真机视觉验收（公开前唯一未完成项）**：按 `docs/design/v3-review-checklist.md` 在真实 DSH
+      宿主走查浅/深色、darwin 侧栏折叠、窄屏、键盘；本机渲染 harness 的截图不能替代这一步。
+      仓库已公开，但**界面改动尚未经真机确认**，发现的问题用 patch 版本修。
 - [x] **内容再分发授权**：2026-11-08 作者确认「紫微师 / 金聚」为自有内容，可随 MIT 仓库分发
       （人设 / 九诀 / 鲲鹏 14 部分 / 红线，见 `src/ziwei-core.js` 与 `index.js` 系统提示词）。
 - [x] **差分 fixture 来源确认**：`verify/fixtures/paipan-reference.json` 由自有「紫微师」产品 runner
@@ -28,8 +29,8 @@
 - [x] **仓库元信息确认**：owner `NeoJubao`，仓库 `https://github.com/NeoJubao/dsh-ziwei`
       （private）；发布名默认 `dsh-ziwei`；版权人 `Neo / 2026`。
       本机 `gh api user` 实际登录为 `NeoJubao`（keyring 标签显示旧名，属显示问题）。
-- [ ] **联系方式**：在 GitHub 仓库 Settings → Code security 手动开启 Private vulnerability reporting /
-      Security Advisories（REST API 对 private repo 返回 404，需网页操作）；文档已不再留占位邮箱。
+- [x] **联系方式**：Private vulnerability reporting 已启用（`GET repos/.../private-vulnerability-reporting`
+      返回 `{"enabled":true}`）；文档不再留占位邮箱。
 - [x] **干净环境安装冒烟（配置层）**：2026-11-08 用 `DSH_HOME=/tmp/dsh-smoke-home` 新建 `smoke` profile，
       对发布 tarball 执行 `dsh plugin --profile smoke add <tgz>`，`dsh --profile smoke --dump-config`
       已出现 `# == dsh-ziwei` 与 bundle 行；**未做 GUI 启动/点击**。
@@ -39,7 +40,10 @@
 
 - 本地 `git init -b main`，首次提交 `75ec44f`；`audit/`、`dist/`、`*.log`、`.ref/`、
   `.ziwei-runner/` 均被 gitignore，未入库（62 文件 / 约 2.35 万行）。
-- 已创建 **private** 仓库并推送 `main`：`https://github.com/NeoJubao/dsh-ziwei`。
+- 仓库已从 private 转为 **public**：`https://github.com/NeoJubao/dsh-ziwei`（2026-11-08）。
+- 公开版本 **v1.3.0**（首个公开版）：tag `v1.3.0`，GitHub Release 含 tarball 附件。
+- **npm 尚未发布**：本机 `npm whoami` 返回 401（未登录/无有效 token）；需要维护者执行
+  `npm login` 后再 `npm publish dist/dsh-ziwei/dsh-ziwei-1.3.0.tgz --access public`。
 - **CI 已绿**：三平台 × Node 22/24（run `42480774977`，workflow `ci.yml`）；
   Windows 的两处兼容问题（动态 import 的 file:// URL、npm.cmd 调用）已在主分支修复。
 - 已加 topics：`dsh-plugin`、`dsh`、`deepseek-harness`、`ziwei`、`ziwei-doushu`。
