@@ -5,6 +5,7 @@
 
 [![CI](https://github.com/NeoJubao/dsh-ziwei/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/NeoJubao/dsh-ziwei/actions/workflows/ci.yml)
 ![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)
+[![npm](https://img.shields.io/npm/v/dsh-ziwei?logo=npm)](https://www.npmjs.com/package/dsh-ziwei)
 ![DSH plugin](https://img.shields.io/badge/DSH-plugin-4b5563)
 [![GitHub](https://img.shields.io/badge/GitHub-NeoJubao%2Fdsh--ziwei-181717?logo=github)](https://github.com/NeoJubao/dsh-ziwei)
 ![DSH plugin](https://img.shields.io/badge/DSH-plugin-4b5563)
@@ -60,8 +61,11 @@ official DeepSeek product.
 和排障都在 **[docs/INSTALL.md](docs/INSTALL.md)**。最短路径：
 
 ```bash
+# 从 npm 安装（推荐给普通用户）
+dash plugin --profile <profile> add dsh-ziwei@1.3.1
+
 # 开发者：把本地插件目录装进一个 profile（也可在 DSH Web Plugins 页添加）
-dsh plugin --profile <profile> add "/绝对路径/到/ziwei-workbench"
+dash plugin --profile <profile> add "/绝对路径/到/ziwei-workbench"
 ```
 
 > **Host 半（工具 / 提示词 / 路由）装完或更新后必须手动重启 DSH**；只改浏览器半

@@ -82,7 +82,7 @@ plugin_manager({
 ### 3.1 从 npm 安装
 
 ```bash
-dsh plugin --profile <profile> add dsh-ziwei@<version>
+dsh plugin --profile <profile> add dsh-ziwei@1.3.1
 ```
 
 或在 DSH Web **Settings → Plugins → Add plugin** 里输入包名安装。装完**手动重启 DSH**，
