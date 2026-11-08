@@ -43,6 +43,18 @@ ok('黄金用例 4/4 断言通过', golden.ok === true, JSON.stringify(golden.fa
 ok('黄金用例: 真太阳时 08:37 / 辰时 / 索引 4',
   golden.actual && golden.actual.solarTime === '08:37' && golden.actual.timeName === '辰时' && golden.actual.timeIndex === 4,
   JSON.stringify(golden.actual));
+/* 月柱默认口径：1993-07-17 18:00 男，农历五月廿八（午月），节气已过小暑（未月）。
+   八字通行口径应显示 己未；「农历月」选项保留 戊午。命宫/星曜不随该设置变化。 */
+{
+  const base = { calendar: 'solar', year: 1993, month: 7, day: 17, hour: 18, minute: 0, gender: 'male' };
+  const cDefault = engine.computeChart(base);
+  const cLunar = engine.computeChart(Object.assign({}, base, { settings: { monthDivide: 'normal' } }));
+  ok('月柱默认按节气: 1993-07-17 18:00 → 己未', cDefault.pillars && cDefault.pillars.monthly === '己未', cDefault.pillars && cDefault.pillars.monthly);
+  ok('月柱可选农历月: 同一生辰 → 戊午', cLunar.pillars && cLunar.pillars.monthly === '戊午', cLunar.pillars && cLunar.pillars.monthly);
+  ok('月柱口径不影响命宫/星曜', cDefault.soulIndex === cLunar.soulIndex &&
+    JSON.stringify(cDefault.palaces.map((p) => p.major.map((x) => x.name))) ===
+    JSON.stringify(cLunar.palaces.map((p) => p.major.map((x) => x.name))));
+}
 ok('黄金用例: 命宫丑 · 太阳太阴 · 木三局',
   golden.actual && golden.actual.soulBranch === '丑' && golden.actual.soulMajor.join(',') === '太阳,太阴' && golden.actual.fiveElementsClass === '木三局');
 
@@ -392,7 +404,7 @@ ok('engine-built.js 与内核解耦（不含 UI）', !/__ModuleLoader__/.test(re
 ok('autoOpen 默认关闭（不劫持主面板；用户可在设置里开启）',
   /localStorage\.getItem\('ziwei-pro\.autopen'\) === '1'/.test(client) && !/getItem\('ziwei-pro\.autopen'\) !== '0'/.test(client));
 ok('面板默认 dayDivide = current（与紫微师口径一致）',
-  /settings: \{ yearDivide: 'normal', monthDivide: 'normal', dayDivide: 'current', fixLeap: true \}/.test(client));
+  /settings: \{ yearDivide: 'normal', monthDivide: 'exact', dayDivide: 'current', fixLeap: true \}/.test(client));
 
 /* 引擎默认口径必须进产物 */
 ok('引擎默认 dayDivide = current', /dayDivide: 'current'/.test(readFileSync(join(root, 'engine-built.js'), 'utf8')));

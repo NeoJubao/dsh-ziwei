@@ -495,7 +495,8 @@ function __ziweiBootstrapKernel() {
   function computeChart(input) {
     var settings = {
       yearDivide: 'normal',
-      monthDivide: 'normal',
+      /* 四柱月柱默认按节气（八字通行口径）；命宫/星曜仍按农历月，不受此设置影响 */
+      monthDivide: 'exact',
       /* 晚子时安星口径: 'current' = 仍按当日（紫微师/独立版 iztro runner 的口径），
          'forward' = 换到次日。默认取 'current'，保证同一生辰在这里与紫微师
          来源产品排出同一张盘（约 1/13 的出生时间落在 23 点段）。 */
@@ -1706,6 +1707,7 @@ window.__ModuleLoader__.load({
         compute: '排 盘',
         settings: '排盘设置', yearDivide: '年柱', ydNormal: '正月初一', ydExact: '立春',
         monthDivide: '月柱', mdNormal: '农历月', mdExact: '节气',
+        monthDivideHint: '四柱月柱默认按节气；命宫/星曜仍按农历月，不受此处影响。',
         dayDivide: '晚子时', ddForward: '按次日', ddCurrent: '按当日',
         fixLeap: '闰月', flTrue: '下半月按下月', flFalse: '整月按本月',
         summaryTitle: '命主信息', solarLabel: '公历', lunarLabel: '农历',
@@ -1774,6 +1776,7 @@ window.__ModuleLoader__.load({
         compute: 'Draw Chart',
         settings: 'Options', yearDivide: 'Year', ydNormal: 'LNY', ydExact: 'Lichun',
         monthDivide: 'Month', mdNormal: 'Lunar', mdExact: 'Terms',
+        monthDivideHint: 'Month pillar uses solar terms by default; palaces and stars still use the lunar month.',
         dayDivide: 'Late Rat', ddForward: 'Next Day', ddCurrent: 'Same Day',
         fixLeap: 'Leap', flTrue: '2nd half next', flFalse: 'whole month',
         summaryTitle: 'Profile', solarLabel: 'Solar', lunarLabel: 'Lunar',
@@ -2869,7 +2872,8 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
                 value: f.settings.monthDivide,
                 options: [{ value: 'normal', label: t('mdNormal') }, { value: 'exact', label: t('mdExact') }],
                 onChange: function (v) { setSetting('monthDivide', v); }
-              })),
+              }),
+              h('div', { className: 'zp-settings-hint' }, t('monthDivideHint'))),
             h('div', { className: 'zp-field' },
               h('label', { className: 'zp-field-label' }, t('dayDivide')),
               h(Seg, {
@@ -4163,7 +4167,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       isLeap: false, hour: 15, minute: 30, gender: 'male',
       longitude: '', place: '', occupation: '',
       /* dayDivide 默认 current（按当日），与紫微师/独立版 iztro runner 一致 */
-      settings: { yearDivide: 'normal', monthDivide: 'normal', dayDivide: 'current', fixLeap: true }
+      settings: { yearDivide: 'normal', monthDivide: 'exact', dayDivide: 'current', fixLeap: true }
     };
 
     /* ---------------- 错误边界 ---------------- */

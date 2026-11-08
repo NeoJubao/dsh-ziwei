@@ -489,7 +489,8 @@
   function computeChart(input) {
     var settings = {
       yearDivide: 'normal',
-      monthDivide: 'normal',
+      /* 四柱月柱默认按节气（八字通行口径）；命宫/星曜仍按农历月，不受此设置影响 */
+      monthDivide: 'exact',
       /* 晚子时安星口径: 'current' = 仍按当日（紫微师/独立版 iztro runner 的口径），
          'forward' = 换到次日。默认取 'current'，保证同一生辰在这里与紫微师
          来源产品排出同一张盘（约 1/13 的出生时间落在 23 点段）。 */
