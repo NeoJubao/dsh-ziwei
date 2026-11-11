@@ -406,6 +406,15 @@ ok('v3: 格局/词典移到 TimeBar 工具区，有返回盘面出口',
   /openPatterns/.test(client) && /openDict/.test(client) && /backToBoard/.test(client));
 ok('v3: 有盘时排盘降级为次按钮（唯一主行动 = 紫微师解读）',
   /className: 'zp-btn' \+ \(props\.hasChart \? '' : ' zp-btn-primary'\)/.test(client));
+/* v3.2：抽屉不再有「只改下一次请求」的模式条；空态/回答后都是直接发起动作 */
+ok('v3.2: 抽屉去掉速览/鲲鹏模式条（避免点了没反应）',
+  !/modeBrief/.test(client) && !/modeReport/.test(client) && !/zp-ai-mode/.test(client) && !/zp-suggest/.test(client));
+ok('v3.2: 空态两个动作 + 回答后「完整报告」动作都存在',
+  /aiStartBrief/.test(client) && /aiStartReport/.test(client) && /aiFullReport/.test(client) && /showFullReport/.test(client));
+ok('v3.2: 首次打开抽屉自动发起一次速览（每张盘只一次）',
+  /autoStartedRef/.test(client) && /runInterpretation\('', 'brief'\)/.test(client));
+ok('v3.2: 换盘清空旧解读（不串盘）',
+  /换盘 = 换解读对象/.test(client) && /autoStartedRef\.current = false/.test(client));
 ok('client 大限默认停在当前段（不是第 0 段）且流年选择进 payload',
   /function currentDecadeIndex|var currentDecadeIndex = function/.test(client) && /setSelDecadal\(currentDecadeIndex\(result\.chart\)\)/.test(client) && /yearlyFocus:/.test(client));
 ok('client 问答 payload 带完整上下文与当前年龄（大限定位）',
@@ -540,6 +549,43 @@ ok('chrome 避让不用魔法数字写死（顶部偏移只走 --dsh-frame-top-c
     injections.includes('sidebar.panellist') && injections.includes('main'), injections.join(','));
   const panelReg = registrations.filter((r) => r && !r.id).map((r) => r.key || r.name);
   ok('client 主面板 key=ziwei', panelReg.includes('ziwei'), JSON.stringify(panelReg));
+
+  /* ---- 精装报告渲染（v3.2：表格 / <br> / 分隔线 / 打印分页） ---- */
+  const reportApi = win.ZWReport;
+  ok('client 暴露精装报告渲染（window.ZWReport）',
+    !!reportApi && typeof reportApi.mdToHtml === 'function' && typeof reportApi.buildReportHtml === 'function');
+  const mdTable = [
+    '| 宫位 | 主星 | 备注 |',
+    '| :--- | :---: | ---: |',
+    '| 命宫 | 天机[庙]·**化权** | 灯芯<br>谋略 |',
+    '| 夫妻 | 太阳[不] | — |'
+  ].join('\n');
+  const htmlTable = reportApi ? reportApi.mdToHtml(mdTable) : '';
+  ok('报告表格 → <table>（表头 / 三向对齐 / 单元格 <br> / 行内强调）',
+    /<table class="md-table">/.test(htmlTable) &&
+    /<th style="text-align:left">宫位<\/th>/.test(htmlTable) &&
+    /<th style="text-align:center">主星<\/th>/.test(htmlTable) &&
+    /<th style="text-align:right">备注<\/th>/.test(htmlTable) &&
+    /天机\[庙\]·<strong>化权<\/strong>/.test(htmlTable) &&
+    /灯芯<br>谋略/.test(htmlTable) &&
+    !/\|/.test(htmlTable.replace(/<[^>]+>/g, '')),
+    htmlTable.slice(0, 200));
+  const chatTable = reportApi ? reportApi.mdToChatHtml(mdTable) : '';
+  ok('抽屉回答里的管道表格也渲染（zp-md-table，不露管道符）',
+    /<table class="zp-md-table">/.test(chatTable) &&
+    /<th style="text-align:left">宫位<\/th>/.test(chatTable) &&
+    /灯芯<br>谋略/.test(chatTable) &&
+    !/\|/.test(chatTable.replace(/<[^>]+>/g, '')),
+    chatTable.slice(0, 200));
+  const htmlMixed = reportApi ? reportApi.mdToHtml('## 标题\n\n---\n\n正文**加粗**\n\n- 甲\n- 乙') : '';
+  ok('报告标题 / 分隔线 / 列表渲染',
+    /<h3>标题<\/h3>/.test(htmlMixed) && /<hr>/.test(htmlMixed) &&
+    /<strong>加粗<\/strong>/.test(htmlMixed) && /<ul>\s*<li>甲<\/li>\s*<li>乙<\/li>\s*<\/ul>/.test(htmlMixed),
+    htmlMixed.slice(0, 200));
+  const htmlDoc = reportApi ? reportApi.buildReportHtml({ chart: ch, name: '测试', gender: 'male' }, mdTable) : '';
+  ok('精装报告壳含表格样式、<table> 与打印分页保护',
+    /\.md-table\{/.test(htmlDoc) && /<table class="md-table">/.test(htmlDoc) &&
+    /page-break-inside:avoid/.test(htmlDoc) && /<\/html>/.test(htmlDoc));
 
   /* H3 动态: 布局服务可用时, 主面板必须真的能通过官方 API 回到 Conversation。
    * 用第二次 apply 注入一个假 layout, 从 main 注册项里取出 ProApp 的 actions 调用。 */

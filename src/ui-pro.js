@@ -49,14 +49,11 @@ window.__ModuleLoader__.load({
         emptyCta: '用示例生辰先排一盘', defaultName: '命主',
         oppPalace: '对宫', triPalace: '三合', detailTitle: '宫位详情',
         mutagenTitle: '四化', noMutagen: '—',
-        ai: '紫微师解读', aiTitle: '紫微师 · 直接聊', modeBrief: '速览解读', modeReport: '鲲鹏报告',
-        aiSend: '发送', aiNewChat: '新对话', aiAskPh: '追问：如「重点讲事业与财运」「这个大限要注意什么」（Enter 发送，Shift+Enter 换行）',
-        aiSub: '命盘已自动带上 · 会话模型回答',
-        aiSug1: '重点讲事业与财运',
-        aiSug2: '这个大限要注意什么',
-        aiSug3: '写完整鲲鹏报告（14 部分）',
-        aiEmptyHint: '直接问就行：命盘会自动带上。速览解读给 800~1200 字；切到「鲲鹏报告」出完整 14 部分。',
-        aiEngineHint: '由 Harness 会话已配置的模型回答（不需要另配 API Key）。排盘来自确定性引擎，非模型心算。',
+        ai: '紫微师解读', aiTitle: '紫微师解读',
+        aiSend: '发送', aiNewChat: '新对话', aiAskPh: '追问命盘，Enter 发送',
+        aiStartBrief: '速览解读', aiStartReport: '完整鲲鹏报告',
+        aiFullReport: '完整报告', aiFullReportHint: '基于当前命盘生成完整鲲鹏报告（14 部分）',
+        aiEmptyHint: '命盘已带入。直接提问，或先看一份解读。',
         timeScope: '命盘时间维度', backToBoard: '返回盘面',
         prevDecade: '上一个大限', nextDecade: '下一个大限', backToCurrent: '回到当前',
         currentBadge: '当前', thisYear: '今年', prevYear: '上一年', nextYear: '下一年',
@@ -64,7 +61,7 @@ window.__ModuleLoader__.load({
         chartTools: '工具', openPatterns: '格局分析', openDict: '星曜词典',
         handoff: '新会话解读', handoffDone: '已开新会话 ✓',
         handoffHint: '把当前命盘交给会话；之后在对话里说「继续聊这个盘」或「写鲲鹏报告」即可',
-        disclaimerShort: '本内容基于中华传统文化（紫微斗数）体系生成，非现代科学结论，仅供参考。涉及医疗 / 法律 / 投资 / 婚姻等具体决策，请咨询相关专业人士。',
+        disclaimerShort: '传统文化解读，非科学结论，仅供参考。具体决策请咨询专业人士。',
         aiInterpreting: '解读中…', interpStreaming: '生成中…',
         aiThinking: '思考中…', aiStop: '停止', aiContinue: '继续生成',
         aiStopped: '已停止生成，内容可能不完整；可点「继续生成」接着写',
@@ -122,14 +119,11 @@ window.__ModuleLoader__.load({
         emptyCta: 'Draw a sample chart', defaultName: 'Native',
         oppPalace: 'Opposite', triPalace: 'Trine', detailTitle: 'Palace Detail',
         mutagenTitle: 'Transforms', noMutagen: '—',
-        ai: 'Reading', aiTitle: 'Zi Wei Master · Chat', modeBrief: 'Brief', modeReport: 'Kunpeng Report',
-        aiSend: 'Send', aiNewChat: 'New chat', aiAskPh: 'Ask a follow-up (Enter to send, Shift+Enter for newline)',
-        aiSub: 'Chart attached · answered by the session model',
-        aiSug1: 'Focus on career and wealth',
-        aiSug2: 'What should I watch in this decade?',
-        aiSug3: 'Write the full Kunpeng report',
-        aiEmptyHint: 'Just ask — the chart is attached automatically.',
-        aiEngineHint: 'Answered by the model configured in this Harness session (no separate API key needed).',
+        ai: 'Reading', aiTitle: 'Zi Wei Reading',
+        aiSend: 'Send', aiNewChat: 'New chat', aiAskPh: 'Follow-up — Enter to send',
+        aiStartBrief: 'Quick reading', aiStartReport: 'Full Kunpeng report',
+        aiFullReport: 'Full report', aiFullReportHint: 'Generate the full 14-part Kunpeng report for this chart',
+        aiEmptyHint: 'Chart attached. Ask away, or start with a reading.',
         timeScope: 'Time scope', backToBoard: 'Back to chart',
         prevDecade: 'Previous decade', nextDecade: 'Next decade', backToCurrent: 'Back to current',
         currentBadge: 'Current', thisYear: 'This year', prevYear: 'Previous year', nextYear: 'Next year',
@@ -137,7 +131,7 @@ window.__ModuleLoader__.load({
         chartTools: 'Tools', openPatterns: 'Patterns', openDict: 'Star dictionary',
         handoff: 'New session', handoffDone: 'Session opened ✓',
         handoffHint: 'Hand this chart to the session so the agent can continue the reading.',
-        disclaimerShort: 'Generated from the traditional Chinese Zi Wei Dou Shu system; not a scientific conclusion, for reference only.',
+        disclaimerShort: 'Traditional interpretation, not a scientific conclusion. Consult a professional for decisions.',
         aiInterpreting: 'Reading…', interpStreaming: 'Generating…',
         aiThinking: 'Thinking…', aiStop: 'Stop', aiContinue: 'Continue',
         aiStopped: 'Stopped; the answer may be incomplete — press Continue to resume.',
@@ -707,9 +701,8 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   width: 28px; height: 28px; border-radius: 9px; color: #fff;
   background: linear-gradient(135deg, var(--zp-fill-accent), var(--zp-fill-accent-deep));
 }
+.zp-ai:focus, .zp-settings:focus { outline: none }
 .zp-ai-title { font-size: 13.5px; font-weight: 750; letter-spacing: .5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
-.zp-ai-sub { font-size: 10.5px; color: var(--dsw-alias-label-secondary); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
-.zp-ai-mode { width: 168px; flex: none }
 .zp-ai-body {
   flex: 1; min-height: 0; overflow-y: auto; padding: 14px;
   display: flex; flex-direction: column; gap: 10px; scrollbar-width: thin;
@@ -726,8 +719,9 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   background: var(--dsw-alias-bg-layer-1);
 }
 .zp-ai-tools { display: flex; gap: 6px; flex-wrap: wrap; align-items: center }
+.zp-ai-tools .zp-mini-btn { height: 28px }
 .zp-ai-composer { display: flex; gap: 8px; align-items: flex-end }
-.zp-ai-disclaimer { font-size: 10.5px; color: var(--dsw-alias-label-secondary); line-height: 1.5; opacity: .9 }
+.zp-ai-disclaimer { font-size: 11px; color: var(--dsw-alias-label-secondary); line-height: 1.5; opacity: .9 }
 .zp-ai-error {
   flex: none; display: flex; align-items: flex-start; gap: 8px;
   padding: 8px 10px; border-radius: 9px; font-size: 12px; line-height: 1.5;
@@ -736,27 +730,17 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   color: var(--dsw-alias-label-primary);
 }
 .zp-ai-error-text { flex: 1; min-width: 0; word-break: break-word }
+.zp-ai-empty-wrap { flex: 1; display: flex; align-items: center; justify-content: center }
 .zp-ai-empty {
+  box-sizing: border-box; width: 100%;
   border: 1px dashed var(--dsw-alias-border-l1); border-radius: 12px;
-  background: var(--dsw-alias-bg-layer-2); padding: 16px 14px;
-  display: flex; flex-direction: column; gap: 10px;
+  background: var(--dsw-alias-bg-layer-2); padding: 16px;
+  display: flex; flex-direction: column; gap: 8px;
 }
-.zp-ai-empty-title { font-size: 13px; font-weight: 700; letter-spacing: .5px }
 .zp-ai-empty-hint { font-size: 12px; line-height: 1.7; color: var(--dsw-alias-label-secondary) }
-.zp-ai-engine { font-size: 10.5px; line-height: 1.6; color: var(--dsw-alias-label-secondary); opacity: .85 }
-.zp-ai-suggest { display: flex; flex-direction: column; gap: 6px; align-items: flex-start }
-.zp-suggest {
-  display: inline-flex; align-items: center; gap: 6px; font-family: inherit;
-  font-size: 12px; text-align: left; padding: 6px 10px; border-radius: 9px;
-  border: 1px solid var(--dsw-alias-border-l1); background: var(--dsw-alias-bg-layer-1);
-  color: var(--dsw-alias-label-secondary); cursor: pointer; transition: color .12s, border-color .12s, background .12s;
-}
-.zp-suggest:hover {
-  color: var(--zp-accent);
-  border-color: color-mix(in srgb, var(--zp-accent) 50%, transparent);
-  background: color-mix(in srgb, var(--zp-accent) 8%, transparent);
-}
-.zp-suggest:disabled { opacity: .5; cursor: default }
+/* 空态的两个动作：点一次就产出内容，不再是"只改下一次请求"的模式条 */
+.zp-ai-start { display: flex; gap: 8px; flex-wrap: wrap }
+.zp-ai-start .zp-btn { flex: 1 1 0; min-width: 0; height: 32px }
 .zp-send {
   width: 36px; height: 36px; flex: none; display: inline-flex; align-items: center; justify-content: center;
   border: none; border-radius: 10px; color: #fff; cursor: pointer;
@@ -776,10 +760,11 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   cursor: pointer; transition: color .12s, background .12s, border-color .12s;
 }
 .zp-mini-btn:hover { color: var(--dsw-alias-label-primary); background: var(--dsw-alias-bg-layer-2) }
-.zp-mini-btn:focus-visible, .zp-send:focus-visible, .zp-suggest:focus-visible {
+.zp-mini-btn:focus-visible, .zp-send:focus-visible {
   outline: 2px solid var(--zp-accent); outline-offset: 2px;
 }
 .zp-mini-btn:disabled { opacity: .5; cursor: default }
+.zp-mini-icon { width: 28px; height: 28px; padding: 0; justify-content: center }
 .zp-mini-btn-accent {
   margin-left: auto; color: var(--zp-accent);
   border-color: color-mix(in srgb, var(--zp-accent) 42%, transparent);
@@ -850,6 +835,13 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
 }
 .zp-md-gap { height: 6px }
 .zp-md code { background: var(--dsw-alias-bg-layer-2); padding: 1px 4px; border-radius: 4px; font-size: 12px }
+/* 抽屉里的报告表格（v3.2）：与精装报告共用解析器，避免回答里露出管道符 */
+.zp-md-table { width: 100%; border-collapse: collapse; margin: 6px 0; font-size: 12px; line-height: 1.6 }
+.zp-md-table th, .zp-md-table td {
+  border: 1px solid var(--dsw-alias-border-l1); padding: 4px 6px;
+  vertical-align: top; text-align: left; word-break: break-word;
+}
+.zp-md-table th { background: var(--dsw-alias-bg-layer-2); font-weight: 600 }
 .zp-typing { font-size: 12px; color: var(--dsw-alias-label-secondary); padding: 6px 2px }
 .zp-chat-ta { flex: 1; resize: vertical; min-height: 46px; max-height: 180px; font-family: inherit; line-height: 1.6; font-size: 13px }
 .zp-preview-frame {
@@ -859,7 +851,6 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
 .zp-preview-frame-full { flex: 1; height: auto; min-height: 0; margin: 0; border: none; border-radius: 0 }
 /* 窄面板：抽屉铺满工作台，头部收紧 */
 .zp-root[data-w="narrow"] .zp-ai { width: 100%; border-left: none; box-shadow: none }
-.zp-root[data-w="narrow"] .zp-ai-mode { width: 136px }
 .zp-root[data-w="narrow"] .zp-overlay-center { padding: 18px 12px }
 /* ---------------- 格局 / 词典 / 空态 ---------------- */
 .zp-patterns { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 10px }
@@ -1072,8 +1063,11 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       var boxRef = useRef(null);
       useEffect(function () {
         var prev = document.activeElement;
-        var list = focusablesIn(boxRef.current);
-        if (list.length) list[0].focus();
+        /* 聚焦弹层容器本身（tabIndex=-1），而不是第一个按钮：
+           否则一打开抽屉，关闭/新对话按钮就被画上 focus ring，看起来像选错目标。
+           Tab 仍会从容器进入第一个可聚焦控件。 */
+        var box = boxRef.current;
+        try { if (box && typeof box.focus === 'function') box.focus(); } catch (e) { /* ignore */ }
         return function () {
           try { if (prev && typeof prev.focus === 'function') prev.focus(); } catch (e) { /* ignore */ }
         };
@@ -1551,6 +1545,13 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         ['path', { d: 'M8 2.1v7M5.3 6.4L8 9.1l2.7-2.7' }],
         ['path', { d: 'M3.1 10.4v1.7c0 .9.7 1.6 1.6 1.6h6.6c.9 0 1.6-.7 1.6-1.6v-1.7' }]
       ],
+      report: [
+        ['rect', { x: 3.2, y: 2.2, width: 9.6, height: 11.6, rx: 1.6 }],
+        ['path', { d: 'M5.6 5.4h4.8M5.6 8h4.8M5.6 10.6h3' }]
+      ],
+      check: [
+        ['path', { d: 'M3.4 8.3l3.1 3.1 6.1-6.7' }]
+      ],
       newChat: [
         ['path', { d: 'M8 2.9v10.2M2.9 8h10.2' }]
       ],
@@ -1578,34 +1579,20 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
     }
 
     /* ---------------- 紫微师对话：面板内右侧阅读抽屉 ---------------- */
-    function mdInline(s) {
-      /* 极小的 markdown 渲染: 标题 / 加粗 / 引用 / 列表 / 段落。先转义再上标记。 */
-      var esc = function (x) {
-        return String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-      };
-      var inline = function (x) {
-        return esc(x)
-          .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-          .replace(/`([^`]+)`/g, '<code>$1</code>');
-      };
-      var out = [];
-      String(s || '').split('\n').forEach(function (raw) {
-        var line = raw.replace(/\s+$/, '');
-        if (!line.trim()) { out.push('<div class="zp-md-gap"></div>'); return; }
-        var hm = /^(#{1,4})\s+(.*)$/.exec(line);
-        if (hm) { out.push('<div class="zp-md-h zp-md-h' + hm[1].length + '">' + inline(hm[2]) + '</div>'); return; }
-        var qm = /^&gt;\s?(.*)$/.exec(line) || /^>\s?(.*)$/.exec(line);
-        if (qm) { out.push('<div class="zp-md-quote">' + inline(qm[1]) + '</div>'); return; }
-        var lm = /^\s*([-*]|\d+\.)\s+(.*)$/.exec(line);
-        if (lm) { out.push('<div class="zp-md-li">· ' + inline(lm[2]) + '</div>'); return; }
-        out.push('<div class="zp-md-p">' + inline(line) + '</div>');
-      });
-      return out.join('');
+    /* 抽屉回答的 markdown：表格/转义用 ZWReport 的共享解析器（v3.2），其它保持 zp-md 排版 */
+    function renderChatMd(s) {
+      try {
+        if (window.ZWReport && typeof window.ZWReport.mdToChatHtml === 'function') {
+          return window.ZWReport.mdToChatHtml(s);
+        }
+      } catch (e) { /* 回退纯文本 */ }
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/\n/g, '<br>');
     }
 
     function AIModal(props) {
       var t = props.t;
-      var [mode, setMode] = useState('brief');
       var [q, setQ] = useState('');
       var [showPreview, setShowPreview] = useState(false);
       var bodyRef = useRef(null);
@@ -1620,38 +1607,27 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       for (var i = thread.length - 1; i >= 0; i--) {
         if (thread[i].role === 'assistant') { lastAssistant = thread[i].content; break; }
       }
+      /* 追问默认走 brief；完整报告是显式动作，不再藏在"下一次请求的模式"里 */
       var submit = function () {
         var question = q.trim();
+        if (!question || props.streaming) return;
         setQ('');
-        props.onAsk(question, mode);
+        props.onAsk(question, 'brief');
       };
-      var ask = function (question, m) {
-        if (m) setMode(m);
-        setQ('');
-        props.onAsk(question, m || mode);
+      var start = function (m) {
+        if (props.streaming) return;
+        props.onAsk('', m);
       };
-      var suggestions = [
-        ['brief', t('aiSug1')],
-        ['brief', t('aiSug2')],
-        ['report', t('aiSug3')]
-      ];
+      var showFullReport = !!lastAssistant && !props.hasReport && !props.streaming;
 
       return h('div', { className: 'zp-overlay' },
         h('div', { className: 'zp-overlay-mask', onClick: props.onClose, 'aria-hidden': true }),
-        h('aside', { className: 'zp-ai', role: 'dialog', 'data-region': 'DRAWER', 'aria-modal': 'true', 'aria-label': t('aiTitle'),
+        h('aside', { className: 'zp-ai', role: 'dialog', 'data-region': 'DRAWER', 'aria-modal': 'true', 'aria-label': t('aiTitle'), tabIndex: -1,
           ref: boxRef, onKeyDown: function (ev) { trapTab(ev, ev.currentTarget); } },
           h('header', { className: 'zp-ai-head' },
             h('div', { className: 'zp-ai-heading' },
               h('span', { className: 'zp-ai-glyph' }, h(Icon, { name: 'sparkle', size: 15 })),
-              h('div', { style: { minWidth: 0 } },
-                h('div', { className: 'zp-ai-title' }, t('aiTitle')),
-                h('div', { className: 'zp-ai-sub' }, t('aiSub')))),
-            h('div', { className: 'zp-ai-mode' },
-              h(Seg, {
-                value: mode,
-                options: [{ value: 'brief', label: t('modeBrief') }, { value: 'report', label: t('modeReport') }],
-                onChange: function (v) { setMode(v); }
-              })),
+              h('div', { className: 'zp-ai-title' }, t('aiTitle'))),
             thread.length ? h('button', {
               className: 'zp-icon-btn', type: 'button', title: t('aiNewChat'), 'aria-label': t('aiNewChat'),
               disabled: props.streaming, onClick: props.onClear
@@ -1661,23 +1637,24 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
             }, h(Icon, { name: 'close' }))),
           h('div', { className: 'zp-ai-body', ref: bodyRef },
             thread.length === 0
-              ? h('div', { className: 'zp-ai-empty' },
-                h('div', { className: 'zp-ai-empty-title' }, t('aiTitle')),
-                h('div', { className: 'zp-ai-empty-hint' }, t('aiEmptyHint')),
-                h('div', { className: 'zp-ai-engine' }, t('aiEngineHint')),
-                h('div', { className: 'zp-ai-suggest' },
-                  suggestions.map(function (s, i) {
-                    return h('button', {
-                      key: i, className: 'zp-suggest', type: 'button', disabled: props.streaming,
-                      onClick: function () { ask(s[1], s[0]); }
-                    }, h(Icon, { name: s[0] === 'report' ? 'handoff' : 'sparkle', size: 13 }), h('span', null, s[1]));
-                  })))
+              ? h('div', { className: 'zp-ai-empty-wrap' },
+                h('div', { className: 'zp-ai-empty' },
+                  h('div', { className: 'zp-ai-empty-hint' }, t('aiEmptyHint')),
+                  h('div', { className: 'zp-ai-start' },
+                    h('button', {
+                      className: 'zp-btn zp-btn-primary', type: 'button', disabled: props.streaming,
+                      onClick: function () { start('brief'); }
+                    }, h(Icon, { name: 'sparkle', size: 14 }), h('span', null, t('aiStartBrief'))),
+                    h('button', {
+                      className: 'zp-btn', type: 'button', disabled: props.streaming,
+                      onClick: function () { start('report'); }
+                    }, h(Icon, { name: 'report', size: 14 }), h('span', null, t('aiStartReport'))))))
               : h('div', { className: 'zp-chat-thread', role: 'log', 'aria-live': 'polite', 'aria-busy': props.streaming ? 'true' : 'false' },
                 thread.map(function (m, i) {
                   return h('div', { key: 'm' + i, className: m.role === 'user' ? 'zp-bubble zp-bubble-user' : 'zp-bubble zp-bubble-ai' },
                     m.role === 'user'
                       ? h('div', { className: 'zp-bubble-text' }, m.content)
-                      : h('div', { className: 'zp-md', dangerouslySetInnerHTML: { __html: mdInline(m.content) } }));
+                      : h('div', { className: 'zp-md', dangerouslySetInnerHTML: { __html: renderChatMd(m.content) } }));
                 }),
                 props.streaming
                   ? h('div', { className: 'zp-typing' }, props.thinkChars
@@ -1688,21 +1665,33 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
               props.interpIssue && props.interpIssue.canContinue
                 ? h('button', {
                   className: 'zp-mini-btn', type: 'button', disabled: props.streaming,
-                  onClick: function () { props.onContinue(mode); }
+                  onClick: function () { props.onContinue(); }
                 }, t('aiContinue'))
                 : null) : null),
           h('footer', { className: 'zp-ai-foot' },
-            h('div', { className: 'zp-ai-tools' },
-              lastAssistant ? h('button', { className: 'zp-mini-btn', type: 'button', onClick: props.onCopy },
-                h(Icon, { name: 'copy', size: 13 }), props.copied ? t('aiCopied') : t('aiCopy')) : null,
-              lastAssistant ? h('button', { className: 'zp-mini-btn', type: 'button', onClick: function () { setShowPreview(!showPreview); } },
-                h(Icon, { name: 'preview', size: 13 }), showPreview ? t('closePreview') : t('previewHtml')) : null,
-              lastAssistant ? h('button', { className: 'zp-mini-btn', type: 'button', onClick: props.onExport },
-                h(Icon, { name: 'export', size: 13 }), t('exportHtml')) : null,
+            lastAssistant ? h('div', { className: 'zp-ai-tools' },
               h('button', {
-                className: 'zp-mini-btn zp-mini-btn-accent', type: 'button', title: t('handoffHint'),
-                onClick: function () { props.onHandoff(mode); }
-              }, h(Icon, { name: 'handoff', size: 13 }), props.handoffDone ? t('handoffDone') : t('handoff'))),
+                className: 'zp-mini-btn zp-mini-icon', type: 'button',
+                title: props.copied ? t('aiCopied') : t('aiCopy'), 'aria-label': props.copied ? t('aiCopied') : t('aiCopy'),
+                onClick: props.onCopy
+              }, h(Icon, { name: props.copied ? 'check' : 'copy', size: 14 })),
+              h('button', {
+                className: 'zp-mini-btn zp-mini-icon', type: 'button', title: t('previewHtml'), 'aria-label': t('previewHtml'),
+                'aria-expanded': showPreview ? 'true' : 'false',
+                onClick: function () { setShowPreview(!showPreview); }
+              }, h(Icon, { name: 'preview', size: 14 })),
+              h('button', {
+                className: 'zp-mini-btn zp-mini-icon', type: 'button', title: t('exportHtml'), 'aria-label': t('exportHtml'),
+                onClick: props.onExport
+              }, h(Icon, { name: 'export', size: 14 })),
+              showFullReport ? h('button', {
+                className: 'zp-mini-btn', type: 'button', title: t('aiFullReportHint'),
+                onClick: function () { start('report'); }
+              }, h(Icon, { name: 'report', size: 13 }), h('span', null, t('aiFullReport'))) : null,
+              h('button', {
+                className: 'zp-mini-btn zp-mini-btn-accent', type: 'button', title: t('handoffHint'), disabled: props.streaming,
+                onClick: function () { props.onHandoff(); }
+              }, h(Icon, { name: 'handoff', size: 13 }), props.handoffDone ? t('handoffDone') : t('handoff'))) : null,
             h('div', { className: 'zp-ai-composer' },
               h('textarea', {
                 className: 'zp-input zp-chat-ta', rows: 2, value: q,
@@ -1715,8 +1704,10 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
               props.streaming
                 ? h('button', { className: 'zp-send zp-send-stop', type: 'button', title: t('aiStop'), 'aria-label': t('aiStop'), onClick: props.onStop },
                   h(Icon, { name: 'stop', size: 15 }))
-                : h('button', { className: 'zp-send', type: 'button', title: thread.length ? t('aiSend') : t('ai'), 'aria-label': t('aiSend'), onClick: submit },
-                  h(Icon, { name: 'send', size: 15 }))),
+                : h('button', {
+                  className: 'zp-send', type: 'button', disabled: !q.trim(),
+                  title: t('aiSend'), 'aria-label': t('aiSend'), onClick: submit
+                }, h(Icon, { name: 'send', size: 15 }))),
             h('div', { className: 'zp-ai-disclaimer' }, t('disclaimerShort'))),
           showPreview && lastAssistant ? h('div', { className: 'zp-ai-preview', 'data-region': 'PREVIEW' },
             h('div', { className: 'zp-ai-preview-head' },
@@ -1742,7 +1733,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       return h('div', { className: 'zp-overlay' },
         h('div', { className: 'zp-overlay-mask', onClick: props.onClose, 'aria-hidden': true }),
         h('div', { className: 'zp-overlay-center' },
-          h('div', { className: 'zp-settings', role: 'dialog', 'data-region': 'MODAL', 'aria-modal': 'true', 'aria-label': t('settingsTitle'),
+          h('div', { className: 'zp-settings', role: 'dialog', 'data-region': 'MODAL', 'aria-modal': 'true', 'aria-label': t('settingsTitle'), tabIndex: -1,
             ref: boxRef, onKeyDown: function (ev) { trapTab(ev, ev.currentTarget); } },
             h('header', { className: 'zp-settings-head' },
               h('div', { className: 'zp-settings-title' }, t('settingsTitle')),
@@ -1885,6 +1876,8 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       var [modal, setModal] = useState(null);
       var [interpreting, setInterpreting] = useState(false);
       var [thread, setThread] = useState([]);
+      var [lastMode, setLastMode] = useState('brief');   /* 续写 / 交给会话沿用上一次的档位 */
+      var [hasReport, setHasReport] = useState(false);   /* 本轮对话是否已出过完整报告 */
       var [interpError, setInterpError] = useState('');
       var [interpIssue, setInterpIssue] = useState(null);   /* {kind, canContinue}: 截断/断连/超时的结构化原因 */
       var [thinkChars, setThinkChars] = useState(0);        /* 思考阶段已产出的字数（来自 start/thinking 事件） */
@@ -1953,6 +1946,12 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         setYearlyYear(String(new Date().getFullYear()));
         setTab('natal');
         setView('chart');
+        /* 换盘 = 换解读对象：旧对话清掉，允许为新盘再自动生成一次速览 */
+        autoStartedRef.current = false;
+        setThread([]);
+        setInterpError('');
+        setInterpIssue(null);
+        setHasReport(false);
         /* 出盘后收起生辰表单，把纵向空间让给盘面；点「改生辰」再展开 */
         setFormCollapsed(true);
         if (panelW > 0 && panelW < 908) setRail(false);
@@ -2034,6 +2033,11 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         setTab('natal');
         setView('chart');
         setCurrentLibId(item.id);
+        autoStartedRef.current = false;
+        setThread([]);
+        setInterpError('');
+        setInterpIssue(null);
+        setHasReport(false);
         setError('');
         setFormCollapsed(true);
       };
@@ -2072,8 +2076,11 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       /* 面板内「直接聊」: 走 Harness host 的 SSE 通道, 用会话已配置的模型, 不需要另配 API Key */
       var chatAbortRef = useRef(null);
       var stopReqRef = useRef(false);
+      /* 每张盘首次打开抽屉自动生成一次速览；失败/清空后不再无限重试 */
+      var autoStartedRef = useRef(false);
       var runInterpretation = function (question, mode) {
         if (!chart || interpreting) return;
+        setLastMode(mode === 'report' ? 'report' : 'brief');
         var history = thread.map(function (m) { return { role: m.role, content: m.content }; });
         var asked = (question || '').trim();
         var nextThread = thread.concat(asked ? [{ role: 'user', content: asked }] : []);
@@ -2113,6 +2120,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         var finish = function (errMsg, issue) {
           if (settled) return;
           settled = true;
+          if (!errMsg && mode === 'report') setHasReport(true);
           setInterpreting(false);
           setThinkChars(0);
           chatAbortRef.current = null;
@@ -2287,6 +2295,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         setInterpError('');
         setInterpIssue(null);
         setThinkChars(0);
+        setHasReport(false);
       };
       /* 最近一轮回答: 复制 / 导出 / 预览都以它为准 */
       var interpretation = useMemo(function () {
@@ -2362,7 +2371,16 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           if (curAgeForDecade >= decadalList[ci].ageRange[0] && curAgeForDecade <= decadalList[ci].ageRange[1]) { currentDecadalIdx = ci; break; }
         }
       }
-      var openAI = function () { if (!chart) return; if (modal === 'ai') closeModal(); else openModal('ai'); };
+      var openAI = function () {
+        if (!chart) return;
+        if (modal === 'ai') { closeModal(); return; }
+        openModal('ai');
+        /* 用户点的是「解读」，不是「打开一个空抽屉」：每张盘首次打开时直接开始速览 */
+        if (!thread.length && !interpreting && !autoStartedRef.current) {
+          autoStartedRef.current = true;
+          runInterpretation('', 'brief');
+        }
+      };
       var editBirth = function () {
         setRail(true);
         setFormCollapsed(false);
@@ -2560,7 +2578,8 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
             interpError: interpError,
             interpIssue: interpIssue,
             thinkChars: thinkChars,
-            onContinue: function (mode) { runInterpretation(t('aiContinuePrompt'), mode); },
+            hasReport: hasReport,
+            onContinue: function () { runInterpretation(t('aiContinuePrompt'), lastMode); },
             onStop: stopInterpretation,
             copied: interpCopied,
             previewHtml: previewHtml,
@@ -2568,7 +2587,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
             onClose: closeModal,
             onAsk: runInterpretation,
             onClear: clearThread,
-            onHandoff: handoffToSession,
+            onHandoff: function () { handoffToSession(lastMode); },
             onCopy: copyInterpretation,
             onExport: exportReportHtml
           }) : null,
@@ -2672,34 +2691,121 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
 
 
         /* ---- 鲲鹏精装报告 HTML ---- */
-        var REPORT_CSS = ":root{--bg:#FAF6EF;--bg-card:#F4EFE5;--text:#2A2A2A;--text-sub:#666;--accent:#7C5C3C;--accent-lt:#9C6B47;--accent-dim:#C4A882;--border:#E8DDC8;--warn:#B85A3D;--white:#FEFCF8;--font-serif:\"Songti SC\",\"STSong\",\"Source Han Serif CN\",\"Noto Serif CJK SC\",Georgia,serif;--font-sans:\"PingFang SC\",\"Hiragino Sans GB\",\"Microsoft YaHei\",system-ui,sans-serif}@page{size:A4;margin:18mm 22mm}body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-serif);font-size:11pt;line-height:1.9}.page-wrap{max-width:210mm;margin:0 auto;padding:14mm 16mm}h1,h2,h3{font-family:var(--font-sans);color:var(--accent);font-weight:600}h2{font-size:15pt;border-bottom:1px solid var(--accent-dim);padding-bottom:.3em;margin-top:2em}h3{font-size:12.5pt;margin-top:1.4em}.body-text{text-indent:2em;text-align:justify}.quote-block{margin:1em 0;padding:.6em 1em;border-left:3px solid var(--accent-dim);background:var(--bg-card);color:var(--text-sub)}.highlight-box{margin:1em 0;padding:.8em 1em;background:var(--bg-card);border-left:4px solid var(--accent)}.warn-block{margin:1em 0;padding:.8em 1em;border:1px solid var(--warn);border-left:4px solid var(--warn);color:#7A3A24}.kw{display:inline-block;padding:0 .45em;margin:0 .1em;background:var(--accent);color:var(--white);font-size:.82em;border-radius:2px;font-family:var(--font-sans)}.palace-card{margin:.8em 0;padding:.8em 1em;background:var(--white);border:1px solid var(--border);border-radius:4px}.p-palace-name{font-family:var(--font-sans);color:var(--accent);font-weight:600}.p-stars{margin:.2em 0;color:var(--accent-lt)}.p-note{font-size:.85em;color:var(--text-sub)}.info-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.6em;margin:1em 0}.info-cell{background:var(--white);border:1px solid var(--border);padding:.5em .7em;font-size:.95em}.info-cell span{display:block;color:var(--text-sub);font-size:.8em;font-family:var(--font-sans)}.pc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:var(--accent-dim);border:2px solid var(--accent);margin:1.5em 0}.pc-cell{background:var(--white);padding:.5em;min-height:4.2em;font-size:.9em}.pc-center{grid-column:2/4;grid-row:2/4;background:var(--bg-card);padding:1em;text-align:center;font-size:.95em}.p-ganzhi{color:var(--text-sub);font-size:.8em}.p-sihua{display:inline-block;font-size:.75em;color:var(--warn);border:1px solid var(--warn);padding:0 .3em;border-radius:50%;margin-left:.25em}.path-steps{display:flex;gap:.8em;margin:1em 0}.path-step{flex:1;background:var(--white);border:1px solid var(--accent-dim);border-top:3px solid var(--accent);padding:.7em;font-size:.9em}.cover{background:var(--accent);color:var(--white);text-align:center;padding:52mm 0 12mm;margin:-14mm -16mm 10mm}.p-center-title{font-family:var(--font-sans);font-size:34pt;letter-spacing:.35em;text-indent:.35em}.p-center-sub{margin-top:1.2em;color:var(--accent-dim);letter-spacing:.2em}.cover-band{margin-top:20mm;font-size:10pt;color:var(--bg-card)}.disclaimer{margin-top:2em;padding:.8em 1em;background:#EEE9DE;color:var(--text-sub);font-size:.9em}.colophon{margin-top:3em;text-align:center;color:var(--text-sub);font-size:.85em}.seal{display:inline-block;border:2px solid var(--warn);color:var(--warn);padding:.3em .5em;font-family:var(--font-sans);letter-spacing:.15em;transform:rotate(-4deg)}";
+        var REPORT_CSS = ":root{--bg:#FAF6EF;--bg-card:#F4EFE5;--text:#2A2A2A;--text-sub:#666;--accent:#7C5C3C;--accent-lt:#9C6B47;--accent-dim:#C4A882;--border:#E8DDC8;--warn:#B85A3D;--white:#FEFCF8;--font-serif:\"Songti SC\",\"STSong\",\"Source Han Serif CN\",\"Noto Serif CJK SC\",Georgia,serif;--font-sans:\"PingFang SC\",\"Hiragino Sans GB\",\"Microsoft YaHei\",system-ui,sans-serif}@page{size:A4;margin:18mm 22mm}body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-serif);font-size:11pt;line-height:1.9}.page-wrap{max-width:210mm;margin:0 auto;padding:14mm 16mm}h1,h2,h3{font-family:var(--font-sans);color:var(--accent);font-weight:600}h2{font-size:15pt;border-bottom:1px solid var(--accent-dim);padding-bottom:.3em;margin-top:2em}h3{font-size:12.5pt;margin-top:1.4em}.body-text{text-indent:2em;text-align:justify}.quote-block{margin:1em 0;padding:.6em 1em;border-left:3px solid var(--accent-dim);background:var(--bg-card);color:var(--text-sub)}.highlight-box{margin:1em 0;padding:.8em 1em;background:var(--bg-card);border-left:4px solid var(--accent)}.warn-block{margin:1em 0;padding:.8em 1em;border:1px solid var(--warn);border-left:4px solid var(--warn);color:#7A3A24}.kw{display:inline-block;padding:0 .45em;margin:0 .1em;background:var(--accent);color:var(--white);font-size:.82em;border-radius:2px;font-family:var(--font-sans)}.palace-card{margin:.8em 0;padding:.8em 1em;background:var(--white);border:1px solid var(--border);border-radius:4px}.p-palace-name{font-family:var(--font-sans);color:var(--accent);font-weight:600}.p-stars{margin:.2em 0;color:var(--accent-lt)}.p-note{font-size:.85em;color:var(--text-sub)}.info-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.6em;margin:1em 0}.info-cell{background:var(--white);border:1px solid var(--border);padding:.5em .7em;font-size:.95em}.info-cell span{display:block;color:var(--text-sub);font-size:.8em;font-family:var(--font-sans)}.pc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:var(--accent-dim);border:2px solid var(--accent);margin:1.5em 0}.pc-cell{background:var(--white);padding:.5em;min-height:4.2em;font-size:.9em}.pc-center{grid-column:2/4;grid-row:2/4;background:var(--bg-card);padding:1em;text-align:center;font-size:.95em}.p-ganzhi{color:var(--text-sub);font-size:.8em}.p-sihua{display:inline-block;font-size:.75em;color:var(--warn);border:1px solid var(--warn);padding:0 .3em;border-radius:50%;margin-left:.25em}.path-steps{display:flex;gap:.8em;margin:1em 0}.path-step{flex:1;background:var(--white);border:1px solid var(--accent-dim);border-top:3px solid var(--accent);padding:.7em;font-size:.9em}.cover{background:var(--accent);color:var(--white);text-align:center;padding:52mm 0 12mm;margin:-14mm -16mm 10mm}.p-center-title{font-family:var(--font-sans);font-size:34pt;letter-spacing:.35em;text-indent:.35em}.p-center-sub{margin-top:1.2em;color:var(--accent-dim);letter-spacing:.2em}.cover-band{margin-top:20mm;font-size:10pt;color:var(--bg-card)}.disclaimer{margin-top:2em;padding:.8em 1em;background:#EEE9DE;color:var(--text-sub);font-size:.9em}.colophon{margin-top:3em;text-align:center;color:var(--text-sub);font-size:.85em}.seal{display:inline-block;border:2px solid var(--warn);color:var(--warn);padding:.3em .5em;font-family:var(--font-sans);letter-spacing:.15em;transform:rotate(-4deg)}h4{font-family:var(--font-sans);color:var(--accent);font-weight:600;font-size:11.5pt;margin-top:1.4em}.md-table{width:100%;border-collapse:collapse;margin:1.1em 0;font-size:10.5pt;line-height:1.65}.md-table th,.md-table td{border:1px solid var(--border);padding:.45em .6em;vertical-align:top;text-align:left;word-break:break-word}.md-table th{background:var(--bg-card);font-family:var(--font-sans);font-weight:600;color:var(--accent)}.md-table tr{page-break-inside:avoid;break-inside:avoid}hr{border:none;border-top:1px solid var(--accent-dim);margin:1.8em 0}h2,h3,h4{page-break-after:avoid;break-after:avoid}.pc-grid,.info-grid{page-break-inside:avoid;break-inside:avoid}ul,ol{margin:.8em 0;padding-left:1.8em}li{margin:.3em 0}code{padding:.1em .35em;background:var(--bg-card);border-radius:2px;font-family:var(--font-sans);font-size:.92em}";
         var escHtml = function (t) { return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); };
+        /* 报告正文的极小 markdown：标题 / 加粗 / 引用 / 列表 / 管道表格 / 分隔线 / 段落。
+           先转义再上标记；只放行 <br>，其它 HTML 不允许直通。 */
+        var mdInline = function (t) {
+          return escHtml(t)
+            .replace(/&lt;br\s*\/?&gt;/gi, '<br>')
+            .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+            .replace(/`([^`]+)`/g, '<code>$1</code>');
+        };
+        var mdSplitRow = function (line) {
+          var s = String(line).trim();
+          if (s.charAt(0) === '|') s = s.slice(1);
+          if (s.charAt(s.length - 1) === '|') s = s.slice(0, -1);
+          return s.split('|').map(function (c) { return c.trim(); });
+        };
+        var mdIsTableSep = function (line) {
+          if (String(line).indexOf('|') < 0) return false;
+          var cells = mdSplitRow(line);
+          if (!cells.length) return false;
+          for (var i = 0; i < cells.length; i++) {
+            if (!/^:?-{1,}:?$/.test(cells[i])) return false;
+          }
+          return true;
+        };
+        var mdAlignOf = function (cell) {
+          var left = cell.charAt(0) === ':';
+          var right = cell.charAt(cell.length - 1) === ':';
+          if (left && right) return 'center';
+          if (right) return 'right';
+          if (left) return 'left';
+          return '';
+        };
+        var mdTableHtml = function (header, aligns, rows, cls) {
+          var th = header.map(function (c, i) {
+            return '<th' + (aligns[i] ? ' style="text-align:' + aligns[i] + '"' : '') + '>' + mdInline(c) + '</th>';
+          }).join('');
+          var body = rows.map(function (row) {
+            var tds = [];
+            for (var i = 0; i < header.length; i++) {
+              tds.push('<td' + (aligns[i] ? ' style="text-align:' + aligns[i] + '"' : '') + '>' + mdInline(row[i] || '') + '</td>');
+            }
+            return '<tr>' + tds.join('') + '</tr>';
+          }).join('');
+          return '<table class="' + (cls || 'md-table') + '"><thead><tr>' + th + '</tr></thead>' +
+            (body ? '<tbody>' + body + '</tbody>' : '') + '</table>';
+        };
         var mdToHtml = function (md) {
           var lines = String(md || '').split('\n');
           var out = [];
           var inList = null;
           var flush = function () { if (inList) { out.push('</' + inList + '>'); inList = null; } };
-          var inline = function (t) {
-            return escHtml(t)
-              .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-              .replace(/`([^`]+)`/g, '<code>$1</code>');
-          };
           for (var i = 0; i < lines.length; i++) {
             var trimmed = lines[i].trim();
             if (!trimmed) { flush(); continue; }
-            var h = /^(#{1,3})\s+(.*)$/.exec(trimmed);
-            if (h) { flush(); var lv = h[1].length; out.push('<h' + (lv + 1) + '>' + inline(h[2]) + '</h' + (lv + 1) + '>'); continue; }
+            /* 管道表格：当前行以 | 开头、下一行是分隔行；行数按表头列数收口 */
+            if (trimmed.charAt(0) === '|' && i + 1 < lines.length && mdIsTableSep(lines[i + 1])) {
+              flush();
+              var header = mdSplitRow(trimmed);
+              var aligns = mdSplitRow(lines[i + 1]).map(mdAlignOf);
+              var rows = [];
+              var j = i + 2;
+              while (j < lines.length && lines[j].trim().charAt(0) === '|' && !mdIsTableSep(lines[j])) {
+                rows.push(mdSplitRow(lines[j]));
+                j++;
+              }
+              out.push(mdTableHtml(header, aligns, rows));
+              i = j - 1;
+              continue;
+            }
+            var h = /^(#{1,6})\s+(.*)$/.exec(trimmed);
+            if (h) { flush(); var lv = Math.min(4, h[1].length + 1); out.push('<h' + lv + '>' + mdInline(h[2]) + '</h' + lv + '>'); continue; }
+            if (/^([-*_])\1{2,}$/.test(trimmed)) { flush(); out.push('<hr>'); continue; }
             var q = /^>\s?(.*)$/.exec(trimmed);
-            if (q) { flush(); out.push('<blockquote class="quote-block">' + inline(q[1]) + '</blockquote>'); continue; }
+            if (q) { flush(); out.push('<blockquote class="quote-block">' + mdInline(q[1]) + '</blockquote>'); continue; }
             var li = /^[-*•]\s+(.*)$/.exec(trimmed);
-            if (li) { if (inList !== 'ul') { flush(); out.push('<ul>'); inList = 'ul'; } out.push('<li>' + inline(li[1]) + '</li>'); continue; }
-            var num = /^\d+[.、]\s+(.*)$/.exec(trimmed);
-            if (num) { if (inList !== 'ol') { flush(); out.push('<ol>'); inList = 'ol'; } out.push('<li>' + inline(num[1]) + '</li>'); continue; }
+            if (li) { if (inList !== 'ul') { flush(); out.push('<ul>'); inList = 'ul'; } out.push('<li>' + mdInline(li[1]) + '</li>'); continue; }
+            var num = /^\d+[.)]\s+(.*)$/.exec(trimmed) || /^\d+、\s*(.*)$/.exec(trimmed);
+            if (num) { if (inList !== 'ol') { flush(); out.push('<ol>'); inList = 'ol'; } out.push('<li>' + mdInline(num[1]) + '</li>'); continue; }
             flush();
-            out.push('<p class="body-text">' + inline(trimmed) + '</p>');
+            out.push('<p class="body-text">' + mdInline(trimmed) + '</p>');
           }
           flush();
           return out.join('\n');
+        };
+        /* 抽屉回答用同一套表格解析，但保留 .zp-md-* 的对话排版（div 结构，不引入 h 标签） */
+        var mdToChatHtml = function (md) {
+          var lines = String(md || '').split('\n');
+          var out = [];
+          for (var i = 0; i < lines.length; i++) {
+            var line = lines[i].replace(/\s+$/, '');
+            if (!line.trim()) { out.push('<div class="zp-md-gap"></div>'); continue; }
+            var trimmed = line.trim();
+            if (trimmed.charAt(0) === '|' && i + 1 < lines.length && mdIsTableSep(lines[i + 1])) {
+              var header = mdSplitRow(trimmed);
+              var aligns = mdSplitRow(lines[i + 1]).map(mdAlignOf);
+              var rows = [];
+              var j = i + 2;
+              while (j < lines.length && lines[j].trim().charAt(0) === '|' && !mdIsTableSep(lines[j])) {
+                rows.push(mdSplitRow(lines[j]));
+                j++;
+              }
+              out.push(mdTableHtml(header, aligns, rows, 'zp-md-table'));
+              i = j - 1;
+              continue;
+            }
+            var hm = /^(#{1,4})\s+(.*)$/.exec(line);
+            if (hm) { out.push('<div class="zp-md-h zp-md-h' + hm[1].length + '">' + mdInline(hm[2]) + '</div>'); continue; }
+            var qm = /^>\s?(.*)$/.exec(line);
+            if (qm) { out.push('<div class="zp-md-quote">' + mdInline(qm[1]) + '</div>'); continue; }
+            var lm = /^\s*([-*]|\d+[.)])\s+(.*)$/.exec(line);
+            if (lm) { out.push('<div class="zp-md-li">· ' + mdInline(lm[2]) + '</div>'); continue; }
+            out.push('<div class="zp-md-p">' + mdInline(line) + '</div>');
+          }
+          return out.join('');
         };
         var buildReportHtml = function (meta, reportText) {
           var c = meta.chart;
@@ -2752,6 +2858,12 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
             '<div class="colophon"><span class="seal">LifeView</span><div style="margin-top:.6em">紫微师 · 人生画板 · ' + ymd + '</div></div>' +
             '</div></body></html>';
         };
+        /* 报告渲染是纯函数：暴露给自检与无头预览（与 window.ZWEngine / ZWCore 同一形态） */
+        try {
+          if (typeof window !== 'undefined') {
+            window.ZWReport = { REPORT_CSS: REPORT_CSS, escHtml: escHtml, mdToHtml: mdToHtml, mdToChatHtml: mdToChatHtml, buildReportHtml: buildReportHtml };
+          }
+        } catch (e) { /* 非浏览器环境忽略 */ }
 
         /* 侧栏入口 (id 即主面板 key) */
         var PanelIcon = function () {
