@@ -355,22 +355,21 @@ ok('v1.3.3: localStorage 旧默认一次性迁移到节气',
   /ziwei-pro\.formV133/.test(client) && /monthDivide === 'normal'/.test(client) &&
   /JSON\.stringify\(init\)/.test(client));
 
-/* v4: 信息架构 = 首页 / 新建 / 命盘 / 解读 / 报告（页面级，不再用左栏堆卡片） */
-ok('v4: 五页主导航与页面路由',
-  /var navItems = \[/.test(client) && /'data-page': page/.test(client) &&
-  /page === 'home'/.test(client) && /page === 'create'/.test(client) && /page === 'reading'/.test(client) && /page === 'report'/.test(client));
-ok('v4: 首页自动记录最近看过 / 已保存，卡片可点击进入',
-  /ziwei-pro\.history/.test(client) && /var homeItems = useMemo/.test(client) && /onOpen: function \(it\) \{ openInput/.test(client));
-ok('v4: 新建命盘独立页面（BirthForm）', /function BirthForm/.test(client) && /'data-region': 'CREATE'/.test(client));
-ok('v4: 命盘页主行动是解读（排盘不再抢主行动）', /chartInterpret/.test(client) && /'data-region': 'CHART'/.test(client));
-ok('v4: 解读页 = 聊天栏 + 报告工位',
-  /function ChatPane/.test(client) && /function ReportDock/.test(client) &&
-  /'data-region': 'CHAT'/.test(client) && /'data-region': 'REPORT_DOCK'/.test(client));
-ok('v4: 报告状态机 + 全屏阅读页',
-  /status: 'running'/.test(client) && /zp-report-card/.test(client) &&
-  /function ReaderPage/.test(client) && /'data-region': 'READER'/.test(client));
-ok('v4: 聊天有引导示例，报告岗位有生成入口',
-  /readingGreeting/.test(client) && /readingSug1/.test(client) && /reportGenerate/.test(client));
+/* v1.5.2: order 重排只允许在 narrow 生效，不能覆盖宽/中/紧凑档的 DOM 顺序 */
+ok('v1.5.2: 左栏 order 规则已收窄到 narrow', /\[data-w="narrow"\] \.zp-input-card \{ order: 1 \}/.test(client) &&
+  /\[data-w="narrow"\] \.zp-patterns-card \{ order: 3 \}/.test(client) &&
+  !/(?:^|\n)\.zp-input-card \{ order: 1 \}/.test(client));
+
+/* v1.5.1: 左栏阅读顺序 = 命主信息 → 格局摘要 → 排盘输入 → 命盘库 */
+{
+  const iSummary = client.indexOf('h(Summary, { chart');
+  const iPatterns = client.indexOf('h(PatternsSummary,');
+  const iInput = client.indexOf('h(InputForm, {');
+  const iLib = client.indexOf('h(Library, {');
+  ok('v1.5.1: 左栏顺序 命主信息 → 格局摘要 → 排盘输入 → 命盘库',
+    iSummary > 0 && iSummary < iPatterns && iPatterns < iInput && iInput < iLib,
+    `${iSummary}/${iPatterns}/${iInput}/${iLib}`);
+}
 
 /* v1.5.0: 左栏格局摘要（命主信息下方）+ SIDE_PATTERNS 区域 */
 ok('v1.5.0: 左栏格局摘要接通 SIDE_PATTERNS', /data-region': 'SIDE_PATTERNS'/.test(client) &&
@@ -385,27 +384,39 @@ ok('v1.5.0: 左栏格局摘要接通 SIDE_PATTERNS', /data-region': 'SIDE_PATTER
   ok('v1.4.0: 版本检查无轮询定时器', !/setInterval\(/.test(client));
 }
 
-/* v4: 白字填充走宿主 button-primary token（不再自带紫色），三种宽度阈值 */
-ok('v4: 主行动填充走宿主 button-primary token',
-  /--zp-fill-accent: var\(--dsw-alias-button-primary-fill\)/.test(client) &&
-  /--zp-fill-accent-deep: var\(--dsw-alias-button-primary-hover\)/.test(client) &&
-  /--primary: var\(--dsw-alias-button-primary-fill\)/.test(client));
-ok('v4: 三档宽度（narrow/mid/wide）+ 窄屏阅读分栏切换',
-  /panelW >= 1100 \? 'wide'/.test(client) && /panelW >= 880 \? 'mid'/.test(client) &&
-  /data-w="narrow"/.test(client) && /zp-reading-tabs/.test(client));
-
+/* v3.1: 深色白字填充专用色（对比度 ≥4.5）与 mid 详情/窄屏头部微调 */
+ok('v3.1: 深色白字填充走 --zp-fill-accent*（不再拿亮 accent 配白字）',
+  /--zp-fill-accent: #7c5cf0/.test(client) && /--zp-fill-accent: #6a4fe0/.test(client) &&
+  /--zp-fill-accent-deep: #5840c0/.test(client) && /var\(--zp-fill-accent\)/.test(client));
+ok('v3.1: mid/窄档详情卡 max-width 760 居中 + 窄屏头部命主摘要',
+  /:not\(\[data-w="wide"\]\) \.zp-detail \{[^}]*max-width: 760px/.test(client) && /zp-head-mini/.test(client));
+/* v3.1: 侧栏展开时面板 ~908–1071，必须有 compact 两栏，不能掉进单列把中栏拉满 */
+ok('v3.1: 四档布局含 compact（908 起两栏，264+600），防止侧栏展开时中栏被拉成单列',
+  /panelW >= 908/.test(client) && /data-w="compact"/.test(client) &&
+  /data-w="compact"[^}]*grid-template-columns:\s*264px/.test(client) &&
+  /data-w="compact"[^}]*--zp-board-max:\s*600px/.test(client));
 /* v3 布局：时间维度导航、左栏收起、工具视图、窄屏底栏 —— 防回退成「列表堆在盘上」 */
 ok('v3: 时间维度导航常驻 TimeBar（模式分段 + 大限/流年步进 + 回到当前）',
   /zp-timebar/.test(client) && /zp-time-nav/.test(client) && /backToCurrent/.test(client) && /thisYear/.test(client));
 ok('v3: 十二大限列表/流年输入不再压在盘面上方（旧组件已移除）',
   !/function DecadalPanel/.test(client) && !/function YearlyBar/.test(client) && !/className: 'zp-stage-bar'/.test(client));
+ok('v3: 左栏可收起（rail toggle + data-rail），窄屏有底部行动条',
+  /'data-rail': railVisible/.test(client) && /zp-rail-toggle/.test(client) && /zp-bottombar/.test(client));
 ok('v3: 格局/词典移到 TimeBar 工具区，有返回盘面出口',
   /openPatterns/.test(client) && /openDict/.test(client) && /backToBoard/.test(client));
-/* v4: 抽屉退役（v3.2 的两个模式按钮与自动速览一并移除，阅读改整页） */
-ok('v4: 旧抽屉与其模式条/自动速览已退役',
-  !/zp-ai-mode/.test(client) && !/modeBrief/.test(client) && !/autoStartedRef/.test(client) && !/AIModal/.test(client));
+ok('v3: 有盘时排盘降级为次按钮（唯一主行动 = 紫微师解读）',
+  /className: 'zp-btn' \+ \(props\.hasChart \? '' : ' zp-btn-primary'\)/.test(client));
+/* v3.2：抽屉不再有「只改下一次请求」的模式条；空态/回答后都是直接发起动作 */
+ok('v3.2: 抽屉去掉速览/鲲鹏模式条（避免点了没反应）',
+  !/modeBrief/.test(client) && !/modeReport/.test(client) && !/zp-ai-mode/.test(client) && !/zp-suggest/.test(client));
+ok('v3.2: 空态两个动作 + 回答后「完整报告」动作都存在',
+  /aiStartBrief/.test(client) && /aiStartReport/.test(client) && /aiFullReport/.test(client) && /showFullReport/.test(client));
+ok('v3.2: 首次打开抽屉自动发起一次速览（每张盘只一次）',
+  /autoStartedRef/.test(client) && /runInterpretation\('', 'brief'\)/.test(client));
+ok('v3.2: 换盘清空旧解读（不串盘）',
+  /换盘 = 换解读对象/.test(client) && /autoStartedRef\.current = false/.test(client));
 ok('client 大限默认停在当前段（不是第 0 段）且流年选择进 payload',
-  /var currentDecadeIndex = function/.test(client) && /setSelDecadal\(currentDecadeIndex\(chartObj\)\)/.test(client) && /yearlyFocus:/.test(client));
+  /function currentDecadeIndex|var currentDecadeIndex = function/.test(client) && /setSelDecadal\(currentDecadeIndex\(result\.chart\)\)/.test(client) && /yearlyFocus:/.test(client));
 ok('client 问答 payload 带完整上下文与当前年龄（大限定位）',
   /var chartContextText = function/.test(client) && /chartText: chartContextText\(\)/.test(client) &&
   /currentAge: pos\.currentAge/.test(client) && /decadalFocus: selectedDecade/.test(client));
@@ -413,7 +424,7 @@ ok('client 走官方 locale 服务（register + bind，不再读 tr.i18n）',
   /locale\.register\('ziwei'/.test(client) && /locale\.bind\('ziwei'\)/.test(client) && !/\.i18n\[0\]/.test(client));
 /* P2-8 / a11y 回归：流式区 aria-live、分段控件 aria-pressed、图标出口 aria-label、预览 iframe title+sandbox */
 ok('client 可访问性契约在位（aria-live / aria-pressed / iframe title+sandbox）',
-  /role: 'log'/.test(client) && /'aria-live': 'polite'/.test(client) && /'aria-pressed':/.test(client) && /title: t\('reportName'\)/.test(client) && /sandbox: 'allow-same-origin'/.test(client));
+  /role: 'log'/.test(client) && /'aria-live': 'polite'/.test(client) && /'aria-pressed':/.test(client) && /title: t\('previewHtml'\)/.test(client) && /sandbox: 'allow-same-origin'/.test(client));
 ok('engine-built.js 与内核解耦（不含 UI）', !/__ModuleLoader__/.test(readFileSync(join(root, 'engine-built.js'), 'utf8')));
 
 /* H2: 构建产物新鲜度 —— 改了 src 忘记 build、或产物被手改, 都必须报错。
@@ -422,11 +433,8 @@ ok('engine-built.js 与内核解耦（不含 UI）', !/__ModuleLoader__/.test(re
   const eng = readFileSync(join(root, 'engine-built.js'), 'utf8');
   const zc = readFileSync(join(root, 'src', 'ziwei-core.js'), 'utf8');
   const ui = readFileSync(join(root, 'src', 'ui-pro.js'), 'utf8');
-  const uiCss = readFileSync(join(root, 'src', 'ui.css'), 'utf8');
   const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
-  const uiBuilt = ui
-    .replace("'__ZIWEI_VERSION__'", JSON.stringify(pkg.version))
-    .replace("'__ZIWEI_CSS__'", "`" + uiCss + "`");
+  const uiBuilt = ui.replace("'__ZIWEI_VERSION__'", JSON.stringify(pkg.version));
   const headEnd = client.indexOf(eng);
   const tailStart = headEnd + eng.length + 1 + zc.length;
   const fresh = headEnd > 0
@@ -456,10 +464,10 @@ ok('引擎默认 dayDivide = current', /dayDivide: 'current'/.test(readFileSync(
  *     且面板没有返回会话的出口 → 用户被困。三条断言一起防回归。 */
 ok('面板避让 darwin 窗口 chrome（top / leading / overlay 三个 frame 变量都带 0px 兜底）',
   /html\[data-platform="darwin"\] \.zp-root \{\s*padding-top: var\(--dsh-frame-top-clearance, 0px\)/.test(client) &&
-  /html\[data-platform="darwin"\] \[data-sidebar-collapsed\] \.zp-topbar \{[\s\S]{0,200}?var\(--dsh-frame-leading-clearance, 0px\)/.test(client) &&
-  /html\[data-platform="darwin"\] \.zp-root \.zp-overlay-center \{[\s\S]{0,200}?var\(--dsh-frame-overlay-top, 48px\)/.test(client));
+  /html\[data-platform="darwin"\] \[data-sidebar-collapsed\] \.zp-head \{[\s\S]{0,200}?var\(--dsh-frame-leading-clearance, 0px\)/.test(client) &&
+  /html\[data-platform="darwin"\] \.zp-root \.zp-overlay-center \{[\s\S]{0,200}?var\(--dsh-frame-overlay-top, 46px\)/.test(client));
 ok('面板层叠收进自身上下文（内部 z-index 不再盖住 frame 的 shell.leading 出口）',
-  /\.zp-root \{[\s\S]{0,5000}?isolation: isolate;/.test(client));
+  /\.zp-root \{[\s\S]{0,2000}?isolation: isolate;/.test(client));
 ok('client 提供「返回会话」出口：官方 selectPanel(null) + title/aria-label（键盘可达）',
   /selectPanel\(null\)/.test(client) &&
   /className: 'zp-icon-btn zp-exit', type: 'button'/.test(client) &&

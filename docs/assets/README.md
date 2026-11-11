@@ -40,22 +40,3 @@ README 顶部的截图位需要真实界面截图。**当前仓库还没有这�
 - `screenshot-sidebar.png`：DSH 左侧栏局部，显示「紫微斗数 Pro」入口。
 
 深色主题、侧栏折叠、窄屏截图待补；渲染预览见 `docs/design/assets/`（本地渲染）。
-
-## v4 截图（2026-11-11，无头 Chrome 渲染真实 client.js）
-
-用 `/tmp` 下的无头 Chrome harness 物化真实 `client.js`（假 ModuleLoader + React + 假 SSE）截取，
-固定示例生辰 1992-05-03 09:30 男 / 经度 105.97；不含真实客户信息：
-
-| 文件 | 内容 |
-|---|---|
-| `v4-home.jpg` | 首页：Hero + 我的命盘卡片 |
-| `v4-create.jpg` | 新建命盘表单页 |
-| `v4-chart.jpg` | 命盘页：Hero + 时间栏 + 盘面 + 详情 |
-| `v4-reading-empty.jpg` | 解读页空态：聊天引导 + 报告工位 |
-| `v4-reading-answer.jpg` | 解读页：速览回答 |
-| `v4-report-progress.jpg` | 报告生成中：章节进度 / 字数 / 停止 |
-| `v4-report-dock.jpg` | 报告完成卡：全屏阅读 / 导出 / 复制 |
-| `v4-reader.jpg` | 报告全屏阅读页 |
-| `v4-reader-dark.jpg` | 深色主题下的报告阅读页 |
-
-录屏与真机截图仍建议在干净 profile 里补；v4 这批用于文档与 PR 说明，不替代真机走查。

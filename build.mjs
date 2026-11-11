@@ -48,10 +48,8 @@ const engine = readFileSync(join(srcDir, 'engine-core.js'), 'utf8')
   .replace('/*__LTERM_INFO__*/', lTermInfo);
 
 const zcore = readFileSync(join(srcDir, 'ziwei-core.js'), 'utf8');
-const uiCss = readFileSync(join(srcDir, 'ui.css'), 'utf8');
 const ui = readFileSync(join(srcDir, 'ui-pro.js'), 'utf8')
-  .replace("'__ZIWEI_VERSION__'", JSON.stringify(PKG_VERSION))
-  .replace("'__ZIWEI_CSS__'", "`" + uiCss + "`");
+  .replace("'__ZIWEI_VERSION__'", JSON.stringify(PKG_VERSION));
 
 // 引擎单独文件(供 Node 测试与 host 沙箱): 带数据
 writeFileSync(join(root, 'engine-built.js'), engine);

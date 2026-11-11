@@ -101,12 +101,11 @@ node scripts/audit-ui.mjs --strict
 
 ---
 
-## 当前状态（2026-11-11 v4）
+## 当前状态（2026-11-07）
 
 - 契约已落：三份文档 + 体检脚本可跑，`node scripts/audit-ui.mjs` 与 `node verify/ui-contract.mjs` 均 exit 0。
-- **已接线**：v4 起 `data-region` 14/14 与 §2 一致；`RegionId` 联合类型仍未建（layout.md §11 A2）。
-- **历史欠账（基线内）**：字阶 3、间距 41、字重 10、literal 色 6、私牌色 10、深色对比度 0 组（基线 70）。
-- **CSS 位置**：v4 起在 `src/ui.css`，由 `build.mjs` 注入 client.js；audit 直接读该文件。
+- **未接线（需改 src，不在本轮范围）**：`data-region` 标记 0 处、`RegionId` 联合类型未建（layout.md §11 A1/A2）。因此 C14 目前只做「出现即校验」，不会要求必须出现。
+- **历史欠账（基线内，见 design.md §11）**：字阶 42、间距 103、字重 16、literal 色 13、私牌色 49、深色对比度 1 组。
 - **必须 GUI 复核的项**（本机无浏览器控制，未实测）：深色主题实际观感、darwin 顶栏遮挡、窄面板真实宽度、报告 iframe 版式。审计脚本只做静态检查，**不替代视觉走查**。
 
 ## 基线更新记录
@@ -118,6 +117,3 @@ node scripts/audit-ui.mjs --strict
   60→53；基线 234→226（下调）。
 - 2026-11-11（v3.2）：抽屉删掉模式条 / 空态说明 / 三条建议与建议按钮样式，C3 间距违规 103→99、
   C16 私有 accent 引用 53→50；基线 226→219（下调）。C1/C2/C4 不变。
-- 2026-11-11（v4）：五页信息架构 + 独立 CSS 文件 + 宿主品牌 token；重写 C2 字阶（展示级 34/28/25/24/20
-  与半档）、C13 结构参数（PAGE_MAX/BOARD_MAX/READER_MAX/CHAT_W/MID/WIDE）、C14 区域表、C15 只比较
-  内容色；C1 6 / C2 3 / C3 41 / C4 10 / C16 10，基线 219→70（下调）。

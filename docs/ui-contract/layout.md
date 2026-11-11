@@ -13,12 +13,6 @@
 
 ---
 
-> **v4 重构提示（2026-11-11）**：工作台从「左栏 + 盘面 + 抽屉」改为「五页 + 浮空顶栏」。
-> 本文 §2 区域白名单、§3 外壳、§4 页型与 §11 as-built 已按 v4 同步；§1/§5–§10 仍是通用规则，
-> 与 v4 冲突处以本页表格为准（旧 DRAWER/PREVIEW/SIDE_FORM/SIDE_LIBRARY/EMPTY/BOTTOMBAR 已退役）。
-
----
-
 ## §0 与视觉规范的分工
 
 切线只有一条：**换一套品牌视觉时，这条规则会不会变？**
@@ -107,20 +101,20 @@ Q3 它属于哪个切面？
 
 | Region | 职责（Responsibility） | 对应选择器 / JSX 位置 | 允许放（Must hold） | 禁止放（Must not hold） |
 |---|---|---|---|---|
-| `HEAD` | 全局顶栏：品牌、五页导航、当前命主上下文、全局出口 | `.zp-topbar` | 品牌、首页/命盘/解读/报告导航、上下文 chip、返回会话、设置 | 页面内容、主行动、表单 |
-| `HOME` | 首页：命盘入口总览 | `.zp-page[data-region="HOME"]` | Hero、统计、我的命盘卡片、新建入口 | 盘面、表单字段、解读正文 |
-| `CREATE` | 新建/改生辰页 | `.zp-page[data-region="CREATE"]` | 出生信息表单、流派折叠、排盘提交、口径说明 | 盘面、解读正文、设置项 |
-| `CHART` | 命盘页：身份、时间、盘面 | `.zp-page[data-region="CHART"]` | 命盘标题与操作、TIMEBAR、BOARD、INSPECTOR、SIDE_PROFILE、SIDE_PATTERNS、TOOLPAGE | 解读正文、设置项 |
-| `TIMEBAR` | 时间维度 / 工具 / 视图开关 | `.zp-timebar` | 本命/大限/流年、时间步进、格局/词典入口、杂曜开关 | 主行动、第二套导航条、盘面内容 |
-| `BOARD` | 盘面本体 | `.zp-board` / `.zp-grid` | 16 宫、中宫、选中态、四化/庙旺角标 | 说明性长文、表格、解读正文 |
-| `INSPECTOR` | 当前选中宫的一个切面 | `.zp-detail` | 星曜、运限、对宫/三合导航 | 第二宫、报告正文、设置 |
-| `TOOLPAGE` | 工具页整页内容 | `.zp-patterns` / `.zp-dict-grid` | 格局卡、词典条目 | 盘面、主行动 |
-| `SIDE_PROFILE` | 命盘页的命主信息卡 | `.zp-summary-card` | 四柱、五行局、命宫身宫、四化 strip | 可编辑控件、解读正文 |
-| `SIDE_PATTERNS` | 命盘页的格局摘要卡 | `.zp-patterns-card` | 最多 4 条格局 + 查看全部 | 完整格局正文、盘面内容 |
-| `CHAT` | 解读页聊天栏 | `.zp-reading-chat` | 引导、对话流、输入框、免责声明、复制回答 | 报告长文、设置项 |
-| `REPORT_DOCK` | 解读页报告工位 | `.zp-reading-dock` | 生成入口、章节进度、完成卡、全屏阅读/导出/复制 | 聊天输入框、设置项 |
-| `READER` | 报告全屏阅读页 | `.zp-reader` | 报告 iframe、返回解读、全屏/导出/复制 | 编辑控件、聊天、设置 |
-| `MODAL` | 持久偏好浮层 | `.zp-overlay > .zp-settings` | 自动打开、默认杂曜、检查更新、关于 | 命盘数据、解读正文、危险操作 |
+| `HEAD` | 全局页头：品牌、当前命主上下文、唯一主行动、全局入口 | `.zp-head`（CSS 238 / JSX 2153） | 页面标题、命主摘要 chip、返回会话出口（`.zp-exit`，HEAD 的第一个控件）、复制/写入会话、唯一主行动「紫微师解读」、设置入口 | 表单字段、设置项正文、第二个 brand 填充按钮、危险操作（删除/清空）、命盘库管理 |
+| `SIDE_PROFILE` | 当前命盘只读摘要 | `.zp-summary-card`（CSS 281 / JSX 1132） | 四柱、生肖/星座、命宫身宫、五行局、命主身主、起运、真太阳时、四化 strip | 任何可编辑控件、任何按钮、已保存盘列表 |
+| `SIDE_PATTERNS` | 命主信息下方的格局摘要（只读） | `.zp-patterns-card`（v1.5.0） | 格局名、等级、一句话说明、查看全部入口（最多 4 条） | 完整格局正文、可编辑控件、盘面内容 |
+| `SIDE_FORM` | 生辰输入与排盘 | `.zp-input-card`（CSS 279 / JSX 1109） | 11 个字段、历法/性别分段、流派折叠 `<details>`、排盘按钮、错误条 | 已保存盘列表、解读入口、命主摘要、命盘库 |
+| `SIDE_LIBRARY` | 命盘资产管理 | `.zp-lib-card`（CSS 282 / JSX 1160） | 保存输入、盘列表（每项最多 1 个删除按钮）、当前选中态 | 编辑盘名（保存时输入）、批量操作、导入导出、解读正文 |
+| `TIMEBAR` | 时间维度切换、运限导航、工具入口与视图级开关 | `.zp-timebar` / `.zp-tabs` / `.zp-time-nav`（v3） | 本命/大限/流年 3 个模式页签；大限「‹ 段位 干支 宫位 › + 回到当前 + 下拉」；流年「‹ 年份 › + 今年」；格局/词典工具入口；杂曜/专注开关 | 状态告警、主行动、设置、盘面内容、第二套导航条、把十二大限列表或年份输入堆在盘面上方 |
+| `BOTTOMBAR` | 窄屏（`data-w="narrow"`）贴底行动条 | `.zp-bottombar`（v3，仅窄屏有盘时渲染） | 「生辰」（展开左栏并回到顶部）、唯一主行动「紫微师解读」 | 第三个动作、设置、复制/写入会话（这些在 HEAD 或 TIMEBAR）、盘面内容 |
+| `BOARD` | 命盘本体 | `.zp-board-wrap` / `.zp-board` / `.zp-grid`（CSS 432/436/444 / JSX 2235） | 16 宫、中宫、选中环、命/身标记、四化/庙旺角标、盘面横向滚动容器 | 说明性长文、表格、跨宫对比、解读正文、第二张卡片 |
+| `INSPECTOR` | 当前选中宫的一个切面 | `.zp-detail`（CSS 571 / JSX 1275） | 主/辅/杂曜、大限小限十二神、对宫/三合导航、宫位四化 | 第二宫详情、报告文本、设置项、跨宫对比 |
+| `TOOLPAGE` | 非盘面视图的整页内容 | `.zp-patterns` / `.zp-dict-grid` / `.zp-decadal-list` / 流年条（CSS 831/839/381） | 各自网格/列表（格局卡、词典条目、十二大限列表、流年选择条） | 盘面（不得与 BOARD 同屏）、主行动、第二套卡片语言 |
+| `EMPTY` | 未出盘时的占位 | `.zp-empty`（CSS 846 / JSX 2221） | 太极符号、一句说明、一个示例 CTA | 第二张卡、第二个 CTA、表单（表单在 SIDE_FORM） |
+| `DRAWER` | 解读抽屉（右滑浮层） | `.zp-overlay > .zp-ai`（CSS 651/663 / JSX 1522） | 对话流、一次点击即产出的解读入口（速览 / 完整报告）、复制/预览/导出/带到会话、输入框、免责声明 | 设置项、命盘库管理、只在下次请求生效的模式切换、第二个弹层（PREVIEW 是它的子层，见下） |
+| `PREVIEW` | 报告 HTML 只读预览（DRAWER 内层） | `.zp-ai-preview > iframe`（CSS 763 / JSX 1604/1609） | iframe、关闭、返回会话 | 编辑控件、导出按钮（导出在 DRAWER 工具条）、第二个 iframe |
+| `MODAL` | 持久偏好弹层 | `.zp-settings`（CSS 773 / JSX 1619） | API Key（可后置）、自动打开、默认杂曜、关于 | 命盘数据、解读正文、命盘库、危险操作 |
 
 **表尾指认代码形态**：当前 `data-region` 在源码中为 **0 处**（见 §11）；将来落地形态是 `src/ui-region.js` 里的 `type RegionId = 'HEAD' | 'SIDE_FORM' | ...` + 每区域元数据。改这张表必须同时改联合类型与 `data-region`，顺序见 §9。
 
@@ -134,15 +128,25 @@ Q3 它属于哪个切面？
 
 ```
 .zp-root                     容器 height:100%; overflow:hidden; isolation:isolate
-├─ .zp-ambient               装饰光斑（aria-hidden）
-├─ HEAD  .zp-topbar          绝对定位玻璃顶栏：品牌 / 五页导航 / 上下文 chip / 出口
-└─ 页面（绝对定位 inset:0，各自滚动；页面顶部留出 92px 顶栏避让）
-   ├─ HOME    .zp-page > .zp-page-inner       hero + 我的命盘网格 + 新建卡
-   ├─ CREATE  .zp-page > .zp-create-grid      表单卡 + 说明侧卡
-   ├─ CHART   .zp-page > .zp-page-inner       hero + TIMEBAR + BOARD(+INSPECTOR) + SIDE 信息卡
-   ├─ READING .zp-reading                     宽/中：CHAT 380 + REPORT_DOCK；窄：单栏 + tabs
-   └─ READER  .zp-reader[data-region]         顶部工具条 + 居中的 860px 报告纸张（iframe）
-MODAL .zp-overlay > .zp-overlay-center > .zp-settings   居中设置浮层
+└─ .zp-scroll                唯一滚动容器 height:100%; overflow:auto
+   └─ .zp-inner              max-width 1460（全局上限，见 §3.2 事实 3）
+      ├─ HEAD    .zp-head              ~auto（sticky top:0; z-index:20）
+      └─ .zp-body             grid（narrow 1 列 / mid 296px+1fr / wide 304px+1fr）
+         ├─ .zp-side         =SIDE_MID / SIDE_WIDE（narrow 下 display:contents 拆散重排）
+         │  ├─ SIDE_FORM     .zp-input-card      ~auto
+         │  ├─ SIDE_PROFILE  .zp-summary-card    ~auto（无盘时不渲染）
+         │  └─ SIDE_LIBRARY  .zp-lib-card        ~auto
+         └─ .zp-stage        =剩余宽（main 区）
+            ├─ TIMEBAR       .zp-timebar      auto（无盘时不渲染；窄屏非 sticky）
+            ├─ EMPTY         .zp-empty         ~auto（无盘时）
+            ├─ TOOLPAGE      .zp-patterns / .zp-dict-grid / .zp-decadal-list   ~auto
+            └─ BOARD         .zp-board-wrap
+               ├─ BOARD      .zp-board  max-width:720（居中）
+               └─ INSPECTOR  .zp-detail  宽 300（仅 wide 并列，否则下沉）
+浮层（都绝对定位在 .zp-root 内，不按视口坐标）：
+   DRAWER  .zp-overlay > .zp-ai        =min(464px,100%)，右贴边
+      └─ PREVIEW .zp-ai-preview        =inset:0（DRAWER 子层，z-index:5）
+   MODAL   .zp-overlay-center > .zp-settings   =min(520px,100%)
 ```
 
 ### 3.2 关键结构事实（图上看不出来、但改扩展规则时会踩的）
@@ -157,28 +161,38 @@ MODAL .zp-overlay > .zp-overlay-center > .zp-settings   居中设置浮层
 
 | 参数 | 值 | 用途 / 约束 | 现状 |
 |---|---|---|---|
-| `PAGE_MAX` | 1160 | 普通页面内容上限（`.zp-page-inner`） | 已实现 |
-| `PAGE_PAD_X` | 40 | 页面横向内边距合计（20×2） | 已实现 |
-| `BOARD_MAX` | 720 | 盘面最大宽（`--zp-board-max`） | 已实现 |
-| `READER_MAX` | 860 | 报告纸张最大宽（`.zp-reader-paper`） | 已实现 |
-| `CHAT_W` | 380 | 解读页聊天栏宽（wide；mid 340） | 已实现 |
-| `DOCK_MIN` | 460 | 解读页报告工位最小可用宽 | 已实现（阈值推导） |
-| `MID` | 880 | 中档阈值：`CHAT_W + DOCK_MIN + PAGE_PAD_X` = 380+460+40 | 已实现 |
-| `WIDE` | 1100 | 宽档阈值：`BOARD_MAX + INSPECTOR_W 300 + 16 + PAGE_PAD_X 40 + 24` | 已实现 |
-| `INSPECTOR_W` | 300 | wide 下宫位详情列宽 | 已实现 |
-| `INSPECTOR_GAP` | 16 | 盘面与详情列间隙 | 已实现 |
+| `SIDE_COMPACT` | 264 | compact 档左栏宽（px） | 已实现（`.zp-body` compact 栅格） |
+| `SIDE_MID` | 296 | mid 档左栏宽（px） | 已实现（`.zp-body` mid 栅格） |
+| `SIDE_WIDE` | 304 | wide 档左栏宽（px） | 已实现（`.zp-body` wide 栅格） |
+| `BOARD_MAX` | 720 | mid/wide 盘面最大宽（px） | 已实现（`--zp-board-max`） |
+| `BOARD_COMPACT` | 600 | compact 档盘面最大宽（px） | 已实现（compact 的 `--zp-board-max` 覆盖） |
+| `BOARD_MIN` | 560 | 盘面最小可读宽（px），低于则横向滚动 | 目标值，代码未实现（P0-3） |
+| `INSPECTOR_W` | 300 | 宫位详情列宽（px） | 已实现（`.zp-board-wrap.has-detail`） |
+| `INSPECTOR_GAP` | 14 | 盘面与详情列的间隙（px） | 已实现（同上 `gap:14px`） |
+| `GUTTER` | 16 | mid/wide 的栏间距（px） | 已实现（`.zp-body` gap） |
+| `GAP_COMPACT` | 12 | compact 档栏间距（px） | 已实现（`.zp-body` compact gap） |
+| `PAGE_PAD_X` | 40 | mid/wide 滚动区横向内边距合计（20×2，px） | 已实现（`.zp-scroll` padding） |
+| `PAD_COMPACT` | 32 | compact 滚动区横向内边距合计（16×2，px） | 已实现（compact 的 `.zp-scroll` padding） |
+| `DRAWER_W` | 464 | 解读抽屉宽（px，`min(464px,100%)`） | 已实现（`.zp-ai`） |
+| `MODAL_W` | 520 | 设置弹层宽（px，`min(520px,100%)`） | 已实现（`.zp-settings`） |
+| `COMPACT` | 908 | = `SIDE_COMPACT + GAP_COMPACT + BOARD_COMPACT + PAD_COMPACT` = 264+12+600+32 | 已实现，但以字面量出现（§3.4） |
+| `MID` | 1072 | = `SIDE_MID + GUTTER + BOARD_MAX + PAGE_PAD_X` | 已实现，但以字面量出现（§3.4） |
+| `WIDE` | 1394 | = `SIDE_WIDE + GUTTER + BOARD_MAX + INSPECTOR_GAP + INSPECTOR_W + PAGE_PAD_X` | 已实现，但以字面量出现（§3.4） |
 
-⚠ 改 `PAGE_MAX` / `BOARD_MAX` / `READER_MAX` / `CHAT_W` 任一项，必须同步上表与 audit C13 对账。
+⚠ 改 `SIDE_*` / `BOARD_*` / `INSPECTOR_*` / `GUTTER` / `PAGE_PAD_X` 任一项，必须重算 `COMPACT`/`MID`/`WIDE`、更新本表、跑 `node scripts/audit-ui.mjs`（C13 会核对公式与代码字面量）。
 
-### 3.4 三档阈值
+### 3.4 四档阈值：公式与当前硬编码对照
 
 三档由**面板实测宽度** `panelW` 决定（`ResizeObserver`，不是 viewport media query）：
 
-| 档位 | 条件 | 行为 |
-|---|---|---|
-| `narrow` | `panelW < MID`（< 880） | 顶栏换成两排；页面上下留白加大；解读页单栏 + 对话/报告 tabs；报告纸张全宽 |
-| `mid` | `880 ≤ panelW < 1100` | 顶栏单排、隐藏上下文 chip；解读页仍双栏（聊天 340）；盘面与详情上下排 |
-| `wide` | `panelW ≥ 1100` | 顶栏完整；解读页双栏（聊天 380）；盘面与宫位详情左右并列 |
+| 档位 | 条件 | 栅格 | 阈值公式 | 当前硬编码值 |
+|---|---|---|---|---|
+| `narrow` | `panelW < COMPACT` | 单列；`.zp-side` 拆散；详情下沉到盘面下方 | — | `panelW <= 0 ? 'narrow'`（首帧兜底） |
+| `compact` | `COMPACT ≤ panelW < MID` | `264px + 1fr`；盘面 ≤600；详情下沉 | `COMPACT = SIDE_COMPACT + GAP_COMPACT + BOARD_COMPACT + PAD_COMPACT` = 264+12+600+32 = **908** | `908`（ui-pro.js，字面量） |
+| `mid` | `MID ≤ panelW < WIDE` | `296px + 1fr`；详情下沉到盘面下方 | `MID = SIDE_MID + GUTTER + BOARD_MAX + PAGE_PAD_X` = 296+16+720+40 = **1072** | `1072`（ui-pro.js，字面量） |
+| `wide` | `panelW ≥ WIDE` | `304px + 1fr`，stage 内再切 `1fr + 300px` | `WIDE = SIDE_WIDE + GUTTER + BOARD_MAX + INSPECTOR_GAP + INSPECTOR_W + PAGE_PAD_X` = 304+16+720+14+300+40 = **1394** | `1394`（ui-pro.js:2141，字面量） |
+
+判读：两个阈值不是拍脑袋，是**布局参数的精确和**——这正是最危险的魔数：看起来有理由，但没写在任何文档里，改一个栏宽就静默失配。**§11 的 P1-5 是把字面量换成常量并由本表公式算出**；在那之前 audit 的 C13 会把字面量与本文公式对账，对不上即 FAIL。
 
 ### 3.5 降级顺序
 
@@ -201,36 +215,35 @@ wide（详情并列）
 
 ## §4 页型
 
-### 4.1 五种页型
+### 4.1 四种页型
 
-| 页型 | 组成 | 用途 |
-|---|---|---|
-| P0 首页 | `HEAD` + `HOME` | 命盘总览、最近看过、已保存、新建入口 |
-| P1 新建 | `HEAD` + `CREATE` | 填写出生信息 / 改生辰后排盘 |
-| P2 命盘 | `HEAD` + `CHART`（`TIMEBAR` + `BOARD` + `INSPECTOR` + `SIDE_PROFILE`/`SIDE_PATTERNS`/`TOOLPAGE`） | 看盘与时间维度 |
-| P3 解读 | `HEAD` + `READING`（`CHAT` + `REPORT_DOCK`） | 聊天解读与完整报告生成 |
-| P4 报告 | `HEAD` + `READER` | 报告全屏阅读、导出 |
+| 页型 | 组成 | 用途 | 区分特征 |
+|---|---|---|---|
+| P1 未出盘 | `HEAD` + `SIDE_FORM` + `SIDE_LIBRARY` + `EMPTY` | 还没排盘 | **无 TIMEBAR、无 BOARD、无 INSPECTOR、无 BOTTOMBAR** |
+| P2 本命页 | `HEAD` + `SIDE_*` + `TIMEBAR` + `BOARD` + `INSPECTOR` | 看本命盘与选中宫 | 唯一会出现 INSPECTOR 的页型 |
+| P3 大限/流年页 | `HEAD` + `SIDE_*` + `TIMEBAR` + `BOARD` | 运限视角 | 盘面 + TIMEBAR 内的段位/年份步进，**无 INSPECTOR、不再有盘上列表** |
+| P4 工具页 | `HEAD` + `SIDE_*` + `TIMEBAR` + `TOOLPAGE` | 格局 / 词典 | **无 BOARD**（工具页禁止盘面） |
 
-`MODAL` 是任意页型上叠加的设置浮层；`PREVIEW` / `DRAWER` 已退役。
+`DRAWER`（解读抽屉）与 `MODAL`（设置）**不是页型**，是任意页型上叠加的浮层；`PREVIEW` 是 `DRAWER` 的子层。
 
 ### 4.2 页型 × 区域矩阵（`✓` 必有 / `○` 可选 / `—` 必无）
 
-| 区域 | P0 首页 | P1 新建 | P2 命盘 | P3 解读 | P4 报告 |
-|---|---|---|---|---|---|
-| `HEAD` | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `HOME` | ✓ | — | — | — | — |
-| `CREATE` | — | ✓ | — | — | — |
-| `CHART` | — | — | ✓ | — | — |
-| `TIMEBAR` | — | — | ✓ | — | — |
-| `BOARD` | — | — | ✓ | — | — |
-| `INSPECTOR` | — | — | ○（选中宫时） | — | — |
-| `TOOLPAGE` | — | — | ○（工具视图） | — | — |
-| `SIDE_PROFILE` | — | — | ✓ | — | — |
-| `SIDE_PATTERNS` | — | — | ✓ | — | — |
-| `CHAT` | — | — | — | ✓ | — |
-| `REPORT_DOCK` | — | — | — | ✓ | — |
-| `READER` | — | — | — | — | ✓ |
-| `MODAL` | ○ 浮层 | ○ | ○ | ○ | ○ |
+| 区域 | P1 未出盘 | P2 本命 | P3 大限 | P4 工具 |
+|---|---|---|---|---|
+| `HEAD` | ✓ | ✓ | ✓ | ✓ |
+| `SIDE_FORM` | ✓ | ✓ | ✓ | ✓ |
+| `SIDE_PROFILE` | — | ✓ | ✓ | ✓ |
+| `SIDE_LIBRARY` | ✓ | ✓ | ✓ | ✓ |
+| `TIMEBAR` | — | ✓ | ✓ | ✓ |
+| `BOARD` | — | ✓ | ✓ | — |
+| `INSPECTOR` | — | ○（选中宫时） | — | — |
+| `TOOLPAGE` | — | — | ✓ | ✓ |
+| `EMPTY` | ✓ | — | — | — |
+| `DRAWER` | ○ 浮层 | ○ 浮层 | ○ 浮层 | ○ 浮层 |
+| `PREVIEW` | — | ○（DRAWER 内） | ○ | ○ |
+| `MODAL` | ○ 浮层 | ○ 浮层 | ○ 浮层 | ○ 浮层 |
+
+矩阵之外不得新增勾。想让 `BOARD` 出现在 P4，改变的是 §4.1 的定义，走 §9。
 
 ### 4.3 浮层规则
 
@@ -380,14 +393,54 @@ wide（详情并列）
 
 ## §11 as-built 对照：本文与当前代码的差异
 
-本节是**契约 vs 现状**的诚实清单（2026-11-11 v4 实测），不是规则。修完一项删一项。
+本节是**契约 vs 现状**的诚实清单（2026-11-07 实测），不是规则。修完一项，删一项；不要留着当待办博物馆。
 
 | # | 契约要求 | 现状 | 处置 |
 |---|---|---|---|
-| A1 | `data-region` 14 处与 §2 一一对应 | v4 已接 14/14（HEAD/HOME/CREATE/CHART/TIMEBAR/BOARD/INSPECTOR/TOOLPAGE/SIDE_PROFILE/SIDE_PATTERNS/CHAT/REPORT_DOCK/READER/MODAL） | 已接线 |
+| A1 | `data-region` 14 处与 §2 一一对应 | v1.5.0 已接 **14/14**（HEAD/SIDE_PROFILE/SIDE_PATTERNS/SIDE_FORM/SIDE_LIBRARY/TIMEBAR/BOARD/INSPECTOR/TOOLPAGE/EMPTY/DRAWER/PREVIEW/MODAL/BOTTOMBAR） | 已接线；改区域名须同步本文与源码 |
 | A2 | `RegionId` 联合类型 | 无 `src/ui-region.js` | 待接线 |
-| A3 | 阈值/参数由常量计算 | `panelW >= 880 / >= 1100` 仍为字面量 | audit C13 对账 |
-| A4 | 窄屏报告纸张全宽 | 已实现（`min(860px,100%)`） | — |
-| A5 | 报告阅读可全屏 | `requestFullscreen` + `:fullscreen` 样式；宿主 webview 不支持时静默 | 能力探测 |
-| A6 | 浮层开关用 `aria-expanded` | 设置用 `aria-pressed`（历史形态） | 可选清理 |
-| A7 | 顶栏首个控件是返回品牌/出口 | 品牌在左；`返回会话` 在右侧动作组（仅宿主支持时渲染） | — |
+| A3 | `COMPACT`/`MID`/`WIDE` 由参数公式计算 | 仍为字面量 `908`/`1072`/`1394`（与公式一致）；compact 档为 v3.1 新增 | P1-5 待做；audit C13 已对账 |
+| A4 | `BOARD_MIN 560` + 盘面横向滚动 | `.zp-board` 只有 `max-width:720`，无 `min-width` | P0-3 待做 |
+| A5 | 工具页独立阅读宽 `READ_MAX 760` | 全局 `max-width:1460` | P2-2 待做 |
+| A6 | `INSPECTOR` 的 `sticky top` 用变量 | 字面量 `top:64px`（ui-pro.js:575） | P1-4 待做 |
+| A7 | 页签方向键切页签 | 未实现；←→ 仍会被舞台宫位导航接管 | P0-4 待做 |
+| A8 | 浮层开关用 `aria-expanded` | HEAD 的解读/设置仍用 `aria-pressed`；v3 左栏开关已用 `aria-expanded` + `aria-controls` | 部分完成 |
+| A9 | 首帧不跳变 | `panelW<=0` 强制 narrow，回调后切档 | 可接受，记录在案 |
+| A10 | `HEAD` 首个控件是 `.zp-exit` 返回会话 | 已实现（仅宿主支持时渲染） | — |
+
+---
+
+## Appendix A — 本文不决定的事
+
+| 问题 | 归属 |
+|---|---|
+| 颜色、字号、间距、圆角、动效 | design.md |
+| token 名与值 | tokens.md |
+| 排盘算法、真太阳时、历法换算 | `src/ziwei-core.js` / `engine-built.js` |
+| 解读提示词、模型选择、流式协议 | `index.js`（host 侧） |
+| 权限、数据持久化、命盘库存储格式 | `index.js` |
+| 宿主窗口 chrome（darwin 安全区数值） | `@deepseek-ai/dsh-client-ui-layout` README |
+
+## Appendix B — 已推翻的结论
+
+| 曾是 | 现在是 | 为什么推翻 |
+|---|---|---|
+| 阈值写死 1072/1394 | 参数公式 + 对账 | 改栏宽会静默失配；本轮已把公式写进 §3.4 |
+| 浮层用 `position:fixed` 覆盖视口 | 面板内 `absolute` | 会盖住侧栏出口；已修复为绝对定位 |
+| 详情列作为 `.zp-body` 第三列 | 在 `.zp-board-wrap` 内部切两列 | 改第三列会连带改阈值；内部切列让 stage 仍是一个区域 |
+| 顶栏 sticky `top:0` 视为天经地义 | 保留但需 darwin clearance | mac 窗口控件遮挡；已加 `--dsh-frame-*` 避让 |
+
+## Appendix C — 落位追踪
+
+验证 §1 全覆盖的一次记录（2026-11-07，本文初版）。每行必须落到一个 RegionId 或明确的「停」。
+
+| 输入 | 敌意/普通 | 落位 | 这次暴露了什么 |
+|---|---|---|---|
+| 「导出全部命盘」 | 敌意（无归属对象的一次性动作） | 停 → §9 | 初版树会把「没归属」漏进 SIDE_LIBRARY；补了 S4 的边界（只限单盘集合操作） |
+| 「在盘面下加一行运势解释」 | 敌意（两处都像） | `INSPECTOR`（选中宫切面） | 补 §1.4 反向清单第 2 条，明确盘面不放说明文字 |
+| 「给页签加第 6 个『神煞』」 | 敌意（枚举已满） | 停 → §7 合并规则 | 初版 §7 只写「5 个页签」，没写满了怎么办；补「合并而非溢出菜单」 |
+| 「顶栏加『分享』按钮」 | 普通 | `HEAD` | 普通动作大部分能落；但 HEAD 主行动唯一性需在 §2 的禁止放里重申 |
+| 「宫位详情加一个『复制此宫』」 | 普通 | `INSPECTOR` | 通过；但暴露「复制类动作在 HEAD 已有先例」，在 §2 INSPECTOR 允许放里补「宫位四化」而非复制按钮 |
+| 「命盘库加导入 JSON」 | 普通 | `SIDE_LIBRARY` | 通过（导入=资产集合操作） |
+
+追踪规则：树上每次改动都要重跑一次敌意 + 普通输入，**追加不覆盖**，并写清触发原因（「某日，因为 §1.1 插入了 S1」）。

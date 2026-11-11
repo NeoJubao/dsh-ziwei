@@ -87,8 +87,8 @@
 
 | 变量 | 值（浅色） | 深色 | 引用次数 | 状态 |
 |---|---|---|---|---|
-| `--zp-accent` | `var(--dsw-alias-brand-primary)` | 同名（宿主切换） | 少量 | ✅ v4 起只是宿主 token 的别名，不再自带紫色 |
-| `--zp-accent-deep` | `var(--dsw-alias-button-primary-hover)` | 同名（宿主切换） | 少量 | ✅ 同上 |
+| `--zp-accent` | `#7c5cf0` | `#a78bfa` | **46** | ❌ 应换 `--dsw-alias-brand-primary`（P0-2） |
+| `--zp-accent-deep` | `#5b3fd6` | `#7c5cf0` | **3** | ❌ 应换 `--dsw-alias-button-primary-hover` |
 
 ### 3.3 填充色（v3.1 新增）
 
@@ -97,11 +97,11 @@ accent 是给文字/描边用的亮紫（#a78bfa），配白字只有 2.72:1。�
 
 | 变量 | 浅色 | 深色 | 用途 |
 |---|---|---|---|
-| `--zp-fill-accent` | `var(--dsw-alias-button-primary-fill)` | 同名（宿主切换） | 白字填充背景（对比度由宿主主题保证） |
-| `--zp-fill-accent-deep` | `var(--dsw-alias-button-primary-hover)` | 同名（宿主切换） | 渐变深端 |
+| `--zp-fill-accent` | `#7c5cf0` | `#6a4fe0` | 白字填充背景（白字对比度 4.52 / 5.52） |
+| `--zp-fill-accent-deep` | `#5b3fd6` | `#5840c0` | 渐变深端（白字对比度 6.72 / 7.22） |
 
 登记规则：这两个名字是**新增的填充专用变量**，允许引用；`--zp-accent*` 仍按 §3.2 只减不增。
-**v4 起**四个填充变量都直接映射宿主 `button-primary-*` token，明暗由宿主主题切换；audit C15 校验 `--zp-*` 内容色的明暗配对，宿主别名不参与配对（主题负责）。
+audit C15 用它们校验「白字填充 ≥ 4.5:1」。
 
 ### 3.2 规则
 

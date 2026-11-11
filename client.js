@@ -1730,52 +1730,6 @@ window.__ModuleLoader__.load({
         oppPalace: '对宫', triPalace: '三合', detailTitle: '宫位详情',
         mutagenTitle: '四化', noMutagen: '—',
         ai: '紫微师解读', aiTitle: '紫微师解读',
-
-        /* ---- v4 工作台 ---- */
-        navHome: '首页', navChart: '命盘', navReading: '解读', navReport: '报告',
-        navLabel: '工作台导航', navNeedChart: '先新建一张命盘',
-        homeEyebrow: '紫微斗数 · 人生规划工作台',
-        homeTitleA: '把一张命盘，', homeTitleB: '读成一条人生路线。',
-        homeStatSavedBare: '张已保存', homeStatRecentBare: '张最近看过',
-        homeStatLast: '上次：{name} · {time}',
-        homeNew: '新建命盘', homeSample: '示例命盘',
-        homeRecentTitle: '我的命盘', homeRecentMeta: '最近看过的盘会自动出现在这里',
-        homeCardNew: '新建一张', homeEmptyTitle: '还没有命盘',
-        homeEmptyHint: '新建一张，排盘后会自动出现在这里。',
-        homeSavedTag: '已保存', homeRecentTag: '最近', homeRemove: '移除记录',
-        createTitle: '新建命盘', createSub: '填写出生信息，排盘后进入命盘阅读。',
-        createSubmit: '排盘并查看', createSample: '用示例生辰',
-        createWhat: '你会得到', createAsideTitle: '排盘与隐私',
-        createWhat1: '确定性命盘、四化与大限',
-        createWhat2: '格局分析：一眼看懂盘面结构',
-        createWhat3: '紫微师解读：带上下文直接聊',
-        createWhat4: '完整鲲鹏报告：14 个部分',
-        createWhat5: '精装 HTML：可离线阅读、打印',
-        createSubmitEdit: '重新排盘',
-        chartInterpret: '解读这张盘', chartEdit: '改生辰',
-        chartSave: '保存命盘', chartSaved: '已保存', chartUnsave: '取消保存',
-        readingTitle: '紫微师解读', readingGreeting: '先把这张盘读懂。',
-        readingLead: '命盘已经带入。可以直接问一个问题，也可以先出一份速览解读。',
-        readingSug1: '重点讲事业与财运', readingSug2: '这十年大限要注意什么',
-        readingSug3: '我的性格与优势', readingSug4: '写完整鲲鹏报告', readingSug4Meta: '完整报告',
-        readingAskPh: '问事业、财运、大限…', readingHint: 'Enter 发送 · Shift+Enter 换行',
-        readingTabChat: '对话', readingTabDock: '报告', readingCtxIn: '命盘已带入',
-        dockEyebrow: '完整鲲鹏报告', dockTitle: '报告工位', dockMeta: '生成后可预览、全屏阅读、导出 HTML',
-        dockIdleTitle: '把这张盘读成一份完整报告。',
-        dockIdleLead: '14 个部分：命盘总览、性格大略、家庭、婚姻、子女、财富、健康、朋友、事业、居所、福德、迁移、大限、综合建议。约 2–3 分钟。',
-        reportGenerate: '生成完整报告', reportGenerating: '正在撰写完整报告…',
-        reportChars: '{n} 字', reportSections: '{n} / 14 部分',
-        reportStop: '停止', reportContinue: '继续生成', reportRetry: '重试', reportRegenerate: '重新生成',
-        reportRead: '全屏阅读', reportExport: '导出 HTML', reportCopy: '复制全文', reportCopied: '已复制',
-        reportReady: '报告已完成', reportFailed: '报告生成中断', reportEmpty: '还没有生成报告',
-        reportHint: '报告会保留在本页；导出 HTML 后可离线阅读、打印或转发。',
-        reportHintFoot: '完成后可全屏阅读、导出 HTML', reportName: '人生鲲鹏计划 · 完整报告',
-        reportPart1: '命盘总览', reportPart2: '性格大略', reportPart3: '家庭关系', reportPart4: '婚姻情感',
-        reportPart5: '子女培育', reportPart6: '财富管理', reportPart7: '健康养生', reportPart8: '朋友贵人',
-        reportPart9: '事业发展', reportPart10: '居家风水', reportPart11: '心灵福德', reportPart12: '出行迁移',
-        reportPart13: '大限节奏', reportPart14: '综合建议',
-        readerBack: '返回解读', readerFull: '全屏', readerExitFull: '退出全屏',
-        relJustNow: '刚刚', relMin: '{n} 分钟前', relHour: '{n} 小时前', relYesterday: '昨天', relDays: '{n} 天前',
         aiSend: '发送', aiNewChat: '新对话', aiAskPh: '追问命盘，Enter 发送',
         aiStartBrief: '速览解读', aiStartReport: '完整鲲鹏报告',
         aiFullReport: '完整报告', aiFullReportHint: '基于当前命盘生成完整鲲鹏报告（14 部分）',
@@ -1846,52 +1800,6 @@ window.__ModuleLoader__.load({
         oppPalace: 'Opposite', triPalace: 'Trine', detailTitle: 'Palace Detail',
         mutagenTitle: 'Transforms', noMutagen: '—',
         ai: 'Reading', aiTitle: 'Zi Wei Reading',
-
-        /* ---- v4 workbench ---- */
-        navHome: 'Home', navChart: 'Chart', navReading: 'Reading', navReport: 'Report',
-        navLabel: 'Workbench navigation', navNeedChart: 'Create a chart first',
-        homeEyebrow: 'Zi Wei Dou Shu · Life planning desk',
-        homeTitleA: 'Turn one chart ', homeTitleB: 'into a life route.',
-        homeStatSavedBare: 'saved', homeStatRecentBare: 'recently viewed',
-        homeStatLast: 'Last: {name} · {time}',
-        homeNew: 'New chart', homeSample: 'Sample chart',
-        homeRecentTitle: 'My charts', homeRecentMeta: 'Charts you open show up here',
-        homeCardNew: 'Create one', homeEmptyTitle: 'No charts yet',
-        homeEmptyHint: 'Create one and it will appear here.',
-        homeSavedTag: 'Saved', homeRecentTag: 'Recent', homeRemove: 'Remove',
-        createTitle: 'New chart', createSub: 'Enter the birth data, then read the chart.',
-        createSubmit: 'Draw chart', createSample: 'Use sample',
-        createWhat: 'What you get', createAsideTitle: 'Charting & privacy',
-        createWhat1: 'Deterministic chart, transforms and decades',
-        createWhat2: 'Pattern analysis of the chart structure',
-        createWhat3: 'Zi Wei reading with chart context',
-        createWhat4: 'Full Kunpeng report in 14 parts',
-        createWhat5: 'Self-contained HTML for offline reading',
-        createSubmitEdit: 'Redraw chart',
-        chartInterpret: 'Read this chart', chartEdit: 'Edit birth data',
-        chartSave: 'Save chart', chartSaved: 'Saved', chartUnsave: 'Remove from saved',
-        readingTitle: 'Zi Wei reading', readingGreeting: 'Start with this chart.',
-        readingLead: 'The chart is attached. Ask a question, or start with a quick reading.',
-        readingSug1: 'Career and money', readingSug2: 'What to watch in this decade',
-        readingSug3: 'Strengths and blind spots', readingSug4: 'Write the full Kunpeng report', readingSug4Meta: 'Full report',
-        readingAskPh: 'Ask about career, money, decades…', readingHint: 'Enter to send · Shift+Enter for newline',
-        readingTabChat: 'Chat', readingTabDock: 'Report', readingCtxIn: 'Chart attached',
-        dockEyebrow: 'Full Kunpeng report', dockTitle: 'Report desk', dockMeta: 'Preview, read full screen and export HTML',
-        dockIdleTitle: 'Turn this chart into a full report.',
-        dockIdleLead: '14 parts: overview, personality, family, marriage, children, wealth, health, friends, career, home, spirit, travel, decades, advice. Takes 2–3 minutes.',
-        reportGenerate: 'Generate full report', reportGenerating: 'Drafting the full report…',
-        reportChars: '{n} chars', reportSections: '{n} / 14 parts',
-        reportStop: 'Stop', reportContinue: 'Continue', reportRetry: 'Retry', reportRegenerate: 'Regenerate',
-        reportRead: 'Read full screen', reportExport: 'Export HTML', reportCopy: 'Copy all', reportCopied: 'Copied',
-        reportReady: 'Report ready', reportFailed: 'Report interrupted', reportEmpty: 'No report yet',
-        reportHint: 'The report stays on this page. Export HTML to read, print or share offline.',
-        reportHintFoot: 'Then read full screen or export HTML', reportName: 'Life Kunpeng Report',
-        reportPart1: 'Chart overview', reportPart2: 'Personality', reportPart3: 'Family', reportPart4: 'Marriage',
-        reportPart5: 'Children', reportPart6: 'Wealth', reportPart7: 'Health', reportPart8: 'Friends',
-        reportPart9: 'Career', reportPart10: 'Home', reportPart11: 'Spirit', reportPart12: 'Travel',
-        reportPart13: 'Decades', reportPart14: 'Advice',
-        readerBack: 'Back to reading', readerFull: 'Fullscreen', readerExitFull: 'Exit fullscreen',
-        relJustNow: 'just now', relMin: '{n} min ago', relHour: '{n} h ago', relYesterday: 'yesterday', relDays: '{n} d ago',
         aiSend: 'Send', aiNewChat: 'New chat', aiAskPh: 'Follow-up — Enter to send',
         aiStartBrief: 'Quick reading', aiStartReport: 'Full Kunpeng report',
         aiFullReport: 'Full report', aiFullReportHint: 'Generate the full 14-part Kunpeng report for this chart',
@@ -1952,17 +1860,19 @@ window.__ModuleLoader__.load({
     const BRIGHT_CLASS = { '庙': 'miao', '旺': 'wang', '得': 'de', '利': 'li', '平': 'ping', '不': 'bu', '陷': 'xian' };
 
     /* ---------------- 样式 (设计系统) ---------------- */
-    /* 设计系统样式在 src/ui.css；由 build.mjs 注入，避免 900 行 CSS 埋在 JS 里。 */
-    const CSS = `/* ================================================================
- * 紫微斗数工作台 · 设计系统 v4
- *
- * 信息架构：首页 / 新建 / 命盘 / 解读 / 报告（五页）+ 设置浮层
- * 视觉语言：参考自媒体工作台（MIT）——玻璃拟态顶栏、轻量大标题、
- *           浮起卡片与胶囊动作；颜色全部走宿主 --dsw-alias-* 语义 token。
- * 响应式：按面板实测宽 data-w 三档（narrow < 880 ≤ mid < 1100 ≤ wide）。
+    const CSS = `
+/* ================================================================
+ * 设计系统 v2
+ * - 所有底色/边框/文字只走 --dsw-alias-* token；星曜/四化等内容色单列
+ * - 命盘盘面优先占宽: 布局按面板实测宽度切换 (data-w)，不再用 viewport media query
+ * - 盘面字号用容器查询单位 (cqw) 随盘宽等比缩放，窄面板下不挤字
+ * - 支持深色主题 (body[data-ds-dark-theme]) 与专注看盘 (data-focus)
  * ================================================================ */
 .zp-root {
-  /* 内容色（命理数据专用，允许固定值；明暗两套见文件末尾） */
+  --zp-accent: #7c5cf0;
+  --zp-accent-deep: #5b3fd6;
+  --zp-fill-accent: #7c5cf0;
+  --zp-fill-accent-deep: #5b3fd6;
   --zp-gold: #c9a35c;
   --zp-gold-dim: #8a7550;
   --zp-mu-lu: #15803d;
@@ -1971,79 +1881,131 @@ window.__ModuleLoader__.load({
   --zp-mu-ji: #b91c1c;
   --zp-good: #15803d;
   --zp-bad: #b91c1c;
-
-  /* 旧组件仍引用 --zp-accent*：指向宿主品牌 token，不再自带紫色 */
-  --zp-accent: var(--dsw-alias-brand-primary);
-  --zp-accent-deep: var(--dsw-alias-button-primary-hover);
-  --zp-fill-accent: var(--dsw-alias-button-primary-fill);
-  --zp-fill-accent-deep: var(--dsw-alias-button-primary-hover);
-
-  /* 设计系统别名 */
-  --ink: var(--dsw-alias-label-primary);
-  --ink-2: var(--dsw-alias-label-secondary);
-  --ink-3: var(--dsw-alias-label-tertiary);
-  --ink-4: var(--dsw-alias-label-caption);
-  --on-primary: var(--dsw-alias-label-primary-inverted);
-  --primary: var(--dsw-alias-button-primary-fill);
-  --primary-hover: var(--dsw-alias-button-primary-hover);
-  --line: var(--dsw-alias-border-l1);
-  --line-strong: var(--dsw-alias-border-l2);
-  --hover: var(--dsw-alias-interactive-bg-hover);
-  --active: var(--dsw-alias-interactive-bg-active);
-  --bg: var(--dsw-alias-bg-base);
-  --card: var(--dsw-alias-bg-layer-2);
-  --card-solid: var(--dsw-alias-bg-layer-1);
-  --glass: color-mix(in srgb, var(--dsw-alias-bg-layer-2) 70%, transparent);
-  --canvas: color-mix(in srgb, var(--ink) 3.5%, var(--bg));
-  --elev-soft: var(--dsw-elevation-soft);
-  --elev-pop: var(--dsw-elevation-prominent);
-  --r-sm: var(--dsw-radius-sm, 8px);
-  --r-md: var(--dsw-radius-md, 12px);
-  --r-lg: var(--dsw-radius-lg, 16px);
-  --r-xl: var(--dsw-radius-xl, 20px);
-  --r-panel: var(--dsw-radius-panel, 28px);
-  --font: var(--dsh-font-family-text-default, -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", sans-serif);
-  --font-serif: "Songti SC", "STSong", "Source Han Serif SC", "Noto Serif SC", Georgia, serif;
-  --ease: cubic-bezier(.2, .8, .2, 1);
   --zp-board-max: 720px;
-  --chat-w: 380px;
-
   position: relative;
   height: 100%;
   overflow: hidden;
   box-sizing: border-box;
-  background: var(--bg);
-  color: var(--ink);
-  font-family: var(--font);
-  font-size: 14px;
-  line-height: 22px;
+  color: var(--dsw-alias-label-primary);
+  font-family: var(--dsh-font-family-text-default, -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", sans-serif);
   -webkit-font-smoothing: antialiased;
   scrollbar-width: thin;
+  /* 把面板内部的 z-index（sticky 头 z20、浮层 z100）关进本面板自己的层叠上下文：
+     frame 的 shell.leading（z-index 15，侧栏折叠后的「展开侧栏 / 新会话」出口）
+     是 frame 的直接子元素，不能再被面板内部的高 z-index 盖住或抢走点击。 */
   isolation: isolate;
 }
-.zp-root *,
-.zp-root *::before,
-.zp-root *::after { box-sizing: border-box; }
-.zp-root h1, .zp-root h2, .zp-root h3, .zp-root h4,
-.zp-root p, .zp-root ul, .zp-root ol, .zp-root dl, .zp-root dd { margin: 0; padding: 0; }
-.zp-root ul, .zp-root ol { list-style: none; }
-.zp-root button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: inherit; }
-.zp-root button:disabled { cursor: default; }
-.zp-root :is(input, textarea, select) { font: inherit; color: inherit; }
-.zp-root :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-.zp-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 
-/* 背景氛围：极淡的两团光斑，不抢内容 */
-.zp-ambient { position: absolute; inset: 0; overflow: clip; pointer-events: none; z-index: 0; }
-.zp-ambient i { position: absolute; width: 52vmax; height: 52vmax; border-radius: 50%; filter: blur(80px); opacity: .5; }
-.zp-ambient i:nth-child(1) {
-  left: -20vmax; top: -26vmax;
-  background: radial-gradient(circle, color-mix(in srgb, var(--dsw-alias-brand-primary) 7%, transparent), transparent 68%);
+/* ---------------- 窗口 chrome 避让（macOS 桌面端） ----------------
+ * 契约见 @deepseek-ai/dsh-client-ui-layout README「Window-chrome seat」：
+ * - html[data-platform=darwin] 发布 --dsh-frame-top-clearance（48px），入口页要把内容压到窗口标题带之下；
+ * - 侧栏完全隐藏时 frame 追加发布 --dsh-frame-leading-clearance（160px，全屏 84px），
+ *   此时面板左缘即窗口左缘，左上角必须让出 traffic lights + leading 控件的横向条带；
+ * - 浮层用 --dsh-frame-overlay-top（= top-clearance + 20px）作为视口内边距。
+ * 变量全部带 0px 兜底、选择器限定 darwin：Web / Windows 渲染不受影响。
+ * 选择器加 html + 2 个类/属性（0,3,1），高于 .zp-root[data-w="narrow"] 的 (0,3,0)，
+ * 窄面板规则不会把这里的 padding 覆盖回去。 */
+html[data-platform="darwin"] .zp-root {
+  padding-top: var(--dsh-frame-top-clearance, 0px);
 }
-.zp-ambient i:nth-child(2) {
-  right: -18vmax; bottom: -30vmax;
-  background: radial-gradient(circle, color-mix(in srgb, var(--zp-gold) 8%, transparent), transparent 68%);
+html[data-platform="darwin"] [data-sidebar-collapsed] .zp-head {
+  /* 顶栏内容起点 = max(设计内边距 22px, leading 条带宽度)；侧栏隐藏时面板左缘即窗口左缘 */
+  padding-left: max(22px, var(--dsh-frame-leading-clearance, 0px));
 }
+html[data-platform="darwin"] .zp-root .zp-overlay-center {
+  /* 设置弹层：上内边距取官方浮层 inset（68px 普通 / 全屏 20px），不钻到窗口标题带里 */
+  padding-top: max(46px, var(--dsh-frame-overlay-top, 46px));
+}
+.zp-scroll {
+  height: 100%; overflow: auto; box-sizing: border-box;
+  padding: 0 20px 40px; scrollbar-width: thin;
+}
+.zp-root[data-w="narrow"] .zp-scroll { padding: 0 14px 32px; }
+.zp-scroll-locked { overflow: hidden }
+.zp-scroll::-webkit-scrollbar { width: 9px; height: 9px; }
+.zp-scroll::-webkit-scrollbar-thumb {
+  background: rgba(128,128,128,.35);
+  background: color-mix(in srgb, var(--dsw-alias-label-secondary) 30%, transparent);
+  border-radius: 6px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.zp-inner { max-width: 1460px; margin: 0 auto; display: flex; flex-direction: column; min-height: 100% }
+
+/* ---------------- 顶栏 ---------------- */
+.zp-head {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 12px 2px 11px; position: sticky; top: 0; z-index: 20;
+  background: var(--dsw-alias-bg-base);
+  background: color-mix(in srgb, var(--dsw-alias-bg-base) 90%, transparent);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--dsw-alias-border-l1);
+  margin: 0 -20px 14px; padding-left: 22px; padding-right: 22px;
+}
+.zp-root[data-w="narrow"] .zp-head { margin: 0 -14px 12px; padding-left: 16px; padding-right: 16px; }
+.zp-brand { display: flex; align-items: center; gap: 8px; flex: none }
+.zp-brand-name { font-size: 17px; font-weight: 750; letter-spacing: 1.5px }
+.zp-brand-pro {
+  font-size: 10px; font-weight: 800; letter-spacing: 1px; line-height: 1.5;
+  color: var(--zp-accent); border: 1px solid color-mix(in srgb, var(--zp-accent) 45%, transparent);
+  border-radius: 6px; padding: 0 6px;
+}
+.zp-brand-tag {
+  display: none; font-size: 11px; color: var(--dsw-alias-label-secondary); letter-spacing: .5px;
+  border-left: 1px solid var(--dsw-alias-border-l1); padding-left: 10px; margin-left: 2px;
+}
+.zp-root[data-w="wide"] .zp-brand-tag { display: inline }
+.zp-head-sum { display: none; align-items: center; gap: 6px; min-width: 0; flex: 1 1 0; overflow: hidden }
+.zp-root[data-w="mid"] .zp-head-sum, .zp-root[data-w="wide"] .zp-head-sum, .zp-root[data-w="compact"] .zp-head-sum { display: flex }
+.zp-sum-chip {
+  font-size: 11.5px; color: var(--dsw-alias-label-secondary); white-space: nowrap;
+  background: var(--dsw-alias-bg-layer-2); border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 999px; padding: 2px 9px;
+}
+.zp-sum-chip b { color: var(--dsw-alias-label-primary); font-weight: 650 }
+.zp-sum-gz { letter-spacing: 1.5px; font-variant-numeric: tabular-nums }
+.zp-root[data-w="mid"] .zp-sum-class, .zp-root[data-w="compact"] .zp-sum-class { display: none }
+.zp-head-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap }
+
+/* ---------------- 布局骨架 ---------------- */
+.zp-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; align-items: start }
+.zp-root[data-w="mid"] .zp-body { grid-template-columns: 296px minmax(0, 1fr); gap: 16px }
+.zp-root[data-w="wide"] .zp-body { grid-template-columns: 304px minmax(0, 1fr); gap: 16px }
+.zp-side { display: flex; flex-direction: column; gap: 12px; min-width: 0 }
+/* 窄面板: 左栏拆开重排 —— 出盘前生辰输入在上；出盘后盘面在前（见 data-chart 规则），命主信息/命盘库沉底 */
+.zp-root[data-w="narrow"] .zp-side { display: contents }
+/* 这些 order 只服务 narrow 的 display:contents 重排；放在全局会在宽/中/紧凑档的
+   flex 左栏里覆盖 DOM 顺序（1.5.1 把摘要移到 DOM 前面后，格局卡会被顶到最上面）。 */
+.zp-root[data-w="narrow"] .zp-input-card { order: 1 }
+.zp-root[data-w="narrow"] .zp-stage { order: 2 }
+.zp-root[data-w="narrow"] .zp-summary-card { order: 3 }
+.zp-root[data-w="narrow"] .zp-patterns-card { order: 3 }
+.zp-root[data-w="narrow"] .zp-lib-card { order: 4 }
+.zp-root[data-w="narrow"][data-chart="1"] .zp-stage { order: 1 }
+.zp-root[data-w="narrow"][data-chart="1"] .zp-input-card { order: 2 }
+.zp-stage { min-width: 0; outline: none; border-radius: 14px }
+.zp-stage:focus-visible { outline: 2px solid var(--zp-accent); outline-offset: 3px }
+
+/* ---------------- 卡片 ---------------- */
+.zp-card {
+  background: var(--dsw-alias-bg-layer-1); border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 14px; padding: 14px 16px;
+}
+.zp-card-title {
+  font-size: 11px; font-weight: 800; letter-spacing: 1.8px; color: var(--dsw-alias-label-secondary);
+  margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+}
+.zp-card-title::before {
+  content: ''; width: 3px; height: 12px; border-radius: 2px; flex: none;
+  background: linear-gradient(180deg, var(--zp-accent), var(--zp-gold));
+}
+.zp-title-actions { margin-left: auto; display: flex; gap: 6px; align-items: center }
+.zp-link-btn {
+  border: none; background: transparent; color: var(--dsw-alias-label-secondary);
+  font-size: 11px; font-weight: 600; font-family: inherit; cursor: pointer;
+  padding: 2px 6px; border-radius: 6px; letter-spacing: .5px; height: auto;
+}
+.zp-link-btn:hover { color: var(--zp-accent); background: color-mix(in srgb, var(--zp-accent) 10%, transparent) }
 
 /* ---------------- 表单 ---------------- */
 .zp-field { margin-bottom: 9px }
@@ -2103,6 +2065,7 @@ window.__ModuleLoader__.load({
   font-size: 11px; color: var(--dsw-alias-label-secondary); line-height: 1.65;
   margin-top: 12px; border-top: 1px dashed var(--dsw-alias-border-l1); padding-top: 10px;
 }
+
 /* ---------------- 命主信息 ---------------- */
 .zp-pillars { display: flex; gap: 6px; margin-bottom: 10px }
 .zp-pillar {
@@ -2127,6 +2090,45 @@ window.__ModuleLoader__.load({
 .zp-mu-quan { color: var(--zp-mu-quan) }
 .zp-mu-ke { color: var(--zp-mu-ke) }
 .zp-mu-ji { color: var(--zp-mu-ji) }
+
+/* ---------------- 舞台：页签 / 工具 ---------------- */
+.zp-stage-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px }
+.zp-tabs {
+  display: inline-flex; align-items: center; gap: 2px; padding: 3px;
+  background: var(--dsw-alias-bg-layer-2); border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 999px; max-width: 100%; overflow-x: auto; scrollbar-width: none;
+}
+.zp-tabs::-webkit-scrollbar { display: none }
+.zp-tabs button {
+  border: none; background: transparent; color: var(--dsw-alias-label-secondary);
+  padding: 5px 13px; font-size: 12.5px; font-weight: 650; cursor: pointer;
+  border-radius: 999px; font-family: inherit; white-space: nowrap; transition: background .12s, color .12s;
+}
+.zp-tabs button:hover { color: var(--dsw-alias-label-primary) }
+.zp-tabs button.on { background: var(--zp-fill-accent); color: #fff }
+.zp-stage-ctrl { margin-left: auto; display: flex; align-items: center; gap: 6px; flex-wrap: wrap }
+.zp-toggle {
+  display: inline-flex; align-items: center; gap: 5px; height: 28px; padding: 0 10px;
+  font-size: 11.5px; font-weight: 600; font-family: inherit; letter-spacing: .3px;
+  color: var(--dsw-alias-label-secondary); background: var(--dsw-alias-bg-layer-2);
+  border: 1px solid var(--dsw-alias-border-l1); border-radius: 999px; cursor: pointer;
+  transition: color .12s, border-color .12s, background .12s;
+}
+.zp-toggle:hover { color: var(--dsw-alias-label-primary) }
+.zp-toggle.on {
+  color: var(--zp-accent);
+  border-color: var(--zp-accent);
+  border-color: color-mix(in srgb, var(--zp-accent) 50%, transparent);
+  background: var(--dsw-alias-bg-layer-2);
+  background: color-mix(in srgb, var(--zp-accent) 12%, transparent);
+}
+.zp-scope-bar {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 10px; padding: 6px 10px;
+  font-size: 12px; color: var(--dsw-alias-label-secondary); flex-wrap: wrap;
+  background: var(--dsw-alias-bg-layer-2); border-left: 3px solid var(--zp-accent); border-radius: 0 8px 8px 0;
+}
+.zp-scope-bar b { color: var(--zp-accent); font-weight: 750 }
+
 /* ---------------- 命盘盘面 ---------------- */
 .zp-board-wrap { display: block }
 .zp-root[data-w="wide"] .zp-board-wrap.has-detail {
@@ -2156,8 +2158,9 @@ window.__ModuleLoader__.load({
 }
 .zp-cell:hover { background: var(--dsw-alias-bg-layer-2); background: color-mix(in srgb, var(--dsw-alias-bg-layer-1) 90%, var(--zp-accent) 10%) }
 .zp-cell.on {
-  background: color-mix(in srgb, var(--card-solid) 88%, var(--primary) 12%);
-  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--primary) 55%, transparent);
+  background: var(--dsw-alias-bg-layer-2);
+  background: color-mix(in srgb, var(--dsw-alias-bg-layer-1) 84%, var(--zp-accent) 16%);
+  box-shadow: inset 0 0 0 2px var(--zp-accent);
 }
 .zp-cell.empty .zp-cell-name { color: var(--dsw-alias-label-secondary) }
 .zp-cell:focus-visible { outline: 2px solid var(--zp-accent); outline-offset: -2px }
@@ -2264,6 +2267,7 @@ window.__ModuleLoader__.load({
   font-size: 10.5px; font-size: clamp(9px, 1.45cqw, 10.5px);
   color: var(--zp-gold-dim); letter-spacing: .5px;
 }
+
 /* ---------------- 宫位详情 ---------------- */
 .zp-detail {
   background: var(--dsw-alias-bg-layer-1); border: 1px solid var(--dsw-alias-border-l1);
@@ -2294,6 +2298,240 @@ window.__ModuleLoader__.load({
 }
 .zp-chip b { font-weight: 700 }
 .zp-kbd-hint { font-size: 10.5px; color: var(--dsw-alias-label-secondary); margin-top: 10px; letter-spacing: .5px }
+
+/* ---------------- 列表（命盘库 / 大限） ---------------- */
+.zp-list-item {
+  display: flex; align-items: center; gap: 8px; padding: 6px 9px;
+  border: 1px solid var(--dsw-alias-border-l1); border-radius: 9px; margin-bottom: 6px;
+  cursor: pointer; font-size: 12px; transition: border-color .12s, background .12s; min-width: 0;
+}
+.zp-list-item:hover { border-color: color-mix(in srgb, var(--zp-accent) 55%, var(--dsw-alias-border-l1)) }
+.zp-list-item.on { border-color: var(--zp-accent); background: color-mix(in srgb, var(--zp-accent) 8%, transparent) }
+.zp-list-item b { font-weight: 650; white-space: nowrap }
+.zp-list-item .zp-list-sub { color: var(--dsw-alias-label-secondary); font-size: 11px; margin-left: auto; white-space: nowrap }
+.zp-list-del {
+  background: none; border: none; color: var(--dsw-alias-label-secondary); cursor: pointer;
+  font-size: 13px; padding: 1px 5px; border-radius: 6px; font-family: inherit; line-height: 1.4;
+}
+.zp-list-del:hover { color: var(--dsw-alias-state-error-primary); background: var(--dsw-alias-bg-layer-2) }
+
+/* ---------------- 顶栏动作 / 图标按钮 ---------------- */
+.zp-btn-label { white-space: nowrap }
+.zp-icon-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  height: 32px; min-width: 32px; padding: 0 9px; box-sizing: border-box;
+  border: 1px solid transparent; border-radius: 9px; background: transparent;
+  color: var(--dsw-alias-label-secondary); font-family: inherit; font-size: 12px;
+  cursor: pointer; transition: color .12s, background .12s, border-color .12s;
+}
+.zp-icon-btn:hover {
+  color: var(--dsw-alias-label-primary); background: var(--dsw-alias-bg-layer-2);
+  border-color: var(--dsw-alias-border-l1);
+}
+.zp-icon-btn:disabled { opacity: .45; cursor: default }
+.zp-icon-btn:focus-visible { outline: 2px solid var(--zp-accent); outline-offset: 2px }
+.zp-head-sep { width: 1px; height: 18px; background: var(--dsw-alias-border-l1); flex: none; margin: 0 1px }
+/* 「返回会话」出口：顶栏最左侧常驻，图标 + 文案（窄面板只留图标），键盘可聚焦 */
+.zp-exit {
+  flex: none;
+  color: var(--dsw-alias-label-primary);
+  background: var(--dsw-alias-bg-layer-2);
+  border-color: var(--dsw-alias-border-l1);
+}
+.zp-exit:hover {
+  border-color: color-mix(in srgb, var(--zp-accent) 45%, var(--dsw-alias-border-l1));
+  background: color-mix(in srgb, var(--zp-accent) 10%, var(--dsw-alias-bg-layer-2));
+}
+.zp-btn-ai { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 14px }
+.zp-btn-ai[aria-pressed="true"] { box-shadow: inset 0 0 0 1px color-mix(in srgb, #fff 35%, transparent) }
+.zp-root[data-w="narrow"] .zp-icon-btn { padding: 0; width: 32px }
+.zp-root[data-w="narrow"] .zp-icon-btn .zp-btn-label { display: none }
+
+/* ---------------- 面板内浮层（抽屉 / 设置） ----------------
+ * .zp-root 是不滚动外壳（position:relative），内容在 .zp-scroll 里滚；
+ * 浮层绝对定位在外壳内，所以只覆盖工作台，不按视口坐标、也不受侧栏宽度变化影响。 */
+.zp-overlay { position: absolute; inset: 0; z-index: 100 }
+.zp-overlay-mask {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,.38); background: color-mix(in srgb, #000 38%, transparent);
+  animation: zp-fade-in .14s ease-out;
+}
+.zp-overlay-center {
+  position: absolute; inset: 0; display: flex; align-items: flex-start; justify-content: center;
+  padding: 46px 18px; overflow: auto;
+}
+
+/* 右侧阅读抽屉 */
+.zp-ai {
+  position: absolute; top: 0; right: 0; bottom: 0; width: min(464px, 100%);
+  display: flex; flex-direction: column; min-height: 0;
+  background: var(--dsw-alias-bg-layer-1);
+  border-left: 1px solid var(--dsw-alias-border-l1);
+  box-shadow: -18px 0 48px rgba(0,0,0,.22);
+  box-shadow: -18px 0 48px color-mix(in srgb, #000 22%, transparent);
+  animation: zp-slide-in .18s cubic-bezier(.22,.61,.36,1);
+}
+.zp-ai-head {
+  flex: none; display: flex; align-items: center; gap: 10px;
+  padding: 11px 12px 11px 14px; border-bottom: 1px solid var(--dsw-alias-border-l1);
+}
+.zp-ai-heading { display: flex; align-items: center; gap: 9px; min-width: 0; flex: 1 }
+.zp-ai-glyph {
+  display: inline-flex; align-items: center; justify-content: center; flex: none;
+  width: 28px; height: 28px; border-radius: 9px; color: #fff;
+  background: linear-gradient(135deg, var(--zp-fill-accent), var(--zp-fill-accent-deep));
+}
+.zp-ai:focus, .zp-settings:focus { outline: none }
+.zp-ai-title { font-size: 13.5px; font-weight: 750; letter-spacing: .5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.zp-ai-body {
+  flex: 1; min-height: 0; overflow-y: auto; padding: 14px;
+  display: flex; flex-direction: column; gap: 10px; scrollbar-width: thin;
+}
+.zp-ai-body::-webkit-scrollbar { width: 8px }
+.zp-ai-body::-webkit-scrollbar-thumb {
+  background: rgba(128,128,128,.35);
+  background: color-mix(in srgb, var(--dsw-alias-label-secondary) 30%, transparent);
+  border-radius: 4px; border: 2px solid transparent; background-clip: padding-box;
+}
+.zp-ai-foot {
+  flex: none; border-top: 1px solid var(--dsw-alias-border-l1);
+  padding: 10px 14px 12px; display: flex; flex-direction: column; gap: 8px;
+  background: var(--dsw-alias-bg-layer-1);
+}
+.zp-ai-tools { display: flex; gap: 6px; flex-wrap: wrap; align-items: center }
+.zp-ai-tools .zp-mini-btn { height: 28px }
+.zp-ai-composer { display: flex; gap: 8px; align-items: flex-end }
+.zp-ai-disclaimer { font-size: 11px; color: var(--dsw-alias-label-secondary); line-height: 1.5; opacity: .9 }
+.zp-ai-error {
+  flex: none; display: flex; align-items: flex-start; gap: 8px;
+  padding: 8px 10px; border-radius: 9px; font-size: 12px; line-height: 1.5;
+  border: 1px solid color-mix(in srgb, var(--dsw-alias-state-error-primary) 42%, transparent);
+  background: color-mix(in srgb, var(--dsw-alias-state-error-primary) 8%, transparent);
+  color: var(--dsw-alias-label-primary);
+}
+.zp-ai-error-text { flex: 1; min-width: 0; word-break: break-word }
+.zp-ai-empty-wrap { flex: 1; display: flex; align-items: center; justify-content: center }
+.zp-ai-empty {
+  box-sizing: border-box; width: 100%;
+  border: 1px dashed var(--dsw-alias-border-l1); border-radius: 12px;
+  background: var(--dsw-alias-bg-layer-2); padding: 16px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.zp-ai-empty-hint { font-size: 12px; line-height: 1.7; color: var(--dsw-alias-label-secondary) }
+/* 空态的两个动作：点一次就产出内容，不再是"只改下一次请求"的模式条 */
+.zp-ai-start { display: flex; gap: 8px; flex-wrap: wrap }
+.zp-ai-start .zp-btn { flex: 1 1 0; min-width: 0; height: 32px }
+.zp-send {
+  width: 36px; height: 36px; flex: none; display: inline-flex; align-items: center; justify-content: center;
+  border: none; border-radius: 10px; color: #fff; cursor: pointer;
+  background: linear-gradient(135deg, var(--zp-accent), var(--zp-accent-deep));
+  transition: opacity .12s;
+}
+.zp-send:hover { opacity: .92 }
+.zp-send:disabled { opacity: .5; cursor: default }
+.zp-send-stop {
+  background: var(--dsw-alias-bg-layer-2); border: 1px solid var(--dsw-alias-border-l1);
+  color: var(--dsw-alias-label-primary);
+}
+.zp-mini-btn {
+  display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 9px; box-sizing: border-box;
+  border: 1px solid var(--dsw-alias-border-l1); border-radius: 8px; background: transparent;
+  color: var(--dsw-alias-label-secondary); font-family: inherit; font-size: 11.5px;
+  cursor: pointer; transition: color .12s, background .12s, border-color .12s;
+}
+.zp-mini-btn:hover { color: var(--dsw-alias-label-primary); background: var(--dsw-alias-bg-layer-2) }
+.zp-mini-btn:focus-visible, .zp-send:focus-visible {
+  outline: 2px solid var(--zp-accent); outline-offset: 2px;
+}
+.zp-mini-btn:disabled { opacity: .5; cursor: default }
+.zp-mini-icon { width: 28px; height: 28px; padding: 0; justify-content: center }
+.zp-mini-btn-accent {
+  margin-left: auto; color: var(--zp-accent);
+  border-color: color-mix(in srgb, var(--zp-accent) 42%, transparent);
+}
+.zp-mini-btn-accent:hover {
+  color: var(--zp-accent); background: color-mix(in srgb, var(--zp-accent) 10%, transparent);
+  border-color: color-mix(in srgb, var(--zp-accent) 62%, transparent);
+}
+.zp-ai-preview {
+  position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column;
+  background: var(--dsw-alias-bg-base); animation: zp-fade-in .14s ease-out;
+}
+.zp-ai-preview-head {
+  flex: none; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 9px 12px 9px 14px; border-bottom: 1px solid var(--dsw-alias-border-l1); font-size: 12.5px;
+}
+
+/* 设置弹层 */
+.zp-settings {
+  width: min(520px, 100%); max-height: 86%; display: flex; flex-direction: column;
+  background: var(--dsw-alias-bg-layer-1); border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 16px; box-shadow: 0 24px 64px rgba(0,0,0,.28);
+  box-shadow: 0 24px 64px color-mix(in srgb, #000 30%, transparent);
+  animation: zp-pop-in .16s cubic-bezier(.22,.61,.36,1);
+}
+.zp-settings-head { flex: none; display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid var(--dsw-alias-border-l1) }
+.zp-settings-title { font-size: 14px; font-weight: 750; letter-spacing: .5px }
+.zp-settings-body { padding: 16px; overflow: auto }
+.zp-settings-hint { font-size: 11px; color: var(--dsw-alias-label-secondary); margin-top: 4px; line-height: 1.55 }
+.zp-check {
+  display: flex; align-items: center; gap: 8px; font-size: 12.5px;
+  margin-bottom: 10px; cursor: pointer; color: var(--dsw-alias-label-primary);
+}
+.zp-check input { accent-color: var(--zp-accent) }
+.zp-settings-about {
+  margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--dsw-alias-border-l1);
+  font-size: 11px; line-height: 1.7; color: var(--dsw-alias-label-secondary);
+  display: flex; flex-direction: column; gap: 4px;
+}
+.zp-settings-about b { color: var(--dsw-alias-label-primary); font-size: 11px; letter-spacing: 1px }
+.zp-update { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--dsw-alias-border-l1); display: flex; flex-direction: column; gap: 8px }
+.zp-update-row { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--dsw-alias-label-secondary) }
+.zp-update-row b { font-size: 12px; color: var(--dsw-alias-label-primary) }
+.zp-update-cmd { display: block; padding: 8px; border-radius: 8px; background: var(--dsw-alias-bg-layer-2); font-size: 11px; line-height: 1.6; color: var(--dsw-alias-label-primary); word-break: break-all; font-family: ui-monospace, SFMono-Regular, Menlo, monospace }
+.zp-update-new { font-size: 11px; line-height: 1.6; color: var(--dsw-alias-state-warn-primary) }
+.zp-update-ok { font-size: 11px; line-height: 1.6; color: var(--dsw-alias-label-secondary) }
+
+@keyframes zp-slide-in { from { transform: translateX(24px); opacity: .55 } to { transform: none; opacity: 1 } }
+@keyframes zp-fade-in { from { opacity: 0 } to { opacity: 1 } }
+@keyframes zp-pop-in { from { transform: translateY(6px) scale(.99); opacity: .4 } to { transform: none; opacity: 1 } }
+
+/* ---------------- 对话气泡 / 预览 ---------------- */
+.zp-chat-thread { display: flex; flex-direction: column; gap: 10px }
+.zp-bubble { max-width: 88%; border-radius: 12px; padding: 9px 12px; font-size: 13px; line-height: 1.7 }
+.zp-bubble-user {
+  align-self: flex-end; background: var(--dsw-alias-bg-layer-2);
+  border: 1px solid var(--dsw-alias-border-l1); white-space: pre-wrap; word-break: break-word;
+}
+.zp-bubble-ai { align-self: flex-start; background: var(--dsw-alias-bg-layer-1); border: 1px solid var(--dsw-alias-border-l1); width: 100%; max-width: 100% }
+.zp-bubble-text { white-space: pre-wrap; word-break: break-word }
+.zp-md-h { font-weight: 650; color: var(--dsw-alias-label-primary); margin: 10px 0 4px }
+.zp-md-h1 { font-size: 15px } .zp-md-h2 { font-size: 14px } .zp-md-h3 { font-size: 13.5px } .zp-md-h4 { font-size: 13px }
+.zp-md-p { margin: 3px 0 }
+.zp-md-li { margin: 2px 0 2px 4px }
+.zp-md-quote {
+  margin: 6px 0; padding: 4px 10px; border-left: 3px solid var(--dsw-alias-border-l2);
+  color: var(--dsw-alias-label-secondary); font-style: italic;
+}
+.zp-md-gap { height: 6px }
+.zp-md code { background: var(--dsw-alias-bg-layer-2); padding: 1px 4px; border-radius: 4px; font-size: 12px }
+/* 抽屉里的报告表格（v3.2）：与精装报告共用解析器，避免回答里露出管道符 */
+.zp-md-table { width: 100%; border-collapse: collapse; margin: 6px 0; font-size: 12px; line-height: 1.6 }
+.zp-md-table th, .zp-md-table td {
+  border: 1px solid var(--dsw-alias-border-l1); padding: 4px 6px;
+  vertical-align: top; text-align: left; word-break: break-word;
+}
+.zp-md-table th { background: var(--dsw-alias-bg-layer-2); font-weight: 600 }
+.zp-typing { font-size: 12px; color: var(--dsw-alias-label-secondary); padding: 6px 2px }
+.zp-chat-ta { flex: 1; resize: vertical; min-height: 46px; max-height: 180px; font-family: inherit; line-height: 1.6; font-size: 13px }
+.zp-preview-frame {
+  width: 100%; height: 60vh; border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 10px; background: #FAF6EF; margin-top: 10px;
+}
+.zp-preview-frame-full { flex: 1; height: auto; min-height: 0; margin: 0; border: none; border-radius: 0 }
+/* 窄面板：抽屉铺满工作台，头部收紧 */
+.zp-root[data-w="narrow"] .zp-ai { width: 100%; border-left: none; box-shadow: none }
+.zp-root[data-w="narrow"] .zp-overlay-center { padding: 18px 12px }
 /* ---------------- 格局 / 词典 / 空态 ---------------- */
 .zp-patterns { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 10px }
 /* 左栏「格局摘要」：命主信息下面的只读结论（完整页仍在 PatternsView） */
@@ -2330,751 +2568,119 @@ window.__ModuleLoader__.load({
 .zp-empty-title { font-size: 14px; letter-spacing: 1px; color: var(--dsw-alias-label-primary); font-weight: 650 }
 .zp-empty-hint { font-size: 12px; line-height: 1.7 }
 
-/* ================================================================
- * 通用组件（v4 覆盖层：放在旧组件块之后，同名类以这里为准）
- * ================================================================ */
-.zp-btn {
-  box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-  height: 32px; padding: 0 12px; border-radius: var(--r-md);
-  border: 1px solid var(--line-strong); background: var(--card-solid); color: var(--ink);
-  font-family: inherit; font-size: 13px; line-height: 20px; white-space: nowrap; cursor: pointer;
-  transition: background .15s, border-color .15s, transform .2s var(--ease);
-}
-.zp-btn:hover { background: var(--hover) }
-.zp-btn:active { transform: scale(.98) }
-.zp-btn:disabled { opacity: .5; cursor: default }
-.zp-btn-primary { background: var(--primary); border-color: transparent; color: var(--on-primary); font-weight: 500 }
-.zp-btn-primary:hover { background: var(--primary-hover) }
-.zp-btn-ghost { background: transparent; border-color: transparent; color: var(--ink-2) }
-.zp-btn-ghost:hover { background: var(--hover); color: var(--ink) }
+/* ---------------- 窄面板微调 ---------------- */
+.zp-root[data-w="narrow"] .zp-head-actions .zp-btn { height: 30px; padding: 0 10px; font-size: 12px }
+.zp-root[data-w="narrow"] .zp-detail { padding: 12px 14px }
+.zp-root[data-w="narrow"] .zp-detail-body { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) }
+.zp-root[data-w="narrow"] .zp-card { padding: 12px 14px }
 
-.zp-pill {
-  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-  height: 34px; padding: 0 16px; border-radius: 999px;
-  background: color-mix(in srgb, var(--card-solid) 70%, transparent);
-  box-shadow: inset 0 0 0 1px var(--line-strong); color: var(--ink);
-  font-family: inherit; font-size: 13px; line-height: 20px; white-space: nowrap; text-decoration: none;
-  backdrop-filter: blur(12px); transition: background .15s, transform .25s var(--ease);
-}
-.zp-pill:hover { background: var(--card-solid) }
-.zp-pill:active { transform: scale(.97) }
-.zp-pill:disabled { opacity: .5; cursor: default }
-.zp-pill.is-primary { background: var(--primary); color: var(--on-primary); box-shadow: none }
-.zp-pill.is-primary:hover { background: var(--primary-hover) }
-.zp-pill.is-quiet { background: transparent; box-shadow: none; color: var(--ink-2) }
-.zp-pill.is-quiet:hover { background: var(--hover); color: var(--ink) }
-.zp-pill.is-small { height: 28px; padding: 0 8px; font-size: 12px }
+/* ---------------- 专注看盘 ----------------
+ * 注意：这些规则靠「同特异性 + 位置靠后」覆盖上面的 data-w / has-detail 规则，
+ * 必须保持在布局规则之后、深色主题之前；往后追加布局规则会静默破坏专注态。 */
 
-.zp-icon-btn {
-  display: inline-flex; align-items: center; justify-content: center; flex: none;
-  width: 32px; height: 32px; border-radius: var(--r-md); color: var(--ink-2);
-  transition: background .15s, color .15s;
-}
-.zp-icon-btn:hover { background: var(--hover); color: var(--ink) }
-.zp-icon-btn:disabled { opacity: .45; cursor: default }
-.zp-icon-btn.is-active { background: var(--active); color: var(--ink) }
-.zp-topbar .zp-icon-btn { width: 34px; height: 34px; background: var(--glass); box-shadow: var(--elev-soft) }
+.zp-root[data-focus="1"] .zp-side { display: none }
+.zp-root[data-focus="1"] .zp-body { grid-template-columns: minmax(0, 1fr) }
+.zp-root[data-focus="1"] .zp-board-wrap.has-detail, .zp-root[data-focus="1"] .zp-board-wrap { display: block }
+.zp-root[data-focus="1"] .zp-board { max-width: 820px }
+.zp-root[data-focus="1"] .zp-detail { display: none }
 
-.zp-card {
-  min-width: 0; padding: 20px; border-radius: var(--r-xl);
-  background: var(--card); box-shadow: var(--elev-soft); border: 0;
-}
-.zp-card-title {
-  display: flex; align-items: center; gap: 8px;
-  font-size: 14px; line-height: 20px; font-weight: 600; color: var(--ink); margin-bottom: 12px; letter-spacing: 0;
-}
-.zp-card-title::before {
-  content: ''; flex: none; width: 3px; height: 14px; border-radius: 2px;
-  background: var(--primary); opacity: .75;
-}
-.zp-title-actions { margin-left: auto; display: flex; align-items: center; gap: 6px }
-.zp-link-btn { font-size: 12px; color: var(--ink-3); background: none; border: 0; padding: 0; cursor: pointer }
-.zp-link-btn:hover { color: var(--ink) }
-
-.zp-seg {
-  display: inline-flex; gap: 0; padding: 4px; border-radius: var(--r-md);
-  background: var(--hover); width: auto; border: 0;
-}
-.zp-seg button {
-  flex: none; height: 28px; min-width: 32px; padding: 0 8px; border-radius: var(--r-sm);
-  color: var(--ink-3); font-size: 12px; font-weight: 500; transition: background .18s var(--ease), color .18s;
-}
-.zp-seg button:hover { color: var(--ink) }
-.zp-seg button.on { background: var(--card-solid); color: var(--ink); box-shadow: var(--elev-soft) }
-
-.zp-input {
-  box-sizing: border-box; height: 38px; padding: 0 12px; border-radius: var(--r-md);
-  border: 1px solid var(--line-strong); background: var(--card-solid); color: var(--ink);
-  font-family: inherit; font-size: 13px;
-}
-.zp-input::placeholder { color: var(--ink-3) }
-.zp-input:focus {
-  border-color: var(--primary); outline: none;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 16%, transparent);
-}
-.zp-field { margin-bottom: 12px }
-.zp-field-label { display: block; font-size: 12px; color: var(--ink-2); margin-bottom: 6px; letter-spacing: 0 }
-.zp-settings-hint { font-size: 11px; color: var(--ink-3); line-height: 1.55; margin-top: 4px }
-.zp-row { display: flex; gap: 8px; align-items: center; min-width: 0 }
-.zp-error { color: var(--dsw-alias-state-error-primary); font-size: 12px; line-height: 1.55 }
-.zp-warn { color: var(--dsw-alias-state-warn-primary); font-size: 12px; line-height: 1.55 }
-.zp-note { font-size: 12px; color: var(--ink-3); line-height: 1.65 }
-
-/* ================================================================
- * 外壳：浮空顶栏 + 页面
- * ================================================================ */
-.zp-topbar {
-  position: absolute; z-index: 30; left: 0; right: 0; top: 0;
-  display: flex; align-items: center; gap: 8px;
-  padding: 16px 20px;
-  pointer-events: none;
-}
-.zp-topbar > * { pointer-events: auto; }
-.zp-brand {
-  display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px 0 8px;
-  border-radius: var(--r-lg); background: var(--glass);
-  backdrop-filter: blur(24px) saturate(160%); box-shadow: var(--elev-soft);
-  transition: transform .25s var(--ease);
-}
-.zp-brand:hover { transform: translateY(-1px) }
-.zp-brand-mark {
-  display: inline-flex; align-items: center; justify-content: center; flex: none;
-  width: 26px; height: 26px; border-radius: 50%;
-  background: color-mix(in srgb, var(--zp-gold) 24%, var(--card-solid));
-}
-.zp-brand-name { font-size: 14px; font-weight: 600; letter-spacing: .5px; white-space: nowrap }
-.zp-brand-pro { font-size: 11px; color: var(--ink-3); letter-spacing: 1px; white-space: nowrap }
-
-.zp-nav {
-  display: flex; gap: 2px; padding: 4px; border-radius: var(--r-lg);
-  background: var(--glass); backdrop-filter: blur(24px) saturate(160%);
-  box-shadow: var(--elev-soft); min-width: 0;
-}
-.zp-nav button {
-  height: 32px; padding: 0 16px; border-radius: var(--r-md);
-  color: var(--ink-2); font-size: 13px; line-height: 32px; white-space: nowrap;
-  transition: background .18s var(--ease), color .18s var(--ease);
-}
-.zp-nav button:hover { background: var(--hover); color: var(--ink) }
-.zp-nav button.is-on { background: var(--primary); color: var(--on-primary) }
-.zp-nav button:disabled { opacity: .45; cursor: default }
-.zp-nav button:disabled:hover { background: none; color: var(--ink-2) }
-.zp-top-spacer { flex: 1; min-width: 0 }
-.zp-top-ctx {
-  display: inline-flex; align-items: center; gap: 6px; max-width: 260px; min-width: 0;
-  height: 32px; padding: 0 12px; border-radius: 999px;
-  background: var(--glass); box-shadow: var(--elev-soft); color: var(--ink-2); font-size: 12px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.zp-top-ctx b { color: var(--ink); font-weight: 500; overflow: hidden; text-overflow: ellipsis }
-.zp-top-actions { display: inline-flex; align-items: center; gap: 6px; flex: none }
-
-.zp-page {
-  position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden;
-  padding: 92px 20px 48px; z-index: 1; scrollbar-width: thin;
-}
-.zp-page-inner { width: 100%; max-width: 1160px; margin: 0 auto }
-.zp-page-head { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; margin-bottom: 24px }
-.zp-page-title { font-size: 34px; line-height: 44px; font-weight: 300; letter-spacing: -.015em; color: var(--ink) }
-.zp-page-sub { color: var(--ink-3); font-size: 13px; line-height: 20px; margin-top: 4px }
-.zp-page-head > .zp-icon-btn { align-self: center }
-.zp-page-head.is-stack { flex-direction: column; align-items: flex-start; gap: 6px }
-.zp-page-head.is-stack > .zp-icon-btn { align-self: flex-start; margin-left: -4px }
-.zp-page-head-actions { margin-left: auto; display: flex; align-items: center; gap: 6px; flex-wrap: wrap }
-
-.zp-section-head { display: flex; align-items: baseline; gap: 8px; margin: 32px 0 12px; flex-wrap: wrap }
-.zp-section-title { font-size: 20px; line-height: 28px; font-weight: 400; color: var(--ink) }
-.zp-section-meta { font-size: 12px; color: var(--ink-3) }
-.zp-section-head .zp-title-actions { margin-left: auto }
-
-.zp-empty {
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
-  width: 100%; max-width: 100%; margin: 0; padding: 40px 20px; text-align: center;
-  color: var(--ink-3); font-size: 13px;
-  border: 1px dashed var(--line-strong); border-radius: var(--r-xl);
-  background: color-mix(in srgb, var(--card) 50%, transparent);
-}
-.zp-empty-title { font-size: 17px; line-height: 26px; color: var(--ink-2); margin-bottom: 4px }
-.zp-empty-hint { font-size: 12px; line-height: 18px }
-
-/* ================================================================
- * 首页
- * ================================================================ */
-.zp-home-hero {
-  padding: 6px 4px 0; max-width: 760px;
-}
-.zp-hero-eyebrow {
-  display: inline-flex; align-items: center; gap: 6px;
-  color: var(--ink-3); font-size: 12px; line-height: 18px; letter-spacing: .08em;
-  margin-bottom: 12px;
-}
-.zp-hero-title {
-  font-size: 34px; line-height: 46px; font-weight: 300; letter-spacing: -.015em; color: var(--ink-2);
-}
-.zp-hero-title b { font-weight: 400; color: var(--ink) }
-.zp-hero-title em { font-style: normal; color: var(--ink-2) }
-.zp-hero-stats {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px;
-  margin-top: 16px; color: var(--ink-3); font-size: 12.5px; line-height: 20px;
-}
-.zp-hero-stats b { font-weight: 500; color: var(--ink-2); font-variant-numeric: tabular-nums }
-.zp-hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 20px }
-
-.zp-chart-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px }
-.zp-chart-card {
-  position: relative; min-width: 0; border-radius: var(--r-xl); background: var(--card);
-  box-shadow: var(--elev-soft); text-align: left;
-  transition: transform .3s var(--ease), box-shadow .3s var(--ease);
-}
-.zp-chart-card:hover { transform: translateY(-2px); box-shadow: var(--elev-pop) }
-.zp-chart-card:active { transform: translateY(0) scale(.995) }
-.zp-chart-card-open {
-  display: flex; flex-direction: column; gap: 8px; width: 100%; height: 100%; min-height: 132px;
-  padding: 16px 48px 16px 16px; text-align: left; border-radius: inherit;
-  justify-content: space-between;
-}
-.zp-chart-card-actions {
-  position: absolute; top: 10px; right: 10px; display: flex; gap: 2px;
-  opacity: .62; transition: opacity .2s;
-}
-.zp-chart-card:hover .zp-chart-card-actions, .zp-chart-card:focus-within .zp-chart-card-actions { opacity: 1 }
-.zp-chart-card-top { display: flex; align-items: flex-start; gap: 8px }
-.zp-chart-badge {
-  display: inline-flex; flex-direction: column; align-items: center; justify-content: center; flex: none;
-  width: 44px; height: 44px; border-radius: var(--r-md);
-  background: color-mix(in srgb, var(--zp-gold) 16%, var(--card-solid));
-  border: 1px solid color-mix(in srgb, var(--zp-gold) 30%, transparent);
-  color: var(--ink); font-family: var(--font-serif); font-size: 15px; line-height: 1;
-}
-.zp-chart-badge small { font-family: var(--font); font-size: 9.5px; color: var(--ink-3); margin-top: 2px }
-.zp-chart-card-main { min-width: 0; flex: 1 }
-.zp-chart-card-name {
-  font-size: 14px; line-height: 20px; font-weight: 600; color: var(--ink);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.zp-chart-card-gz {
-  margin-top: 2px; color: var(--ink-3); font-size: 12px; line-height: 18px;
-  font-variant-numeric: tabular-nums; letter-spacing: .04em;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.zp-chart-card-save, .zp-chart-card-del {
-  flex: none; width: 26px; height: 26px; border-radius: var(--r-sm);
-  color: var(--ink-3); display: inline-flex; align-items: center; justify-content: center;
-}
-.zp-chart-card-save:hover, .zp-chart-card-del:hover { background: var(--hover); color: var(--ink) }
-.zp-chart-card-save.is-saved { color: var(--zp-gold-dim) }
-.zp-chart-card-foot {
-  display: flex; align-items: center; gap: 8px; min-width: 0;
-  color: var(--ink-4); font-size: 11.5px; line-height: 16px;
-}
-.zp-chart-card-foot .zp-grow { flex: 1 }
-.zp-chart-card-tag {
-  display: inline-flex; align-items: center; gap: 2px; height: 18px; padding: 0 8px;
-  border-radius: 999px; background: var(--hover); color: var(--ink-3); font-size: 10.5px;
-}
-.zp-chart-card-tag.is-saved { color: var(--zp-gold-dim) }
-.zp-chart-card-add {
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
-  min-height: 132px; padding: 20px; border-radius: var(--r-xl);
-  border: 1px dashed var(--line-strong); background: transparent; color: var(--ink-3);
-  font-size: 13px; transition: background .2s, color .2s, border-color .2s;
-}
-.zp-chart-card-add:hover { background: var(--hover); color: var(--ink); border-color: var(--primary) }
-.zp-chart-card-add b { font-weight: 500 }
-
-/* ================================================================
- * 新建命盘
- * ================================================================ */
-.zp-create-grid {
-  display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr);
-  gap: 20px; align-items: start;
-}
-.zp-create-aside { display: flex; flex-direction: column; gap: 12px }
-.zp-create-form { padding: 24px }
-.zp-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 12px }
-.zp-form-grid .zp-field.is-wide { grid-column: 1 / -1 }
-.zp-create-submit { display: flex; align-items: center; gap: 8px; margin-top: 8px }
-.zp-create-submit .zp-grow { flex: 1 }
-.zp-aside-note { color: var(--ink-3); font-size: 12px; line-height: 1.7 }
-.zp-aside-note b { color: var(--ink-2); font-weight: 500 }
-.zp-parts-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 20px; margin-top: 4px }
-.zp-parts-list li { display: flex; gap: 8px; color: var(--ink-3); font-size: 12px; line-height: 18px }
-.zp-parts-list li span { flex: none; color: var(--ink-4); font-variant-numeric: tabular-nums; width: 16px }
-/* ================================================================
- * 命盘页
- * ================================================================ */
-.zp-chart-hero { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px; margin-bottom: 20px }
-.zp-chart-id { flex: 1 1 360px; min-width: 0 }
-.zp-chart-eyebrow { color: var(--ink-3); font-size: 12px; line-height: 18px; letter-spacing: .08em; margin-bottom: 6px }
-.zp-chart-title {
-  font-size: 28px; line-height: 36px; font-weight: 300; letter-spacing: -.01em; color: var(--ink);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.zp-chart-title small { font-size: 14px; color: var(--ink-3); font-weight: 400; margin-left: 8px }
-.zp-chart-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 8px }
-.zp-chip {
-  display: inline-flex; align-items: center; gap: 4px; height: 24px; padding: 0 8px;
-  border-radius: 999px; background: var(--hover); color: var(--ink-2);
-  font-size: 11.5px; line-height: 24px; white-space: nowrap;
-}
-.zp-chip b { color: var(--ink); font-weight: 500; font-variant-numeric: tabular-nums }
-.zp-chip.is-gold { background: color-mix(in srgb, var(--zp-gold) 14%, transparent); color: var(--ink-2) }
-.zp-chip.is-gold b { color: var(--ink) }
-.zp-chart-actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; flex: none }
-
+/* ---------------- v3：AppBar / TimeBar / Rail / BottomBar ---------------- */
+.zp-head { flex-wrap: nowrap; min-height: 56px; box-sizing: border-box }
+.zp-rail-toggle { flex: none }
+.zp-root[data-rail="closed"] .zp-side { display: none }
+.zp-root[data-rail="closed"] .zp-body { grid-template-columns: minmax(0, 1fr) }
 .zp-timebar {
-  position: sticky; top: 72px; z-index: 12;
   display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-  padding: 8px 8px; margin: 0 0 16px; border-radius: var(--r-lg);
-  background: var(--glass); backdrop-filter: blur(22px) saturate(150%);
-  box-shadow: var(--elev-soft);
+  padding: 8px 12px; margin: 0 0 12px;
+  border: 1px solid var(--dsw-alias-border-l1); border-radius: 12px;
+  background: var(--dsw-alias-bg-layer-2);
+  position: sticky; top: 56px; z-index: 12;
 }
-.zp-tabs { display: inline-flex; gap: 2px; padding: 2px; border-radius: var(--r-md); background: var(--hover) }
-.zp-tabs button {
-  height: 30px; padding: 0 12px; border-radius: var(--r-sm);
-  color: var(--ink-3); font-size: 12px; font-weight: 500; white-space: nowrap;
-  transition: background .18s var(--ease), color .18s var(--ease);
-}
-.zp-tabs button:hover { color: var(--ink) }
-.zp-tabs button.on { background: var(--card-solid); color: var(--ink); box-shadow: var(--elev-soft) }
+.zp-timebar .zp-tabs { background: transparent; border: 0; padding: 0 }
+.zp-timebar .zp-stage-ctrl { margin-left: 0 }
 .zp-time-nav { display: inline-flex; align-items: center; gap: 4px; min-width: 0 }
 .zp-time-btn {
-  display: inline-flex; align-items: center; justify-content: center; flex: none;
-  width: 26px; height: 26px; border-radius: 999px; border: 1px solid var(--line-strong);
-  background: var(--card-solid); color: var(--ink-2); font-family: inherit; font-size: 14px; line-height: 1;
+  width: 24px; height: 24px; padding: 0; flex: none; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--dsw-alias-border-l1); border-radius: 999px;
+  background: var(--dsw-alias-bg-layer-1); color: var(--dsw-alias-label-secondary);
+  font-family: inherit; font-size: 14px; line-height: 1;
 }
-.zp-time-btn:hover { color: var(--ink); border-color: var(--primary) }
+.zp-time-btn:hover { color: var(--dsw-alias-label-primary); border-color: var(--zp-accent) }
 .zp-time-btn:disabled { opacity: .45; cursor: default }
+.zp-time-btn:focus-visible { outline: 2px solid var(--zp-accent); outline-offset: 1px }
 .zp-time-select {
-  height: 30px; max-width: 280px; min-width: 0; padding: 0 8px;
-  border: 1px solid var(--line-strong); border-radius: var(--r-sm);
-  background: var(--card-solid); color: var(--ink); font-family: inherit; font-size: 12px;
+  height: 28px; max-width: 280px; min-width: 0; padding: 0 8px;
+  border: 1px solid var(--dsw-alias-border-l1); border-radius: 8px;
+  background: var(--dsw-alias-bg-layer-1); color: var(--dsw-alias-label-primary);
+  font-family: inherit; font-size: 12px;
 }
+.zp-time-select:focus-visible, .zp-time-input:focus-visible { outline: 2px solid var(--zp-accent); outline-offset: 1px }
 .zp-time-input {
-  width: 76px; height: 30px; padding: 0 8px;
-  border: 1px solid var(--line-strong); border-radius: var(--r-sm);
-  background: var(--card-solid); color: var(--ink); font-family: inherit; font-size: 12px;
+  width: 72px; height: 28px; padding: 0 8px;
+  border: 1px solid var(--dsw-alias-border-l1); border-radius: 8px;
+  background: var(--dsw-alias-bg-layer-1); color: var(--dsw-alias-label-primary);
+  font-family: inherit; font-size: 12px;
 }
 .zp-time-now {
-  height: 30px; padding: 0 8px; white-space: nowrap; border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--primary) 40%, transparent);
-  background: color-mix(in srgb, var(--primary) 10%, transparent); color: var(--primary);
-  font-size: 11px; font-weight: 500;
+  height: 28px; padding: 0 8px; cursor: pointer; white-space: nowrap;
+  border: 1px solid color-mix(in srgb, var(--zp-accent) 45%, transparent); border-radius: 999px;
+  background: color-mix(in srgb, var(--zp-accent) 12%, transparent); color: var(--zp-accent);
+  font-family: inherit; font-size: 11px; font-weight: 650;
 }
-.zp-time-chip { padding: 0 4px; color: var(--ink-3); font-size: 11px; white-space: nowrap }
+.zp-time-now:focus-visible { outline: 2px solid var(--zp-accent); outline-offset: 1px }
+.zp-time-chip {
+  padding: 0 4px; font-size: 11px; color: var(--dsw-alias-label-secondary); white-space: nowrap;
+}
 .zp-timebar-right { margin-left: auto; display: flex; align-items: center; gap: 6px; flex-wrap: wrap }
 .zp-tool-btn {
-  height: 30px; padding: 0 12px; white-space: nowrap; border-radius: 999px;
-  border: 1px solid var(--line-strong); background: transparent;
-  color: var(--ink-2); font-size: 11.5px; font-weight: 500;
+  height: 28px; padding: 0 8px; cursor: pointer; white-space: nowrap;
+  border: 1px solid var(--dsw-alias-border-l1); border-radius: 999px;
+  background: transparent; color: var(--dsw-alias-label-secondary);
+  font-family: inherit; font-size: 11px; font-weight: 600;
 }
-.zp-tool-btn:hover { color: var(--ink); border-color: var(--line-strong); background: var(--hover) }
-.zp-tool-btn.on { color: var(--primary); border-color: color-mix(in srgb, var(--primary) 45%, transparent); background: color-mix(in srgb, var(--primary) 8%, transparent) }
-.zp-toolview-head { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap }
-.zp-toolview-title { font-size: 20px; line-height: 28px; font-weight: 400 }
-.zp-toolview-sub { font-size: 12px; color: var(--ink-3) }
-
-.zp-chart-board { margin-top: 2px }
-.zp-chart-info { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 16px }
-.zp-chart-info .zp-card { height: 100% }
-.zp-info-empty { color: var(--ink-3); font-size: 12px }
-.zp-kbd-hint { color: var(--ink-4); font-size: 11px; line-height: 16px; padding: 8px 2px 0; text-align: center }
-
-/* 命主信息卡（沿用旧组件结构，换成 v4 卡片外观） */
-.zp-summary-card { padding: 20px }
-.zp-summary-card .zp-pillars { display: flex; gap: 6px; margin-bottom: 12px }
-.zp-summary-card .zp-pillar {
-  flex: 1; text-align: center; padding: 8px 2px; border: 1px solid var(--line);
-  border-radius: var(--r-md); background: var(--card-solid); font-size: 15px; font-weight: 600; letter-spacing: 2px;
+.zp-tool-btn:hover { color: var(--dsw-alias-label-primary); border-color: var(--dsw-alias-border-l2) }
+.zp-tool-btn.on { color: var(--zp-accent); border-color: color-mix(in srgb, var(--zp-accent) 50%, transparent); background: color-mix(in srgb, var(--zp-accent) 10%, transparent) }
+.zp-tool-btn:focus-visible { outline: 2px solid var(--zp-accent); outline-offset: 1px }
+.zp-toolview-head { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap }
+.zp-toolview-title { font-size: 14px; font-weight: 650 }
+.zp-toolview-sub { font-size: 11px; color: var(--dsw-alias-label-secondary) }
+.zp-bottombar { display: none }
+.zp-root[data-w="narrow"][data-chart="1"] .zp-bottombar {
+  display: flex; align-items: center; gap: 8px; position: sticky; bottom: 0; z-index: 14;
+  margin: 12px -16px -32px; padding: 8px 16px;
+  border-top: 1px solid var(--dsw-alias-border-l1);
+  background: color-mix(in srgb, var(--dsw-alias-bg-base) 92%, transparent);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
 }
-.zp-summary-card .zp-kv-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px }
-.zp-summary-card .zp-kv { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 12px; padding: 4px 0; min-width: 0 }
-.zp-summary-card .zp-kv > span { flex: none; color: var(--ink-3); font-size: 11px }
-.zp-summary-card .zp-kv > b { font-weight: 500; text-align: right; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
-.zp-summary-card .zp-detail-section-label { font-size: 11px; color: var(--ink-3); letter-spacing: .5px; margin: 12px 0 6px }
-.zp-mutagen-strip { display: flex; flex-wrap: wrap; gap: 4px }
-.zp-mu {
-  display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 999px;
-  font-size: 10.5px; line-height: 22px; color: var(--ink-2);
-  background: color-mix(in srgb, var(--ink) 5%, transparent);
-}
-.zp-patterns-card { padding: 20px }
-.zp-patterns-card-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px }
-.zp-patterns-count { color: var(--ink-3); font-size: 11px }
-.zp-patterns-all { margin-left: auto }
-.zp-pattern-mini { display: flex; flex-direction: column; gap: 2px; padding: 8px 0; border-top: 1px solid var(--line) }
-.zp-pattern-mini:first-of-type { border-top: none; padding-top: 0 }
-.zp-pattern-mini-head { display: flex; align-items: baseline; gap: 6px; font-size: 12.5px; font-weight: 600; color: var(--ink) }
-.zp-pattern-mini-level { color: var(--ink-3); font-size: 10.5px; font-weight: 500 }
-.zp-pattern-mini-desc { color: var(--ink-2); font-size: 12px; line-height: 1.6 }
-
-/* 命盘/详情沿用旧盘面组件，只调外框与详情卡 */
-.zp-board-wrap { min-width: 0 }
-.zp-root[data-w="wide"] .zp-board-wrap.has-detail {
-  display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; align-items: start;
-}
-.zp-board {
-  width: 100%; max-width: var(--zp-board-max); margin: 0 auto;
-  padding: 6px; border-radius: var(--r-xl);
-  border: 1px solid color-mix(in srgb, var(--zp-gold) 22%, var(--line));
-  background: var(--card-solid);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--zp-gold) 5%, transparent), transparent 55%), var(--card-solid);
-  box-shadow: var(--elev-soft);
-}
-.zp-detail {
-  background: var(--card); border: 0; box-shadow: var(--elev-soft);
-  border-radius: var(--r-xl); padding: 16px 16px; margin-top: 12px; min-width: 0;
-}
-.zp-root:not([data-w="wide"]) .zp-detail { max-width: 760px; margin-left: auto; margin-right: auto }
-.zp-root[data-w="wide"] .zp-detail { margin-top: 0; position: sticky; top: 96px }
-.zp-detail-name { font-size: 15px; font-weight: 600; letter-spacing: .5px }
-.zp-detail-section-label { font-size: 11px; color: var(--ink-3); letter-spacing: .5px; margin-bottom: 4px }
-.zp-detail-nav .zp-btn { height: 26px; font-size: 11px; padding: 0 8px; border-radius: 999px }
-.zp-detail-body { display: flex; flex-direction: column; gap: 12px }
-
-/* ================================================================
- * 解读页：左聊天 + 右报告工位
- * ================================================================ */
-.zp-reading { position: absolute; inset: 92px 0 0; z-index: 1; display: flex; min-height: 0; overflow: hidden }
-.zp-reading-chat {
-  flex: none; width: var(--chat-w); min-height: 0; display: flex; flex-direction: column;
-  border-right: 1px solid var(--line); background: var(--card-solid);
-}
-.zp-chat-head {
-  flex: none; display: flex; align-items: center; gap: 8px;
-  min-height: 58px; padding: 8px 16px; border-bottom: 1px solid var(--line);
-}
-.zp-chat-head-main { min-width: 0; flex: 1 }
-.zp-chat-title { font-size: 14px; line-height: 20px; font-weight: 600; color: var(--ink) }
-.zp-chat-ctx {
-  color: var(--ink-3); font-size: 11px; line-height: 16px; margin-top: 2px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.zp-chat-scroll {
-  flex: 1; min-height: 0; overflow-y: auto; padding: 16px 16px;
-  display: flex; flex-direction: column; gap: 16px; scrollbar-width: thin;
-}
-.zp-chat-empty { margin: auto 0; padding: 8px 2px 12px }
-.zp-chat-greeting { font-size: 25px; line-height: 34px; font-weight: 300; letter-spacing: -.01em; color: var(--ink) }
-.zp-chat-greeting b { font-weight: 400 }
-.zp-chat-lead { margin-top: 8px; color: var(--ink-3); font-size: 13px; line-height: 21px }
-.zp-chat-suggests { display: flex; flex-direction: column; gap: 6px; margin-top: 16px }
-.zp-suggest {
-  display: flex; align-items: center; gap: 8px; width: 100%;
-  padding: 8px 12px; border-radius: var(--r-md);
-  background: var(--card); box-shadow: var(--elev-soft);
-  color: var(--ink-2); font-size: 12.5px; line-height: 18px; text-align: left;
-  transition: transform .2s var(--ease), background .2s, color .2s;
-}
-.zp-suggest:hover { transform: translateY(-1px); background: var(--card-solid); color: var(--ink) }
-.zp-suggest svg { color: var(--ink-3); flex: none }
-.zp-suggest small { color: var(--ink-4); font-size: 10.5px; margin-left: auto; white-space: nowrap }
-
-.zp-msg { display: flex; flex-direction: column; gap: 6px; min-width: 0 }
-.zp-msg.is-user { align-items: flex-end }
-.zp-msg-bubble {
-  max-width: 90%; padding: 8px 16px; border-radius: var(--r-lg);
-  background: var(--active); color: var(--ink); font-size: 13.5px; line-height: 22px;
-  white-space: pre-wrap; word-break: break-word;
-}
-.zp-msg-ai-head { display: flex; align-items: center; gap: 6px; color: var(--ink-3); font-size: 11px }
-.zp-msg-ai-head .zp-glyph-sm {
-  display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px;
-  border-radius: 50%; background: color-mix(in srgb, var(--zp-gold) 22%, var(--card)); color: var(--ink);
-}
-.zp-msg-ai-body {
-  width: 100%; padding: 16px 16px; border-radius: var(--r-lg);
-  background: var(--card); box-shadow: var(--elev-soft);
-  color: var(--ink); font-size: 13.5px; line-height: 1.85;
-}
-.zp-msg-actions { display: flex; align-items: center; gap: 8px; color: var(--ink-4); font-size: 11px; padding-left: 2px }
-.zp-msg-actions button { display: inline-flex; align-items: center; gap: 4px; color: var(--ink-3); font-size: 11px }
-.zp-msg-actions button:hover { color: var(--ink) }
-.zp-typing { display: flex; align-items: center; gap: 8px; color: var(--ink-3); font-size: 12px; padding: 2px; }
-.zp-typing i {
-  width: 7px; height: 7px; border-radius: 50%; background: var(--ink-3);
-  animation: zp-pulse 1.2s ease-in-out infinite;
-}
-.zp-typing i:nth-child(2) { animation-delay: .15s }
-.zp-typing i:nth-child(3) { animation-delay: .3s }
-@keyframes zp-pulse { 0%, 100% { opacity: .3; transform: translateY(0) } 50% { opacity: 1; transform: translateY(-2px) } }
-
-.zp-composer {
-  flex: none; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 6px;
-  margin: 0 12px 12px; padding: 8px 8px 8px 16px;
-  border-radius: var(--r-xl); background: var(--card); box-shadow: var(--elev-soft);
-  transition: box-shadow .2s var(--ease);
-}
-.zp-composer:focus-within { box-shadow: 0 0 0 1px var(--ink-2), var(--elev-soft) }
-.zp-composer textarea {
-  flex: 1; min-width: 0; min-height: 24px; max-height: 140px; padding: 4px 0;
-  border: 0; outline: 0; background: none; resize: none;
-  color: var(--ink); font-size: 13.5px; line-height: 22px;
-}
-.zp-composer textarea::placeholder { color: var(--ink-3) }
-.zp-composer-foot {
-  display: flex; align-items: center; gap: 8px; width: 100%;
-  color: var(--ink-4); font-size: 11px; line-height: 16px;
-}
-.zp-composer-foot .zp-grow { flex: 1 }
-.zp-send {
-  display: inline-flex; align-items: center; justify-content: center; flex: none;
-  width: 36px; height: 36px; border-radius: 50%;
-  background: var(--primary); color: var(--on-primary); transition: opacity .15s, transform .2s var(--ease);
-}
-.zp-send:hover { opacity: .92 }
-.zp-send:active { transform: scale(.96) }
-.zp-send:disabled { opacity: .4; cursor: default }
-.zp-send-stop { background: var(--active); color: var(--ink); border: 1px solid var(--line-strong) }
-.zp-disclaimer-inline { color: var(--ink-4); font-size: 10.5px; line-height: 16px; margin: 0 16px 16px; text-align: center }
-
-/* 右侧报告工位 */
-.zp-reading-dock {
-  flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column;
-  background: var(--canvas); overflow: hidden;
-}
-.zp-dock-head {
-  flex: none; display: flex; align-items: center; gap: 8px; min-height: 58px;
-  padding: 8px 20px; border-bottom: 1px solid var(--line);
-  background: color-mix(in srgb, var(--card-solid) 70%, transparent);
-  backdrop-filter: blur(16px);
-}
-.zp-dock-title { font-size: 14px; font-weight: 600; color: var(--ink) }
-.zp-dock-meta { color: var(--ink-3); font-size: 11.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
-.zp-dock-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px }
-.zp-dock-empty { max-width: 640px; margin: auto; display: flex; flex-direction: column; gap: 16px }
-.zp-dock-eyebrow { color: var(--ink-3); font-size: 12px; letter-spacing: .08em }
-.zp-dock-hero { font-size: 24px; line-height: 34px; font-weight: 300; letter-spacing: -.01em; color: var(--ink) }
-.zp-dock-hero b { font-weight: 400 }
-.zp-dock-lead { color: var(--ink-3); font-size: 13px; line-height: 21px }
-.zp-report-card {
-  padding: 24px; border-radius: var(--r-xl); background: var(--card); box-shadow: var(--elev-soft);
-}
-.zp-report-card-head { display: flex; align-items: flex-start; gap: 8px }
-.zp-report-card-main { flex: 1; min-width: 0 }
-.zp-report-title { font-size: 20px; line-height: 28px; font-weight: 400; color: var(--ink) }
-.zp-report-meta { color: var(--ink-3); font-size: 12px; line-height: 18px; margin-top: 4px; font-variant-numeric: tabular-nums }
-.zp-report-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px }
-.zp-report-excerpt {
-  position: relative; margin-top: 16px; padding: 16px; border-radius: var(--r-lg);
-  background: var(--bg); box-shadow: inset 0 0 0 1px var(--line);
-  color: var(--ink-2); font-size: 12px; line-height: 1.8; max-height: 210px; overflow: hidden;
-}
-.zp-report-excerpt::after {
-  content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 56px;
-  background: linear-gradient(transparent, var(--bg));
-}
-.zp-report-excerpt h2, .zp-report-excerpt h3, .zp-report-excerpt h4 {
-  font-family: var(--font); font-size: 13px; line-height: 20px; color: var(--ink); font-weight: 600; margin: 8px 0 4px;
-}
-.zp-report-excerpt p { margin-bottom: 6px }
-.zp-report-hint { color: var(--ink-4); font-size: 11px; line-height: 16px; margin-top: 8px }
-
-.zp-progress-card { padding: 20px; border-radius: var(--r-xl); background: var(--card); box-shadow: var(--elev-soft) }
-.zp-progress-head { display: flex; align-items: center; gap: 8px; margin-bottom: 12px }
-.zp-progress-title { font-size: 14px; font-weight: 600; color: var(--ink) }
-.zp-progress-meta { color: var(--ink-3); font-size: 11.5px; margin-left: auto; font-variant-numeric: tabular-nums }
-.zp-progress-list { display: flex; flex-direction: column; gap: 8px }
-.zp-progress-step { display: flex; align-items: center; gap: 8px; color: var(--ink-3); font-size: 12.5px; line-height: 18px }
-.zp-progress-step i {
-  display: inline-flex; align-items: center; justify-content: center; flex: none;
-  width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--line-strong);
-  color: var(--ink-3); font-style: normal; font-size: 10px;
-}
-.zp-progress-step.is-done { color: var(--ink-2) }
-.zp-progress-step.is-done i { background: var(--primary); border-color: transparent; color: var(--on-primary) }
-.zp-progress-step.is-active { color: var(--ink) }
-.zp-progress-bar { height: 3px; border-radius: 999px; background: var(--hover); margin-top: 16px; overflow: hidden }
-.zp-progress-bar span { display: block; height: 100%; border-radius: 999px; background: var(--primary); transition: width .3s var(--ease) }
-.zp-dock-dots { display: flex; gap: 4px; margin-top: 16px }
-.zp-dock-dots i { flex: 1 1 0; height: 4px; border-radius: 999px; background: var(--hover) }
-.zp-dock-dots i.is-done { background: var(--primary) }
-.zp-dock-dots i.is-active { background: color-mix(in srgb, var(--primary) 45%, var(--hover)) }
-.zp-shimmer { color: transparent; background: linear-gradient(90deg, var(--ink-3) 30%, var(--ink) 50%, var(--ink-3) 70%); background-size: 220% 100%; -webkit-background-clip: text; background-clip: text; animation: zp-shimmer 1.6s linear infinite }
-@keyframes zp-shimmer { to { background-position: -220% 0 } }
-
-.zp-error-card { padding: 16px; border-radius: var(--r-lg); background: color-mix(in srgb, var(--dsw-alias-state-error-primary) 8%, transparent); color: var(--ink); font-size: 12.5px; line-height: 1.7 }
-.zp-error-card b { display: block; margin-bottom: 4px; font-weight: 600 }
-
-/* ================================================================
- * 报告阅读页（全屏 / 面板内全屏）
- * ================================================================ */
-.zp-reader { position: absolute; inset: 92px 0 0; z-index: 1; display: flex; flex-direction: column; background: var(--canvas) }
-.zp-reader-head {
-  flex: none; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-  padding: 12px 20px; border-bottom: 1px solid var(--line);
-  background: color-mix(in srgb, var(--card-solid) 72%, transparent); backdrop-filter: blur(16px);
-}
-.zp-reader-title { font-size: 14px; font-weight: 600; color: var(--ink); white-space: nowrap }
-.zp-reader-meta { color: var(--ink-3); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0 }
-.zp-reader-actions { margin-left: auto; display: flex; align-items: center; gap: 6px; flex-wrap: wrap }
-.zp-reader-body { flex: 1; min-height: 0; overflow: auto; padding: 20px; display: flex; justify-content: center; align-items: flex-start }
-.zp-reader-paper {
-  width: min(860px, 100%); height: 100%; min-height: 0;
-  display: flex; flex-direction: column; overflow: hidden;
-  border-radius: var(--r-lg); background: var(--dsw-alias-bg-layer-1);
-  box-shadow: var(--elev-pop);
-}
-.zp-reader-frame { width: 100%; flex: 1; min-height: 0; border: 0; background: var(--dsw-alias-bg-layer-1) }
-.zp-reader:fullscreen { inset: 0; background: var(--bg) }
-.zp-reader:fullscreen .zp-reader-head { padding-top: 16px }
-.zp-reader:fullscreen .zp-reader-paper { width: min(960px, 100%) }
-/* ================================================================
- * 聊天 markdown
- * ================================================================ */
-.zp-chat-thread { display: flex; flex-direction: column; gap: 16px }
-.zp-md { font-size: 13.5px; line-height: 1.85; color: var(--ink); overflow-wrap: anywhere }
-.zp-md-gap { height: 6px }
-.zp-md-p { margin: 0 0 8px }
-.zp-md-p:last-child { margin-bottom: 0 }
-.zp-md-h { margin: 16px 0 6px; color: var(--ink); font-weight: 600 }
-.zp-md-h:first-child { margin-top: 0 }
-.zp-md-h1 { font-size: 15px; line-height: 24px }
-.zp-md-h2 { font-size: 14px; line-height: 22px }
-.zp-md-h3 { font-size: 13.5px; line-height: 22px }
-.zp-md-h4 { font-size: 13px; line-height: 20px }
-.zp-md-li { position: relative; margin: 2px 0 2px 12px }
-.zp-md-li::before { content: '·'; position: absolute; left: -12px; color: var(--ink-3) }
-.zp-md-quote {
-  margin: 8px 0; padding: 6px 12px; border-left: 2px solid var(--line-strong);
-  color: var(--ink-2); font-style: normal;
-}
-.zp-md code {
-  padding: 2px 4px; border-radius: 4px; background: var(--hover);
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px;
-}
-.zp-md hr { margin: 12px 0; border: 0; border-top: 1px solid var(--line-strong) }
-.zp-md-table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 12px; line-height: 1.6 }
-.zp-md-table th, .zp-md-table td {
-  border: 1px solid var(--line-strong); padding: 6px 8px;
-  vertical-align: top; text-align: left; word-break: break-word;
-}
-.zp-md-table th { background: var(--hover); font-weight: 600 }
-.zp-md-table tr:nth-child(even) td { background: color-mix(in srgb, var(--ink) 2.5%, transparent) }
-
-/* ================================================================
- * 设置浮层
- * ================================================================ */
-.zp-overlay { position: absolute; inset: 0; z-index: 100 }
-.zp-overlay-mask {
-  position: absolute; inset: 0; background: color-mix(in srgb, var(--ink) 32%, transparent);
-  animation: zp-fade .14s ease-out;
-}
-.zp-overlay-center {
-  position: absolute; inset: 0; display: flex; align-items: flex-start; justify-content: center;
-  padding: 48px 20px; overflow: auto;
-}
-.zp-settings:focus { outline: none }
-.zp-settings {
-  width: min(560px, 100%); max-height: 86%; display: flex; flex-direction: column;
-  background: var(--card-solid); border-radius: var(--r-xl);
-  box-shadow: var(--elev-pop); animation: zp-pop .16s var(--ease);
-}
-.zp-settings-head {
-  flex: none; display: flex; align-items: center; gap: 8px;
-  padding: 16px 20px; border-bottom: 1px solid var(--line);
-}
-.zp-settings-title { font-size: 20px; font-weight: 400; color: var(--ink) }
-.zp-settings-body { padding: 20px; overflow: auto; display: flex; flex-direction: column; gap: 12px }
-.zp-settings-hint { font-size: 11px; color: var(--ink-3); line-height: 1.55; margin-top: 4px }
-.zp-check { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink); cursor: pointer }
-.zp-check input { accent-color: var(--primary) }
-.zp-settings-about {
-  margin-top: 4px; padding-top: 16px; border-top: 1px solid var(--line);
-  color: var(--ink-3); font-size: 12px; line-height: 1.7;
-  display: flex; flex-direction: column; gap: 4px;
-}
-.zp-settings-about b { color: var(--ink-2); font-size: 12px; font-weight: 600; letter-spacing: .5px }
-.zp-update { padding-top: 16px; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 8px }
-.zp-update-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-3) }
-.zp-update-row b { color: var(--ink); font-size: 13px; font-weight: 500 }
-.zp-update-cmd {
-  display: block; padding: 8px 12px; border-radius: var(--r-md); background: var(--hover);
-  color: var(--ink-2); font-size: 11px; line-height: 1.6; word-break: break-all;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-}
-.zp-update-new { font-size: 12px; line-height: 1.6; color: var(--dsw-alias-state-warn-primary) }
-.zp-update-ok { font-size: 12px; line-height: 1.6; color: var(--ink-3) }
-
-/* ================================================================
- * 窗口 chrome 避让（macOS 桌面端）
- * ================================================================ */
-html[data-platform="darwin"] .zp-root { padding-top: var(--dsh-frame-top-clearance, 0px) }
-html[data-platform="darwin"] [data-sidebar-collapsed] .zp-topbar {
-  padding-left: max(20px, var(--dsh-frame-leading-clearance, 0px));
-}
-html[data-platform="darwin"] .zp-root .zp-overlay-center {
-  padding-top: max(48px, var(--dsh-frame-overlay-top, 48px));
+.zp-bottombar .zp-btn { flex: 1 1 0; height: 34px }
+.zp-root[data-w="narrow"] .zp-head .zp-btn-ai { display: none }
+.zp-root[data-w="narrow"] .zp-timebar { position: static; margin-bottom: 8px }
+.zp-root[data-w="narrow"] .zp-time-select { max-width: 168px }
+.zp-head-mini { display: none }
+.zp-root[data-w="narrow"] .zp-head-mini {
+  display: inline-flex; flex: 0 1 auto; min-width: 0; max-width: 168px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 
-/* ================================================================
- * 响应式：narrow < 880 ≤ mid < 1100 ≤ wide
- * ================================================================ */
-.zp-root[data-w="narrow"] { --chat-w: 100% }
-.zp-root[data-w="mid"] { --chat-w: 340px }
-.zp-root[data-w="narrow"] .zp-topbar {
-  gap: 6px; flex-wrap: wrap;
-  padding: 8px 8px 8px 8px;
-}
-.zp-root[data-w="narrow"] .zp-brand { height: 36px; padding: 0 8px 0 6px }
-.zp-root[data-w="narrow"] .zp-brand-pro { display: none }
-.zp-root[data-w="narrow"] .zp-nav {
-  order: 3; width: 100%; overflow-x: auto; scrollbar-width: none;
-}
-.zp-root[data-w="narrow"] .zp-nav::-webkit-scrollbar { display: none }
-.zp-root[data-w="narrow"] .zp-nav button { padding: 0 12px; font-size: 12px }
-.zp-root[data-w="narrow"] .zp-top-ctx { display: none }
-.zp-root[data-w="mid"] .zp-top-ctx { display: none }
-.zp-root[data-w="mid"] .zp-brand-pro { display: none }
-.zp-root[data-w="mid"] .zp-nav { overflow-x: auto; scrollbar-width: none }
-.zp-root[data-w="mid"] .zp-nav::-webkit-scrollbar { display: none }
-.zp-root[data-w="narrow"] .zp-page { padding: 124px 16px 32px }
-.zp-root[data-w="narrow"] .zp-reading, .zp-root[data-w="narrow"] .zp-reader { inset: 124px 0 0 }
-.zp-root[data-w="narrow"] .zp-create-grid { grid-template-columns: minmax(0, 1fr) }
-.zp-root[data-w="narrow"] .zp-form-grid { grid-template-columns: minmax(0, 1fr) }
-.zp-root[data-w="narrow"] .zp-chart-info { grid-template-columns: minmax(0, 1fr) }
-.zp-root[data-w="narrow"] .zp-summary-card .zp-kv-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) }
-.zp-root[data-w="narrow"] .zp-page-title { font-size: 24px; line-height: 34px }
-.zp-root[data-w="narrow"] .zp-hero-title { font-size: 24px; line-height: 34px }
-.zp-root[data-w="narrow"] .zp-chart-title { font-size: 24px; line-height: 32px }
-.zp-root[data-w="narrow"] .zp-chat-greeting { font-size: 24px; line-height: 32px }
-.zp-root[data-w="narrow"] .zp-dock-hero, .zp-root[data-w="narrow"] .zp-report-title { font-size: 20px; line-height: 28px }
-.zp-root[data-w="narrow"] .zp-timebar { position: static; top: auto }
-.zp-root[data-w="narrow"] .zp-time-select { max-width: 170px }
-.zp-root[data-w="narrow"] .zp-detail-nav .zp-btn { font-size: 10.5px }
-.zp-root[data-w="narrow"] .zp-chart-actions { width: 100% }
-.zp-root[data-w="narrow"] .zp-reading { display: flex; flex-direction: column; overflow: hidden }
-.zp-root[data-w="narrow"] .zp-reading-tabs { display: flex }
-.zp-root[data-w="narrow"] .zp-reading-chat { width: 100%; height: auto; flex: 1; border-right: 0 }
-.zp-root[data-w="narrow"] .zp-reading-dock { height: auto; flex: 1; display: none }
-.zp-root[data-w="narrow"] .zp-reading[data-tab="dock"] .zp-reading-chat { display: none }
-.zp-root[data-w="narrow"] .zp-reading[data-tab="dock"] .zp-reading-dock { display: flex }
-.zp-root[data-w="narrow"] .zp-reader-head { padding: 8px 16px }
-.zp-root[data-w="narrow"] .zp-reader-body { padding: 12px }
-.zp-root[data-w="narrow"] .zp-reader-paper { border-radius: var(--r-md) }
-.zp-root[data-w="narrow"] .zp-dock-scroll { padding: 16px }
-.zp-root[data-w="narrow"] .zp-report-card { padding: 16px }
-.zp-root[data-w="narrow"] .zp-chat-scroll { padding: 16px 12px }
-.zp-root[data-w="narrow"] .zp-composer { margin: 0 8px 8px }
-.zp-root[data-w="narrow"] .zp-disclaimer-inline { margin: 0 12px 8px }
+/* compact 档（908–1071）：左栏 264 + 盘面 600，详情下沉；专治侧栏展开时中栏单列拉满 */
+.zp-root[data-w="compact"] { --zp-board-max: 600px }
+.zp-root[data-w="compact"] .zp-scroll { padding: 0 16px 32px }
+.zp-root[data-w="compact"] .zp-body { grid-template-columns: 264px minmax(0, 1fr); gap: 12px }
+.zp-root[data-w="compact"] .zp-rail-head .zp-mini-btn { display: none }
+.zp-root[data-w="compact"] .zp-head { margin: 0 -16px 12px; padding-left: 16px; padding-right: 16px }
+.zp-root[data-w="compact"] .zp-icon-btn { width: 32px; padding: 0 }
+.zp-root[data-w="compact"] .zp-icon-btn .zp-btn-label { display: none }
+.zp-root[data-w="compact"] .zp-time-btn { width: 24px }
+/* 收起左栏必须压过所有档位栅格（同特异性，放最后） */
+.zp-root[data-rail="closed"] .zp-body { grid-template-columns: minmax(0, 1fr) }
 
-/* 阅读页窄面板：对话 / 报告 分栏切换 */
-.zp-reading-tabs {
-  display: none; flex: none; align-items: center; gap: 4px;
-  padding: 8px 12px; border-bottom: 1px solid var(--line); background: var(--card-solid);
-}
-.zp-reading-tabs .zp-seg { width: 100% }
-.zp-reading-tabs .zp-seg button { flex: 1; height: 30px }
-.zp-root[data-w="narrow"] .zp-reading-tabs { display: flex }
-
-/* ================================================================
- * 深色主题：内容色提亮一档；品牌/背景全部交给宿主 token
- * ================================================================ */
+/* ---------------- 深色主题：内容色提亮一档 ---------------- */
 body[data-ds-dark-theme] .zp-root {
-  --zp-accent: var(--dsw-alias-brand-primary);
-  --zp-accent-deep: var(--dsw-alias-button-primary-hover);
-  --zp-fill-accent: var(--dsw-alias-button-primary-fill);
-  --zp-fill-accent-deep: var(--dsw-alias-button-primary-hover);
+  --zp-accent: #a78bfa;
+  --zp-accent-deep: #7c5cf0;
+  --zp-fill-accent: #6a4fe0;
+  --zp-fill-accent-deep: #5840c0;
   --zp-gold: #d8b877;
   --zp-gold-dim: #b9a075;
   --zp-mu-lu: #4ade80;
@@ -3090,12 +2696,10 @@ body[data-ds-dark-theme] .zp-star.bad { color: var(--zp-bad) }
 body[data-ds-dark-theme] .zp-star-none { border-color: var(--dsw-alias-border-l2) }
 body[data-ds-dark-theme] .zp-mark-body { color: #2a2210 }
 body[data-ds-dark-theme] .zp-mu-badge { color: #14161a }
+body[data-ds-dark-theme] .zp-preview-frame { background: #FAF6EF }
 body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18%, transparent) }
 
-@keyframes zp-fade { from { opacity: 0 } to { opacity: 1 } }
-@keyframes zp-pop { from { transform: translateY(6px) scale(.99); opacity: .4 } to { transform: none; opacity: 1 } }
-
-/* 动效偏好 */
+/* ---------------- 动效偏好 ---------------- */
 @media (prefers-reduced-motion: reduce) {
   .zp-root *, .zp-root *::before, .zp-root *::after { transition: none !important; animation: none !important }
 }
@@ -3171,117 +2775,162 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         extra && extra.badge ? h('span', { className: 'zp-mu-badge ' + MU_CLASS[extra.badge] }, extra.text) : null);
     }
 
-    /* ---------------- 排盘输入（新建命盘页） ---------------- */
-    function BirthForm(props) {
+    /* ---------------- 排盘输入 ---------------- */
+    function InputForm(props) {
       var f = props.form;
       var t = props.t;
       var set = props.setForm;
+      var collapsed = !!props.collapsed;
+      var onToggle = props.onToggleCollapse || function () { };
       var lunarMode = f.calendar === 'lunar';
       var leapAvailable = lunarMode && E.leapMonth(+f.year) === +f.month;
+      var pad2 = function (v) { return ('0' + (+v || 0)).slice(-2); };
+      var birthText = [
+        f.year + '-' + pad2(f.month) + '-' + pad2(f.day),
+        pad2(f.hour) + ':' + pad2(f.minute),
+        f.gender === 'female' ? t('female') : t('male'),
+        (f.longitude === '' || f.longitude === null || f.longitude === undefined) ? t('uncorrected') : f.longitude + '°E'
+      ].join(' · ');
+
       var setSetting = function (k, v) {
         var next = Object.assign({}, f.settings);
         next[k] = v;
         set({ settings: next });
       };
-      var seg = function (value, options, onChange) {
-        return h(Seg, { value: value, options: options, onChange: onChange });
-      };
-      return h('div', { className: 'zp-card zp-create-form' },
-        h('div', { className: 'zp-card-title' }, t('formTitle')),
-        h('div', { className: 'zp-form-grid' },
-          h('div', { className: 'zp-field is-wide' },
+
+      var formBody = [
+        h('div', { key: 'r1', className: 'zp-row', style: { gap: 8, alignItems: 'flex-start' } },
+          h('div', { className: 'zp-field', style: { flex: 1, marginBottom: 9 } },
             h('label', { className: 'zp-field-label' }, t('name')),
             h('input', {
               className: 'zp-input', type: 'text', value: f.name || '', maxLength: 20,
               placeholder: t('namePh'), 'aria-label': t('name'),
               onChange: function (ev) { set({ name: ev.target.value }); }
             })),
-          h('div', { className: 'zp-field' },
+          h('div', { className: 'zp-field', style: { flex: 1, marginBottom: 9 } },
             h('label', { className: 'zp-field-label' }, t('calendar')),
-            seg(f.calendar, [{ value: 'solar', label: t('solar') }, { value: 'lunar', label: t('lunar') }],
-              function (v) { set({ calendar: v, isLeap: false }); })),
-          h('div', { className: 'zp-field is-wide' },
-            h('label', { className: 'zp-field-label' }, t('year') + ' / ' + t('month') + ' / ' + t('day')),
-            h('div', { className: 'zp-row' },
+            h(Seg, {
+              value: f.calendar,
+              options: [{ value: 'solar', label: t('solar') }, { value: 'lunar', label: t('lunar') }],
+              onChange: function (v) { set({ calendar: v, isLeap: false }); }
+            }))),
+        h('div', { key: 'r2', className: 'zp-field' },
+          h('label', { className: 'zp-field-label' }, t('year') + ' / ' + t('month') + ' / ' + t('day')),
+          h('div', { className: 'zp-row' },
+            h('input', {
+              className: 'zp-input', type: 'number', value: f.year, min: 1900, max: 2100, style: { flex: 1, minWidth: 0 },
+              'aria-label': t('year'),
+              onChange: function (ev) { set({ year: ev.target.value }); }
+            }),
+            h('input', {
+              className: 'zp-input', type: 'number', value: f.month, min: 1, max: 12, style: { width: 58, flex: 'none' },
+              'aria-label': t('month'),
+              onChange: function (ev) { set({ month: ev.target.value }); }
+            }),
+            h('input', {
+              className: 'zp-input', type: 'number', value: f.day, min: 1, max: 30, style: { width: 58, flex: 'none' },
+              'aria-label': t('day'),
+              onChange: function (ev) { set({ day: ev.target.value }); }
+            }),
+            lunarMode ? h('label', { className: 'zp-row', style: { fontSize: 11.5, color: 'var(--dsw-alias-label-secondary)', gap: 4, flex: 'none' } },
               h('input', {
-                className: 'zp-input', type: 'number', value: f.year, min: 1900, max: 2100, style: { flex: '1 1 0', minWidth: 0 },
-                'aria-label': t('year'), onChange: function (ev) { set({ year: ev.target.value }); }
-              }),
-              h('input', {
-                className: 'zp-input', type: 'number', value: f.month, min: 1, max: 12, style: { flex: '1 1 0', minWidth: 0 },
-                'aria-label': t('month'), onChange: function (ev) { set({ month: ev.target.value }); }
-              }),
-              h('input', {
-                className: 'zp-input', type: 'number', value: f.day, min: 1, max: 30, style: { flex: '1 1 0', minWidth: 0 },
-                'aria-label': t('day'), onChange: function (ev) { set({ day: ev.target.value }); }
-              }),
-              lunarMode ? h('label', { className: 'zp-check', style: { flex: 'none' } },
-                h('input', {
-                  type: 'checkbox', checked: !!f.isLeap, disabled: !leapAvailable,
-                  onChange: function (ev) { set({ isLeap: ev.target.checked }); }
-                }), t('leap')) : null)),
-          h('div', { className: 'zp-field is-wide' },
-            h('label', { className: 'zp-field-label' }, t('time') + ' · ' + t('gender')),
-            h('div', { className: 'zp-row' },
-              h('input', {
-                className: 'zp-input', type: 'number', value: f.hour, min: 0, max: 23, style: { width: 70, flex: 'none' },
-                'aria-label': t('hour'), onChange: function (ev) { set({ hour: ev.target.value }); }
-              }),
-              h('span', { style: { color: 'var(--ink-3)', fontSize: 12, flex: 'none' } }, t('hour')),
-              h('input', {
-                className: 'zp-input', type: 'number', value: f.minute, min: 0, max: 59, style: { width: 70, flex: 'none' },
-                'aria-label': t('minute'), onChange: function (ev) { set({ minute: ev.target.value }); }
-              }),
-              h('div', { style: { flex: '1 1 0', minWidth: 120, marginLeft: 4 } },
-                seg(f.gender, [{ value: 'male', label: t('male') }, { value: 'female', label: t('female') }],
-                  function (v) { set({ gender: v }); })))),
-          h('div', { className: 'zp-field' },
+                type: 'checkbox', checked: !!f.isLeap, disabled: !leapAvailable,
+                onChange: function (ev) { set({ isLeap: ev.target.checked }); }
+              }), t('leap')) : null)),
+        h('div', { key: 'r3', className: 'zp-field' },
+          h('label', { className: 'zp-field-label' }, t('time') + ' · ' + t('gender')),
+          h('div', { className: 'zp-row' },
+            h('input', {
+              className: 'zp-input', type: 'number', value: f.hour, min: 0, max: 23, style: { width: 58, flex: 'none' },
+              'aria-label': t('hour'),
+              onChange: function (ev) { set({ hour: ev.target.value }); }
+            }),
+            h('span', { style: { fontSize: 11, color: 'var(--dsw-alias-label-secondary)', flex: 'none' } }, t('hour')),
+            h('input', {
+              className: 'zp-input', type: 'number', value: f.minute, min: 0, max: 59, style: { width: 58, flex: 'none' },
+              'aria-label': t('minute'),
+              onChange: function (ev) { set({ minute: ev.target.value }); }
+            }),
+            h('div', { style: { flex: 1, minWidth: 96 } },
+              h(Seg, {
+                value: f.gender,
+                options: [{ value: 'male', label: t('male') }, { value: 'female', label: t('female') }],
+                onChange: function (v) { set({ gender: v }); }
+              })))),
+        h('div', { key: 'r4', className: 'zp-row', style: { gap: 8, alignItems: 'flex-start' } },
+          h('div', { className: 'zp-field', style: { flex: 1, marginBottom: 9 } },
             h('label', { className: 'zp-field-label' }, t('lonLabel')),
             h('input', {
               className: 'zp-input', type: 'number', value: f.longitude, min: 60, max: 140, step: 'any',
               placeholder: t('lonPh'), 'aria-label': t('lonLabel'),
               onChange: function (ev) { set({ longitude: ev.target.value }); }
             })),
-          h('div', { className: 'zp-field' },
+          h('div', { className: 'zp-field', style: { flex: 1, marginBottom: 9 } },
             h('label', { className: 'zp-field-label' }, t('placeLabel')),
             h('input', {
               className: 'zp-input', type: 'text', value: f.place || '', maxLength: 30,
               placeholder: t('placePh'), 'aria-label': t('placeLabel'),
               onChange: function (ev) { set({ place: ev.target.value }); }
-            })),
-          h('div', { className: 'zp-field is-wide' },
-            h('label', { className: 'zp-field-label' }, t('occupationLabel')),
-            h('input', {
-              className: 'zp-input', type: 'text', value: f.occupation || '', maxLength: 60,
-              placeholder: t('occupationPh'), 'aria-label': t('occupationLabel'),
-              onChange: function (ev) { set({ occupation: ev.target.value }); }
-            })),
-          h('details', { className: 'zp-field is-wide' },
-            h('summary', { style: { fontSize: 12, color: 'var(--ink-3)', cursor: 'pointer' } }, t('settings')),
-            h('div', { style: { paddingTop: 12 } },
-              h('div', { className: 'zp-field' },
-                h('label', { className: 'zp-field-label' }, t('yearDivide')),
-                seg(f.settings.yearDivide, [{ value: 'normal', label: t('ydNormal') }, { value: 'exact', label: t('ydExact') }],
-                  function (v) { setSetting('yearDivide', v); })),
-              h('div', { className: 'zp-field' },
-                h('label', { className: 'zp-field-label' }, t('monthDivide')),
-                seg(f.settings.monthDivide, [{ value: 'normal', label: t('mdNormal') }, { value: 'exact', label: t('mdExact') }],
-                  function (v) { setSetting('monthDivide', v); }),
-                h('div', { className: 'zp-settings-hint' }, t('monthDivideHint'))),
-              h('div', { className: 'zp-field' },
-                h('label', { className: 'zp-field-label' }, t('dayDivide')),
-                seg(f.settings.dayDivide, [{ value: 'forward', label: t('ddForward') }, { value: 'current', label: t('ddCurrent') }],
-                  function (v) { setSetting('dayDivide', v); })),
-              h('div', { className: 'zp-field' },
-                h('label', { className: 'zp-field-label' }, t('fixLeap')),
-                seg(f.settings.fixLeap, [{ value: true, label: t('flTrue') }, { value: false, label: t('flFalse') }],
-                  function (v) { setSetting('fixLeap', v); }))))),
-        props.error ? h('div', { className: 'zp-error', style: { marginBottom: 10 } }, props.error) : null,
-        h('div', { className: 'zp-create-submit' },
-          h('button', { className: 'zp-pill is-primary', type: 'button', onClick: props.onSubmit },
-            h(Icon, { name: 'chart', size: 14 }), props.submitLabel || t('createSubmit')),
-          h('span', { className: 'zp-grow' }),
-          h('button', { className: 'zp-pill is-quiet', type: 'button', onClick: props.onSample }, t('createSample'))));
+            }))),
+        h('div', { key: 'r5', className: 'zp-field' },
+          h('label', { className: 'zp-field-label' }, t('occupationLabel')),
+          h('input', {
+            className: 'zp-input', type: 'text', value: f.occupation || '', maxLength: 60,
+            placeholder: t('occupationPh'), 'aria-label': t('occupationLabel'),
+            onChange: function (ev) { set({ occupation: ev.target.value }); }
+          })),
+        h('details', { key: 'r6', style: { marginBottom: 10 } },
+          h('summary', { style: { fontSize: 11, color: 'var(--dsw-alias-label-secondary)', cursor: 'pointer', letterSpacing: '.5px' } }, t('settings')),
+          h('div', { style: { paddingTop: 8 } },
+            h('div', { className: 'zp-field' },
+              h('label', { className: 'zp-field-label' }, t('yearDivide')),
+              h(Seg, {
+                value: f.settings.yearDivide,
+                options: [{ value: 'normal', label: t('ydNormal') }, { value: 'exact', label: t('ydExact') }],
+                onChange: function (v) { setSetting('yearDivide', v); }
+              })),
+            h('div', { className: 'zp-field' },
+              h('label', { className: 'zp-field-label' }, t('monthDivide')),
+              h(Seg, {
+                value: f.settings.monthDivide,
+                options: [{ value: 'normal', label: t('mdNormal') }, { value: 'exact', label: t('mdExact') }],
+                onChange: function (v) { setSetting('monthDivide', v); }
+              }),
+              h('div', { className: 'zp-settings-hint' }, t('monthDivideHint'))),
+            h('div', { className: 'zp-field' },
+              h('label', { className: 'zp-field-label' }, t('dayDivide')),
+              h(Seg, {
+                value: f.settings.dayDivide,
+                options: [{ value: 'forward', label: t('ddForward') }, { value: 'current', label: t('ddCurrent') }],
+                onChange: function (v) { setSetting('dayDivide', v); }
+              })),
+            h('div', { className: 'zp-field' },
+              h('label', { className: 'zp-field-label' }, t('fixLeap')),
+              h(Seg, {
+                value: f.settings.fixLeap,
+                options: [{ value: true, label: t('flTrue') }, { value: false, label: t('flFalse') }],
+                onChange: function (v) { setSetting('fixLeap', v); }
+              })))),
+        h('button', { key: 'r7', className: 'zp-btn' + (props.hasChart ? '' : ' zp-btn-primary'), type: 'button', style: { width: '100%' }, onClick: props.onCompute },
+          t('compute'))
+      ];
+      if (props.error) formBody.push(h('div', { key: 'r8', className: 'zp-error' }, props.error));
+      formBody.push(h('div', { key: 'r9', className: 'zp-note' },
+        h('div', null, t('note1')),
+        h('div', null, t('note2'))));
+
+      return h('div', { className: 'zp-card zp-input-card', 'data-region': 'SIDE_FORM' },
+        h('div', { className: 'zp-card-title' }, t('formTitle'),
+          h('span', { className: 'zp-title-actions' },
+            h('button', { className: 'zp-link-btn', type: 'button', onClick: onToggle },
+              collapsed ? t('expandForm') : t('collapseForm')))),
+        collapsed
+          ? h('div', { className: 'zp-birth-line' },
+            h('span', { className: 'zp-birth-text' }, h('b', null, f.name || t('defaultName')), '　' + birthText),
+            h('button', { className: 'zp-btn', type: 'button', style: { height: 30 }, onClick: onToggle }, t('editBirth')),
+            h('button', { className: 'zp-btn' + (props.hasChart ? '' : ' zp-btn-primary'), type: 'button', style: { height: 30 }, onClick: props.onCompute }, t('compute')))
+          : h('div', null, formBody),
+        collapsed && props.error ? h('div', { className: 'zp-error' }, props.error) : null);
     }
 
     /* ---------------- 命主信息 ---------------- */
@@ -3317,6 +2966,39 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           })));
     }
 
+    /* ---------------- 命盘库 ---------------- */
+    function Library(props) {
+      var t = props.t;
+      var [name, setName] = useState('');
+      return h('div', { className: 'zp-card zp-lib-card', 'data-region': 'SIDE_LIBRARY' },
+        h('div', { className: 'zp-card-title' }, t('libTitle')),
+        h('div', { className: 'zp-row', style: { marginBottom: 8 } },
+          h('input', {
+            className: 'zp-input', type: 'text', value: name, maxLength: 20, style: { flex: 1, minWidth: 0 },
+            placeholder: t('libName'), 'aria-label': t('libName'),
+            onChange: function (ev) { setName(ev.target.value); }
+          }),
+          h('button', {
+            className: 'zp-btn', type: 'button',
+            onClick: function () {
+              if (props.onSave(name)) setName('');
+            }
+          }, t('libSave'))),
+        props.items.length === 0
+          ? h('div', { style: { fontSize: 11.5, color: 'var(--dsw-alias-label-secondary)' } }, t('libEmpty'))
+          : props.items.map(function (item) {
+            return h('div', {
+              key: item.id, className: 'zp-list-item' + (props.current === item.id ? ' on' : ''),
+              onClick: function () { props.onLoad(item); }
+            },
+              h('b', null, item.name),
+              h('span', { className: 'zp-list-sub' }, item.input.year + '-' + item.input.month + '-' + item.input.day),
+              h('button', {
+                className: 'zp-list-del', type: 'button', title: t('libDelete'),
+                onClick: function (ev) { ev.stopPropagation(); props.onDelete(item.id); }
+              }, '×'));
+          }));
+    }
     /* ---------------- 命盘宫格 ---------------- */
     /* 索引 → 网格位置 (紫微盘方位: 命宫左上, 顺时针) */
     const CELL_POS = {
@@ -3550,23 +3232,6 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       check: [
         ['path', { d: 'M3.4 8.3l3.1 3.1 6.1-6.7' }]
       ],
-      home: [
-        ['path', { d: 'M2.4 7.2L8 2.6l5.6 4.6' }],
-        ['path', { d: 'M4 6.6v6.6h8V6.6' }]
-      ],
-      chart: [
-        ['rect', { x: 2.2, y: 2.2, width: 4.6, height: 4.6, rx: 1 }],
-        ['rect', { x: 9.2, y: 2.2, width: 4.6, height: 4.6, rx: 1 }],
-        ['rect', { x: 2.2, y: 9.2, width: 4.6, height: 4.6, rx: 1 }],
-        ['rect', { x: 9.2, y: 9.2, width: 4.6, height: 4.6, rx: 1 }]
-      ],
-      clock: [
-        ['circle', { cx: 8, cy: 8, r: 6 }],
-        ['path', { d: 'M8 4.6V8l2.6 1.6' }]
-      ],
-      star: [
-        ['path', { d: 'M8 2.2l1.7 3.6 3.9.5-2.9 2.7.8 3.9L8 11.1l-3.5 1.8.8-3.9L2.4 6.3l3.9-.5z' }]
-      ],
       newChat: [
         ['path', { d: 'M8 2.9v10.2M2.9 8h10.2' }]
       ],
@@ -3606,350 +3271,130 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         .replace(/\n/g, '<br>');
     }
 
-    /* ================================================================
-     * v4 通用小工具
-     * ================================================================ */
-    function relTime(t, ts) {
-      if (!ts) return '';
-      var d = Date.now() - ts;
-      if (d < 60 * 1000) return t('relJustNow');
-      if (d < 60 * 60 * 1000) return t('relMin').replace('{n}', String(Math.max(1, Math.floor(d / 60000))));
-      if (d < 24 * 60 * 60 * 1000) return t('relHour').replace('{n}', String(Math.floor(d / 3600000)));
-      if (d < 48 * 60 * 60 * 1000) return t('relYesterday');
-      if (d < 30 * 24 * 60 * 60 * 1000) return t('relDays').replace('{n}', String(Math.floor(d / 86400000)));
-      return fmtDate(ts);
-    }
-    function fmtDate(ts) {
-      var d = new Date(ts);
-      return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
-    }
-    function fmtDateTime(ts) {
-      var d = new Date(ts);
-      return fmtDate(ts) + ' ' + ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
-    }
-    function inputKey(input) {
-      if (!input) return '';
-      return [input.calendar, input.year, input.month, input.day, input.isLeap ? 1 : 0,
-        input.hour, input.minute, input.gender, input.longitude == null ? '' : input.longitude].join('|');
-    }
-    function cleanInput(form) {
-      return {
-        name: form.name || '', calendar: form.calendar, year: form.year, month: form.month, day: form.day,
-        isLeap: !!form.isLeap, hour: form.hour, minute: form.minute, gender: form.gender,
-        longitude: form.longitude, place: form.place || '', occupation: form.occupation || '',
-        settings: Object.assign({}, form.settings)
-      };
-    }
-    function reportProgress(text) {
-      var s = String(text || '');
-      var sections = (s.match(/^#{2,4}\s+/gm) || []).length;
-      var last = '';
-      var re = /^#{2,4}\s+(.+)$/gm;
-      var m;
-      while ((m = re.exec(s))) last = m[1];
-      return { sections: Math.min(sections, 14), chars: s.length, last: last };
-    }
-    function reportExcerpt(text) {
-      var s = String(text || '');
-      if (s.length <= 1400) return s;
-      var cut = s.slice(0, 1400);
-      var lastBreak = Math.max(cut.lastIndexOf('\n\n'), cut.lastIndexOf('\n'));
-      return lastBreak > 600 ? cut.slice(0, lastBreak) : cut;
-    }
-
-    /* ================================================================
-     * 首页命盘卡片
-     * ================================================================ */
-    function ChartCard(props) {
-      var t = props.t;
-      var item = props.item;
-      var c = item.chart;
-      var gz = c ? [c.pillars.yearly, c.pillars.monthly, c.pillars.daily, c.pillars.hourly].join(' ') : '';
-      return h('div', { className: 'zp-chart-card' },
-        h('button', {
-          className: 'zp-chart-card-open', type: 'button', onClick: function () { props.onOpen(item); },
-          'aria-label': (item.name || t('defaultName')) + '，' + gz
-        },
-          h('div', { className: 'zp-chart-card-top' },
-            h('span', { className: 'zp-chart-badge' },
-              c ? c.soulBranch : '盘',
-              h('small', null, c ? c.fiveElementsClass : '')),
-            h('div', { className: 'zp-chart-card-main' },
-              h('div', { className: 'zp-chart-card-name' }, item.name || t('defaultName')),
-              h('div', { className: 'zp-chart-card-gz' }, gz))),
-          h('div', { className: 'zp-chart-card-foot' },
-            h('span', null, item.lastViewedAt ? relTime(t, item.lastViewedAt) : t('chartSaved')),
-            h('span', { className: 'zp-grow' }),
-            item.saved
-              ? h('span', { className: 'zp-chart-card-tag is-saved' }, t('homeSavedTag'))
-              : h('span', { className: 'zp-chart-card-tag' }, t('homeRecentTag')))),
-        h('div', { className: 'zp-chart-card-actions' },
-          h('button', {
-            className: 'zp-chart-card-save' + (item.saved ? ' is-saved' : ''), type: 'button',
-            title: item.saved ? t('chartUnsave') : t('chartSave'),
-            'aria-label': item.saved ? t('chartUnsave') : t('chartSave'),
-            onClick: function (ev) { ev.stopPropagation(); props.onToggleSave(item); }
-          }, h(Icon, { name: 'star', size: 13 })),
-          item.saved ? null : h('button', {
-            className: 'zp-chart-card-del', type: 'button',
-            title: t('homeRemove'), 'aria-label': t('homeRemove'),
-            onClick: function (ev) { ev.stopPropagation(); props.onRemove(item); }
-          }, h(Icon, { name: 'close', size: 12 }))));
-    }
-
-    /* ================================================================
-     * 解读页 · 聊天栏
-     * ================================================================ */
-    function ChatPane(props) {
+    function AIModal(props) {
       var t = props.t;
       var [q, setQ] = useState('');
+      var [showPreview, setShowPreview] = useState(false);
       var bodyRef = useRef(null);
-      var thread = props.thread || [];
-      var streaming = props.streaming;
-      var lastAssistant = -1;
-      for (var i = thread.length - 1; i >= 0; i--) {
-        if (thread[i].role === 'assistant' && thread[i].content) { lastAssistant = i; break; }
-      }
+      var boxRef = useDialogFocus();
       useEffect(function () {
         var el = bodyRef.current;
         if (el) el.scrollTop = el.scrollHeight;
       }, [props.thread, props.streaming]);
 
+      var thread = props.thread || [];
+      var lastAssistant = '';
+      for (var i = thread.length - 1; i >= 0; i--) {
+        if (thread[i].role === 'assistant') { lastAssistant = thread[i].content; break; }
+      }
+      /* 追问默认走 brief；完整报告是显式动作，不再藏在"下一次请求的模式"里 */
       var submit = function () {
-        var text = q.trim();
-        if (!text || streaming || props.reportRunning) return;
+        var question = q.trim();
+        if (!question || props.streaming) return;
         setQ('');
-        props.onAsk(text);
+        props.onAsk(question, 'brief');
       };
-      var suggests = [
-        { icon: 'chart', label: t('readingSug1') },
-        { icon: 'clock', label: t('readingSug2') },
-        { icon: 'sparkle', label: t('readingSug3') },
-        { icon: 'report', label: t('readingSug4'), meta: t('readingSug4Meta'), report: true }
-      ];
-      return h('section', { className: 'zp-reading-chat', 'data-region': 'CHAT' },
-        h('header', { className: 'zp-chat-head' },
-          h('button', {
-            className: 'zp-icon-btn zp-chat-back', type: 'button', title: t('navChart'),
-            'aria-label': t('navChart'), onClick: props.onBack
-          }, h(Icon, { name: 'back' })),
-          h('div', { className: 'zp-chat-head-main' },
-            h('div', { className: 'zp-chat-title' }, t('readingTitle')),
-            h('div', { className: 'zp-chat-ctx' }, props.ctxLine || '')),
-          props.onHandoff ? h('button', {
-            className: 'zp-icon-btn', type: 'button', title: t('handoffHint'), 'aria-label': t('handoff'),
-            disabled: streaming || props.reportRunning,
-            onClick: props.onHandoff
-          }, h(Icon, { name: 'handoff' })) : null,
-          thread.length ? h('button', {
-            className: 'zp-icon-btn', type: 'button', title: t('aiNewChat'), 'aria-label': t('aiNewChat'),
-            disabled: streaming, onClick: props.onNewChat
-          }, h(Icon, { name: 'newChat' })) : null),
-        props.tabs || null,
-        h('div', { className: 'zp-chat-scroll', ref: bodyRef },
-          thread.length === 0
-            ? h('div', { className: 'zp-chat-empty' },
-              h('div', { className: 'zp-chat-greeting' }, t('readingGreeting')),
-              h('p', { className: 'zp-chat-lead' }, t('readingLead')),
-              h('div', { className: 'zp-chat-suggests' },
-                suggests.map(function (s, idx) {
-                  return h('button', {
-                    key: idx, className: 'zp-suggest', type: 'button',
-                    disabled: s.report ? (props.reportRunning || props.chatRunning) : false,
-                    onClick: function () { s.report ? props.onGenerateReport() : props.onAsk(s.label); }
-                  }, h(Icon, { name: s.icon, size: 14 }), h('span', null, s.label),
-                    s.meta ? h('small', null, s.meta) : null);
-                })))
-            : h('div', { className: 'zp-chat-thread', role: 'log', 'aria-live': 'polite', 'aria-busy': streaming ? 'true' : 'false' },
-              thread.map(function (m, idx) {
-                if (m.role === 'user') {
-                  return h('div', { key: 'm' + idx, className: 'zp-msg is-user' },
-                    h('div', { className: 'zp-msg-bubble' }, m.content));
-                }
-                return h('div', { key: 'm' + idx, className: 'zp-msg' },
-                  h('div', { className: 'zp-msg-ai-head' },
-                    h('span', { className: 'zp-glyph-sm' }, h(Icon, { name: 'sparkle', size: 11 })),
-                    h('span', null, t('readingTitle'))),
-                  h('div', { className: 'zp-msg-ai-body' },
-                    h('div', { className: 'zp-md', dangerouslySetInnerHTML: { __html: renderChatMd(m.content) } })),
-                  idx === lastAssistant && !streaming && m.content
-                    ? h('div', { className: 'zp-msg-actions' },
-                      h('button', { type: 'button', onClick: props.onCopyAnswer },
-                        h(Icon, { name: props.copied ? 'check' : 'copy', size: 12 }),
-                        props.copied ? t('aiCopied') : t('aiCopy')))
-                    : null);
-              }),
-              streaming
-                ? h('div', { className: 'zp-typing' },
-                  h('i', null), h('i', null), h('i', null),
-                  h('span', null, props.thinkChars
+      var start = function (m) {
+        if (props.streaming) return;
+        props.onAsk('', m);
+      };
+      var showFullReport = !!lastAssistant && !props.hasReport && !props.streaming;
+
+      return h('div', { className: 'zp-overlay' },
+        h('div', { className: 'zp-overlay-mask', onClick: props.onClose, 'aria-hidden': true }),
+        h('aside', { className: 'zp-ai', role: 'dialog', 'data-region': 'DRAWER', 'aria-modal': 'true', 'aria-label': t('aiTitle'), tabIndex: -1,
+          ref: boxRef, onKeyDown: function (ev) { trapTab(ev, ev.currentTarget); } },
+          h('header', { className: 'zp-ai-head' },
+            h('div', { className: 'zp-ai-heading' },
+              h('span', { className: 'zp-ai-glyph' }, h(Icon, { name: 'sparkle', size: 15 })),
+              h('div', { className: 'zp-ai-title' }, t('aiTitle'))),
+            thread.length ? h('button', {
+              className: 'zp-icon-btn', type: 'button', title: t('aiNewChat'), 'aria-label': t('aiNewChat'),
+              disabled: props.streaming, onClick: props.onClear
+            }, h(Icon, { name: 'newChat' })) : null,
+            h('button', {
+              className: 'zp-icon-btn', type: 'button', title: t('close'), 'aria-label': t('close'), onClick: props.onClose
+            }, h(Icon, { name: 'close' }))),
+          h('div', { className: 'zp-ai-body', ref: bodyRef },
+            thread.length === 0
+              ? h('div', { className: 'zp-ai-empty-wrap' },
+                h('div', { className: 'zp-ai-empty' },
+                  h('div', { className: 'zp-ai-empty-hint' }, t('aiEmptyHint')),
+                  h('div', { className: 'zp-ai-start' },
+                    h('button', {
+                      className: 'zp-btn zp-btn-primary', type: 'button', disabled: props.streaming,
+                      onClick: function () { start('brief'); }
+                    }, h(Icon, { name: 'sparkle', size: 14 }), h('span', null, t('aiStartBrief'))),
+                    h('button', {
+                      className: 'zp-btn', type: 'button', disabled: props.streaming,
+                      onClick: function () { start('report'); }
+                    }, h(Icon, { name: 'report', size: 14 }), h('span', null, t('aiStartReport'))))))
+              : h('div', { className: 'zp-chat-thread', role: 'log', 'aria-live': 'polite', 'aria-busy': props.streaming ? 'true' : 'false' },
+                thread.map(function (m, i) {
+                  return h('div', { key: 'm' + i, className: m.role === 'user' ? 'zp-bubble zp-bubble-user' : 'zp-bubble zp-bubble-ai' },
+                    m.role === 'user'
+                      ? h('div', { className: 'zp-bubble-text' }, m.content)
+                      : h('div', { className: 'zp-md', dangerouslySetInnerHTML: { __html: renderChatMd(m.content) } }));
+                }),
+                props.streaming
+                  ? h('div', { className: 'zp-typing' }, props.thinkChars
                     ? t('aiThinking') + '（' + props.thinkChars + ' 字）'
-                    : t('interpStreaming')))
-                : null),
-          props.error ? h('div', { className: 'zp-error-card' },
-            h('b', null, t('reportFailed')),
-            h('div', null, props.error),
-            props.issue && props.issue.canContinue
-              ? h('button', { className: 'zp-pill is-small', type: 'button', style: { marginTop: 8 }, onClick: props.onContinue }, t('aiContinue'))
-              : null) : null),
-        h('div', { className: 'zp-composer' },
-          h('textarea', {
-            rows: 2, value: q, placeholder: t('readingAskPh'), 'aria-label': t('readingAskPh'),
-            disabled: streaming,
-            onChange: function (ev) { setQ(ev.target.value); },
-            onKeyDown: function (ev) {
-              if (ev.nativeEvent && ev.nativeEvent.isComposing) return;
-              if (ev.key === 'Enter' && !ev.shiftKey) { ev.preventDefault(); submit(); }
-            }
-          }),
-          streaming
-            ? h('button', { className: 'zp-send zp-send-stop', type: 'button', title: t('aiStop'), 'aria-label': t('aiStop'), onClick: props.onStop },
-              h(Icon, { name: 'stop', size: 15 }))
-            : h('button', {
-              className: 'zp-send', type: 'button', disabled: !q.trim() || props.reportRunning,
-              title: t('aiSend'), 'aria-label': t('aiSend'), onClick: submit
-            }, h(Icon, { name: 'send', size: 15 })),
-          h('div', { className: 'zp-composer-foot' },
-            h('span', null, t('readingHint')),
-            h('span', { className: 'zp-grow' }),
-            props.reportRunning ? h('span', null, t('reportGenerating')) : null)),
-        h('div', { className: 'zp-disclaimer-inline' }, t('disclaimerShort')));
-    }
-
-    /* ================================================================
-     * 解读页 · 报告工位
-     * ================================================================ */
-    function ReportDock(props) {
-      var t = props.t;
-      var report = props.report || { status: 'idle', text: '' };
-      var running = report.status === 'running';
-      var done = report.status === 'done' && report.text;
-      var progress = reportProgress(report.text || '');
-      var pct = done ? 100 : Math.min(96, Math.round(progress.sections / 14 * 100) + (running ? 4 : 0));
-      var dots = [];
-      for (var i = 0; i < 14; i++) {
-        dots.push(h('i', { key: i, className: i < progress.sections ? 'is-done' : (i === progress.sections && running ? 'is-active' : '') }));
-      }
-      var body = null;
-      if (running) {
-        body = h('div', { className: 'zp-progress-card' },
-          h('div', { className: 'zp-progress-head' },
-            h('span', { className: 'zp-progress-title' }, h('span', { className: 'zp-shimmer' }, t('reportGenerating'))),
-            h('span', { className: 'zp-progress-meta' }, t('reportSections').replace('{n}', String(progress.sections)) + ' · ' + t('reportChars').replace('{n}', String(progress.chars)))),
-          h('div', { className: 'zp-progress-list' },
-            h('div', { className: 'zp-progress-step is-active' },
-              h('i', null, '·'),
-              h('span', null, (progress.last || t('reportGenerating')))),
-            h('div', { className: 'zp-progress-step is-done' },
-              h('i', null, h(Icon, { name: 'check', size: 9 })),
-              h('span', null, progress.sections
-                ? t('reportSections').replace('{n}', String(progress.sections)) + ' · ' + t('reportChars').replace('{n}', String(progress.chars))
-                : t('reportGenerating'))),
-            h('div', { className: 'zp-progress-step' },
-              h('i', null), h('span', null, t('reportHintFoot')))),
-          h('div', { className: 'zp-progress-bar' }, h('span', { style: { width: pct + '%' } })),
-          h('div', { className: 'zp-dock-dots' }, dots),
-          h('div', { className: 'zp-report-actions' },
-            h('button', { className: 'zp-pill', type: 'button', onClick: props.onStop }, t('reportStop'))));
-      } else if (report.status === 'error') {
-        body = h('div', { className: 'zp-error-card' },
-          h('b', null, t('reportFailed')),
-          h('div', null, report.error || ''),
-          h('div', { className: 'zp-report-actions' },
-            h('button', { className: 'zp-pill is-primary', type: 'button', onClick: props.onRetry }, t('reportRetry')),
-            report.issue && report.issue.canContinue
-              ? h('button', { className: 'zp-pill', type: 'button', onClick: props.onContinue }, t('reportContinue'))
-              : null));
-      } else if (done) {
-        body = h('div', null,
-          h('div', { className: 'zp-report-card' },
-            h('div', { className: 'zp-report-card-head' },
-              h('div', { className: 'zp-report-card-main' },
-                h('div', { className: 'zp-report-title' }, t('reportName')),
-                h('div', { className: 'zp-report-meta' },
-                  [t('reportSections').replace('{n}', String(progress.sections)),
-                    t('reportChars').replace('{n}', String(progress.chars)),
-                    report.finishedAt ? fmtDateTime(report.finishedAt) : ''].filter(Boolean).join(' · '))),
-              h('span', { className: 'zp-chart-card-tag is-saved' }, t('reportReady'))),
-            h('div', { className: 'zp-report-actions' },
-              h('button', { className: 'zp-pill is-primary', type: 'button', onClick: props.onRead },
-                h(Icon, { name: 'expand', size: 14 }), t('reportRead')),
-              h('button', { className: 'zp-pill', type: 'button', onClick: props.onExport },
-                h(Icon, { name: 'export', size: 14 }), t('reportExport')),
-              h('button', { className: 'zp-pill is-quiet', type: 'button', onClick: props.onCopy },
-                h(Icon, { name: 'copy', size: 14 }), props.copied ? t('reportCopied') : t('reportCopy'))),
-            h('div', { className: 'zp-report-excerpt' },
-              h('div', { className: 'zp-md', dangerouslySetInnerHTML: { __html: renderChatMd(reportExcerpt(report.text)) } })),
-            h('div', { className: 'zp-report-hint' }, t('reportHint')),
-            h('button', { className: 'zp-link-btn', type: 'button', style: { marginTop: 8 }, disabled: props.chatRunning, onClick: props.onRetry }, t('reportRegenerate'))));
-      } else {
-        body = h('div', { className: 'zp-dock-empty' },
-          h('div', { className: 'zp-dock-eyebrow' }, t('dockEyebrow')),
-          h('div', { className: 'zp-dock-hero' }, t('dockIdleTitle')),
-          h('p', { className: 'zp-dock-lead' }, t('dockIdleLead')),
-          h('div', { className: 'zp-report-actions' },
-            h('button', { className: 'zp-pill is-primary', type: 'button', disabled: props.chatRunning, onClick: props.onGenerate },
-              h(Icon, { name: 'sparkle', size: 14 }), t('reportGenerate'))),
-          h('ul', { className: 'zp-parts-list' },
-            [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].map(function (n) {
-              return h('li', { key: n }, h('span', null, String(n).padStart(2, '0')), t('reportPart' + n));
-            })));
-      }
-      return h('section', { className: 'zp-reading-dock', 'data-region': 'REPORT_DOCK' },
-        h('header', { className: 'zp-dock-head' },
-          h('div', { className: 'zp-chat-head-main' },
-            h('div', { className: 'zp-chat-title' }, t('dockTitle')),
-            h('div', { className: 'zp-chat-ctx' }, t('dockMeta'))),
-          done ? h('button', {
-            className: 'zp-icon-btn', type: 'button', title: t('reportRead'), 'aria-label': t('reportRead'), onClick: props.onRead
-          }, h(Icon, { name: 'expand' })) : null),
-        h('div', { className: 'zp-dock-scroll' }, body));
-    }
-
-    /* ================================================================
-     * 报告全屏阅读页
-     * ================================================================ */
-    function ReaderPage(props) {
-      var t = props.t;
-      var boxRef = useRef(null);
-      var [full, setFull] = useState(false);
-      useEffect(function () {
-        var onChange = function () { setFull(!!(document.fullscreenElement && boxRef.current && document.fullscreenElement === boxRef.current)); };
-        document.addEventListener('fullscreenchange', onChange);
-        return function () { document.removeEventListener('fullscreenchange', onChange); };
-      }, []);
-      var toggleFull = function () {
-        var el = boxRef.current;
-        if (!el) return;
-        try {
-          if (document.fullscreenElement) { document.exitFullscreen && document.exitFullscreen(); return; }
-          if (el.requestFullscreen) el.requestFullscreen().catch(function () { /* 宿主 webview 不支持时静默 */ });
-        } catch (e) { /* ignore */ }
-      };
-      var progress = reportProgress(props.text);
-      return h('div', { className: 'zp-reader', 'data-region': 'READER', ref: boxRef },
-        h('header', { className: 'zp-reader-head' },
-          h('button', { className: 'zp-pill is-quiet', type: 'button', onClick: props.onBack },
-            h(Icon, { name: 'back', size: 14 }), t('readerBack')),
-          h('div', { className: 'zp-chat-head-main' },
-            h('div', { className: 'zp-reader-title' }, t('reportName')),
-            h('div', { className: 'zp-reader-meta' },
-              [props.name, t('reportChars').replace('{n}', String(progress.chars)),
-                t('reportSections').replace('{n}', String(progress.sections)),
-                props.finishedAt ? fmtDateTime(props.finishedAt) : ''].filter(Boolean).join(' · '))),
-          h('div', { className: 'zp-reader-actions' },
-            h('button', { className: 'zp-pill is-small', type: 'button', onClick: toggleFull },
-              h(Icon, { name: full ? 'close' : 'expand', size: 13 }), full ? t('readerExitFull') : t('readerFull')),
-            h('button', { className: 'zp-pill is-small', type: 'button', onClick: props.onExport },
-              h(Icon, { name: 'export', size: 13 }), t('reportExport')),
-            h('button', { className: 'zp-pill is-small', type: 'button', onClick: props.onCopy },
-              h(Icon, { name: props.copied ? 'check' : 'copy', size: 13 }), props.copied ? t('reportCopied') : t('reportCopy')))),
-        h('div', { className: 'zp-reader-body' },
-          h('div', { className: 'zp-reader-paper' },
-            h('iframe', {
-              className: 'zp-reader-frame', srcDoc: props.html,
-              title: t('reportName'), sandbox: 'allow-same-origin'
-            }))));
+                    : t('interpStreaming')) : null),
+            props.interpError ? h('div', { className: 'zp-ai-error' },
+              h('span', { className: 'zp-ai-error-text' }, props.interpError),
+              props.interpIssue && props.interpIssue.canContinue
+                ? h('button', {
+                  className: 'zp-mini-btn', type: 'button', disabled: props.streaming,
+                  onClick: function () { props.onContinue(); }
+                }, t('aiContinue'))
+                : null) : null),
+          h('footer', { className: 'zp-ai-foot' },
+            lastAssistant ? h('div', { className: 'zp-ai-tools' },
+              h('button', {
+                className: 'zp-mini-btn zp-mini-icon', type: 'button',
+                title: props.copied ? t('aiCopied') : t('aiCopy'), 'aria-label': props.copied ? t('aiCopied') : t('aiCopy'),
+                onClick: props.onCopy
+              }, h(Icon, { name: props.copied ? 'check' : 'copy', size: 14 })),
+              h('button', {
+                className: 'zp-mini-btn zp-mini-icon', type: 'button', title: t('previewHtml'), 'aria-label': t('previewHtml'),
+                'aria-expanded': showPreview ? 'true' : 'false',
+                onClick: function () { setShowPreview(!showPreview); }
+              }, h(Icon, { name: 'preview', size: 14 })),
+              h('button', {
+                className: 'zp-mini-btn zp-mini-icon', type: 'button', title: t('exportHtml'), 'aria-label': t('exportHtml'),
+                onClick: props.onExport
+              }, h(Icon, { name: 'export', size: 14 })),
+              showFullReport ? h('button', {
+                className: 'zp-mini-btn', type: 'button', title: t('aiFullReportHint'),
+                onClick: function () { start('report'); }
+              }, h(Icon, { name: 'report', size: 13 }), h('span', null, t('aiFullReport'))) : null,
+              h('button', {
+                className: 'zp-mini-btn zp-mini-btn-accent', type: 'button', title: t('handoffHint'), disabled: props.streaming,
+                onClick: function () { props.onHandoff(); }
+              }, h(Icon, { name: 'handoff', size: 13 }), props.handoffDone ? t('handoffDone') : t('handoff'))) : null,
+            h('div', { className: 'zp-ai-composer' },
+              h('textarea', {
+                className: 'zp-input zp-chat-ta', rows: 2, value: q,
+                placeholder: t('aiAskPh'), 'aria-label': t('aiAskPh'),
+                onChange: function (ev) { setQ(ev.target.value); },
+                onKeyDown: function (ev) {
+                  if (ev.key === 'Enter' && !ev.shiftKey) { ev.preventDefault(); submit(); }
+                }
+              }),
+              props.streaming
+                ? h('button', { className: 'zp-send zp-send-stop', type: 'button', title: t('aiStop'), 'aria-label': t('aiStop'), onClick: props.onStop },
+                  h(Icon, { name: 'stop', size: 15 }))
+                : h('button', {
+                  className: 'zp-send', type: 'button', disabled: !q.trim(),
+                  title: t('aiSend'), 'aria-label': t('aiSend'), onClick: submit
+                }, h(Icon, { name: 'send', size: 15 }))),
+            h('div', { className: 'zp-ai-disclaimer' }, t('disclaimerShort'))),
+          showPreview && lastAssistant ? h('div', { className: 'zp-ai-preview', 'data-region': 'PREVIEW' },
+            h('div', { className: 'zp-ai-preview-head' },
+              h('b', null, t('previewHtml')),
+              h('button', { className: 'zp-icon-btn', type: 'button', title: t('closePreview'), 'aria-label': t('closePreview'), onClick: function () { setShowPreview(false); } },
+                h(Icon, { name: 'close' }))),
+            h('iframe', { className: 'zp-preview-frame zp-preview-frame-full', srcDoc: props.previewHtml, title: t('previewHtml'), sandbox: 'allow-same-origin' })) : null));
     }
 
     /* ---------------- 设置：面板内居中弹层 ---------------- */
@@ -4016,7 +3461,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       var t = props.t;
       var actions = props.actions;
 
-      /* ---------- 表单 ---------- */
+      /* 表单与命盘 */
       var [form, setFormRaw] = useState(function () {
         var init = Object.assign({}, DEFAULT_FORM);
         try {
@@ -4026,6 +3471,9 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
             if (saved.settings && typeof saved.settings === 'object') init.settings = Object.assign({}, init.settings, saved.settings);
           }
         } catch (e) { /* ignore */ }
+        /* v1.3.3 一次性迁移：旧版把默认 monthDivide='normal'（农历月）连同表单一起持久化，
+           升级后仅改默认值不会生效；这里把「旧默认」改写成节气并写回，只做一次。
+           迁移之后用户显式选择的「农历月」不会再被覆盖。 */
         try {
           if (!localStorage.getItem('ziwei-pro.formV133')) {
             if (init.settings && init.settings.monthDivide === 'normal') {
@@ -4044,35 +3492,48 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           return next;
         });
       };
-
-      /* ---------- 命盘与视图 ---------- */
       var [chart, setChart] = useState(null);
       var [error, setError] = useState('');
       var [selected, setSelected] = useState(-1);
       var [tab, setTab] = useState('natal');
       var [selDecadal, setSelDecadal] = useState(0);
+      /* v3：默认停在「当前大限」，而不是第 0 段（3–12 岁）——旧默认会让用户打开大限页就看到童年。 */
+      var currentDecadeIndex = function (chartObj) {
+        if (!chartObj || !chartObj.lunar) return 0;
+        var age = new Date().getFullYear() - chartObj.lunar.year + 1;
+        var list = [];
+        try { list = E.decadalList(chartObj) || []; } catch (e) { list = []; }
+        for (var i = 0; i < list.length; i++) {
+          if (age >= list[i].ageRange[0] && age <= list[i].ageRange[1]) return i;
+        }
+        return 0;
+      };
       var [yearlyYear, setYearlyYear] = useState(String(new Date().getFullYear()));
-      var [view, setView] = useState('chart');
+
+      /* 布局：面板实测宽度（0 = 尚未测量，按窄面板安全兜底）、专注看盘、生辰输入折叠 */
       var [panelW, setPanelW] = useState(0);
+      var [focus, setFocus] = useState(function () {
+        try { return localStorage.getItem('ziwei-pro.focus') === '1'; } catch (e) { return false; }
+      });
+      var [formCollapsed, setFormCollapsed] = useState(false);
+      /* v3：左栏可收起（窄屏出盘后自动收起，给盘面让宽）；view 区分「盘面」与工具视图 */
+      var [railOpen, setRailOpenState] = useState(function () {
+        try { return localStorage.getItem('ziwei-pro.rail') !== '0'; } catch (e) { return true; }
+      });
+      var setRail = function (v) {
+        setRailOpenState(!!v);
+        try { localStorage.setItem('ziwei-pro.rail', v ? '1' : '0'); } catch (e) { /* ignore */ }
+      };
+      var [view, setView] = useState('chart');
 
-      /* ---------- 页面导航 ---------- */
-      var [page, setPage] = useState('home');
-      var chartInputRef = useRef(null); /* home | create | chart | reading | report */
-      var [createFrom, setCreateFrom] = useState('home');
-      var [readingTab, setReadingTab] = useState('chat');
-
-      /* ---------- 命盘库 / 最近看过 ---------- */
+      /* 命盘库 */
       var [library, setLibrary] = useState(function () {
         try { return JSON.parse(localStorage.getItem('ziwei-pro.library') || '[]'); } catch (e) { return []; }
       });
-      var [history, setHistory] = useState(function () {
-        try {
-          var raw = JSON.parse(localStorage.getItem('ziwei-pro.history') || '[]');
-          return Array.isArray(raw) ? raw.filter(function (h) { return h && h.input; }) : [];
-        } catch (e) { return []; }
-      });
+      var [currentLibId, setCurrentLibId] = useState(null);
 
-      /* ---------- 偏好 ---------- */
+      /* 偏好。旧版曾在 localStorage 明文保存 DeepSeek API Key（已无消费方），
+         这里启动时清掉残留，避免升级后继续把密钥留在浏览器里。 */
       useEffect(function () {
         try { localStorage.removeItem('ziwei-workbench.apikey'); } catch (e) { /* ignore */ }
       }, []);
@@ -4091,25 +3552,20 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         try { localStorage.setItem('ziwei-pro.showadj', v ? '1' : '0'); } catch (e) { /* ignore */ }
       };
 
-      /* ---------- 解读状态 ---------- */
+      /* AI 状态 */
+      var [modal, setModal] = useState(null);
+      var [interpreting, setInterpreting] = useState(false);
       var [thread, setThread] = useState([]);
-      var [chatting, setChatting] = useState(false);
+      var [lastMode, setLastMode] = useState('brief');   /* 续写 / 交给会话沿用上一次的档位 */
+      var [hasReport, setHasReport] = useState(false);   /* 本轮对话是否已出过完整报告 */
       var [interpError, setInterpError] = useState('');
-      var [interpIssue, setInterpIssue] = useState(null);
-      var [thinkChars, setThinkChars] = useState(0);
-      var [report, setReport] = useState({ status: 'idle', text: '', error: '', issue: null, startedAt: 0, finishedAt: 0 });
-      var [copied, setCopied] = useState(false);
-      var [reportCopied, setReportCopied] = useState(false);
+      var [interpIssue, setInterpIssue] = useState(null);   /* {kind, canContinue}: 截断/断连/超时的结构化原因 */
+      var [thinkChars, setThinkChars] = useState(0);        /* 思考阶段已产出的字数（来自 start/thinking 事件） */
+      var [interpCopied, setInterpCopied] = useState(false);
       var [handoffDone, setHandoffDone] = useState(false);
       var [synced, setSynced] = useState(false);
-      var [modal, setModal] = useState(null);
-      var chatAbortRef = useRef(null);
-      var reportAbortRef = useRef(null);
-      var stopChatRef = useRef(false);
-      var stopReportRef = useRef(false);
-      var lastModeRef = useRef('brief');
 
-      /* 面板宽度 → 三档布局 */
+      /* 面板宽度监听：布局切换与盘面缩放都靠它，避免用 viewport media query 误判面板宽度 */
       var rootRef = useRef(null);
       useEffect(function () {
         var el = rootRef.current;
@@ -4132,10 +3588,18 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         window.addEventListener('resize', onWinResize);
         return function () { window.removeEventListener('resize', onWinResize); };
       }, []);
+      var toggleFocus = function () {
+        setFocus(function (prev) {
+          var next = !prev;
+          try { localStorage.setItem('ziwei-pro.focus', next ? '1' : '0'); } catch (e) { /* ignore */ }
+          return next;
+        });
+      };
 
-      var layoutMode = panelW <= 0 ? 'narrow' : (panelW >= 1100 ? 'wide' : (panelW >= 880 ? 'mid' : 'narrow'));
-
-      /* 浮层 Esc */
+      /* 浮层（抽屉 / 设置）是 .zp-root 内的绝对定位层：只在工作台范围内出现，
+         不按视口坐标算位置，也不受祖先 transform / 侧栏变化影响；打开时锁住背景滚动。 */
+      var openModal = function (name) { setModal(name); };
+      var closeModal = function () { setModal(null); };
       useEffect(function () {
         if (!modal) return undefined;
         var onEsc = function (ev) { if (ev.key === 'Escape') { ev.preventDefault(); setModal(null); } };
@@ -4143,118 +3607,37 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         return function () { window.removeEventListener('keydown', onEsc); };
       }, [modal]);
 
-      /* 启动自动打开工作台 */
-      useEffect(function () {
-        if (!autoOpen) return undefined;
-        var timer = setTimeout(function () { actions.autoOpenPanel(); }, 250);
-        return function () { clearTimeout(timer); };
-      }, []);
-
-      /* ---------- 计算 / 持久化 ---------- */
-      var computeChartFromInput = function (input) {
-        return E.computeChart({
-          calendar: input.calendar,
-          year: +input.year, month: +input.month, day: +input.day,
-          isLeapMonth: !!input.isLeap,
-          hour: +input.hour, minute: +input.minute,
-          gender: input.gender,
-          longitude: (input.longitude === '' || input.longitude === null || input.longitude === undefined) ? undefined : +input.longitude,
-          settings: input.settings
+      /* 计算 */
+      var compute = function () {
+        setError('');
+        var result = E.computeChart({
+          calendar: form.calendar,
+          year: +form.year, month: +form.month, day: +form.day,
+          isLeapMonth: !!form.isLeap,
+          hour: +form.hour, minute: +form.minute,
+          gender: form.gender,
+          longitude: (form.longitude === '' || form.longitude === null || form.longitude === undefined) ? undefined : +form.longitude,
+          settings: form.settings
         });
-      };
-      var currentInput = function () { return cleanInput(form); };
-
-      var persistHistory = function (next) {
-        setHistory(next);
-        try { localStorage.setItem('ziwei-pro.history', JSON.stringify(next)); } catch (e) { /* ignore */ }
-      };
-      var persistLibrary = function (next) {
-        setLibrary(next);
-        try { localStorage.setItem('ziwei-pro.library', JSON.stringify(next)); } catch (e) { /* ignore */ }
-      };
-      var recordHistory = function (input) {
-        var key = inputKey(input);
-        var now = Date.now();
-        var next = [{ id: 'h-' + now, input: input, lastViewedAt: now }];
-        history.forEach(function (h) {
-          if (inputKey(h.input) !== key) next.push(h);
-        });
-        persistHistory(next.slice(0, 16));
-      };
-
-      var currentDecadeIndex = function (chartObj) {
-        if (!chartObj || !chartObj.lunar) return 0;
-        var age = new Date().getFullYear() - chartObj.lunar.year + 1;
-        var list = [];
-        try { list = E.decadalList(chartObj) || []; } catch (e) { list = []; }
-        for (var i = 0; i < list.length; i++) {
-          if (age >= list[i].ageRange[0] && age <= list[i].ageRange[1]) return i;
-        }
-        return 0;
-      };
-
-      var resetReading = function () {
-        setThread([]);
-        setChatting(false);
-        setInterpError('');
-        setInterpIssue(null);
-        setThinkChars(0);
-        setReport({ status: 'idle', text: '', error: '', issue: null, startedAt: 0, finishedAt: 0 });
-        setReadingTab('chat');
-      };
-
-      var adoptChart = function (res, input) {
-        /* E.computeChart 成功时直接返回命盘对象（错误时返回 {error}） */
-        var chartObj = res.chart || res;
-        chartInputRef.current = input;
-        setChart(chartObj);
-        setSelected(chartObj.soulIndex);
-        setSelDecadal(currentDecadeIndex(chartObj));
+        if (result.error) { setError(result.error); return; }
+        setChart(result);
+        setSelected(result.soulIndex);
+        setSelDecadal(currentDecadeIndex(result.chart));
         setYearlyYear(String(new Date().getFullYear()));
         setTab('natal');
         setView('chart');
-        setError('');
-        resetReading();
-        recordHistory(input);
-        setPage('chart');
+        /* 换盘 = 换解读对象：旧对话清掉，允许为新盘再自动生成一次速览 */
+        autoStartedRef.current = false;
+        setThread([]);
+        setInterpError('');
+        setInterpIssue(null);
+        setHasReport(false);
+        /* 出盘后收起生辰表单，把纵向空间让给盘面；点「改生辰」再展开 */
+        setFormCollapsed(true);
+        if (panelW > 0 && panelW < 908) setRail(false);
       };
 
-      var compute = function () {
-        setError('');
-        var input = currentInput();
-        var result;
-        try { result = computeChartFromInput(input); } catch (e) { setError(String((e && e.message) || e)); return; }
-        if (!result || result.error) { setError((result && result.error) || '排盘失败'); return; }
-        adoptChart(result, input);
-      };
-
-      var SAMPLE_FORM = {
-        name: '示例命主', calendar: 'solar', year: 1992, month: 5, day: 3,
-        isLeap: false, hour: 9, minute: 30, gender: 'male',
-        longitude: 105.97, place: '成都', occupation: '',
-        settings: { yearDivide: 'normal', monthDivide: 'exact', dayDivide: 'current', fixLeap: true }
-      };
-      var computeSample = function () {
-        var input = cleanInput(SAMPLE_FORM);
-        setFormRaw(function () { return Object.assign({}, DEFAULT_FORM, SAMPLE_FORM, { settings: Object.assign({}, DEFAULT_FORM.settings, SAMPLE_FORM.settings) }); });
-        var result = computeChartFromInput(input);
-        if (result && !result.error) adoptChart(result, input);
-      };
-
-      var openInput = function (input) {
-        /* 同一张盘：保留当前解读/报告，直接回命盘页 */
-        if (chart && chartInputRef.current && inputKey(chartInputRef.current) === inputKey(input)) {
-          setPage('chart');
-          return;
-        }
-        var result;
-        try { result = computeChartFromInput(input); } catch (e) { setError(String((e && e.message) || e)); return; }
-        if (!result || result.error) { setError((result && result.error) || '排盘失败'); return; }
-        setFormRaw(Object.assign({}, DEFAULT_FORM, input, { settings: Object.assign({}, DEFAULT_FORM.settings, input.settings || {}) }));
-        adoptChart(result, input);
-      };
-
-      /* ---------- 大限 / 流年 / 格局 ---------- */
+      /* 大限/流年/格局 */
       var decadalList = useMemo(function () { return chart ? E.decadalList(chart) : []; }, [chart]);
       var yearlyChart = useMemo(function () {
         if (!chart) return null;
@@ -4283,55 +3666,77 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           stars: y.stars
         };
       }
-      var scopeLabel = scope ? scope.label : '';
 
-      /* ---------- 命盘库交互 ---------- */
-      var libraryIndexOf = function (input) {
-        var key = inputKey(input);
-        for (var i = 0; i < library.length; i++) if (inputKey(library[i].input) === key) return i;
-        return -1;
+      /* 键盘导航：只在舞台（盘面）内部获得焦点时接管方向键，避免全局劫持页面滚动/其他输入区 */
+      var onStageKeyDown = function (ev) {
+        if (!chart || modal) return;
+        var target = ev.target;
+        if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT' || target.isContentEditable)) return;
+        if (ev.key === 'ArrowLeft') { ev.preventDefault(); setSelected(function (s) { return ringStep(s < 0 ? chart.soulIndex : s, 'left'); }); }
+        else if (ev.key === 'ArrowRight') { ev.preventDefault(); setSelected(function (s) { return ringStep(s < 0 ? chart.soulIndex : s, 'right'); }); }
+        else if (ev.key === 'ArrowUp' || ev.key === 'ArrowDown') { ev.preventDefault(); setSelected(function (s) { return ringStep(s < 0 ? chart.soulIndex : s, 'opp'); }); }
       };
-      var toggleSaveInput = function (input, name) {
-        var idx = libraryIndexOf(input);
-        if (idx >= 0) {
-          var next = library.slice(); next.splice(idx, 1); persistLibrary(next);
-          return false;
-        }
-        var entry = { id: 'lib-' + Date.now(), name: (name || input.name || t('defaultName')).trim() || t('defaultName'), input: input };
-        persistLibrary([entry].concat(library).slice(0, 60));
+
+      /* 命盘库操作 */
+      var saveChart = function (name) {
+        if (!chart || !name || !String(name).trim()) return false;
+        var entry = {
+          id: 'lib-' + Date.now(),
+          name: name.trim(),
+          input: {
+            name: form.name, calendar: form.calendar, year: form.year, month: form.month, day: form.day,
+            isLeap: form.isLeap, hour: form.hour, minute: form.minute, gender: form.gender,
+            longitude: form.longitude, place: form.place, occupation: form.occupation,
+            settings: form.settings
+          }
+        };
+        var next = [entry].concat(library).slice(0, 60);
+        setLibrary(next);
+        setCurrentLibId(entry.id);
+        try { localStorage.setItem('ziwei-pro.library', JSON.stringify(next)); } catch (e) { /* ignore */ }
         return true;
       };
-      var removeHistoryItem = function (item) {
-        persistHistory(history.filter(function (h) { return inputKey(h.input) !== item.key; }));
+      var loadSaved = function (item) {
+        setFormRaw(Object.assign({}, DEFAULT_FORM, item.input, {
+          settings: Object.assign({}, DEFAULT_FORM.settings, item.input.settings || {})
+        }));
+        var result = E.computeChart(Object.assign({}, item.input, {
+          hour: +item.input.hour, minute: +item.input.minute,
+          isLeapMonth: !!item.input.isLeap,
+          longitude: (item.input.longitude === '' || item.input.longitude === null || item.input.longitude === undefined) ? undefined : +item.input.longitude
+        }));
+        if (result.error) { setError(result.error); return; }
+        setChart(result);
+        setSelected(result.soulIndex);
+        setSelDecadal(currentDecadeIndex(result.chart));
+        setYearlyYear(String(new Date().getFullYear()));
+        setTab('natal');
+        setView('chart');
+        setCurrentLibId(item.id);
+        autoStartedRef.current = false;
+        setThread([]);
+        setInterpError('');
+        setInterpIssue(null);
+        setHasReport(false);
+        setError('');
+        setFormCollapsed(true);
+      };
+      var deleteSaved = function (id) {
+        var next = library.filter(function (x) { return x.id !== id; });
+        setLibrary(next);
+        try { localStorage.setItem('ziwei-pro.library', JSON.stringify(next)); } catch (e) { /* ignore */ }
       };
 
-      var homeItems = useMemo(function () {
-        var map = {};
-        var list = [];
-        var push = function (input, saved, libId, lastViewedAt) {
-          var key = inputKey(input);
-          if (map[key]) {
-            var ex = map[key];
-            ex.saved = ex.saved || saved;
-            ex.libId = ex.libId || libId || null;
-            ex.lastViewedAt = Math.max(ex.lastViewedAt || 0, lastViewedAt || 0);
-            return;
-          }
-          var entry = { key: key, input: input, saved: !!saved, libId: libId || null, lastViewedAt: lastViewedAt || 0, name: input.name || '', chart: null };
-          try {
-            var r = computeChartFromInput(input);
-            if (r && (r.chart || r.palaces)) entry.chart = r.chart || r;
-          } catch (e) { /* 坏记录不渲染 */ }
-          map[key] = entry;
-          list.push(entry);
+      /* AI 解读 */
+      var reportMeta = function () {
+        return {
+          chart: chart, name: form.name, place: form.place, occupation: form.occupation,
+          gender: form.gender === 'female' ? 'female' : 'male'
         };
-        (history || []).forEach(function (h) { push(h.input, false, null, h.lastViewedAt); });
-        (library || []).forEach(function (l) { push(l.input, true, l.id, 0); });
-        list.sort(function (a, b) { return (b.lastViewedAt || 0) - (a.lastViewedAt || 0); });
-        return list;
-      }, [history, library]);
-
-      /* ---------- 解读：上下文 ---------- */
+      };
+      /* 当前时间定位（虚岁/公历年）：面板问答与同步/交接共用同一份上下文。
+         问「这 10 年大运」却答成命格总纲，根因之一是旧 payload 只发 E.chartText(chart)，
+         既没有十二大限表，也没有“现在处于哪一段”。 */
       var nowPosition = function () {
         var cy = new Date().getFullYear();
         var birthYear = (chart && chart.lunar && chart.lunar.year) ? chart.lunar.year : (+form.year || 0);
@@ -4344,40 +3749,36 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           if (window.ZWCore && typeof window.ZWCore.fullChartText === 'function') {
             return window.ZWCore.fullChartText(chart, pos);
           }
-        } catch (e) { /* 回退 */ }
+        } catch (e) { /* 回退原生文本 */ }
         return E.chartText(chart);
       };
-      var lastAssistant = function () {
-        for (var i = thread.length - 1; i >= 0; i--) if (thread[i].role === 'assistant' && thread[i].content) return thread[i].content;
-        return '';
-      };
 
-      /* ---------- 解读：流式通道 ---------- */
-      var runStream = function (mode, question, target, opts) {
-        opts = opts || {};
-        if (!chart) return;
-        var controller = null;
-        try { controller = new AbortController(); } catch (e) { controller = null; }
-        var abortRef = target === 'chat' ? chatAbortRef : reportAbortRef;
-        var stopRef = target === 'chat' ? stopChatRef : stopReportRef;
-        abortRef.current = controller;
-        stopRef.current = false;
-        var base = opts.base || '';
-        if (target === 'chat') {
-          setChatting(true);
-          setInterpError('');
-          setInterpIssue(null);
-          setThinkChars(0);
-        } else {
-          setReport({ status: 'running', text: base, error: '', issue: null, startedAt: Date.now(), finishedAt: 0 });
-        }
+      /* 面板内「直接聊」: 走 Harness host 的 SSE 通道, 用会话已配置的模型, 不需要另配 API Key */
+      var chatAbortRef = useRef(null);
+      var stopReqRef = useRef(false);
+      /* 每张盘首次打开抽屉自动生成一次速览；失败/清空后不再无限重试 */
+      var autoStartedRef = useRef(false);
+      var runInterpretation = function (question, mode) {
+        if (!chart || interpreting) return;
+        setLastMode(mode === 'report' ? 'report' : 'brief');
+        var history = thread.map(function (m) { return { role: m.role, content: m.content }; });
+        var asked = (question || '').trim();
+        var nextThread = thread.concat(asked ? [{ role: 'user', content: asked }] : []);
+        setThread(nextThread);
+        setInterpreting(true);
+        setInterpError('');
+        setInterpIssue(null);
+        setThinkChars(0);
+        setHandoffDone(false);
+        stopReqRef.current = false;
+
         var pos = nowPosition();
         var selectedDecade = (tab === 'decadal' && decadalList[selDecadal]) ? decadalList[selDecadal].ageRange : null;
         var body = {
           chartText: chartContextText(),
           mode: mode === 'report' ? 'report' : 'brief',
-          question: (question || '').trim(),
-          history: opts.history || [],
+          question: asked,
+          history: history,
           meta: {
             name: form.name, place: form.place, occupation: form.occupation,
             gender: form.gender === 'female' ? 'female' : 'male',
@@ -4386,46 +3787,37 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
             yearlyFocus: (tab === 'yearly') ? (parseInt(yearlyYear, 10) || pos.currentYear) : null
           }
         };
-        var settled = false, gotDone = false, gotError = false, produced = '', finalText = base;
+
+        var controller = null;
+        try { controller = new AbortController(); chatAbortRef.current = controller; } catch (e) { controller = null; }
+
+        /* done / error / EOF 三种收尾分开记：只有真的收到 done 才算写完。
+           旧实现把「读完流」一律当成功——服务端截断、连接中途断掉，都会显示成「写完了」。 */
+        var settled = false;
+        var gotDone = false;
+        var gotError = false;
+        var produced = '';
         var finish = function (errMsg, issue) {
           if (settled) return;
           settled = true;
-          abortRef.current = null;
+          if (!errMsg && mode === 'report') setHasReport(true);
+          setInterpreting(false);
           setThinkChars(0);
-          if (target === 'chat') {
-            setChatting(false);
-            setInterpError(errMsg || '');
-            setInterpIssue(issue || null);
-            if (!errMsg) lastModeRef.current = 'brief';
-          } else {
-            setReport(function (prev) {
-              return Object.assign({}, prev, {
-                status: errMsg ? 'error' : 'done',
-                text: finalText || prev.text,
-                error: errMsg || '',
-                issue: issue || null,
-                finishedAt: Date.now()
-              });
-            });
-            if (!errMsg) lastModeRef.current = 'report';
-          }
+          chatAbortRef.current = null;
+          setInterpError(errMsg || '');
+          setInterpIssue(issue || null);
         };
-        var appendDelta = function (delta) {
-          produced += delta;
-          finalText = base + produced;
-          if (target === 'chat') {
-            setThread(function (prev) {
-              if (!prev.length) return prev;
-              var copy = prev.slice();
-              var last = copy[copy.length - 1];
-              if (!last || last.role !== 'assistant') return prev;
-              copy[copy.length - 1] = { role: 'assistant', content: finalText };
-              return copy;
-            });
-          } else {
-            setReport(function (prev) { return Object.assign({}, prev, { text: finalText }); });
-          }
+        var replaceLastAssistant = function (text) {
+          setThread(function (prev) {
+            if (!prev.length) return prev;
+            var copy = prev.slice();
+            var last = copy[copy.length - 1];
+            if (!last || last.role !== 'assistant') return prev;
+            copy[copy.length - 1] = { role: 'assistant', content: text };
+            return copy;
+          });
         };
+
         fetch('/ziwei/interpret', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -4443,13 +3835,27 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
             finish('浏览器不支持流式响应');
             return undefined;
           }
+          setThread(function (prev) { return prev.concat([{ role: 'assistant', content: '' }]); });
           var reader = resp.body.getReader();
           var decoder = new TextDecoder();
           var buf = '';
+          var append = function (delta) {
+            produced += delta;
+            setThread(function (prev) {
+              if (!prev.length) return prev;
+              var copy = prev.slice();
+              var last = copy[copy.length - 1];
+              if (!last || last.role !== 'assistant') copy.push({ role: 'assistant', content: delta });
+              else copy[copy.length - 1] = { role: 'assistant', content: (last.content || '') + delta };
+              return copy;
+            });
+          };
           var pump = function () {
             return reader.read().then(function (chunk) {
               if (chunk.done) {
-                if (!gotDone && !gotError) finish(t('aiDisconnected'), { kind: 'stream-closed', canContinue: !!produced.trim() });
+                if (!gotDone && !gotError) {
+                  finish(t('aiDisconnected'), { kind: 'stream-closed', canContinue: !!produced.trim() });
+                }
                 return;
               }
               buf += decoder.decode(chunk.value, { stream: true });
@@ -4466,21 +3872,11 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
                 try { payload = JSON.parse(data); } catch (e) { return; }
                 if (ev === 'start') { setThinkChars(0); }
                 else if (ev === 'thinking') { setThinkChars((payload && payload.chars) || 0); }
-                else if (ev === 'delta' && payload && payload.text) { setThinkChars(0); appendDelta(payload.text); }
+                else if (ev === 'delta' && payload && payload.text) { setThinkChars(0); append(payload.text); }
                 else if (ev === 'done') {
                   gotDone = true;
-                  if (payload && typeof payload.text === 'string' && payload.text) {
-                    produced = payload.text;
-                    finalText = base + produced;
-                    if (target === 'chat') {
-                      setThread(function (prev) {
-                        if (!prev.length) return prev;
-                        var copy = prev.slice();
-                        copy[copy.length - 1] = { role: 'assistant', content: payload.text };
-                        return copy;
-                      });
-                    }
-                  }
+                  /* done 带全文：以它为准，避免个别 delta 丢帧导致正文缺字 */
+                  if (payload && typeof payload.text === 'string' && payload.text) replaceLastAssistant(payload.text);
                   finish('');
                 } else if (ev === 'error') {
                   gotError = true;
@@ -4493,117 +3889,25 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           return pump();
         }).catch(function (e) {
           if (e && e.name === 'AbortError') {
-            if (stopRef.current) finish(t('aiStopped'), { kind: 'stopped', canContinue: !!produced.trim() });
+            if (stopReqRef.current) finish(t('aiStopped'), { kind: 'stopped', canContinue: !!produced.trim() });
             else finish('');
             return;
           }
           finish(String((e && e.message) || e), { kind: 'error', canContinue: !!produced.trim() });
         });
       };
-
-      var runChat = function (question) {
-        if (!chart || chatting || report.status === 'running') return;
-        var asked = (question || '').trim();
-        if (!asked) return;
-        var history = thread.map(function (m) { return { role: m.role, content: m.content }; });
-        setThread(thread.concat([{ role: 'user', content: asked }, { role: 'assistant', content: '' }]));
-        runStream('brief', asked, 'chat', { history: history });
-      };
-      var continueChat = function () {
-        if (!chart || chatting) return;
-        var history = thread.map(function (m) { return { role: m.role, content: m.content }; });
-        setThread(thread.concat([{ role: 'assistant', content: '' }]));
-        runStream('brief', t('aiContinuePrompt'), 'chat', { history: history });
-      };
-      var stopChat = function () {
+      /* 面板内「停止」：保留已生成部分，并允许接着写 */
+      var stopInterpretation = function () {
         if (!chatAbortRef.current) return;
-        stopChatRef.current = true;
+        stopReqRef.current = true;
         try { chatAbortRef.current.abort(); } catch (e) { /* ignore */ }
       };
-      var newChat = function () {
-        if (chatting) return;
-        setThread([]);
-        setInterpError('');
-        setInterpIssue(null);
-      };
-
-      var generateReport = function () {
-        if (!chart || report.status === 'running' || chatting) return;
-        setReadingTab('dock');
-        runStream('report', '', 'report', { history: [] });
-      };
-      var regenerateReport = function () {
-        if (!chart || report.status === 'running' || chatting) return;
-        setReadingTab('dock');
-        runStream('report', '', 'report', { history: [] });
-      };
-      var stopReport = function () {
-        if (!reportAbortRef.current) return;
-        stopReportRef.current = true;
-        try { reportAbortRef.current.abort(); } catch (e) { /* ignore */ }
-      };
-      var continueReport = function () {
-        if (!chart || report.status === 'running') return;
-        var base = report.text || '';
-        var hist = base ? [{ role: 'assistant', content: base }] : [];
-        runStream('report', t('aiContinuePrompt'), 'report', { history: hist, base: base });
-      };
-
-      var reportMeta = function () {
-        return { chart: chart, name: form.name, place: form.place, occupation: form.occupation, gender: form.gender === 'female' ? 'female' : 'male' };
-      };
-      var reportHtml = useMemo(function () {
-        if (!chart || !report.text) return '';
-        try { return actions.buildReportHtml(reportMeta(), report.text); } catch (e) { return ''; }
-      }, [chart, report.text, form]);
-
-      var copyReport = function () {
-        if (!report.text) return;
-        setReportCopied(true);
-        setTimeout(function () { setReportCopied(false); }, 1600);
-        try {
-          if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(report.text).catch(function () { /* ignore */ });
-        } catch (e) { /* ignore */ }
-      };
-      var exportReportHtml = function () {
-        if (!report.text) return;
-        try {
-          var html = actions.buildReportHtml(reportMeta(), report.text);
-          var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-          var url = URL.createObjectURL(blob);
-          var a = document.createElement('a');
-          var now = new Date();
-          var ymd = now.getFullYear() + ('0' + (now.getMonth() + 1)).slice(-2) + ('0' + now.getDate()).slice(-2);
-          a.href = url;
-          a.download = '人生鲲鹏计划_' + (form.name || '命主') + '_' + ymd + '.html';
-          document.body.appendChild(a);
-          a.click();
-          setTimeout(function () { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1500);
-        } catch (e) {
-          setReport(function (prev) { return Object.assign({}, prev, { error: '导出失败: ' + String((e && e.message) || e) }); });
-        }
-      };
-      var copyAnswer = function () {
-        var text = lastAssistant();
-        if (!text) return;
-        setCopied(true);
-        setTimeout(function () { setCopied(false); }, 1600);
-        try {
-          if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).catch(function () { /* ignore */ });
-        } catch (e) { /* ignore */ }
-      };
-
-      /* 复制命盘 / 写入会话 / 交给会话 */
-      var copyChart = function () {
-        if (!chart) return;
-        setCopied(true);
-        setTimeout(function () { setCopied(false); }, 1600);
-        try {
-          if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(E.chartText(chart)).catch(function () { /* ignore */ });
-        } catch (e) { /* ignore */ }
-      };
+      /* 「同步给会话」: 只把当前命盘写进 host 上下文, 不新建会话。
+         之后在**任意**已有会话里说「读取工作台命盘并写鲲鹏报告」即可 —— 
+         agent 会用 ziwei_context 工具读到这张盘。 */
       var syncToSession = function () {
         if (!chart) return;
+        setInterpError('');
         fetch('/ziwei/context', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -4618,29 +3922,40 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           else setInterpError((j && j.reason) || '同步失败');
         }).catch(function (e) { setInterpError(String((e && e.message) || e)); });
       };
-      var handoffToSession = function () {
-        if (!chart || chatting || report.status === 'running') return;
+
+      /* 「交给会话」: host 新建一个 GUI 可见会话, 把命盘作为首条消息灌进去 */
+      var lastAnswer = function () {
+        for (var i = thread.length - 1; i >= 0; i--) if (thread[i].role === 'assistant') return thread[i].content || '';
+        return '';
+      };
+      var handoffToSession = function (mode) {
+        if (!chart || interpreting) return;
         setInterpError('');
         setHandoffDone(false);
-        var answer = report.text || lastAssistant();
-        var mode = report.text ? 'report' : 'brief';
+        setInterpreting(true);
+        var payload = {
+          chartText: E.chartText(chart),
+          fullText: chartContextText(),
+          name: form.name || '',
+          place: form.place || '',
+          occupation: form.occupation || '',
+          gender: form.gender === 'female' ? 'female' : 'male',
+          interpretation: lastAnswer(),
+          mode: mode === 'report' ? 'report' : 'brief'
+        };
         fetch('/ziwei/handoff', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chartText: E.chartText(chart),
-            fullText: chartContextText(),
-            name: form.name || '', place: form.place || '', occupation: form.occupation || '',
-            gender: form.gender === 'female' ? 'female' : 'male',
-            interpretation: answer,
-            mode: mode
-          })
+          body: JSON.stringify(payload)
         }).then(function (r) { return r.json().then(function (j) { return { status: r.status, j: j }; }); })
           .then(function (out) {
+            setInterpreting(false);
             var j = out.j || {};
             if (j.ok && j.sessionId) {
               setHandoffDone(true);
               setTimeout(function () { setHandoffDone(false); }, 3000);
+              /* 新会话可能还没同步进客户端目录, openSession 会失败。
+                 失败就重试几次; 始终失败则如实告知去看侧栏, 不假装跳过去了。 */
               var tries = 0;
               var openIt = function () {
                 tries += 1;
@@ -4653,34 +3968,107 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
               setInterpError(j.reason || ('交给会话失败 (HTTP ' + out.status + ')'));
             }
           })
-          .catch(function (e) { setInterpError(String((e && e.message) || e)); });
+          .catch(function (e) { setInterpreting(false); setInterpError(String((e && e.message) || e)); });
       };
-
-      /* ---------- 页面导航 ---------- */
-      var go = function (id) {
-        if ((id === 'chart' || id === 'reading') && !chart) { setCreateFrom('home'); setPage('create'); return; }
-        if (id === 'report' && !(report.status === 'done' && report.text)) { setPage('reading'); return; }
-        setPage(id);
+      var clearThread = function () {
+        setThread([]);
+        setInterpError('');
+        setInterpIssue(null);
+        setThinkChars(0);
+        setHasReport(false);
       };
-      var openCreate = function (from) {
-        setError('');
-        setCreateFrom(from || 'home');
-        setPage('create');
-      };
-      var backFromCreate = function () {
-        if (createFrom === 'chart' && chart) {
-          if (chartInputRef.current) {
-            setFormRaw(Object.assign({}, DEFAULT_FORM, chartInputRef.current, {
-              settings: Object.assign({}, DEFAULT_FORM.settings, chartInputRef.current.settings || {})
-            }));
+      /* 最近一轮回答: 复制 / 导出 / 预览都以它为准 */
+      var interpretation = useMemo(function () {
+        for (var i = thread.length - 1; i >= 0; i--) if (thread[i].role === 'assistant') return thread[i].content || '';
+        return '';
+      }, [thread]);
+      var copyInterpretation = function () {
+        if (!interpretation) return;
+        setInterpCopied(true);
+        setTimeout(function () { setInterpCopied(false); }, 1600);
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(interpretation).catch(function () { /* ignore */ });
           }
-          setPage('chart');
-          return;
+        } catch (e) { /* ignore */ }
+      };
+      var exportReportHtml = function () {
+        if (!interpretation) return;
+        try {
+          var html = actions.buildReportHtml(reportMeta(), interpretation);
+          var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement('a');
+          var now = new Date();
+          var ymd = now.getFullYear() + ('0' + (now.getMonth() + 1)).slice(-2) + ('0' + now.getDate()).slice(-2);
+          a.href = url;
+          a.download = '人生鲲鹏计划_' + (form.name || '命主') + '_' + ymd + '.html';
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(function () { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1500);
+        } catch (e) {
+          setInterpError('导出失败: ' + String((e && e.message) || e));
         }
-        setPage('home');
+      };
+      var previewHtml = useMemo(function () {
+        if (!chart || !interpretation) return '';
+        try { return actions.buildReportHtml(reportMeta(), interpretation); } catch (e) { return ''; }
+      }, [chart, interpretation, form]);
+
+      /* 复制命盘 */
+      var [copied, setCopied] = useState(false);
+      var copyChart = function () {
+        if (!chart) return;
+        setCopied(true);
+        setTimeout(function () { setCopied(false); }, 1600);
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(E.chartText(chart)).catch(function () { /* ignore */ });
+          }
+        } catch (e) { /* ignore */ }
       };
 
-      /* ---------- 命盘操作 ---------- */
+      /* 启动自动打开 (设置可关) */
+      useEffect(function () {
+        if (!autoOpen) return;
+        var timer = setTimeout(function () { actions.autoOpenPanel(); }, 250);
+        return function () { clearTimeout(timer); };
+      }, []);
+
+      /* 渲染（v3 布局：AppBar / TimeBar / ContextRail / ChartStage / BottomBar） */
+      var palaceSelected = chart && selected >= 0 ? chart.palaces[selected] : null;
+      /* 面板实测宽度 → 三档布局：看的是面板自身宽度，不是视口宽度（media query 会把盘面挤扁） */
+      /* 四档：compact 档专治「DSH 侧栏展开 -> 面板 ~900-1070 -> 旧逻辑掉进单列、中栏被拉满」。 */
+      var layoutMode = panelW <= 0 ? 'narrow'
+        : (panelW >= 1394 ? 'wide'
+        : (panelW >= 1072 ? 'mid'
+        : (panelW >= 908 ? 'compact' : 'narrow')));
+      var modeDefs = [['natal', t('tabNatal')], ['decadal', t('tabDecadal')], ['yearly', t('tabYearly')]];
+      var curAgeForDecade = nowPosition().currentAge;
+      var currentDecadalIdx = -1;
+      if (chart) {
+        for (var ci = 0; ci < decadalList.length; ci++) {
+          if (curAgeForDecade >= decadalList[ci].ageRange[0] && curAgeForDecade <= decadalList[ci].ageRange[1]) { currentDecadalIdx = ci; break; }
+        }
+      }
+      var openAI = function () {
+        if (!chart) return;
+        if (modal === 'ai') { closeModal(); return; }
+        openModal('ai');
+        /* 用户点的是「解读」，不是「打开一个空抽屉」：每张盘首次打开时直接开始速览 */
+        if (!thread.length && !interpreting && !autoStartedRef.current) {
+          autoStartedRef.current = true;
+          runInterpretation('', 'brief');
+        }
+      };
+      var editBirth = function () {
+        setRail(true);
+        setFormCollapsed(false);
+        try {
+          var sc = rootRef.current && rootRef.current.querySelector('.zp-scroll');
+          if (sc) { if (sc.scrollTo) sc.scrollTo({ top: 0, behavior: 'smooth' }); else sc.scrollTop = 0; }
+        } catch (e) { /* ignore */ }
+      };
       var stepDecade = function (delta) {
         if (!decadalList.length) return;
         var next = selDecadal + delta;
@@ -4693,348 +4081,202 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         if (next < 1900 || next > 2100) return;
         setYearlyYear(String(next));
       };
-      var onStageKeyDown = function (ev) {
-        if (!chart || modal || page !== 'chart' || view !== 'chart') return;
-        var target = ev.target;
-        if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT' || target.isContentEditable)) return;
-        if (ev.key === 'ArrowLeft') { ev.preventDefault(); setSelected(function (s) { return ringStep(s < 0 ? chart.soulIndex : s, 'left'); }); }
-        else if (ev.key === 'ArrowRight') { ev.preventDefault(); setSelected(function (s) { return ringStep(s < 0 ? chart.soulIndex : s, 'right'); }); }
-        else if (ev.key === 'ArrowUp' || ev.key === 'ArrowDown') { ev.preventDefault(); setSelected(function (s) { return ringStep(s < 0 ? chart.soulIndex : s, 'opp'); }); }
-      };
-
-      /* ---------- 渲染：顶栏 ---------- */
-      var navItems = [
-        { id: 'home', label: t('navHome'), icon: 'home' },
-        { id: 'chart', label: t('navChart'), icon: 'chart', disabled: !chart },
-        { id: 'reading', label: t('navReading'), icon: 'sparkle', disabled: !chart },
-        { id: 'report', label: t('navReport'), icon: 'report', hidden: !(report.status === 'done' && report.text) }
-      ];
-      var topAction = null;
-      var topCtx = chart ? h('span', { className: 'zp-top-ctx' },
-        h('b', null, form.name || t('defaultName')), ' · ', chart.fiveElementsClass, ' · ', form.gender === 'female' ? t('female') : t('male')) : null;
-      var topbar = h('header', { className: 'zp-topbar', 'data-region': 'HEAD' },
-        h('button', { className: 'zp-brand', type: 'button', onClick: function () { go('home'); }, title: t('navHome'), 'aria-label': t('navHome') },
-          h('span', { className: 'zp-brand-mark' },
-            h('svg', { width: 18, height: 18, viewBox: '0 0 24 24', 'aria-hidden': true },
-              h('circle', { cx: 12, cy: 12, r: 10, fill: 'none', stroke: 'currentColor', strokeWidth: 1.3, opacity: .5 }),
-              h('path', { d: 'M12 2a10 10 0 0 1 0 20 5 5 0 0 1 0-10 5 5 0 0 0 0-10z', fill: 'currentColor' }))),
-          h('span', { className: 'zp-brand-name' }, t('brand')),
-          h('span', { className: 'zp-brand-pro' }, t('brandPro'))),
-        h('nav', { className: 'zp-nav', 'aria-label': t('navLabel') },
-          navItems.filter(function (n) { return !n.hidden; }).map(function (n) {
-            return h('button', {
-              key: n.id, type: 'button', className: page === n.id ? 'is-on' : undefined,
-              'aria-current': page === n.id ? 'page' : undefined,
-              disabled: !!n.disabled, title: n.disabled ? t('navNeedChart') : n.label,
-              onClick: function () { go(n.id); }
-            }, n.label);
+      var timeNav = null;
+      if (chart && view === 'chart' && tab === 'decadal' && decadalList.length) {
+        timeNav = h('div', { className: 'zp-time-nav', role: 'group', 'aria-label': t('tabDecadal') },
+          h('button', { className: 'zp-time-btn', type: 'button', title: t('prevDecade'), 'aria-label': t('prevDecade'), disabled: selDecadal <= 0, onClick: function () { stepDecade(-1); } }, '‹'),
+          h('select', {
+            className: 'zp-time-select', value: String(selDecadal), 'aria-label': t('tabDecadal'),
+            onChange: function (ev) { setSelDecadal(parseInt(ev.target.value, 10) || 0); }
+          }, decadalList.map(function (d, i) {
+            return h('option', { key: i, value: String(i) }, d.ageRange[0] + '–' + d.ageRange[1] + ' 岁 · ' + d.stem + d.branch + ' · ' + d.palaceName);
           })),
-        h('span', { className: 'zp-top-spacer' }),
-        topCtx,
-        h('div', { className: 'zp-top-actions' },
-          topAction,
-          actions.canReturnToConversation ? h('button', {
-            className: 'zp-icon-btn zp-exit', type: 'button',
-            title: t('backToConversation'), 'aria-label': t('backToConversation'),
-            onClick: function () { actions.returnToConversation(); }
-          }, h(Icon, { name: 'back' })) : null,
-          h('button', {
-            className: 'zp-icon-btn', type: 'button', title: t('settingsTitle'), 'aria-label': t('settingsTitle'),
-            'aria-pressed': modal === 'settings' ? 'true' : 'false',
-            onClick: function () { setModal(modal === 'settings' ? null : 'settings'); }
-          }, h(Icon, { name: 'settings' }))));
-      var ambient = h('div', { className: 'zp-ambient', 'aria-hidden': true }, h('i', null), h('i', null));
-
-      /* ---------- 渲染：首页 ---------- */
-      var renderHome = function () {
-        var savedCount = library.length;
-        var recentCount = history.length;
-        var last = homeItems.filter(function (x) { return x.lastViewedAt; })[0];
-        var stats = [];
-        stats.push(h('span', { key: 's' }, h('b', null, String(savedCount)), ' ' + t('homeStatSavedBare')));
-        stats.push(h('span', { key: 'r' }, h('b', null, String(recentCount)), ' ' + t('homeStatRecentBare')));
-        if (last) stats.push(h('span', { key: 'l' }, t('homeStatLast').replace('{name}', last.name || t('defaultName')).replace('{time}', relTime(t, last.lastViewedAt))));
-        return h('div', { className: 'zp-page', 'data-region': 'HOME' },
-          h('div', { className: 'zp-page-inner' },
-            h('section', { className: 'zp-home-hero' },
-              h('div', { className: 'zp-hero-eyebrow' }, h(Icon, { name: 'sparkle', size: 13 }), t('homeEyebrow')),
-              h('h1', { className: 'zp-hero-title' }, t('homeTitleA'), h('b', null, t('homeTitleB'))),
-              h('div', { className: 'zp-hero-stats' }, stats),
-              h('div', { className: 'zp-hero-actions' },
-                h('button', { className: 'zp-pill is-primary', type: 'button', onClick: function () { openCreate('home'); } },
-                  h(Icon, { name: 'newChat', size: 14 }), t('homeNew')),
-                h('button', { className: 'zp-pill', type: 'button', onClick: computeSample },
-                  h(Icon, { name: 'sparkle', size: 14 }), t('homeSample')))),
-            homeItems.length
-              ? h('div', null,
-                h('div', { className: 'zp-section-head' },
-                  h('h2', { className: 'zp-section-title' }, t('homeRecentTitle')),
-                  h('span', { className: 'zp-section-meta' }, t('homeRecentMeta'))),
-                h('div', { className: 'zp-chart-grid' },
-                  homeItems.map(function (item) {
-                    return h(ChartCard, {
-                      key: item.key, t: t, item: item,
-                      onOpen: function (it) { openInput(it.input); },
-                      onToggleSave: function (it) {
-                        if (it.saved && it.libId) persistLibrary(library.filter(function (x) { return x.id !== it.libId; }));
-                        else toggleSaveInput(it.input, it.name || it.input.name);
-                      },
-                      onRemove: function (it) { removeHistoryItem(it); }
-                    });
-                  }),
-                  h('button', { className: 'zp-chart-card-add', type: 'button', onClick: function () { openCreate('home'); } },
-                    h(Icon, { name: 'newChat', size: 18 }), h('b', null, t('homeCardNew')))))
-              : h('div', { style: { marginTop: 32 } },
-                h('div', { className: 'zp-empty' },
-                  h('div', { className: 'zp-empty-title' }, t('homeEmptyTitle')),
-                  h('div', { className: 'zp-empty-hint' }, t('homeEmptyHint')),
-                  h('div', { style: { marginTop: 16 } },
-                    h('button', { className: 'zp-pill is-primary', type: 'button', onClick: function () { openCreate('home'); } },
-                      h(Icon, { name: 'newChat', size: 14 }), t('homeNew')))))));
-      };
-
-      /* ---------- 渲染：新建命盘 ---------- */
-      var renderCreate = function () {
-        var items = [];
-        [1, 2, 3, 4, 5].forEach(function (n) { items.push(h('li', { key: n }, h('span', null, '0' + n), t('createWhat' + n))); });
-        return h('div', { className: 'zp-page', 'data-region': 'CREATE' },
-          h('div', { className: 'zp-page-inner' },
-            h('div', { className: 'zp-page-head is-stack' },
-              h('button', { className: 'zp-icon-btn', type: 'button', title: t('readerBack'), 'aria-label': t('readerBack'), onClick: backFromCreate },
-                h(Icon, { name: 'back' })),
-              h('div', null,
-                h('h1', { className: 'zp-page-title' }, createFrom === 'chart' ? t('chartEdit') : t('createTitle')),
-                h('p', { className: 'zp-page-sub' }, t('createSub')))),
-            h('div', { className: 'zp-create-grid' },
-              h(BirthForm, {
-                t: t, form: form, setForm: setForm, error: error,
-                onSubmit: compute, onSample: computeSample,
-                submitLabel: createFrom === 'chart' ? t('createSubmitEdit') : t('createSubmit')
-              }),
-              h('div', { className: 'zp-create-aside' },
-                h('div', { className: 'zp-card' },
-                  h('div', { className: 'zp-card-title' }, t('createWhat')),
-                  h('ul', { className: 'zp-parts-list' }, items)),
-                h('div', { className: 'zp-card' },
-                  h('div', { className: 'zp-card-title' }, t('createAsideTitle')),
-                  h('div', { className: 'zp-aside-note' },
-                    h('div', null, t('note1')),
-                    h('div', { style: { marginTop: 6 } }, t('note2'))))))));
-      };
-
-      /* ---------- 渲染：命盘页 ---------- */
-      var renderChart = function () {
-        if (!chart) return null;
-        var palaceSelected = selected >= 0 ? chart.palaces[selected] : null;
-        var curAge = nowPosition().currentAge;
-        var currentDecadalIdx = -1;
-        for (var ci = 0; ci < decadalList.length; ci++) {
-          if (curAge >= decadalList[ci].ageRange[0] && curAge <= decadalList[ci].ageRange[1]) { currentDecadalIdx = ci; break; }
-        }
-        var timeNav = null;
-        if (view === 'chart' && tab === 'decadal' && decadalList.length) {
-          timeNav = h('div', { className: 'zp-time-nav', role: 'group', 'aria-label': t('tabDecadal') },
-            h('button', { className: 'zp-time-btn', type: 'button', title: t('prevDecade'), 'aria-label': t('prevDecade'), disabled: selDecadal <= 0, onClick: function () { stepDecade(-1); } }, '‹'),
-            h('select', {
-              className: 'zp-time-select', value: String(selDecadal), 'aria-label': t('tabDecadal'),
-              onChange: function (ev) { setSelDecadal(parseInt(ev.target.value, 10) || 0); }
-            }, decadalList.map(function (dd, i) {
-              return h('option', { key: i, value: String(i) }, dd.ageRange[0] + '–' + dd.ageRange[1] + ' 岁 · ' + dd.stem + dd.branch + ' · ' + dd.palaceName);
-            })),
-            h('button', { className: 'zp-time-btn', type: 'button', title: t('nextDecade'), 'aria-label': t('nextDecade'), disabled: selDecadal >= decadalList.length - 1, onClick: function () { stepDecade(1); } }, '›'),
-            currentDecadalIdx >= 0 && selDecadal !== currentDecadalIdx
-              ? h('button', { className: 'zp-time-now', type: 'button', title: t('backToCurrent'), onClick: function () { setSelDecadal(currentDecadalIdx); } }, t('backToCurrent'))
-              : (currentDecadalIdx >= 0 ? h('span', { className: 'zp-time-chip' }, t('currentBadge')) : null));
-        } else if (view === 'chart' && tab === 'yearly') {
-          timeNav = h('div', { className: 'zp-time-nav', role: 'group', 'aria-label': t('tabYearly') },
-            h('button', { className: 'zp-time-btn', type: 'button', title: t('prevYear'), 'aria-label': t('prevYear'), onClick: function () { stepYear(-1); } }, '‹'),
-            h('input', {
-              className: 'zp-time-input', type: 'number', min: 1900, max: 2100, value: yearlyYear,
-              'aria-label': t('yearlyYear'),
-              onChange: function (ev) { setYearlyYear(ev.target.value); }
-            }),
-            h('button', { className: 'zp-time-btn', type: 'button', title: t('nextYear'), 'aria-label': t('nextYear'), onClick: function () { stepYear(1); } }, '›'),
-            String(yearNum()) === String(new Date().getFullYear())
-              ? h('span', { className: 'zp-time-chip' }, t('currentBadge'))
-              : h('button', { className: 'zp-time-now', type: 'button', title: t('thisYear'), onClick: function () { setYearlyYear(String(new Date().getFullYear())); } }, t('thisYear')));
-        }
-        var timebar = h('div', { className: 'zp-timebar', 'data-region': 'TIMEBAR' },
-          view === 'chart'
-            ? h('div', { className: 'zp-tabs', role: 'tablist', 'aria-label': t('timeScope') },
-              [['natal', t('tabNatal')], ['decadal', t('tabDecadal')], ['yearly', t('tabYearly')]].map(function (md) {
-                return h('button', {
-                  key: md[0], type: 'button', role: 'tab', 'aria-selected': tab === md[0],
-                  className: tab === md[0] ? 'on' : undefined,
-                  onClick: function () { setTab(md[0]); }
-                }, md[1]);
-              }))
-            : h('div', { className: 'zp-toolview-head', style: { marginBottom: 0 } },
-              h('button', { className: 'zp-icon-btn', type: 'button', title: t('backToBoard'), 'aria-label': t('backToBoard'), onClick: function () { setView('chart'); } }, h(Icon, { name: 'back' })),
-              h('span', { className: 'zp-toolview-title' }, view === 'patterns' ? t('openPatterns') : t('openDict'))),
-          view === 'chart' ? timeNav : null,
-          h('div', { className: 'zp-timebar-right' },
-            view === 'chart' ? h('button', { className: 'zp-tool-btn', type: 'button', title: t('openPatterns'), onClick: function () { setView('patterns'); } }, t('openPatterns')) : null,
-            view === 'chart' ? h('button', { className: 'zp-tool-btn', type: 'button', title: t('openDict'), onClick: function () { setView('dict'); } }, t('openDict')) : null,
-            view === 'chart' ? h('button', {
-              className: 'zp-tool-btn' + (showAdj ? ' on' : ''), type: 'button', 'aria-pressed': !!showAdj,
-              title: showAdj ? t('hideAdj') : t('showAdj'), onClick: function () { setShowAdj(!showAdj); }
-            }, h(Icon, { name: 'adj', size: 12 }), t('adjChip')) : null));
-        var genderCn = (function () {
-          var yearStem = (chart.pillars && chart.pillars.yearly) ? String(chart.pillars.yearly).charAt(0) : '甲';
-          var yang = '甲丙戊庚壬'.indexOf(yearStem) >= 0;
-          return (yang ? '阳' : '阴') + (form.gender === 'female' ? '女' : '男');
-        })();
-        var hero = h('section', { className: 'zp-chart-hero' },
-          h('div', { className: 'zp-chart-id' },
-            h('div', { className: 'zp-chart-eyebrow' }, t('tabNatal') + ' · ' + chart.fiveElementsClass + ' · ' + genderCn),
-            h('h1', { className: 'zp-chart-title' }, form.name || t('defaultName'),
-              h('small', null, chart.zodiac + '年 · ' + chart.timeName)),
-            h('div', { className: 'zp-chart-meta' },
-              h('span', { className: 'zp-chip' }, h('b', null, t('solarLabel')), ' ', chart.solarDate),
-              h('span', { className: 'zp-chip' }, h('b', null, t('lunarLabel')), ' ', chart.lunar.year + '年' + chart.lunarText),
-              [chart.pillars.yearly, chart.pillars.monthly, chart.pillars.daily, chart.pillars.hourly].map(function (pz, i) {
-                return h('span', { key: 'p' + i, className: 'zp-chip is-gold' }, h('b', null, pz));
-              }),
-              h('span', { className: 'zp-chip' }, h('b', null, t('soul') + '/' + t('body')), ' ', chart.soulBranch + ' / ' + chart.bodyBranch),
-              h('span', { className: 'zp-chip' }, h('b', null, t('startAge')), ' ', chart.startAge + ' 岁'))),
-          h('div', { className: 'zp-chart-actions' },
-            h('button', { className: 'zp-pill is-primary', type: 'button', onClick: function () { go('reading'); } },
-              h(Icon, { name: 'sparkle', size: 14 }), t('chartInterpret')),
-            h('button', { className: 'zp-pill', type: 'button', onClick: function () { toggleSaveInput(currentInput(), form.name); } },
-              h(Icon, { name: 'star', size: 14 }), libraryIndexOf(currentInput()) >= 0 ? t('chartSaved') : t('chartSave')),
-            h('button', { className: 'zp-pill is-quiet', type: 'button', onClick: function () { openCreate('chart'); } },
-              h(Icon, { name: 'adj', size: 13 }), t('chartEdit')),
-            h('button', { className: 'zp-icon-btn', type: 'button', title: t('copy'), 'aria-label': t('copy'), onClick: copyChart }, h(Icon, { name: 'copy' })),
-            h('button', { className: 'zp-icon-btn', type: 'button', title: t('syncHint'), 'aria-label': t('sync'), onClick: syncToSession }, h(Icon, { name: 'sync' }))));
-        var board = null;
-        if (view === 'chart' && !(tab === 'yearly' && yearlyChart && yearlyChart.error)) {
-          board = h('div', { className: 'zp-chart-board', tabIndex: 0, onKeyDown: onStageKeyDown },
-            h('div', { className: 'zp-board-wrap' + (palaceSelected && tab === 'natal' ? ' has-detail' : ''), 'data-region': 'BOARD' },
-              h('div', { className: 'zp-board' },
-                h('div', { className: 'zp-grid' },
-                  [3, 4, 5, 6, 2, 7, 1, 8, 0, 11, 10, 9].map(function (idx) {
-                    return h(PalaceCell, {
-                      key: idx,
-                      palace: Object.assign({}, chart.palaces[idx], { isSoul: idx === chart.soulIndex }),
-                      chart: chart, selected: selected === idx,
-                      onSelect: function () { setSelected(idx); },
-                      t: t, showAdj: showAdj, scope: scope, scopeBadges: scopeBadges
-                    });
-                  }),
-                  h(CenterCell, { chart: chart, t: t, name: form.name }))),
-              palaceSelected && tab === 'natal' ? h(PalaceDetail, {
-                chart: chart,
-                palace: Object.assign({}, palaceSelected, { isSoul: selected === chart.soulIndex }),
-                t: t, onSelect: setSelected
-              }) : null),
-            palaceSelected && tab === 'decadal' ? h('div', { className: 'zp-kbd-hint' }, t('keyboardHint')) : null);
-        }
-        if (tab === 'yearly' && yearlyChart && yearlyChart.error) {
-          board = h('div', { className: 'zp-error', style: { marginBottom: 12 } }, yearlyChart.error);
-        }
-        var toolpage = null;
-        if (view === 'patterns') toolpage = h(PatternsView, { patterns: patterns, t: t });
-        if (view === 'dict') toolpage = h(DictView, { t: t });
-        return h('div', { className: 'zp-page', 'data-region': 'CHART' },
-          h('div', { className: 'zp-page-inner' },
-            hero,
-            timebar,
-            board,
-            toolpage,
-            view === 'chart' ? h('div', { className: 'zp-chart-info' },
-              h(Summary, { chart: chart, t: t }),
-              h(PatternsSummary, { patterns: patterns, t: t, onOpen: function () { setView('patterns'); } })) : null));
-      };
-
-      /* ---------- 渲染：解读页 ---------- */
-      var renderReading = function () {
-        if (!chart) return null;
-        var ctxLine = scopeLabel ? ('当前视角 · ' + scopeLabel) : t('readingCtxIn');
-        var tabs = h('div', { className: 'zp-reading-tabs' },
-          h(Seg, {
-            value: readingTab,
-            options: [
-              { value: 'chat', label: t('readingTabChat') },
-              { value: 'dock', label: t('readingTabDock') + (report.status === 'done' ? ' ·' : '') }
-            ],
-            onChange: setReadingTab
-          }));
-        return h('div', { className: 'zp-reading', 'data-tab': readingTab },
-          tabs,
-          h(ChatPane, {
-            t: t, thread: thread, streaming: chatting, thinkChars: thinkChars,
-            error: interpError, issue: interpIssue,
-            ctxLine: ctxLine,
-            copied: copied,
-            onBack: function () { go('chart'); },
-            onHandoff: handoffToSession,
-            onNewChat: newChat,
-            onAsk: runChat,
-            onStop: stopChat,
-            onContinue: continueChat,
-            onCopyAnswer: copyAnswer,
-            onGenerateReport: generateReport,
-            reportRunning: report.status === 'running',
-            chatRunning: chatting
+          h('button', { className: 'zp-time-btn', type: 'button', title: t('nextDecade'), 'aria-label': t('nextDecade'), disabled: selDecadal >= decadalList.length - 1, onClick: function () { stepDecade(1); } }, '›'),
+          currentDecadalIdx >= 0 && selDecadal !== currentDecadalIdx
+            ? h('button', { className: 'zp-time-now', type: 'button', title: t('backToCurrent'), onClick: function () { setSelDecadal(currentDecadalIdx); } }, t('backToCurrent'))
+            : (currentDecadalIdx >= 0 ? h('span', { className: 'zp-time-chip' }, t('currentBadge')) : null));
+      } else if (chart && view === 'chart' && tab === 'yearly') {
+        timeNav = h('div', { className: 'zp-time-nav', role: 'group', 'aria-label': t('tabYearly') },
+          h('button', { className: 'zp-time-btn', type: 'button', title: t('prevYear'), 'aria-label': t('prevYear'), onClick: function () { stepYear(-1); } }, '‹'),
+          h('input', {
+            className: 'zp-time-input', type: 'number', min: 1900, max: 2100, value: yearlyYear,
+            'aria-label': t('yearlyYear'),
+            onChange: function (ev) { setYearlyYear(ev.target.value); }
           }),
-          h(ReportDock, {
-            t: t, report: report, copied: reportCopied,
-            chatRunning: chatting,
-            onGenerate: generateReport,
-            onStop: stopReport,
-            onContinue: continueReport,
-            onRetry: regenerateReport,
-            onRead: function () { setPage('report'); },
-            onExport: exportReportHtml,
-            onCopy: copyReport
-          }));
-      };
+          h('button', { className: 'zp-time-btn', type: 'button', title: t('nextYear'), 'aria-label': t('nextYear'), onClick: function () { stepYear(1); } }, '›'),
+          String(yearNum()) === String(new Date().getFullYear())
+            ? h('span', { className: 'zp-time-chip' }, t('currentBadge'))
+            : h('button', { className: 'zp-time-now', type: 'button', title: t('thisYear'), onClick: function () { setYearlyYear(String(new Date().getFullYear())); } }, t('thisYear')));
+      }
+      var timebar = chart ? h('div', { className: 'zp-timebar', 'data-region': 'TIMEBAR' },
+        view === 'chart'
+          ? h('div', { className: 'zp-tabs', role: 'tablist', 'aria-label': t('timeScope') },
+            modeDefs.map(function (md) {
+              return h('button', {
+                key: md[0], type: 'button', role: 'tab', 'aria-selected': tab === md[0],
+                className: tab === md[0] ? 'on' : undefined,
+                onClick: function () { setTab(md[0]); }
+              }, md[1]);
+            }))
+          : h('div', { className: 'zp-toolview-head', style: { marginBottom: 0 } },
+            h('button', { className: 'zp-icon-btn', type: 'button', title: t('backToBoard'), 'aria-label': t('backToBoard'), onClick: function () { setView('chart'); } }, h(Icon, { name: 'back' })),
+            h('span', { className: 'zp-toolview-title' }, view === 'patterns' ? t('openPatterns') : t('openDict'))),
+        view === 'chart' ? timeNav : null,
+        h('div', { className: 'zp-timebar-right' },
+          view === 'chart' ? h('button', { className: 'zp-tool-btn', type: 'button', title: t('openPatterns'), onClick: function () { setView('patterns'); } }, t('openPatterns')) : null,
+          view === 'chart' ? h('button', { className: 'zp-tool-btn', type: 'button', title: t('openDict'), onClick: function () { setView('dict'); } }, t('openDict')) : null,
+          view === 'chart' ? h('button', {
+            className: 'zp-toggle' + (showAdj ? ' on' : ''), type: 'button', 'aria-pressed': !!showAdj,
+            title: showAdj ? t('hideAdj') : t('showAdj'), onClick: function () { setShowAdj(!showAdj); }
+          }, h(Icon, { name: 'adj', size: 12 }), t('adjChip')) : null,
+          view === 'chart' ? h('button', {
+            className: 'zp-toggle' + (focus ? ' on' : ''), type: 'button', 'aria-pressed': !!focus,
+            title: focus ? t('focusOff') : t('focusOn'), onClick: toggleFocus
+          }, h(Icon, { name: 'expand', size: 12 }), focus ? t('focusOff') : t('focusOn')) : null)) : null;
 
-      /* ---------- 渲染：报告阅读页 ---------- */
-      var renderReport = function () {
-        if (!(report.status === 'done' && report.text && reportHtml)) {
-          return h('div', { className: 'zp-page', 'data-region': 'READER' },
-            h('div', { className: 'zp-page-inner' },
-              h('div', { className: 'zp-empty', style: { marginTop: 40 } },
-                h('div', { className: 'zp-empty-title' }, t('reportEmpty')),
-                h('div', { className: 'zp-empty-hint' }, t('dockIdleLead')),
-                h('div', { style: { marginTop: 16 } },
-                  h('button', { className: 'zp-pill is-primary', type: 'button', onClick: function () { setPage('reading'); } }, t('readerBack'))))));
-        }
-        return h(ReaderPage, {
-          t: t, html: reportHtml, text: report.text,
-          name: form.name || t('defaultName'),
-          finishedAt: report.finishedAt,
-          copied: reportCopied,
-          onBack: function () { setPage('reading'); },
-          onExport: exportReportHtml,
-          onCopy: copyReport
-        });
-      };
-
-      var body = null;
-      if (page === 'home') body = renderHome();
-      else if (page === 'create') body = renderCreate();
-      else if (page === 'chart') body = renderChart();
-      else if (page === 'reading') body = renderReading();
-      else if (page === 'report') body = renderReport();
-      else body = renderHome();
-
+      /* 没盘时左栏必须始终可见（否则用户只剩空态、没有输入入口）；有盘才允许收起。 */
+      var railVisible = !chart || railOpen;
       return h('div', {
-        className: 'zp-root', ref: rootRef,
+        className: 'zp-root',
+        ref: rootRef,
         'data-w': layoutMode,
-        'data-page': page,
-        'data-chart': chart ? '1' : undefined
+        'data-chart': chart ? '1' : undefined,
+        'data-rail': railVisible ? 'open' : 'closed',
+        /* 没有盘时不能进专注态：否则左栏（生辰输入）被隐藏且没有退出按钮 */
+        'data-focus': (focus && chart) ? '1' : undefined
       },
-        ambient,
-        topbar,
-        body,
-        modal === 'settings' ? h(SettingsModal, {
-          t: t,
-          autoOpen: autoOpen, setAutoOpen: setAutoOpen,
-          showAdj: showAdj, setShowAdj: setShowAdj,
-          onClose: function () { setModal(null); }
-        }) : null);
+        h('div', { className: 'zp-scroll' + (modal ? ' zp-scroll-locked' : '') },
+          h('div', { className: 'zp-inner' },
+          h('div', { className: 'zp-head', 'data-region': 'HEAD' },
+            /* 显式出口: 返回会话（不依赖侧栏，layout 服务缺失时不渲染） */
+            actions.canReturnToConversation ? h('button', {
+              className: 'zp-icon-btn zp-exit', type: 'button',
+              title: t('backToConversation'), 'aria-label': t('backToConversation'),
+              onClick: function () { actions.returnToConversation(); }
+            }, h(Icon, { name: 'back' }), h('span', { className: 'zp-btn-label' }, t('backToConversation'))) : null,
+            actions.canReturnToConversation ? h('span', { className: 'zp-head-sep' }) : null,
+            /* 左栏开关：桌面/中档常驻，窄屏用底部「生辰」按钮 */
+            chart && layoutMode !== 'narrow' ? h('button', {
+              className: 'zp-icon-btn zp-rail-toggle', type: 'button',
+              title: railVisible ? t('collapseRail') : t('expandRail'),
+              'aria-label': railVisible ? t('collapseRail') : t('expandRail'),
+              'aria-expanded': railVisible ? 'true' : 'false',
+              'aria-controls': 'zp-rail',
+              onClick: function () { setRail(!railVisible); }
+            }, h(Icon, { name: 'panelLeft' })) : null,
+            h('div', { className: 'zp-brand' },
+              h('span', { className: 'zp-brand-name' }, t('brand')),
+              h('span', { className: 'zp-brand-pro' }, t('brandPro'))),
+            /* 窄屏头部只留图标，补一个紧凑命主摘要，避免头部空荡 */
+            chart && layoutMode === 'narrow' ? h('span', {
+              className: 'zp-sum-chip zp-head-mini',
+              title: (form.name || t('defaultName')) + ' · ' + chart.fiveElementsClass
+            }, (form.name || t('defaultName')) + ' · ' + chart.fiveElementsClass) : null,
+            h('span', { className: 'zp-brand-tag' }, t('tagline')),
+            chart ? h('div', { className: 'zp-head-sum' },
+              h('span', { className: 'zp-sum-chip' }, h('b', null, form.name || t('defaultName'))),
+              h('span', { className: 'zp-sum-chip zp-sum-gz' },
+                [chart.pillars.yearly, chart.pillars.monthly, chart.pillars.daily, chart.pillars.hourly].join(' ')),
+              h('span', { className: 'zp-sum-chip zp-sum-class' }, chart.fiveElementsClass)) : null,
+            h('div', { className: 'zp-head-actions' },
+              chart ? h('button', {
+                className: 'zp-icon-btn', type: 'button', title: t('copy'), 'aria-label': t('copy'), onClick: copyChart
+              }, h(Icon, { name: 'copy' }), h('span', { className: 'zp-btn-label' }, copied ? t('copied') : t('copy'))) : null,
+              chart ? h('button', {
+                className: 'zp-icon-btn', type: 'button', title: t('syncHint'), 'aria-label': t('sync'), onClick: syncToSession
+              }, h(Icon, { name: 'sync' }), h('span', { className: 'zp-btn-label' }, synced ? t('synced') : t('sync'))) : null,
+              chart ? h('span', { className: 'zp-head-sep' }) : null,
+              h('button', {
+                className: 'zp-btn zp-btn-primary zp-btn-ai', type: 'button', disabled: !chart,
+                'aria-pressed': modal === 'ai' ? 'true' : 'false',
+                onClick: openAI
+              }, h(Icon, { name: 'sparkle', size: 14 }), h('span', null, t('ai'))),
+              h('button', {
+                className: 'zp-icon-btn', type: 'button', title: t('settingsTitle'), 'aria-label': t('settingsTitle'),
+                'aria-pressed': modal === 'settings' ? 'true' : 'false',
+                onClick: function () { if (modal === 'settings') closeModal(); else openModal('settings'); }
+              }, h(Icon, { name: 'settings' })))),
+          h('div', { className: 'zp-body' },
+            h('div', { className: 'zp-side', id: 'zp-rail' },
+              /* 阅读优先：有盘时 命主信息 → 格局摘要 → 排盘输入 → 命盘库；
+                 无盘时 Summary/Patterns 不渲染，输入自然回到顶部。 */
+              chart ? h(Summary, { chart: chart, t: t }) : null,
+              chart ? h(PatternsSummary, { patterns: patterns, t: t, onOpen: function () { setView('patterns'); } }) : null,
+              h(InputForm, {
+                form: form, setForm: setForm, t: t, onCompute: compute, error: error, hasChart: !!chart,
+                collapsed: formCollapsed,
+                onToggleCollapse: function () { setFormCollapsed(!formCollapsed); }
+              }),
+              h(Library, { items: library, current: currentLibId, t: t, onSave: saveChart, onLoad: loadSaved, onDelete: deleteSaved })),
+            h('div', { className: 'zp-stage', tabIndex: chart ? 0 : -1, onKeyDown: onStageKeyDown },
+              timebar,
+              !chart ? h('div', { className: 'zp-empty', 'data-region': 'EMPTY' },
+                h('div', { className: 'zp-empty-taiji' }, h(Taiji, null)),
+                h('div', { className: 'zp-empty-title' }, t('brand') + ' ' + t('brandPro')),
+                h('div', { className: 'zp-empty-hint' }, t('emptyState')),
+                h('button', { className: 'zp-btn', type: 'button', onClick: compute }, t('emptyCta'))) : null,
+              chart && view === 'chart' && tab === 'yearly' && yearlyChart && yearlyChart.error
+                ? h('div', { className: 'zp-error', style: { marginBottom: 12 } }, yearlyChart.error)
+                : null,
+              chart && view === 'chart' && !(tab === 'yearly' && yearlyChart && yearlyChart.error) ? h('div', null,
+                h('div', { className: 'zp-board-wrap' + (palaceSelected && tab === 'natal' ? ' has-detail' : ''), 'data-region': 'BOARD' },
+                  h('div', { className: 'zp-board' },
+                    h('div', { className: 'zp-grid' },
+                      [3, 4, 5, 6, 2, 7, 1, 8, 0, 11, 10, 9].map(function (idx) {
+                        return h(PalaceCell, {
+                          key: idx,
+                          palace: Object.assign({}, chart.palaces[idx], { isSoul: idx === chart.soulIndex }),
+                          chart: chart,
+                          selected: selected === idx,
+                          onSelect: function () { setSelected(idx); },
+                          t: t,
+                          showAdj: showAdj,
+                          scope: scope,
+                          scopeBadges: scopeBadges
+                        });
+                      }),
+                      h(CenterCell, { chart: chart, t: t, name: form.name }))),
+                  palaceSelected && tab === 'natal' ? h(PalaceDetail, {
+                    chart: chart,
+                    palace: Object.assign({}, palaceSelected, { isSoul: selected === chart.soulIndex }),
+                    t: t,
+                    onSelect: setSelected
+                  }) : null),
+                palaceSelected && tab === 'decadal' ? h('div', { className: 'zp-kbd-hint' }, t('keyboardHint')) : null) : null,
+              chart && view === 'patterns' ? h(PatternsView, { patterns: patterns, t: t }) : null,
+              chart && view === 'dict' ? h(DictView, { t: t }) : null)),
+          chart ? h('div', { className: 'zp-bottombar', 'data-region': 'BOTTOMBAR' },
+            h('button', { className: 'zp-btn', type: 'button', onClick: editBirth },
+              h(Icon, { name: 'panelLeft', size: 14 }), h('span', null, t('editBirthShort'))),
+            h('button', { className: 'zp-btn zp-btn-primary', type: 'button', onClick: openAI },
+              h(Icon, { name: 'sparkle', size: 14 }), h('span', null, t('ai')))) : null
+          )),
+        modal === 'ai' && chart ? h(AIModal, {
+            t: t,
+            thread: thread,
+            streaming: interpreting,
+            interpError: interpError,
+            interpIssue: interpIssue,
+            thinkChars: thinkChars,
+            hasReport: hasReport,
+            onContinue: function () { runInterpretation(t('aiContinuePrompt'), lastMode); },
+            onStop: stopInterpretation,
+            copied: interpCopied,
+            previewHtml: previewHtml,
+            handoffDone: handoffDone,
+            onClose: closeModal,
+            onAsk: runInterpretation,
+            onClear: clearThread,
+            onHandoff: function () { handoffToSession(lastMode); },
+            onCopy: copyInterpretation,
+            onExport: exportReportHtml
+          }) : null,
+          modal === 'settings' ? h(SettingsModal, {
+            t: t,
+            autoOpen: autoOpen, setAutoOpen: setAutoOpen,
+            showAdj: showAdj, setShowAdj: setShowAdj,
+            onClose: closeModal
+          }) : null);
     }
 
     /* ---------------- 默认表单 ---------------- */
@@ -5222,7 +4464,6 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
             var line = lines[i].replace(/\s+$/, '');
             if (!line.trim()) { out.push('<div class="zp-md-gap"></div>'); continue; }
             var trimmed = line.trim();
-            if (/^([-*_])\1{2,}$/.test(trimmed)) { out.push('<hr>'); continue; }
             if (trimmed.charAt(0) === '|' && i + 1 < lines.length && mdIsTableSep(lines[i + 1])) {
               var header = mdSplitRow(trimmed);
               var aligns = mdSplitRow(lines[i + 1]).map(mdAlignOf);
