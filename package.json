@@ -46,6 +46,7 @@
     "src/engine-core.js",
     "src/lunar-data.js",
     "src/ziwei-core.js",
+    "src/ui.css",
     "locale/*.json",
     "icon.svg",
     "verify/*.mjs",

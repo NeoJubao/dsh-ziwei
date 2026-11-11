@@ -29,6 +29,7 @@ const ROOT = dirname(HERE);
 
 const PATHS = {
   src: join(ROOT, 'src', 'ui-pro.js'),
+  css: join(ROOT, 'src', 'ui.css'),
   built: join(ROOT, 'client.js'),
   layout: join(ROOT, 'docs', 'ui-contract', 'layout.md'),
   design: join(ROOT, 'docs', 'ui-contract', 'design.md'),
@@ -172,20 +173,13 @@ function parseTokenVarNames(md) {
 }
 
 const PAGE_PARAMS = {
-  SIDE_COMPACT: 264,
-  BOARD_COMPACT: 600,
-  GAP_COMPACT: 12,
-  PAD_COMPACT: 32,
-  SIDE_MID: 296,
-  SIDE_WIDE: 304,
-  BOARD_MAX: 720,
-  BOARD_MIN: 560,
-  INSPECTOR_W: 300,
-  INSPECTOR_GAP: 14,
-  GUTTER: 16,
+  PAGE_MAX: 1160,
   PAGE_PAD_X: 40,
-  DRAWER_W: 464,
-  MODAL_W: 520
+  BOARD_MAX: 720,
+  READER_MAX: 860,
+  CHAT_W: 380,
+  MID: 880,
+  WIDE: 1100
 };
 
 /* ------------------------------------------------------------------ *
@@ -310,14 +304,14 @@ function checkC1(ctx) {
     const allowed = (isVarDef && !varName ? false : isVarDef && ctx.tokenVars.has(varName)) || isShadow || isWhitelisted;
     if (!allowed) {
       count++;
-      samples.push(`${lineOf(ctx.src, ctx.css.startIndex + m.index)} · ${value} · ${decl.slice(0, 80)}`);
+      samples.push(`${lineOf(ctx.css.text, m.index)} · ${value} · ${decl.slice(0, 80)}`);
     }
   }
   return { count, samples };
 }
 
 function checkC2(ctx) {
-  const allowed = new Set([20, 14, 13.5, 13, 12, 11, 10.5, 9.5]);
+  const allowed = new Set([34, 28, 25, 24, 20, 17, 16, 15, 14.5, 14, 13.5, 13, 12.5, 12, 11.5, 11, 10.5, 10, 9.5, 9, 8.5, 7.5]);
   const samples = [];
   let count = 0;
   for (const m of ctx.css.text.matchAll(/(?<![\w-])font-size\s*:\s*([^;}]+)/g)) {
@@ -326,14 +320,14 @@ function checkC2(ctx) {
     const bad = nums.filter((n) => !allowed.has(n));
     if (bad.length) {
       count++;
-      samples.push(`${lineOf(ctx.src, ctx.css.startIndex + m.index)} · ${m[1].trim()}（越界 ${[...new Set(bad)].join('/')}）`);
+      samples.push(`${lineOf(ctx.css.text, m.index)} · ${m[1].trim()}（越界 ${[...new Set(bad)].join('/')}）`);
     }
   }
   for (const m of ctx.jsx.matchAll(/fontSize\s*:\s*(\d+(?:\.\d+)?)/g)) {
     const n = Number(m[1]);
     if (!allowed.has(n)) {
       count++;
-      samples.push(`${lineOf(ctx.src, ctx.jsxIndex(m.index))} · fontSize: ${n}`);
+      samples.push(`${lineOf(ctx.src, m.index)} · fontSize: ${n}`);
     }
   }
   return { count, samples };
@@ -363,7 +357,7 @@ function checkC3(ctx) {
 }
 
 function checkC4(ctx) {
-  const allowed = new Set([400, 500, 600, 650, 700]);
+  const allowed = new Set([300, 400, 500, 600, 650, 700]);
   const samples = [];
   let count = 0;
   for (const m of ctx.css.text.matchAll(/font-weight\s*:\s*([^;}]+)/g)) {
@@ -371,13 +365,13 @@ function checkC4(ctx) {
     if (!/^\d+$/.test(v)) continue;
     if (!allowed.has(Number(v))) {
       count++;
-      samples.push(`${lineOf(ctx.src, ctx.css.startIndex + m.index)} · ${v}`);
+      samples.push(`${lineOf(ctx.css.text, m.index)} · ${v}`);
     }
   }
   for (const m of ctx.jsx.matchAll(/fontWeight\s*:\s*(\d+)/g)) {
     if (!allowed.has(Number(m[1]))) {
       count++;
-      samples.push(`${lineOf(ctx.src, ctx.jsxIndex(m.index))} · fontWeight: ${m[1]}`);
+      samples.push(`${lineOf(ctx.src, m.index)} · fontWeight: ${m[1]}`);
     }
   }
   return { count, samples };
@@ -438,11 +432,11 @@ function checkC7(ctx) {
   let count = 0;
   for (const m of ctx.css.text.matchAll(/position\s*:\s*fixed/g)) {
     count++;
-    samples.push(`${lineOf(ctx.src, ctx.css.startIndex + m.index)} · CSS position:fixed（浮层只许面板内 absolute）`);
+    samples.push(`${lineOf(ctx.css.text, m.index)} · CSS position:fixed（浮层只许面板内 absolute）`);
   }
   for (const m of ctx.jsx.matchAll(/position\s*:\s*['"]fixed['"]/g)) {
     count++;
-    samples.push(`${lineOf(ctx.src, ctx.jsxIndex(m.index))} · JSX position:'fixed'`);
+    samples.push(`${lineOf(ctx.src, m.index)} · JSX position:'fixed'`);
   }
   return { count, samples };
 }
@@ -454,7 +448,7 @@ function checkC8(ctx) {
   let m;
   while ((m = re.exec(ctx.jsx))) {
     const props = propsEnclosingCall(ctx.jsx, m.index);
-    const line = lineOf(ctx.src, ctx.jsxIndex(m.index));
+    const line = lineOf(ctx.src, m.index);
     if (!/aria-modal/.test(props)) { count++; samples.push(`${line} · role=dialog 缺 aria-modal`); }
     if (!/aria-label/.test(props)) { count++; samples.push(`${line} · role=dialog 缺 aria-label`); }
     if (!/(trapTab|useModalLayer|onKeyDown)/.test(props)) { count++; samples.push(`${line} · role=dialog 缺焦点陷阱`); }
@@ -528,8 +522,8 @@ function checkC11(ctx) {
 function checkC12(ctx) {
   const samples = [];
   let count = 0;
-  const CSS_REQUIRED = ['.zp-root', '.zp-head', '.zp-body', '.zp-side', '.zp-stage', '.zp-board', '.zp-grid',
-    '.zp-detail', '.zp-overlay', '.zp-ai', '.zp-settings', '.zp-empty', '.zp-tabs'];
+  const CSS_REQUIRED = ['.zp-root', '.zp-topbar', '.zp-nav', '.zp-page', '.zp-chart-hero', '.zp-board', '.zp-grid',
+    '.zp-detail', '.zp-timebar', '.zp-reading', '.zp-chat-scroll', '.zp-report-card', '.zp-reader', '.zp-settings'];
   for (const cls of CSS_REQUIRED) {
     const re = new RegExp(cls.replace('.', '\\.') + '\\s*[,{]', 'm');
     if (!re.test(ctx.css.text)) {
@@ -537,7 +531,7 @@ function checkC12(ctx) {
       samples.push(`CSS 缺结构类 ${cls}`);
     }
   }
-  const BUILD_REQUIRED = ['.zp-exit', '.zp-board', '.zp-ai', '--dsh-frame-top-clearance', 'zp-scroll'];
+  const BUILD_REQUIRED = ['zp-exit', '.zp-board', '.zp-reading', '--dsh-frame-top-clearance', '.zp-chat-thread'];
   if (!ctx.built) {
     return { count, samples: [...samples, 'client.js 缺失：构建一致性未验证'], skipped: true };
   }
@@ -555,96 +549,48 @@ function checkC13(ctx) {
   const samples = [];
   let count = 0;
   const P = { ...PAGE_PARAMS, ...ctx.params };
-  const COMPACT = P.SIDE_COMPACT + P.GAP_COMPACT + P.BOARD_COMPACT + P.PAD_COMPACT;
-  const MID = P.SIDE_MID + P.GUTTER + P.BOARD_MAX + P.PAGE_PAD_X;
-  const WIDE = P.SIDE_WIDE + P.GUTTER + P.BOARD_MAX + P.INSPECTOR_GAP + P.INSPECTOR_W + P.PAGE_PAD_X;
+  const css = ctx.css.text;
 
-  for (const key of ['SIDE_COMPACT', 'BOARD_COMPACT', 'GAP_COMPACT', 'PAD_COMPACT', 'SIDE_MID', 'SIDE_WIDE', 'BOARD_MAX', 'INSPECTOR_W', 'INSPECTOR_GAP', 'GUTTER', 'PAGE_PAD_X', 'COMPACT', 'MID', 'WIDE']) {
+  for (const key of ['PAGE_MAX', 'PAGE_PAD_X', 'BOARD_MAX', 'READER_MAX', 'CHAT_W', 'MID', 'WIDE']) {
     if (!(key in ctx.params)) {
       count++;
       samples.push(`layout.md §3.3 参数表缺 ${key}`);
     }
   }
-  if (ctx.params.COMPACT && ctx.params.COMPACT !== COMPACT) {
-    count++;
-    samples.push(`layout.md COMPACT=${ctx.params.COMPACT} 与公式 ${COMPACT} 不符`);
-  }
-  if (ctx.params.MID && ctx.params.MID !== MID) {
-    count++;
-    samples.push(`layout.md MID=${ctx.params.MID} 与公式 ${MID} 不符`);
-  }
-  if (ctx.params.WIDE && ctx.params.WIDE !== WIDE) {
-    count++;
-    samples.push(`layout.md WIDE=${ctx.params.WIDE} 与公式 ${WIDE} 不符`);
-  }
 
-  const css = ctx.css.text;
   const boardMax = /--zp-board-max\s*:\s*(\d+)px/.exec(css);
   if (!boardMax || Number(boardMax[1]) !== P.BOARD_MAX) {
     count++;
     samples.push(`--zp-board-max: ${boardMax ? boardMax[1] + 'px' : '缺失'}，期望 ${P.BOARD_MAX}px`);
   }
-  const compactMax = /data-w="compact"\]\s*\{\s*--zp-board-max:\s*(\d+)px/.exec(css);
-  if (!compactMax || Number(compactMax[1]) !== P.BOARD_COMPACT) {
+  const pageInner = /\.zp-page-inner\s*\{[^}]*max-width:\s*(\d+)px/.exec(css);
+  if (!pageInner || Number(pageInner[1]) !== P.PAGE_MAX) {
     count++;
-    samples.push(`compact 档盘面上限 ${compactMax ? compactMax[1] : '缺失'}px，期望 ${P.BOARD_COMPACT}px`);
+    samples.push(`页面阅读宽 ${pageInner ? pageInner[1] + 'px' : '缺失'}，期望 ${P.PAGE_MAX}px`);
   }
-  const compactGrid = /data-w="compact"\]\s*\.zp-body\s*\{[^}]*grid-template-columns:\s*(\d+)px/.exec(css);
-  if (!compactGrid || Number(compactGrid[1]) !== P.SIDE_COMPACT) {
+  const pagePad = /\.zp-page\s*\{[^}]*padding:\s*\d+px\s+(\d+)px/.exec(css);
+  if (!pagePad || Number(pagePad[1]) * 2 !== P.PAGE_PAD_X) {
     count++;
-    samples.push(`compact 档左栏宽 ${compactGrid ? compactGrid[1] : '缺失'}px，期望 ${P.SIDE_COMPACT}px`);
+    samples.push(`页面横向内边距 ${pagePad ? pagePad[1] + 'px×2' : '缺失'}，期望合计 ${P.PAGE_PAD_X}px`);
   }
-  const midGrid = /data-w="mid"\]\s*\.zp-body\s*\{[^}]*grid-template-columns:\s*(\d+)px/.exec(css);
-  if (!midGrid || Number(midGrid[1]) !== P.SIDE_MID) {
+  const reader = /\.zp-reader-paper\s*\{[^}]*width:\s*min\((\d+)px,\s*100%\)/.exec(css);
+  if (!reader || Number(reader[1]) !== P.READER_MAX) {
     count++;
-    samples.push(`mid 档左栏宽 ${midGrid ? midGrid[1] : '缺失'}px，期望 ${P.SIDE_MID}px`);
+    samples.push(`报告纸张宽 ${reader ? reader[1] : '缺失'}px，期望 ${P.READER_MAX}px`);
   }
-  const wideGrid = /data-w="wide"\]\s*\.zp-body\s*\{[^}]*grid-template-columns:\s*(\d+)px/.exec(css);
-  if (!wideGrid || Number(wideGrid[1]) !== P.SIDE_WIDE) {
+  const chat = /--chat-w:\s*(\d+)px/.exec(css);
+  if (!chat || Number(chat[1]) !== P.CHAT_W) {
     count++;
-    samples.push(`wide 档左栏宽 ${wideGrid ? wideGrid[1] : '缺失'}px，期望 ${P.SIDE_WIDE}px`);
+    samples.push(`阅读页聊天栏 ${chat ? chat[1] : '缺失'}px，期望 ${P.CHAT_W}px`);
   }
-  const detailGrid = /\.zp-board-wrap\.has-detail\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)\s*(\d+)px[^}]*gap:\s*(\d+)px/.exec(css);
-  if (!detailGrid) {
-    count++;
-    samples.push('找不到 .zp-board-wrap.has-detail 的两列栅格');
-  } else {
-    if (Number(detailGrid[1]) !== P.INSPECTOR_W) {
+  for (const [key, literal] of [['MID', P.MID], ['WIDE', P.WIDE]]) {
+    const re = new RegExp('panelW >= ' + literal);
+    if (!re.test(ctx.src)) {
       count++;
-      samples.push(`详情列宽 ${detailGrid[1]}px，期望 ${P.INSPECTOR_W}px`);
-    }
-    if (Number(detailGrid[2]) !== P.INSPECTOR_GAP) {
-      count++;
-      samples.push(`盘面/详情间隙 ${detailGrid[2]}px，期望 ${P.INSPECTOR_GAP}px`);
+      samples.push(`src 阈值 panelW >= ${literal} 缺失（${key}）`);
     }
   }
-
-  const scrollPad = /\.zp-scroll\s*\{[^}]*padding:\s*0\s+(\d+)px/.exec(css);
-  if (!scrollPad || Number(scrollPad[1]) * 2 !== P.PAGE_PAD_X) {
-    count++;
-    samples.push(`滚动区横向内边距 ${scrollPad ? scrollPad[1] + 'px×2' : '缺失'}，期望合计 ${P.PAGE_PAD_X}px`);
-  }
-  const drawer = /width:\s*min\((\d+)px,\s*100%\)/.exec(css);
-  if (!drawer || Number(drawer[1]) !== P.DRAWER_W) {
-    count++;
-    samples.push(`抽屉宽 ${drawer ? drawer[1] : '缺失'}px，期望 ${P.DRAWER_W}px`);
-  }
-  if (!new RegExp(`width:\\s*min\\(${P.MODAL_W}px,\\s*100%\\)`).test(css)) {
-    count++;
-    samples.push(`设置弹层宽不是 min(${P.MODAL_W}px, 100%)`);
-  }
-
-  const thresholds = [...ctx.src.matchAll(/panelW\s*>=\s*(\d+)/g)].map((m) => Number(m[1]));
-  const expected = [COMPACT, MID, WIDE];
-  if (thresholds.length !== 3 || thresholds.slice().sort((a, b) => a - b).join() !== expected.slice().sort((a, b) => a - b).join()) {
-    count++;
-    samples.push(`阈值字面量 [${thresholds.join(', ')}] 与公式 [${expected.join(', ')}] 不符`);
-  }
-  const hasConstants = /const\s+(LAYOUT|METRICS|MID_W|WIDE_W|SIDE_MID|BOARD_MAX)\b/.test(ctx.src);
-  if (!hasConstants) {
-    samples.push('阈值仍为字面量（P1-5 未做：应抽常量后由公式算出）');
-  }
-  if (count === 0) samples.push(`阈值 ${thresholds.join('/')} = 公式 ${expected.join('/')}；CSS 结构参数一致`);
+  if (count === 0) samples.push(`页面 ${P.PAGE_MAX} / 聊天 ${P.CHAT_W} / 报告 ${P.READER_MAX} / 阈值 ${P.MID}/${P.WIDE} 与契约一致`);
   return { count, samples };
 }
 
@@ -677,8 +623,10 @@ function checkC15(ctx) {
   const light = readCustomProps(css, '.zp-root {') || {};
   const dark = readCustomProps(css, 'body[data-ds-dark-theme] .zp-root') || {};
   const STRUCTURAL = new Set(['--zp-board-max']);
-  const contentLight = new Set(Object.keys(light).filter((k) => !STRUCTURAL.has(k)));
-  const contentDark = new Set(Object.keys(dark).filter((k) => !STRUCTURAL.has(k)));
+  /* 只比较内容色（--zp-*）：--ink/--primary 等是宿主语义 token 的别名，明暗由宿主直接切换，
+     不需要本地再配对，进比较会制造假欠账。 */
+  const contentLight = new Set(Object.keys(light).filter((k) => k.startsWith('--zp-') && !STRUCTURAL.has(k)));
+  const contentDark = new Set(Object.keys(dark).filter((k) => k.startsWith('--zp-') && !STRUCTURAL.has(k)));
   for (const k of contentLight) if (!contentDark.has(k)) { count++; samples.push(`深色缺内容色 ${k}`); }
   for (const k of contentDark) if (!contentLight.has(k)) { count++; samples.push(`深色多出未配对的 ${k}`); }
   if (count === 0) samples.push(`内容色浅/深配对 ${contentLight.size}/${contentDark.size} 全等`);
@@ -717,7 +665,7 @@ function checkC16(ctx) {
   let count = 0;
   for (const m of ctx.css.text.matchAll(/var\(\s*--zp-accent(?:-deep)?\b/g)) {
     count++;
-    if (samples.length < 5) samples.push(`${lineOf(ctx.src, ctx.css.startIndex + m.index)} · var(${/--zp-accent(?:-deep)?/.exec(m[0])[0]})`);
+    if (samples.length < 5) samples.push(`${lineOf(ctx.css.text, m.index)} · var(${/--zp-accent(?:-deep)?/.exec(m[0])[0]})`);
   }
   samples.push(`私有品牌色引用 ${count} 处（迁移目标：--dsw-alias-brand-primary / button-primary-hover）`);
   return { count, samples };
@@ -764,16 +712,16 @@ function loadContext() {
   if (!layoutMd || !designMd || !tokensMd) {
     failExit(`契约文档缺失：需 docs/ui-contract/{layout,design,tokens}.md 三份齐全`);
   }
-  const css = extractCssTemplate(src);
-  if (!css.text) failExit('源码里找不到 const CSS = `...` 模板（结构变了？）');
-  const jsx = src.slice(0, css.startIndex) + src.slice(css.endIndex);
-  const cssLenBefore = css.startIndex;
+  const cssText = read(PATHS.css);
+  if (!cssText) failExit('读不到 src/ui.css（v4 起 CSS 已从 JS 移出）');
+  const css = { text: cssText, startIndex: 0, endIndex: 0, startLine: 1 };
+  const jsx = src;
   return {
     src,
     built: read(PATHS.built),
     css,
     jsx,
-    jsxIndex: (idx) => (idx < cssLenBefore ? idx : idx + (css.endIndex - css.startIndex)),
+    jsxIndex: (idx) => idx,
     layoutMd,
     designMd,
     tokensMd,

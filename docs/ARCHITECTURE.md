@@ -110,6 +110,7 @@
   + engine-built.js（排盘引擎，挂 window.ZWEngine）
   + src/ziwei-core.js（紫微师内核，挂 window.ZWCore）
   + src/ui-pro.js（React 面板，window.__ModuleLoader__.load({ id, factory })）
+  + src/ui.css（设计系统样式，build 时注入 ui-pro 的 const CSS）
 ```
 
 - **lazy-CJS 契约**：脚本加载期只调用 `__ModuleLoader__.load(...)` 注册 factory；
@@ -143,7 +144,7 @@ node build.mjs
    `/*__LUNAR_INFO__*/`、`/*__LTERM_INFO__*/`。
 4. 产出：
    - `engine-built.js`：只有引擎（Node/host 沙箱与测试用）；
-   - `client.js`：懒加载内核包装 + 引擎 + `src/ziwei-core.js` + `src/ui-pro.js`。
+   - `client.js`：懒加载内核包装 + 引擎 + `src/ziwei-core.js` + `src/ui-pro.js`（内含注入的 `src/ui.css`）。
 
 产物提交进仓库；`verify/verify.mjs` 会逐字节比较「当前产物」与「源码重新拼接的结果」，
 所以**改了 `src/` 必须重新 `node build.mjs` 并一起提交**。`npm pack` 之前也要先构建，

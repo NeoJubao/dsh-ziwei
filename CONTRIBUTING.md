@@ -54,7 +54,8 @@ node verify/diff-runner.mjs --write-fixture
 ## 硬规则
 
 1. **产物是构建出来的，不要手改。** `client.js` / `engine-built.js` 是 `build.mjs` 的输出；
-   改 `src/` 后必须 `node build.mjs`，并**把重新生成的产物与源码一起提交**。
+   CSS 设计系统在 `src/ui.css`，构建时注入 `client.js`。改 `src/`（含 `src/ui.css`）后必须
+   `node build.mjs`，并**把重新生成的产物与源码一起提交**。
    `verify/verify.mjs` 会逐字节比较产物，手改或忘记重建都会红。
 2. **UI 改动必须亲眼看。** 这是本项目反复吃亏的地方（历史上多次出现「自检全绿但界面是坏的」）。
    任何 `src/ui-pro.js` 的可视改动，PR 里必须附**浅色 + 深色**截图或一段短录屏，并写明检查过
