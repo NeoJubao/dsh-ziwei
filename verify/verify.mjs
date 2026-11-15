@@ -411,10 +411,14 @@ ok('v3.2: 抽屉去掉速览/鲲鹏模式条（避免点了没反应）',
   !/modeBrief/.test(client) && !/modeReport/.test(client) && !/zp-ai-mode/.test(client) && !/zp-suggest/.test(client));
 ok('v3.2: 空态两个动作 + 回答后「完整报告」动作都存在',
   /aiStartBrief/.test(client) && /aiStartReport/.test(client) && /aiFullReport/.test(client) && /showFullReport/.test(client));
-ok('v3.2: 首次打开抽屉自动发起一次速览（每张盘只一次）',
-  /autoStartedRef/.test(client) && /runInterpretation\('', 'brief'\)/.test(client));
-ok('v3.2: 换盘清空旧解读（不串盘）',
-  /换盘 = 换解读对象/.test(client) && /autoStartedRef\.current = false/.test(client));
+ok('v3.3: 点开解读抽屉不自动发起解读（只开空态，动作由用户点）',
+  !/autoStartedRef/.test(client) && !/runInterpretation\('', 'brief'\)/.test(client));
+ok('v3.3: 空态是一行一个的动作卡（图标 / 名称 / 说明 / 箭头），不再把按钮拉满整行',
+  /zp-ai-start-btn/.test(client) && /zp-ai-start-glyph/.test(client) &&
+  /zp-ai-start-desc/.test(client) && /zp-ai-start-arrow/.test(client) &&
+  !/zp-ai-start \.zp-btn/.test(client));
+ok('v3.3: 换盘仍清空旧解读（不串盘），且清空后不会自己生成',
+  /换盘 = 换解读对象/.test(client) && (client.match(/setThread\(\[\]\)/g) || []).length >= 2);
 ok('client 大限默认停在当前段（不是第 0 段）且流年选择进 payload',
   /function currentDecadeIndex|var currentDecadeIndex = function/.test(client) && /setSelDecadal\(currentDecadeIndex\(result\.chart\)\)/.test(client) && /yearlyFocus:/.test(client));
 ok('client 问答 payload 带完整上下文与当前年龄（大限定位）',

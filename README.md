@@ -2,6 +2,8 @@
 
 > 一个 DSH（DeepSeek Harness）插件：**确定性紫微斗数排盘** + **面板内直接解读**。
 > 前面看盘，后面直接聊。排盘走独立引擎，解读走 Harness 会话模型。
+>
+> **紫微师 · 金聚**｜解读依据「道商意象紫微九诀」｜微信：`neo2025new`
 
 [![CI](https://github.com/NeoJubao/dsh-ziwei/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/NeoJubao/dsh-ziwei/actions/workflows/ci.yml)
 ![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)
@@ -76,11 +78,11 @@ official DeepSeek product.
 和排障都在 **[docs/INSTALL.md](docs/INSTALL.md)**。最短路径：
 
 ```bash
-# 从 npm 安装（推荐给普通用户）
-dash plugin --profile <profile> add dsh-ziwei@1.3.1
+# 从 npm 安装（推荐给普通用户；不写版本号即装 latest）
+dsh plugin --profile <profile> add dsh-ziwei
 
 # 开发者：把本地插件目录装进一个 profile（也可在 DSH Web Plugins 页添加）
-dash plugin --profile <profile> add "/绝对路径/到/ziwei-workbench"
+dsh plugin --profile <profile> add "/绝对路径/到/ziwei-workbench"
 ```
 
 > **更新**：`dsh plugin --profile <profile> update dsh-ziwei`（或 `add dsh-ziwei@<version>`）；
@@ -227,6 +229,10 @@ node verify/pack.mjs
    `shell.leading`（macOS 折叠侧栏后的退出控件）。darwin 还要按
    `--dsh-frame-top-clearance` / `--dsh-frame-leading-clearance` / `--dsh-frame-overlay-top`
    避让窗口 chrome。
+10. **别让「入口」自己开工**：v3.2 曾在每张盘首次打开解读抽屉时自动发起一次速览，
+    用户点开只想先看看盘，生成却已经跑起来（还消耗一次模型调用）。现在打开抽屉只把命盘
+    带进空态，动手的是用户点的那颗按钮；凡是「点了就会花钱/等几十秒」的动作，都别挂在
+    打开浮层、切换页签、启动自动打开这类入口上。
 
 ## 界面 v2 / v2.1（2026-10-30）
 
@@ -298,7 +304,7 @@ v3 做两次分离：
    可点击线框 **[docs/design/v3-wireframe.html](docs/design/v3-wireframe.html)**，
    人眼验收清单 **[docs/design/v3-review-checklist.md](docs/design/v3-review-checklist.md)**。
 
-> **未做视觉复核**：v3 的结构改动有自动断言（8 组 225 项）与契约审计，但本机无浏览器控制；
+> **未做视觉复核**：v3 的结构改动有自动断言（8 组 247 项，1.6.0 实测）与契约审计，但本机无浏览器控制；
 > 合并前必须按 v3-review-checklist 真机走查（宽/中/窄、明暗、darwin 折叠、键盘）。
 
 ### 界面 v3.2：解读抽屉降噪与精装报告表格（2026-11-11）
@@ -315,15 +321,29 @@ v3 做两次分离：
 
 设计与取舍见 **[docs/design/v3.2-ai-drawer-and-report.md](docs/design/v3.2-ai-drawer-and-report.md)**。
 
-| 解读抽屉（速览回答 / 表格 / 工具条） | 空态（两个一次点击的动作） |
+| 解读抽屉（速览回答 / 表格 / 工具条） | 空态（一行一个动作卡） |
 |---|---|
-| ![解读抽屉](docs/assets/v3.2-drawer-answer.jpg) | ![抽屉空态](docs/assets/v3.2-drawer-empty.jpg) |
+| ![解读抽屉](docs/assets/v3.2-drawer-answer.jpg) | ![抽屉空态](docs/assets/v3.3-drawer-empty.png) |
 
 ![精装报告表格](docs/assets/v3.2-report-table.jpg)
 
 > 截图用真实 `client.js` + React 在无头 Chrome 中物化渲染（面板 1400×960，2 倍像素），
 > 不是占位图；深色见 [docs/assets/v3.2-drawer-dark.jpg](docs/assets/v3.2-drawer-dark.jpg)。
 > 报告表格图为 Chrome A4 打印的第 2 页，可见 12 宫表、表头对齐与行不跨页。
+> 空态图是 v3.3 改版后按源码 CSS + 等效标记在无头 Chrome 静态渲染的（464×640），
+> 不是真实 React 面板的截图；真实面板以刷新后的界面为准。深色见
+> [docs/assets/v3.3-drawer-empty-dark.png](docs/assets/v3.3-drawer-empty-dark.png)。
+
+### 界面 v3.3：打开解读不再自动生成（2026-11-15）
+
+「紫微师解读」是入口，不是开工令。点开后抽屉停在空态：命盘已带入，看速览、要完整鲲鹏报告，
+还是直接问自己的问题，都由用户点。v3.2 的「每张盘首次打开抽屉自动发起一次速览」已撤回——
+没打招呼就先花掉一次模型生成，用户也来不及先看盘。换盘清空旧对话（不串盘）不变；
+`verify/verify.mjs` 的断言改成「点开抽屉不自动发起」。
+
+空态同时改版：两个动作不再是被拉满整行的大按钮（图标跑最左、文字居中、外面一圈虚线框），
+改成一行一个的动作卡——图标块 + 名称 + 一句说明 + 右侧箭头，块宽封顶 420 居中；
+首选动作只加品牌色描边与浅底，不做整块紫色。
 
 ## 隐私与数据
 
@@ -363,7 +383,8 @@ v3 做两次分离：
 
 - 功能问题、安装问题、使用反馈：优先开 [GitHub Issue](https://github.com/NeoJubao/dsh-ziwei/issues)。
 - 安全漏洞：请走 [SECURITY.md](SECURITY.md) 的 GitHub 私密报告渠道，**不要开公开 issue**。
-- 其他联系（合作 / 授权 / 媒体）：`neo2025new@gmail.com`（公开邮箱，可能被爬虫抓取；请勿发送生辰等个人数据）。
+- 其他联系（合作 / 授权 / 媒体）：微信 `neo2025new`；邮箱 `neo2025new@gmail.com`
+  （均为公开联系方式，可能被爬虫抓取；请勿发送生辰等个人数据）。
 
 ## 贡献 / 安全 / 版本
 

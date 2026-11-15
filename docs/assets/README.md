@@ -38,5 +38,8 @@ README 顶部的截图位需要真实界面截图。**当前仓库还没有这�
 - `screenshot-light.png`：本命盘工作台（示例生辰排盘后的完整面板）。
 - `screenshot-ai.png`：「紫微师 · 直接聊」抽屉，选中示例问题「这个大限要注意什么」后的回答。
 - `screenshot-sidebar.png`：DSH 左侧栏局部，显示「紫微斗数 Pro」入口。
+- `v3.3-drawer-empty.png` / `v3.3-drawer-empty-dark.png`：v3.3 解读抽屉空态改版的
+  **静态渲染**（源码 CSS + 等效标记，无头 Chrome，464×640），不是真实 React 面板截图；
+  用于展示当前版式，真实面板以刷新后的界面为准。
 
 深色主题、侧栏折叠、窄屏截图待补；渲染预览见 `docs/design/assets/`（本地渲染）。

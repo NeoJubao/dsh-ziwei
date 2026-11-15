@@ -34,6 +34,9 @@
 - [x] **联系方式**：Private vulnerability reporting 已启用（`GET repos/.../private-vulnerability-reporting`
       返回 `{"enabled":true}`）；公开联系邮箱 `neo2025new@gmail.com` 已写入 README / SECURITY /
       CODE_OF_CONDUCT / package.json（注意：公开邮箱会被爬虫抓取）。
+- [ ] **v1.6.0 界面真机走查**：解读抽屉「打开不自动解读 + 空态动作卡」只在无头 Chrome
+      （源码 CSS + 等效标记的静态渲染）与自动断言里验过，**未在真实 DSH 宿主点过**。
+      发布前需作者点一遍：亮/暗色、464 宽与窄屏满宽、键盘 Tab、两个动作真的发起请求。
 - [x] **干净环境安装冒烟（配置层）**：2026-11-08 用 `DSH_HOME=/tmp/dsh-smoke-home` 新建 `smoke` profile，
       对发布 tarball 执行 `dsh plugin --profile smoke add <tgz>`，`dsh --profile smoke --dump-config`
       已出现 `# == dsh-ziwei` 与 bundle 行；**未做 GUI 启动/点击**。
@@ -46,15 +49,23 @@
 - 仓库已从 private 转为 **public**：`https://github.com/NeoJubao/dsh-ziwei`（2026-11-08）。
 - 公开版本：**v1.3.0**（首个公开 tag）、**v1.3.1**（首个 npm 发布版）、**v1.3.2**（四柱月柱
   默认口径修复）。三个 tag 均已推远端，GitHub Release 均含 tarball 附件。
-- **npm 已发布 `dsh-ziwei@1.3.3`**（latest，publisher `neomemoryai`）。1.3.3 含旧缓存月柱迁移。
-- **`dsh-ziwei@1.5.2` 待发布**（GitHub tag/Release 已就绪）；含 1.3.3 旧缓存月柱迁移、
-  1.4.0 手动「检查更新」、1.5.0 格局摘要、1.5.1/1.5.2 左栏顺序修复。发布命令：
-  `npm publish dist/dsh-ziwei/dsh-ziwei-1.5.2.tgz --access public`（需 2FA）。
+- 其后陆续发布 **v1.3.3 / v1.4.0 / v1.5.0 / v1.5.1 / v1.5.2**（2026-11-08），远端 tag 与
+  GitHub Release 齐全，`v1.5.2` 为 npm 与 Release 的 Latest。
+- **npm 已发布 `dsh-ziwei@1.5.2`**（latest，2026-11-08，publisher `neomemoryai`，周下载约 1.1k）：
+  含 1.3.3 旧缓存月柱迁移、1.4.0 手动「检查更新」、1.5.0 格局摘要、1.5.1/1.5.2 左栏顺序修复。
+- **`dsh-ziwei@1.6.0` 待发布**：tarball `dist/dsh-ziwei/dsh-ziwei-1.6.0.tgz`（2026-11-15 生成），
+  含界面 v3.2 / v3.3（抽屉不再自动解读、空态动作卡、报告表格渲染）与关于 / README / 报告落款署名。
+  sha256：`4f1fdcbfd40c9e296c4d5d8979d130e2905dfa930d76333f18ab4f6a70918bf0`（2026-11-15 生成）。
+  发布命令：`npm publish dist/dsh-ziwei/dsh-ziwei-1.6.0.tgz --access public`（需 2FA）。
+- **git / 远端现状（2026-11-15）**：远端已有 `v1.3.0`…`v1.5.2` 全部 tag 与 Release；
+  但本机仓库只 fetch 到 `v1.3.0` / `v1.3.1` / `v1.3.2`，且本地 `main` 领先 `origin/main`
+  3 个提交（界面 v3.2 / v4 / v4 revert），1.6.0 的全部改动仍是未提交的工作区变更。
+  发 1.6.0 前：先 `git fetch --tags` 对齐远端、提交并推送 `main`，再打 `v1.6.0` 与 Release。
 - **CI 已绿**：三平台 × Node 22/24（run `42480774977`，workflow `ci.yml`）；
   Windows 的两处兼容问题（动态 import 的 file:// URL、npm.cmd 调用）已在主分支修复。
 - 已加 topics：`dsh-plugin`、`dsh`、`deepseek-harness`、`ziwei`、`ziwei-doushu`。
 - 发布 tarball 由 `node scripts/release-pack.mjs` 生成（`dist/`，gitignored）。
-- 真机验收、真实截图、私密漏洞报告均已完成。
+- 真机验收（v1.3.1 基线）、真实截图、私密漏洞报告均已完成；v1.6.0 的界面走查见 §0.5 待办。
 - **DSH 插件市场提交**：2026-11-08 已向 dsh-plugin.org 提交收录 issue
   `https://github.com/dshplugin/dsh-plugin-hub/issues/682`（含 repo / 一句话价值 / 分类 /
   安装命令 / npm 包 / License / 自检项）。审核与索引刷新由对方流程决定。

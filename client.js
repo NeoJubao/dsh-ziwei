@@ -1692,7 +1692,7 @@ window.__ModuleLoader__.load({
     const { useState, useEffect, useMemo, useRef } = React;
     const E = window.ZWEngine;
     /* 构建时由 build.mjs 注入 package.json 的版本号；未构建的源码里保留占位符。 */
-    const APP_VERSION = "1.5.2";
+    const APP_VERSION = "1.6.0";
 
     /* ---------------- i18n ---------------- */
     const DICT = {
@@ -1732,8 +1732,10 @@ window.__ModuleLoader__.load({
         ai: '紫微师解读', aiTitle: '紫微师解读',
         aiSend: '发送', aiNewChat: '新对话', aiAskPh: '追问命盘，Enter 发送',
         aiStartBrief: '速览解读', aiStartReport: '完整鲲鹏报告',
+        aiStartBriefDesc: '命格总纲与当前大限，几分钟读完',
+        aiStartReportDesc: '14 个部分，可导出精装 HTML',
         aiFullReport: '完整报告', aiFullReportHint: '基于当前命盘生成完整鲲鹏报告（14 部分）',
-        aiEmptyHint: '命盘已带入。直接提问，或先看一份解读。',
+        aiEmptyLead: '命盘已带入', aiEmptyHint: '直接提问，或先看一份解读。',
         timeScope: '命盘时间维度', backToBoard: '返回盘面',
         prevDecade: '上一个大限', nextDecade: '下一个大限', backToCurrent: '回到当前',
         currentBadge: '当前', thisYear: '今年', prevYear: '上一年', nextYear: '下一年',
@@ -1759,6 +1761,8 @@ window.__ModuleLoader__.load({
         updateFailed: '检查失败：{reason}',
         backToConversation: '返回会话',
         aboutText: '紫微斗数 Pro · 算法依据《紫微斗数全书》安星诀，与开源库 iztro 逐字段交叉验证。真太阳时校正含经度差与均时差。本工具仅供研究参考。',
+        signature: '紫微师 · 金聚｜道商意象紫微九诀',
+        contactWechat: '微信：neo2025new',
         libTitle: '命盘库', libName: '盘名', libSave: '保存', libEmpty: '暂无保存的命盘', libDelete: '删除',
         patternTitle: '格局分析', patternEmpty: '未检测到显著格局',
         dictTitle: '星曜词典', dictPlaceholder: '搜索星曜…',
@@ -1802,8 +1806,10 @@ window.__ModuleLoader__.load({
         ai: 'Reading', aiTitle: 'Zi Wei Reading',
         aiSend: 'Send', aiNewChat: 'New chat', aiAskPh: 'Follow-up — Enter to send',
         aiStartBrief: 'Quick reading', aiStartReport: 'Full Kunpeng report',
+        aiStartBriefDesc: 'Core profile and current decade, a few minutes',
+        aiStartReportDesc: '14 parts, exportable to HTML',
         aiFullReport: 'Full report', aiFullReportHint: 'Generate the full 14-part Kunpeng report for this chart',
-        aiEmptyHint: 'Chart attached. Ask away, or start with a reading.',
+        aiEmptyLead: 'Chart ready', aiEmptyHint: 'Ask directly, or start with a reading.',
         timeScope: 'Time scope', backToBoard: 'Back to chart',
         prevDecade: 'Previous decade', nextDecade: 'Next decade', backToCurrent: 'Back to current',
         currentBadge: 'Current', thisYear: 'This year', prevYear: 'Previous year', nextYear: 'Next year',
@@ -1829,6 +1835,8 @@ window.__ModuleLoader__.load({
         updateFailed: 'Check failed: {reason}',
         backToConversation: 'Back to conversation',
         aboutText: 'Zi Wei Dou Shu Pro. Algorithm verified field-by-field against the open-source iztro library. True solar time correction included.',
+        signature: 'Zi Wei Master · Jin Ju｜Daoshang Yixiang Ziwei Nine Keys',
+        contactWechat: 'WeChat: neo2025new',
         libTitle: 'Chart Library', libName: 'Name', libSave: 'Save', libEmpty: 'No saved charts', libDelete: 'Delete',
         patternTitle: 'Patterns', patternEmpty: 'No notable patterns detected',
         dictTitle: 'Star Dictionary', dictPlaceholder: 'Search stars…',
@@ -2410,17 +2418,41 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   color: var(--dsw-alias-label-primary);
 }
 .zp-ai-error-text { flex: 1; min-width: 0; word-break: break-word }
-.zp-ai-empty-wrap { flex: 1; display: flex; align-items: center; justify-content: center }
-.zp-ai-empty {
-  box-sizing: border-box; width: 100%;
-  border: 1px dashed var(--dsw-alias-border-l1); border-radius: 12px;
-  background: var(--dsw-alias-bg-layer-2); padding: 16px;
-  display: flex; flex-direction: column; gap: 8px;
+/* 空态：居中一小块（一句说明 + 两个动作卡），不铺满整张宽抽屉 */
+.zp-ai-empty-wrap {
+  flex: 1; min-height: 0; display: flex; justify-content: center; align-items: center;
 }
+.zp-ai-empty { box-sizing: border-box; width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 4px }
+.zp-ai-empty-lead { font-size: 14px; font-weight: 700; letter-spacing: .2px; color: var(--dsw-alias-label-primary) }
 .zp-ai-empty-hint { font-size: 12px; line-height: 1.7; color: var(--dsw-alias-label-secondary) }
 /* 空态的两个动作：点一次就产出内容，不再是"只改下一次请求"的模式条 */
-.zp-ai-start { display: flex; gap: 8px; flex-wrap: wrap }
-.zp-ai-start .zp-btn { flex: 1 1 0; min-width: 0; height: 32px }
+.zp-ai-start { display: flex; flex-direction: column; gap: 8px; margin-top: 12px }
+.zp-ai-start-btn {
+  box-sizing: border-box; width: 100%; display: flex; align-items: center; gap: 12px;
+  padding: 12px; border-radius: 12px; cursor: pointer; font-family: inherit; text-align: left;
+  background: var(--dsw-alias-bg-layer-2); border: 1px solid var(--dsw-alias-border-l1);
+  color: var(--dsw-alias-label-primary);
+  transition: border-color .12s, background .12s, transform .12s;
+}
+.zp-ai-start-btn:hover { border-color: color-mix(in srgb, var(--zp-fill-accent) 52%, var(--dsw-alias-border-l1)) }
+.zp-ai-start-btn:active { transform: translateY(1px) }
+.zp-ai-start-btn:disabled { opacity: .5; cursor: default; transform: none }
+.zp-ai-start-btn:focus-visible { outline: 2px solid var(--zp-fill-accent); outline-offset: 2px }
+.zp-ai-start-glyph {
+  flex: none; display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border-radius: 8px;
+  color: var(--zp-fill-accent); background: color-mix(in srgb, var(--zp-fill-accent) 12%, transparent);
+}
+.zp-ai-start-copy { display: flex; flex-direction: column; gap: 2px; min-width: 0 }
+.zp-ai-start-arrow { flex: none; margin-left: auto; color: var(--dsw-alias-label-tertiary) }
+.zp-ai-start-name { font-size: 13px; font-weight: 650; line-height: 1.5 }
+.zp-ai-start-desc { font-size: 11px; line-height: 1.5; color: var(--dsw-alias-label-secondary) }
+/* 首选动作：只加一层品牌色描边和一点底色，不做整块紫色大按钮 */
+.zp-ai-start-btn.primary {
+  border-color: color-mix(in srgb, var(--zp-fill-accent) 42%, var(--dsw-alias-border-l1));
+  background: color-mix(in srgb, var(--zp-fill-accent) 7%, var(--dsw-alias-bg-layer-2));
+}
+.zp-ai-start-btn.primary .zp-ai-start-glyph { background: color-mix(in srgb, var(--zp-fill-accent) 18%, transparent) }
 .zp-send {
   width: 36px; height: 36px; flex: none; display: inline-flex; align-items: center; justify-content: center;
   border: none; border-radius: 10px; color: #fff; cursor: pointer;
@@ -2485,6 +2517,8 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   display: flex; flex-direction: column; gap: 4px;
 }
 .zp-settings-about b { color: var(--dsw-alias-label-primary); font-size: 11px; letter-spacing: 1px }
+.zp-settings-sign { color: var(--dsw-alias-label-primary); font-weight: 600 }
+.zp-settings-contact { color: var(--dsw-alias-label-secondary) }
 .zp-update { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--dsw-alias-border-l1); display: flex; flex-direction: column; gap: 8px }
 .zp-update-row { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--dsw-alias-label-secondary) }
 .zp-update-row b { font-size: 12px; color: var(--dsw-alias-label-primary) }
@@ -3191,6 +3225,9 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         ['path', { d: 'M13.4 8H3.2' }],
         ['path', { d: 'M7 4.2L3.2 8l3.8 3.8' }]
       ],
+      caret: [
+        ['path', { d: 'M6.2 3.6L10.6 8l-4.4 4.4' }]
+      ],
       copy: [
         ['rect', { x: 5.6, y: 5.6, width: 7.6, height: 7.6, rx: 1.6 }],
         ['path', { d: 'M10.6 5.6V4.3c0-.9-.7-1.6-1.6-1.6H4.3c-.9 0-1.6.7-1.6 1.6v4.7c0 .9.7 1.6 1.6 1.6h1.3' }]
@@ -3298,6 +3335,18 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         if (props.streaming) return;
         props.onAsk('', m);
       };
+      /* 空态的两个动作：一行一个，图标 + 名称 + 一句说明；点一次就出内容 */
+      var startBtn = function (mode, iconName, name, desc, primary) {
+        return h('button', {
+          className: 'zp-ai-start-btn' + (primary ? ' primary' : ''), type: 'button',
+          disabled: props.streaming, onClick: function () { start(mode); }
+        },
+        h('span', { className: 'zp-ai-start-glyph' }, h(Icon, { name: iconName, size: 15 })),
+        h('span', { className: 'zp-ai-start-copy' },
+          h('span', { className: 'zp-ai-start-name' }, name),
+          h('span', { className: 'zp-ai-start-desc' }, desc)),
+        h('span', { className: 'zp-ai-start-arrow' }, h(Icon, { name: 'caret', size: 14 })));
+      };
       var showFullReport = !!lastAssistant && !props.hasReport && !props.streaming;
 
       return h('div', { className: 'zp-overlay' },
@@ -3319,16 +3368,11 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
             thread.length === 0
               ? h('div', { className: 'zp-ai-empty-wrap' },
                 h('div', { className: 'zp-ai-empty' },
+                  h('div', { className: 'zp-ai-empty-lead' }, t('aiEmptyLead')),
                   h('div', { className: 'zp-ai-empty-hint' }, t('aiEmptyHint')),
                   h('div', { className: 'zp-ai-start' },
-                    h('button', {
-                      className: 'zp-btn zp-btn-primary', type: 'button', disabled: props.streaming,
-                      onClick: function () { start('brief'); }
-                    }, h(Icon, { name: 'sparkle', size: 14 }), h('span', null, t('aiStartBrief'))),
-                    h('button', {
-                      className: 'zp-btn', type: 'button', disabled: props.streaming,
-                      onClick: function () { start('report'); }
-                    }, h(Icon, { name: 'report', size: 14 }), h('span', null, t('aiStartReport'))))))
+                    startBtn('brief', 'sparkle', t('aiStartBrief'), t('aiStartBriefDesc'), true),
+                    startBtn('report', 'report', t('aiStartReport'), t('aiStartReportDesc'), false))))
               : h('div', { className: 'zp-chat-thread', role: 'log', 'aria-live': 'polite', 'aria-busy': props.streaming ? 'true' : 'false' },
                 thread.map(function (m, i) {
                   return h('div', { key: 'm' + i, className: m.role === 'user' ? 'zp-bubble zp-bubble-user' : 'zp-bubble zp-bubble-ai' },
@@ -3453,7 +3497,9 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
                   : null),
               h('div', { className: 'zp-settings-about' },
                 h('b', null, t('about')),
-                h('span', null, t('aboutText')))))));
+                h('span', null, t('aboutText')),
+                h('span', { className: 'zp-settings-sign' }, t('signature')),
+                h('span', { className: 'zp-settings-contact' }, t('contactWechat')))))));
     }
 
     /* ---------------- 主应用 ---------------- */
@@ -3626,8 +3672,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         setYearlyYear(String(new Date().getFullYear()));
         setTab('natal');
         setView('chart');
-        /* 换盘 = 换解读对象：旧对话清掉，允许为新盘再自动生成一次速览 */
-        autoStartedRef.current = false;
+        /* 换盘 = 换解读对象：旧对话清掉，避免旧回答串到新盘上 */
         setThread([]);
         setInterpError('');
         setInterpIssue(null);
@@ -3713,7 +3758,6 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         setTab('natal');
         setView('chart');
         setCurrentLibId(item.id);
-        autoStartedRef.current = false;
         setThread([]);
         setInterpError('');
         setInterpIssue(null);
@@ -3756,8 +3800,6 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       /* 面板内「直接聊」: 走 Harness host 的 SSE 通道, 用会话已配置的模型, 不需要另配 API Key */
       var chatAbortRef = useRef(null);
       var stopReqRef = useRef(false);
-      /* 每张盘首次打开抽屉自动生成一次速览；失败/清空后不再无限重试 */
-      var autoStartedRef = useRef(false);
       var runInterpretation = function (question, mode) {
         if (!chart || interpreting) return;
         setLastMode(mode === 'report' ? 'report' : 'brief');
@@ -4055,11 +4097,8 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         if (!chart) return;
         if (modal === 'ai') { closeModal(); return; }
         openModal('ai');
-        /* 用户点的是「解读」，不是「打开一个空抽屉」：每张盘首次打开时直接开始速览 */
-        if (!thread.length && !interpreting && !autoStartedRef.current) {
-          autoStartedRef.current = true;
-          runInterpretation('', 'brief');
-        }
+        /* 打开抽屉 ≠ 开始解读：这里只把当前盘带进空态，速览 / 完整报告 / 追问都由用户点。
+           点了就跑会在没打招呼的情况下花掉一次模型生成，用户也无法先看盘或先问自己的问题。 */
       };
       var editBirth = function () {
         setRail(true);
@@ -4535,7 +4574,10 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
             '<div class="pc-grid">' + cellsHtml + '</div>' +
             mdToHtml(reportText) +
             '<div class="disclaimer">本报告基于中华传统文化（紫微斗数）体系生成，非现代科学结论，仅供参考，不构成医疗 / 法律 / 金融 / 婚姻等专业领域的决策依据。</div>' +
-            '<div class="colophon"><span class="seal">LifeView</span><div style="margin-top:.6em">紫微师 · 人生画板 · ' + ymd + '</div></div>' +
+            '<div class="colophon"><span class="seal">LifeView</span>' +
+            '<div style="margin-top:.6em">紫微师 · 金聚｜道商意象紫微九诀</div>' +
+            '<div style="margin-top:.2em;color:var(--text-sub)">微信：neo2025new</div>' +
+            '<div style="margin-top:.2em">人生画板 · ' + ymd + '</div></div>' +
             '</div></body></html>';
         };
         /* 报告渲染是纯函数：暴露给自检与无头预览（与 window.ZWEngine / ZWCore 同一形态） */

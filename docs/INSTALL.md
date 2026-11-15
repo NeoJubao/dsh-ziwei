@@ -62,7 +62,7 @@ dsh --profile <profile> --dump-config | grep -F "# == @local/ziwei-workbench"
 ```text
 plugin_manager({
   action: 'install_bundle',
-  target: '/绝对路径/dist/dsh-ziwei/dsh-ziwei-1.2.0.tgz'
+  target: '/绝对路径/dist/dsh-ziwei/dsh-ziwei-1.6.0.tgz'
 })
 ```
 
@@ -82,7 +82,7 @@ plugin_manager({
 ### 3.1 从 npm 安装
 
 ```bash
-dsh plugin --profile <profile> add dsh-ziwei@1.3.1
+dsh plugin --profile <profile> add dsh-ziwei@1.6.0
 ```
 
 或在 DSH Web **Settings → Plugins → Add plugin** 里输入包名安装。装完**手动重启 DSH**，
@@ -109,7 +109,7 @@ dsh plugin --profile <profile> add dsh-ziwei@1.3.1
 dsh plugin --profile <profile> update dsh-ziwei
 
 # 指定版本（强制装到某一版）
-dsh plugin --profile <profile> add dsh-ziwei@1.3.3
+dsh plugin --profile <profile> add dsh-ziwei@1.6.0
 ```
 
 也可以在 **DSH Web → Settings → Plugins** 里看到已装版本；插件市场/Discover 有新版时会提供
