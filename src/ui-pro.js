@@ -1430,6 +1430,19 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         if (o && o.cont) return String(o.base || '') + done;
         return done || String((o && o.accumulated) || '');
       },
+      /* 对话流式写入：host 的 delta 是增量片段。
+         new = 另起一个回答气泡；append = 接在本轮气泡后；replace = 用 done 的本轮全文替换本轮气泡。 */
+      applyAssistantText: function (thread, text, mode) {
+        var copy = (thread || []).slice();
+        var last = copy[copy.length - 1];
+        var s = String(text || '');
+        if (mode !== 'new' && last && last.role === 'assistant') {
+          copy[copy.length - 1] = { role: 'assistant', content: mode === 'replace' ? s : String(last.content || '') + s };
+          return copy;
+        }
+        copy.push({ role: 'assistant', content: s });
+        return copy;
+      },
       /* 宫位的「宫名 干支」。引擎宫位对象只有 stem/branch，没有 gz 字段。 */
       palaceLabel: function (p) {
         if (!p) return '';
@@ -3183,18 +3196,8 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         });
       };
 
-      var appendAssistant = function (text, replace) {
-        setThread(function (prev) {
-          var copy = prev.slice();
-          var last = copy[copy.length - 1];
-          if (replace && last && last.role === 'assistant') {
-            copy[copy.length - 1] = { role: 'assistant', content: String(text || '') };
-            return copy;
-          }
-          if (!last || last.role !== 'assistant') copy.push({ role: 'assistant', content: String(text || '') });
-          else copy[copy.length - 1] = { role: 'assistant', content: (last.content || '') + String(text || '') };
-          return copy;
-        });
+      var appendAssistant = function (text, mode) {
+        setThread(function (prev) { return ZWUI.applyAssistantText(prev, text, mode); });
       };
 
       var runChat = function (question) {
@@ -3217,11 +3220,11 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           onThinking: function (chars) { setThinkChars(chars); },
           onDelta: function (text) {
             setThinkChars(0);
-            appendAssistant(text, added);
+            appendAssistant(text, added ? 'append' : 'new');
             added = true;
           },
           onDone: function (text) {
-            if (text) appendAssistant(text, added);
+            if (text) appendAssistant(text, added ? 'replace' : 'new');
             added = true;
           },
           onFinish: function (err, issue) {

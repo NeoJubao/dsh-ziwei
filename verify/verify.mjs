@@ -632,6 +632,24 @@ ok('chrome 避让不用魔法数字写死（顶部偏移只走 --dsh-frame-top-c
       ui.mergeReportText({ cont: false, base: '', accumulated: '已写部分', done: '' }) === '已写部分');
   }
   {
+    /* 对话流式：host 的 delta 是增量片段（index.js sseSend('delta')），气泡必须累加；done 带本轮全文，替换本轮气泡 */
+    const apply = ui && typeof ui.applyAssistantText === 'function' ? ui.applyAssistantText : null;
+    let th = [{ role: 'user', content: '问' }];
+    if (apply) {
+      th = apply(th, '第一句。', 'new');
+      th = apply(th, '第二句。', 'append');
+    }
+    ok('对话流式中气泡累加增量（不是只显示最后一段）',
+      th.length === 2 && th[1].role === 'assistant' && th[1].content === '第一句。第二句。', JSON.stringify(th));
+    if (apply) th = apply(th, '第一句。第二句。第三句。', 'replace');
+    ok('对话收到 done 时用本轮全文替换本轮气泡',
+      th.length === 2 && th[1].content === '第一句。第二句。第三句。', JSON.stringify(th));
+    const prevAnswer = [{ role: 'assistant', content: '上一轮回答' }];
+    const fresh = apply ? apply(prevAnswer, '新回答', 'new') : prevAnswer;
+    ok('新一轮回答另起气泡，不接在上一轮回答后面',
+      fresh.length === 2 && fresh[0].content === '上一轮回答' && fresh[1].content === '新回答', JSON.stringify(fresh));
+  }
+  {
     /* 引用宫位：用引擎宫位对象的真实字段（stem/branch/major/minor），不能读不存在的 gz/stars */
     const soul = ch.palaces[ch.soulIndex];
     const quoteText = ui && typeof ui.palaceQuoteText === 'function' ? ui.palaceQuoteText(soul, '空宫') : '';
