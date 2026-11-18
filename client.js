@@ -4779,7 +4779,14 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         });
       }, [thread, report, studioTab, interpreting, chart, form.name]);
 
-      var compute = function () {
+      var compute = function () { computeFrom(form); };
+      /* 空态「用示例生辰先排一盘」：表单可能是从本地恢复的用户自己的生辰，先换回示例再排 */
+      var computeSample = function () {
+        var sample = Object.assign({}, DEFAULT_FORM, { settings: Object.assign({}, DEFAULT_FORM.settings) });
+        setForm(sample);
+        computeFrom(sample);
+      };
+      var computeFrom = function (form) {
         setError('');
         var input = {
           name: form.name, calendar: form.calendar,
@@ -5295,6 +5302,8 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         !birth.isLeap && +birth.hour === DEFAULT_FORM.hour && +birth.minute === DEFAULT_FORM.minute &&
         birth.gender === DEFAULT_FORM.gender && String(birth.longitude || '') === '' &&
         !String(form.name || '').trim() && !String(form.place || '').trim();
+      /* 示例盘不叫「命主」：用户要一眼分清这是示例，不是自己的盘 */
+      var chartDisplayName = isSampleChart ? t('sampleChart') : (form.name || t('defaultName'));
       var modeDefs = [['natal', t('tabNatal')], ['decadal', t('tabDecadal')], ['yearly', t('tabYearly')]];
       var curAgeForDecade = nowPosition().currentAge;
       var currentDecadalIdx = -1;
@@ -5504,12 +5513,12 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
               h('span', { className: 'zp-brand-pro' }, t('brandPro'))),
             /* 窄屏头部只留图标，补一个紧凑命主摘要，避免头部空荡 */
             chart && layoutMode === 'narrow' ? h('span', {
-              className: 'zp-sum-chip zp-head-mini',
-              title: (form.name || t('defaultName')) + ' · ' + chart.fiveElementsClass
-            }, (form.name || t('defaultName')) + ' · ' + chart.fiveElementsClass) : null,
+              className: 'zp-sum-chip zp-head-mini' + (isSampleChart ? ' is-sample' : ''),
+              title: chartDisplayName + ' · ' + chart.fiveElementsClass
+            }, chartDisplayName + ' · ' + chart.fiveElementsClass) : null,
             !chart ? h('span', { className: 'zp-brand-tag' }, t('tagline')) : null,
             chart ? h('div', { className: 'zp-head-sum' },
-              h('span', { className: 'zp-sum-chip' }, h('b', null, form.name || t('defaultName'))),
+              isSampleChart ? null : h('span', { className: 'zp-sum-chip' }, h('b', null, form.name || t('defaultName'))),
               isSampleChart ? h('span', { className: 'zp-sample-badge' }, t('sampleChart')) : null,
               isSampleChart ? h('button', {
                 className: 'zp-sample-switch', type: 'button', onClick: editBirth
@@ -5557,7 +5566,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
                 h('div', { className: 'zp-empty-taiji' }, h(Taiji, null)),
                 h('div', { className: 'zp-empty-title' }, t('brand') + ' ' + t('brandPro')),
                 h('div', { className: 'zp-empty-hint' }, t('emptyState')),
-                h('button', { className: 'zp-btn', type: 'button', onClick: compute }, t('emptyCta'))) : null,
+                h('button', { className: 'zp-btn', type: 'button', onClick: computeSample }, t('emptyCta'))) : null,
               chart && view === 'chart' && tab === 'yearly' && yearlyChart && yearlyChart.error
                 ? h('div', { className: 'zp-error', style: { marginBottom: 12 } }, yearlyChart.error)
                 : null,
@@ -5583,7 +5592,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
                           scopeBadges: scopeBadges
                         });
                       }),
-                      h(CenterCell, { chart: chart, t: t, name: form.name }))),
+                      h(CenterCell, { chart: chart, t: t, name: chartDisplayName }))),
                   palaceSelected && tab === 'natal' ? h(PalaceDetail, {
                     chart: chart,
                     palace: Object.assign({}, palaceSelected, { isSoul: selected === chart.soulIndex }),
@@ -5618,7 +5627,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
             reportCopied: reportCopied,
             quote: quote,
             suggestions: hasReport ? [t('suggestCareer'), t('suggestLove'), t('suggestPlain'), t('suggestPalace')] : [],
-            contextLine: (isSampleChart ? t('sampleChart') + ' · ' : '') + (form.name || t('defaultName')) + ' · ' + (chart ? chart.fiveElementsClass : ''),
+            contextLine: chartDisplayName + ' · ' + (chart ? chart.fiveElementsClass : ''),
             selectedPalace: palaceSelected ? ZWUI.palaceLabel(palaceSelected) : '',
             onClose: closeStudio,
             onClear: clearThread,
