@@ -1693,7 +1693,7 @@ window.__ModuleLoader__.load({
     const useLayoutEffect = React.useLayoutEffect || useEffect;
     const E = window.ZWEngine;
     /* 构建时由 build.mjs 注入 package.json 的版本号；未构建的源码里保留占位符。 */
-    const APP_VERSION = "1.7.0-dogfood.2";
+    const APP_VERSION = "1.7.0-dogfood.3";
 
     /* ---------------- i18n ---------------- */
     const DICT = {

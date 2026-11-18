@@ -1,6 +1,6 @@
 {
   "meta": {
     "title": "Zi Wei Dou Shu Workbench",
-    "description": "Professional Zi Wei Dou Shu charting and reading workbench: solar/lunar birth charts with palaces, stars, transformations and decades. Open it from the sidebar (Zi Wei Dou Shu Pro) and use Reading for a quick reading or a 14-part report. Charts are computed locally; interpretation sends the chart and birth data to your configured model provider. Traditional interpretation, not scientific advice."
+    "description": "Professional Zi Wei Dou Shu charting and reading workbench: solar/lunar birth charts with palaces, stars, transformations and decades. Open it from the sidebar (Zi Wei Dou Shu Pro) and use the reading panel to ask questions, get a quick reading, or generate a downloadable 14-part report. Enter a birth city to correct for true solar time. Charts are computed locally; interpretation sends the chart and birth data to your configured model provider. Traditional interpretation, not scientific advice."
   }
 }
