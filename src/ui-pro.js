@@ -2291,7 +2291,9 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
 
     function StudioChat(props) {
       var t = props.t;
-      var [q, setQ] = useState('');
+      /* 草稿由 ProApp 按命盘保存（只在内存）：切页签/关抽屉后组件会卸载，回来要接着写 */
+      var [q, setQState] = useState(props.draft || '');
+      var setQ = function (v) { setQState(v); if (props.onDraft) props.onDraft(v); };
       var scrollRef = useRef(null);
       var taRef = useRef(null);
       var stickRef = useRef(true);
@@ -2497,7 +2499,9 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
               onClearQuote: props.onClearQuote,
               onContinue: props.onContinue,
               onStop: props.onStop,
-              onHandoff: props.onHandoff
+              onHandoff: props.onHandoff,
+              draft: props.draft,
+              onDraft: props.onDraft
             }))));
     }
 
@@ -2902,6 +2906,8 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       /* 流式回调闭包里的 studioOpen 是发起时的旧值；结束时要知道抽屉现在是否开着，读这个 ref */
       var studioOpenRef = useRef(studioOpen);
       studioOpenRef.current = studioOpen;
+      /* 未发送的草稿：按命盘 key 存在内存里，不落盘 */
+      var draftsRef = useRef({});
       /* 抽屉关着时生成结束：弹一个带「查看」的提示（开着时用户自己看得到，不打扰） */
       var announceInBackground = function (text, tab, isError) {
         if (studioOpenRef.current) return;
@@ -2975,7 +2981,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       var closeModal = function () { setModal(null); };
       useEffect(function () {
         if (!modal) return undefined;
-        var onEsc = function (ev) { if (ev.key === 'Escape') { ev.preventDefault(); setModal(null); } };
+        var onEsc = function (ev) { if (ev.key === 'Escape' && !ev.isComposing) { ev.preventDefault(); setModal(null); } };
         window.addEventListener('keydown', onEsc);
         return function () { window.removeEventListener('keydown', onEsc); };
       }, [modal]);
@@ -3599,7 +3605,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       useEffect(function () {
         if (!studioOpen) return undefined;
         var onEsc = function (ev) {
-          if (ev.key === 'Escape' && !readerOpen) { ev.preventDefault(); setStudioOpen(false); }
+          if (ev.key === 'Escape' && !ev.isComposing && !readerOpen) { ev.preventDefault(); setStudioOpen(false); }
         };
         window.addEventListener('keydown', onEsc);
         return function () { window.removeEventListener('keydown', onEsc); };
@@ -3880,6 +3886,8 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
               runningInBackground ? h('span', { className: 'zp-run-dot', 'aria-label': t('aiRunningBg') }) : null)) : null
           )),
         studioOpen && chart ? h(StudioDrawer, {
+            draft: draftsRef.current[chartKeyRef.current] || '',
+            onDraft: function (v) { draftsRef.current[chartKeyRef.current] = v; },
             t: t,
             tab: studioTab,
             onTab: setStudioTab,
