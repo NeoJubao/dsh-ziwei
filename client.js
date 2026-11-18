@@ -2984,6 +2984,11 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
 .zp-report-error { max-width: 560px; margin: 0 auto; padding: 20px; border-radius: 12px; border: 1px solid color-mix(in srgb, var(--dsw-alias-state-error-primary) 32%, transparent); background: var(--dsw-alias-bg-layer-1) }
 .zp-report-error b { display: block; font-size: 14px; line-height: 22px; color: var(--dsw-alias-state-error-primary) }
 .zp-report-error p { margin: 6px 0 12px; color: var(--dsw-alias-label-secondary); font-size: 12px; line-height: 19px }
+/* 中断但已有正文：错误条贴在正文上方、横向铺开，不再是居中的空态卡片 */
+.zp-report-error.is-inline { max-width: none; margin: 0 0 12px; padding: 8px 12px; border-radius: 8px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap }
+.zp-report-error.is-inline b { font-size: 13px; line-height: 20px }
+.zp-report-error.is-inline p { flex: 1 1 200px; margin: 0 }
+.zp-report-error.is-inline .zp-report-actions { margin: 0 }
 .zp-report-empty { max-width: 640px; margin: auto; display: flex; flex-direction: column; align-items: flex-start; gap: 8px }
 .zp-report-empty-icon { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 12px; background: var(--dsw-alias-bg-layer-2); color: var(--dsw-alias-brand-primary) }
 .zp-report-empty h2 { font-size: 20px; line-height: 28px; font-weight: 300 }
@@ -4249,7 +4254,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       /* 中断但已有正文：已写部分照常可读、可引用，「继续生成」是主行动 */
       if (!running && report.status === 'error' && hasText) {
         return h('div', { className: 'zp-report-artifact' },
-          h('div', { className: 'zp-report-error' },
+          h('div', { className: 'zp-report-error is-inline', role: 'status' },
             h('b', null, t('reportError')),
             h('p', null, report.error || t('reportErrorHint')),
             h('div', { className: 'zp-report-actions' },
