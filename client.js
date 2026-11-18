@@ -1749,7 +1749,7 @@ window.__ModuleLoader__.load({
         reportQuoteLabel: '报告选段', reportQuoteAction: '让紫微师改这段',
         reportIdleTitle: '把这盘读成一份完整报告。',
         reportIdleHint: '14 个部分：命盘总览、性格、家庭、婚姻、财富、事业、大限与综合建议。约 2–3 分钟。',
-        reportGenerate: '生成完整报告', reportRegenerate: '重新生成',
+        reportGenerate: '生成完整报告', reportRegenerate: '重新生成', reportRegenerateConfirm: '再点一次，替换旧报告', reportRestored: '重新生成没有写出内容，已保留原报告',
         reportFinePrint: '报告会保存在本机，可随时回来继续读；导出 HTML 后可离线阅读。',
         reportError: '报告生成中断', reportErrorHint: '已生成的部分会保留；可以接着写，或重新生成。',
         reportPartial: '报告已生成的部分保留；可以继续生成补齐。',
@@ -1856,7 +1856,7 @@ window.__ModuleLoader__.load({
         reportQuoteLabel: 'Report excerpt', reportQuoteAction: 'Ask Zi Wei to revise this',
         reportIdleTitle: 'Turn this chart into a full report.',
         reportIdleHint: '14 sections: overview, character, family, marriage, wealth, career, decades and advice. About 2–3 minutes.',
-        reportGenerate: 'Generate full report', reportRegenerate: 'Regenerate',
+        reportGenerate: 'Generate full report', reportRegenerate: 'Regenerate', reportRegenerateConfirm: 'Click again to replace', reportRestored: 'Regeneration produced nothing; the previous report was kept',
         reportFinePrint: 'The report is stored locally and can be reopened; export HTML for offline reading.',
         reportError: 'Report generation interrupted', reportErrorHint: 'The partial report is kept; continue or regenerate.',
         reportPartial: 'The partial report is kept; continue to fill the rest.',
@@ -2944,6 +2944,7 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
 .zp-pill-btn:hover:not(:disabled) { background: var(--dsw-alias-bg-layer-2); color: var(--dsw-alias-label-primary) }
 .zp-pill-btn:disabled { opacity: .5; cursor: default }
 .zp-pill-btn.is-primary { background: var(--zp-fill-accent); border-color: transparent; color: var(--dsw-alias-label-primary-inverted) }
+.zp-pill-btn.is-armed { border-color: var(--dsw-alias-state-warn-primary); color: var(--dsw-alias-state-warn-primary); background: var(--dsw-alias-bg-layer-1) }
 .zp-body.is-studio-split .zp-report-chat-btn { display: none }
 .zp-report-note { flex: none; margin-top: 8px; padding: 6px 8px; border-radius: 8px; background: var(--dsw-alias-bg-layer-2); color: var(--dsw-alias-label-secondary); font-size: 11px; line-height: 16px }
 .zp-report-layout { flex: 1; min-height: 0; display: flex; gap: 16px; margin-top: 12px }
@@ -4212,6 +4213,24 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           }, h(Icon, { name: 'quote', size: 12 }), t('reportQuoteAction')) : null));
     }
 
+    /* 会丢内容的按钮：第一次点只「上膛」，4 秒内再点才执行（armed=false 时直接执行）。 */
+    function ConfirmButton(props) {
+      var [armed, setArmed] = useState(false);
+      useEffect(function () {
+        if (!armed) return undefined;
+        var timer = setTimeout(function () { setArmed(false); }, 4000);
+        return function () { clearTimeout(timer); };
+      }, [armed]);
+      return h('button', {
+        className: props.className + (armed ? ' is-armed' : ''), type: 'button', disabled: props.disabled,
+        'aria-live': 'polite',
+        onClick: function () {
+          if (!props.needConfirm || armed) { setArmed(false); props.onConfirm(); return; }
+          setArmed(true);
+        }
+      }, props.icon ? h(Icon, { name: props.icon, size: 13 }) : null, armed ? props.confirmLabel : props.label);
+    }
+
     function ReportArtifact(props) {
       var t = props.t;
       var report = props.report || emptyReport();
@@ -4219,6 +4238,26 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       var done = report.status === 'done';
       var sections = useMemo(function () { return splitReportSections(report.text); }, [report.text]);
       var chars = String(report.text || '').replace(/\s/g, '').length;
+      var hasText = chars > 0;
+      var regenerateBtn = function (primary) {
+        return h(ConfirmButton, {
+          className: 'zp-pill-btn' + (primary ? ' is-primary' : ''), icon: 'refresh', disabled: running,
+          needConfirm: hasText, label: t('reportRegenerate'), confirmLabel: t('reportRegenerateConfirm'),
+          onConfirm: function () { props.onGenerate(false); }
+        });
+      };
+      /* 中断但已有正文：已写部分照常可读、可引用，「继续生成」是主行动 */
+      if (!running && report.status === 'error' && hasText) {
+        return h('div', { className: 'zp-report-artifact' },
+          h('div', { className: 'zp-report-error' },
+            h('b', null, t('reportError')),
+            h('p', null, report.error || t('reportErrorHint')),
+            h('div', { className: 'zp-report-actions' },
+              h('button', { className: 'zp-pill-btn is-primary', type: 'button', onClick: function () { props.onGenerate(true); } },
+                h(Icon, { name: 'sparkle', size: 13 }), t('aiContinue')),
+              regenerateBtn(false))),
+          h(ReportDocument, { t: t, sections: sections, onQuote: function (q) { props.onQuote(q); } }));
+      }
       if (done) {
         var sectionCount = Math.min(sections.length, REPORT_SECTION_TITLES.length);
         return h('div', { className: 'zp-report-artifact' },
@@ -4237,8 +4276,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
                 h(Icon, { name: 'export', size: 13 }), t('exportHtml')),
               h('button', { className: 'zp-pill-btn', type: 'button', onClick: props.onCopy },
                 h(Icon, { name: props.copied ? 'check' : 'copy', size: 13 }), props.copied ? t('aiCopied') : t('aiCopy')),
-              h('button', { className: 'zp-pill-btn', type: 'button', disabled: running, onClick: function () { props.onGenerate(false); } },
-                h(Icon, { name: 'refresh', size: 13 }), t('reportRegenerate')))),
+              regenerateBtn(false))),
           sectionCount < REPORT_SECTION_TITLES.length
             ? h('div', { className: 'zp-report-note' }, t('reportPartial'))
             : null,
@@ -4253,9 +4291,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           ? h('div', { className: 'zp-report-error' },
             h('b', null, t('reportError')),
             h('p', null, report.error || t('reportErrorHint')),
-            h('div', { className: 'zp-report-actions' },
-              report.text ? h('button', { className: 'zp-pill-btn', type: 'button', onClick: function () { props.onGenerate(true); } }, t('aiContinue')) : null,
-              h('button', { className: 'zp-pill-btn is-primary', type: 'button', onClick: function () { props.onGenerate(false); } }, t('reportRegenerate'))))
+            h('div', { className: 'zp-report-actions' }, regenerateBtn(true)))
           : null,
         !running && report.status !== 'error'
           ? h('div', { className: 'zp-report-empty' },
@@ -4567,6 +4603,22 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       /* 换盘：设置命盘状态，并按「命盘 key」恢复/清空解读记录 */
       var adoptChart = function (result, input) {
         var key = readingKeyOf(input);
+        /* 生成中换盘：旧盘已写的对话/报告先按旧 key 落盘（报告标为中断、可继续生成），再静默中止旧流。
+           必须在改 chartKeyRef 之前取旧 key；旧流的回调随后会因 key 不符被丢弃。 */
+        var prevKey = chartKeyRef.current;
+        if (chatAbortRef.current && prevKey && prevKey !== key) {
+          var keptReport = report.status === 'running'
+            ? Object.assign({}, report, {
+                status: 'error', error: t('aiStopped'), finishedAt: Date.now(),
+                issue: { kind: 'stopped', canContinue: !!String(report.text || '').trim() }
+              })
+            : report;
+          saveReadingRecord(prevKey, { thread: thread, report: keptReport, studioTab: studioTab, name: form.name });
+          stopReqRef.current = false;
+          try { chatAbortRef.current.abort(); } catch (e) { /* ignore */ }
+          chatAbortRef.current = null;
+          setInterpreting(false);
+        }
         chartKeyRef.current = key;
         setChart(result);
         setSelected(result.soulIndex);
@@ -4633,7 +4685,8 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         for (var hi = 0; hi < thread.length; hi++) {
           if (thread[hi].role === 'assistant' && String(thread[hi].content || '').trim()) { hasAnswer = true; break; }
         }
-        if (!hasAnswer && report.status !== 'done') { clearReadingRecord(key); return; }
+        /* 中断的报告只要写出了正文也要落盘（可继续生成），不能当成「无内容」删掉 */
+        if (!hasAnswer && !String(report.text || '').trim()) { clearReadingRecord(key); return; }
         saveReadingRecord(key, {
           thread: thread, report: report, studioTab: studioTab, name: form.name
         });
@@ -4795,8 +4848,17 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           }
         };
       };
-      var openStream = function (opts) {
-        var body = buildInterpretBody(opts.mode, opts.question, opts.history);
+      var openStream = function (rawOpts) {
+        /* 流绑定到发起时的命盘：换盘后旧流的回调一律丢弃，旧回答不会写进新盘
+           （换盘时由 adoptChart 先按旧 key 落盘、再中止）。 */
+        var streamKey = chartKeyRef.current;
+        var live = function () { return chartKeyRef.current === streamKey; };
+        var opts = {};
+        ['onOpen', 'onStart', 'onThinking', 'onDelta', 'onDone', 'onFinish'].forEach(function (name) {
+          if (typeof rawOpts[name] !== 'function') return;
+          opts[name] = function () { if (live()) return rawOpts[name].apply(null, arguments); };
+        });
+        var body = buildInterpretBody(rawOpts.mode, rawOpts.question, rawOpts.history);
         var controller = null;
         try { controller = new AbortController(); chatAbortRef.current = controller; } catch (e) { controller = null; }
         var settled = false;
@@ -4805,7 +4867,8 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         var finish = function (err, issue) {
           if (settled) return;
           settled = true;
-          chatAbortRef.current = null;
+          /* 只清自己的 controller：换盘后新流可能已经占用了 chatAbortRef */
+          if (chatAbortRef.current === controller) chatAbortRef.current = null;
           if (opts.onFinish) opts.onFinish(err || '', issue || null, produced);
         };
         fetch('/ziwei/interpret', {
@@ -4927,6 +4990,8 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         setReportCopied(false);
         setQuote(null);
         var base = cont ? String(report.text || '') : '';
+        /* 重新生成时保留旧报告：新报告一个字都没写出来就失败/被停，恢复旧报告 */
+        var snapshot = !cont && String(report.text || '').trim() ? report : null;
         setReport({
           status: 'running', text: base, startedAt: Date.now(), finishedAt: 0,
           error: '', issue: null
@@ -4947,7 +5012,12 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
               return Object.assign({}, prev, { status: 'done', text: full, finishedAt: Date.now(), error: '', issue: null });
             });
           },
-          onFinish: function (err, issue) {
+          onFinish: function (err, issue, produced) {
+            if (snapshot && err && !String(produced || '').trim()) {
+              setReport(snapshot);
+              showToast(t('reportRestored'), { error: true });
+              return;
+            }
             setReport(function (prev) {
               if (prev.status === 'done') return prev;
               return Object.assign({}, prev, { status: 'error', error: err || '', issue: issue || null, finishedAt: Date.now() });
