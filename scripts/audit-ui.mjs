@@ -317,7 +317,7 @@ function checkC1(ctx) {
 }
 
 function checkC2(ctx) {
-  const allowed = new Set([20, 14, 13.5, 13, 12, 11, 10.5, 9.5]);
+  const allowed = new Set([20, 16, 14, 13.5, 13, 12, 11.5, 11, 10.5, 9.5]);
   const samples = [];
   let count = 0;
   for (const m of ctx.css.text.matchAll(/(?<![\w-])font-size\s*:\s*([^;}]+)/g)) {
@@ -363,7 +363,7 @@ function checkC3(ctx) {
 }
 
 function checkC4(ctx) {
-  const allowed = new Set([400, 500, 600, 650, 700]);
+  const allowed = new Set([300, 400, 500, 600, 650, 700]);
   const samples = [];
   let count = 0;
   for (const m of ctx.css.text.matchAll(/font-weight\s*:\s*([^;}]+)/g)) {

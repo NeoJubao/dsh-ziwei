@@ -409,8 +409,9 @@ ok('v3: 有盘时排盘降级为次按钮（唯一主行动 = 紫微师解读）
 /* v3.2：抽屉不再有「只改下一次请求」的模式条；空态/回答后都是直接发起动作 */
 ok('v3.2: 抽屉去掉速览/鲲鹏模式条（避免点了没反应）',
   !/modeBrief/.test(client) && !/modeReport/.test(client) && !/zp-ai-mode/.test(client) && !/zp-suggest/.test(client));
-ok('v3.2: 空态两个动作 + 回答后「完整报告」动作都存在',
-  /aiStartBrief/.test(client) && /aiStartReport/.test(client) && /aiFullReport/.test(client) && /showFullReport/.test(client));
+ok('v5: 工位空态两个动作 + 报告产物入口都存在',
+  /zp-studio-start/.test(client) && /aiStartBrief/.test(client) && /aiStartReport/.test(client) &&
+  /reportGenerate/.test(client) && /reportOpen/.test(client) && /ReportArtifact/.test(client));
 ok('v3.3: 点开解读抽屉不自动发起解读（只开空态，动作由用户点）',
   !/autoStartedRef/.test(client) && !/runInterpretation\('', 'brief'\)/.test(client));
 ok('v3.3: 空态是一行一个的动作卡（图标 / 名称 / 说明 / 箭头），不再把按钮拉满整行',
@@ -419,8 +420,9 @@ ok('v3.3: 空态是一行一个的动作卡（图标 / 名称 / 说明 / 箭头�
   !/zp-ai-start \.zp-btn/.test(client));
 ok('v1.7: 换盘按命盘 key 恢复该盘记录；没有记录才清空，且不自动生成',
   /var adoptChart = function/.test(client) && /chartKeyRef\.current = key/.test(client) &&
-  /loadReadingRecord\(key\)/.test(client) && /setThread\(saved\.thread\)/.test(client) &&
-  /setThread\(\[\]\)/.test(client) && !/runInterpretation\('', 'brief'\)/.test(client));
+  /loadReadingRecord\(key\)/.test(client) && /setThread\(saved\.thread \|\| \[\]\)/.test(client) &&
+  /setThread\(\[\]\)/.test(client) && /setReport\(normalizeReport\(saved\.report\)\)/.test(client) &&
+  !/autoStartedRef/.test(client));
 ok('v1.7: 解读记录按命盘持久化（最多 8 张 / 每张 24 条）',
   /ziwei-pro\.readings\.v1/.test(client) && /READINGS_MAX = 8/.test(client) &&
   /slice\(-24\)/.test(client) && /saveReadingRecord/.test(client) && /clearReadingRecord/.test(client));
@@ -441,8 +443,20 @@ ok('client 问答 payload 带完整上下文与当前年龄（大限定位）',
 ok('client 走官方 locale 服务（register + bind，不再读 tr.i18n）',
   /locale\.register\('ziwei'/.test(client) && /locale\.bind\('ziwei'\)/.test(client) && !/\.i18n\[0\]/.test(client));
 /* P2-8 / a11y 回归：流式区 aria-live、分段控件 aria-pressed、图标出口 aria-label、预览 iframe title+sandbox */
-ok('client 可访问性契约在位（aria-live / aria-pressed / iframe title+sandbox）',
-  /role: 'log'/.test(client) && /'aria-live': 'polite'/.test(client) && /'aria-pressed':/.test(client) && /title: t\('previewHtml'\)/.test(client) && /sandbox: 'allow-same-origin'/.test(client));
+ok('client 可访问性契约在位（aria-live / aria-pressed / dialog / 焦点陷阱）',
+  /role: 'log'/.test(client) && /'aria-live': 'polite'/.test(client) && /'aria-pressed':/.test(client) &&
+  /'aria-modal': 'true'/.test(client) && /trapTab/.test(client) && /t\(\'reportTitle\'\)/.test(client));
+ok('v5: 工位并排 + 画布页签 + 报告阅读器',
+  /studioSplit/.test(client) && /'data-studio'/.test(client) && /zp-canvas-tabs/.test(client) &&
+  /ReportArtifact/.test(client) && /ReportReader/.test(client) && /studioOpen/.test(client));
+ok('v5: 报告与聊天分离，导出/复制走 report.text',
+  /var runReport = function/.test(client) && /report\.status === 'running'/.test(client) &&
+  /buildReportHtml\(reportMeta\(\), report\.text\)/.test(client) && /setReport\(normalizeReport\(saved\.report\)\)/.test(client));
+ok('v5: 示例盘提示、诚实复制/保存/同步、本机数据清理',
+  /isSampleChart/.test(client) && /copyText/.test(client) && /clearAllReadings/.test(client) &&
+  /showToast/.test(client) && /aiRecordCleared/.test(client) && /reportNeeded/.test(client));
+ok('v5: 报告按部分展示进度（14 部分）',
+  /REPORT_SECTION_TITLES/.test(client) && /countReportSections/.test(client) && /zp-report-progress-card/.test(client));
 ok('engine-built.js 与内核解耦（不含 UI）', !/__ModuleLoader__/.test(readFileSync(join(root, 'engine-built.js'), 'utf8')));
 
 /* H2: 构建产物新鲜度 —— 改了 src 忘记 build、或产物被手改, 都必须报错。

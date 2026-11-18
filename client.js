@@ -1692,7 +1692,7 @@ window.__ModuleLoader__.load({
     const { useState, useEffect, useMemo, useRef } = React;
     const E = window.ZWEngine;
     /* 构建时由 build.mjs 注入 package.json 的版本号；未构建的源码里保留占位符。 */
-    const APP_VERSION = "1.6.0";
+    const APP_VERSION = "1.7.0-dogfood.1";
 
     /* ---------------- i18n ---------------- */
     const DICT = {
@@ -1730,12 +1730,45 @@ window.__ModuleLoader__.load({
         oppPalace: '对宫', triPalace: '三合', detailTitle: '宫位详情',
         mutagenTitle: '四化', noMutagen: '—',
         ai: '紫微师解读', aiTitle: '紫微师解读',
-        aiSend: '发送', aiNewChat: '新对话', aiAskPh: '想问什么？事业、财运、大限…（Enter 发送）',
+        aiSend: '发送', aiNewChat: '新对话', aiAskPh: '问事业、财运、大限…（Enter 发送）',
         aiStartBrief: '速览解读', aiStartReport: '完整鲲鹏报告',
         aiStartBriefDesc: '命格总纲与当前大限，几分钟读完',
         aiStartReportDesc: '14 个部分，可导出精装 HTML',
         aiFullReport: '完整报告', aiFullReportHint: '基于当前命盘生成完整鲲鹏报告（14 部分）',
         aiEmptyLead: '命盘已带入', aiEmptyHint: '直接提问，或先看一份解读。',
+        viewMode: '工作台视图', modeChart: '看盘', modeRead: '解读',
+        studioChatLabel: '紫微师对话', studioEmptyTitle: '说一句话，把这盘读懂。',
+        studioEmptyHint: '可以直接问，也可以先看一份解读；命盘和对话会一起保留。',
+        studioWaitPh: '正在生成，先等这一轮写完…',
+        canvasTabs: '画布视图', canvasChart: '盘面', canvasReport: '报告',
+        reportTitle: '人生鲲鹏计划 · 完整报告', reportOpen: '查看完整报告',
+        reportRunningHint: '完整报告正在画布生成，写完会自动保存。',
+        reportWriting: '正在写完整报告', reportPaused: '报告生成中断',
+        reportProgressMeta: '已完成 {n}/{total} 部分 · {chars} 字',
+        reportCurrent: '正在写第 {n} 部分 · {name}', reportToc: '报告目录',
+        reportQuoteLabel: '报告选段', reportQuoteAction: '让紫微师改这段',
+        reportIdleTitle: '把这盘读成一份完整报告。',
+        reportIdleHint: '14 个部分：命盘总览、性格、家庭、婚姻、财富、事业、大限与综合建议。约 2–3 分钟。',
+        reportGenerate: '生成完整报告', reportRegenerate: '重新生成',
+        reportFinePrint: '报告会保存在本机，可随时回来继续读；导出 HTML 后可离线阅读。',
+        reportError: '报告生成中断', reportErrorHint: '已生成的部分会保留；可以接着写，或重新生成。',
+        reportPartial: '报告已生成的部分保留；可以继续生成补齐。',
+        reportReader: '全屏阅读', reportNeeded: '先生成完整报告',
+        fullscreen: '全屏', exitFullscreen: '退出全屏',
+        quoteRemove: '取消引用', quotePalaceLabel: '当前宫位', quotePalace: '引用宫位',
+        suggestCareer: '重点讲事业与财运', suggestLove: '这十年感情要注意什么',
+        suggestPlain: '说得再口语一点', suggestPalace: '解释一下当前宫位',
+        copyFailed: '复制失败，请手动选择文本', syncFailed: '写入会话失败',
+        exported: '已导出 HTML', exportFailed: '导出失败',
+        aiThreadCleared: '已清空对话', aiRecordCleared: '已清除本机解读记录',
+        localDataTitle: '本机数据', localDataHint: '命盘、对话与报告只存在这个浏览器里；清除后不可恢复。',
+        clearLocal: '清除本机解读记录', clearLocalConfirm: '确定清除？命盘库会保留。',
+        confirmClear: '确定清除', cancel: '取消', undo: '撤销',
+        sampleChart: '示例盘', switchToMyBirth: '换成我的生辰', libDeleted: '已删除命盘', undoDone: '已撤销',
+        reportSec01: '命盘总览', reportSec02: '性格大略', reportSec03: '家庭关系', reportSec04: '婚姻情感',
+        reportSec05: '子女培育', reportSec06: '财富管理', reportSec07: '健康养生', reportSec08: '事业发展',
+        reportSec09: '朋友贵人', reportSec10: '居家风水', reportSec11: '心灵福德', reportSec12: '出行迁移',
+        reportSec13: '大限节奏', reportSec14: '综合建议',
         timeScope: '命盘时间维度', backToBoard: '返回盘面',
         prevDecade: '上一个大限', nextDecade: '下一个大限', backToCurrent: '回到当前',
         currentBadge: '当前', thisYear: '今年', prevYear: '上一年', nextYear: '下一年',
@@ -1804,12 +1837,45 @@ window.__ModuleLoader__.load({
         oppPalace: 'Opposite', triPalace: 'Trine', detailTitle: 'Palace Detail',
         mutagenTitle: 'Transforms', noMutagen: '—',
         ai: 'Reading', aiTitle: 'Zi Wei Reading',
-        aiSend: 'Send', aiNewChat: 'New chat', aiAskPh: 'Ask about career, money, decades… (Enter to send)',
+        aiSend: 'Send', aiNewChat: 'New chat', aiAskPh: 'Ask about career, money, decades… (Enter)',
         aiStartBrief: 'Quick reading', aiStartReport: 'Full Kunpeng report',
         aiStartBriefDesc: 'Core profile and current decade, a few minutes',
         aiStartReportDesc: '14 parts, exportable to HTML',
         aiFullReport: 'Full report', aiFullReportHint: 'Generate the full 14-part Kunpeng report for this chart',
         aiEmptyLead: 'Chart ready', aiEmptyHint: 'Ask directly, or start with a reading.',
+        viewMode: 'Workbench view', modeChart: 'Chart', modeRead: 'Reading',
+        studioChatLabel: 'Zi Wei chat', studioEmptyTitle: 'Say one thing, and we read the chart.',
+        studioEmptyHint: 'Ask directly, or start with a reading. The chart and conversation stay together.',
+        studioWaitPh: 'Generating — wait for this turn to finish…',
+        canvasTabs: 'Canvas view', canvasChart: 'Chart', canvasReport: 'Report',
+        reportTitle: 'Life Kunpeng Plan · Full Report', reportOpen: 'Open full report',
+        reportRunningHint: 'The full report is being written on the canvas; it saves when done.',
+        reportWriting: 'Writing the full report', reportPaused: 'Report paused',
+        reportProgressMeta: '{n}/{total} sections · {chars} chars',
+        reportCurrent: 'Writing section {n} · {name}', reportToc: 'Report contents',
+        reportQuoteLabel: 'Report excerpt', reportQuoteAction: 'Ask Zi Wei to revise this',
+        reportIdleTitle: 'Turn this chart into a full report.',
+        reportIdleHint: '14 sections: overview, character, family, marriage, wealth, career, decades and advice. About 2–3 minutes.',
+        reportGenerate: 'Generate full report', reportRegenerate: 'Regenerate',
+        reportFinePrint: 'The report is stored locally and can be reopened; export HTML for offline reading.',
+        reportError: 'Report generation interrupted', reportErrorHint: 'The partial report is kept; continue or regenerate.',
+        reportPartial: 'The partial report is kept; continue to fill the rest.',
+        reportReader: 'Full screen', reportNeeded: 'Generate the full report first',
+        fullscreen: 'Full screen', exitFullscreen: 'Exit full screen',
+        quoteRemove: 'Remove quote', quotePalaceLabel: 'Current palace', quotePalace: 'Quote palace',
+        suggestCareer: 'Focus on career and money', suggestLove: 'What to watch in love this decade',
+        suggestPlain: 'Make it more conversational', suggestPalace: 'Explain the current palace',
+        copyFailed: 'Copy failed — select the text manually', syncFailed: 'Write to session failed',
+        exported: 'HTML exported', exportFailed: 'Export failed',
+        aiThreadCleared: 'Conversation cleared', aiRecordCleared: 'Local reading records cleared',
+        localDataTitle: 'Local data', localDataHint: 'Charts, conversations and reports live only in this browser. Clearing cannot be undone.',
+        clearLocal: 'Clear local reading records', clearLocalConfirm: 'Clear now? Saved charts are kept.',
+        confirmClear: 'Clear', cancel: 'Cancel', undo: 'Undo',
+        sampleChart: 'Sample chart', switchToMyBirth: 'Use my birth data', libDeleted: 'Chart deleted', undoDone: 'Undone',
+        reportSec01: 'Chart overview', reportSec02: 'Character', reportSec03: 'Family', reportSec04: 'Marriage',
+        reportSec05: 'Children', reportSec06: 'Wealth', reportSec07: 'Health', reportSec08: 'Career',
+        reportSec09: 'Mentors & friends', reportSec10: 'Home', reportSec11: 'Inner life', reportSec12: 'Travel & moves',
+        reportSec13: 'Decade rhythm', reportSec14: 'Advice',
         timeScope: 'Time scope', backToBoard: 'Back to chart',
         prevDecade: 'Previous decade', nextDecade: 'Next decade', backToCurrent: 'Back to current',
         currentBadge: 'Current', thisYear: 'This year', prevYear: 'Previous year', nextYear: 'Next year',
@@ -2721,6 +2787,235 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
 /* 收起左栏必须压过所有档位栅格（同特异性，放最后） */
 .zp-root[data-rail="closed"] .zp-body { grid-template-columns: minmax(0, 1fr) }
 
+/* ---------------- v5 工位：模式 / 对话 / 报告 ---------------- */
+.zp-mode-switch {
+  display: flex; align-items: center; gap: 2px; padding: 4px; flex: none;
+  border-radius: 10px; background: var(--dsw-alias-bg-layer-2);
+  border: 1px solid var(--dsw-alias-border-l1);
+}
+.zp-mode-switch button {
+  border: 0; background: transparent; font-family: inherit; cursor: pointer;
+  position: relative; display: inline-flex; align-items: center; gap: 4px;
+  height: 26px; padding: 0 12px; border-radius: 8px; font-size: 12px;
+  color: var(--dsw-alias-label-secondary); white-space: nowrap;
+}
+.zp-mode-switch button:hover { color: var(--dsw-alias-label-primary); background: var(--dsw-alias-interactive-bg-hover) }
+.zp-mode-switch button.is-on { background: var(--dsw-alias-bg-layer-1); color: var(--dsw-alias-label-primary); box-shadow: var(--dsw-elevation-soft) }
+.zp-sample-badge {
+  display: inline-flex; align-items: center; height: 18px; padding: 0 6px;
+  border-radius: 999px; background: color-mix(in srgb, var(--dsw-alias-state-warn-primary) 14%, transparent);
+  color: var(--dsw-alias-state-warn-primary); font-size: 10.5px; line-height: 18px; font-weight: 600;
+}
+.zp-sample-switch {
+  border: 0; background: transparent; color: var(--dsw-alias-label-secondary);
+  font-size: 11px; line-height: 16px; text-decoration: underline; text-underline-offset: 2px;
+  white-space: nowrap; cursor: pointer;
+}
+.zp-sample-switch:hover { color: var(--dsw-alias-label-primary) }
+.zp-mode-switch button:focus-visible, .zp-canvas-tabs button:focus-visible,
+.zp-pill-btn:focus-visible, .zp-sample-switch:focus-visible,
+.zp-report-toc button:focus-visible, .zp-report-pick:focus-visible {
+  outline: 2px solid var(--dsw-alias-brand-primary); outline-offset: 2px;
+}
+
+.zp-mode-dot {
+  display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--dsw-alias-brand-primary); flex: none;
+}
+.zp-root[data-studio="1"] .zp-scroll { overflow: hidden }
+.zp-root[data-studio="1"] .zp-inner { height: 100%; min-height: 0 }
+.zp-root[data-studio="1"] .zp-body { flex: 1 1 auto; min-height: 0 }
+.zp-root[data-studio="1"] .zp-stage { overflow-y: auto; padding-bottom: 16px }
+.zp-root[data-studio="1"][data-chart="1"] .zp-bottombar { display: none }
+.zp-body.is-studio { display: flex; align-items: stretch; min-height: 0; }
+.zp-root[data-studio="1"] .zp-side { display: none; }
+.zp-root[data-studio="1"] .zp-stage { flex: 1; min-width: 0; }
+.zp-studio-chat {
+  flex: 0 0 340px; width: 340px; min-width: 0; min-height: 0;
+  display: flex; flex-direction: column;
+  border-right: 1px solid var(--dsw-alias-border-l1);
+  background: var(--dsw-alias-bg-base);
+}
+.zp-body.is-studio:not(.is-studio-split) .zp-stage { display: none; }
+.zp-body.is-studio:not(.is-studio-split) .zp-studio-chat { flex: 1 1 auto; width: auto; border-right: 0; }
+.zp-body.is-studio:not(.is-studio-split).is-studio-report .zp-stage { display: block; }
+.zp-body.is-studio:not(.is-studio-split).is-studio-report .zp-studio-chat { display: none; }
+.zp-studio-head {
+  flex: none; display: flex; align-items: center; gap: 8px;
+  padding: 12px 12px 8px; border-bottom: 1px solid var(--dsw-alias-border-l1);
+}
+.zp-studio-title { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px }
+.zp-studio-title b { font-size: 13px; line-height: 20px; font-weight: 600 }
+.zp-studio-title span { font-size: 11px; line-height: 16px; color: var(--dsw-alias-label-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.zp-studio-head-actions { display: flex; gap: 2px; flex: none }
+.zp-studio-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px }
+.zp-studio-empty { margin: auto 0; display: flex; flex-direction: column; gap: 12px }
+.zp-studio-empty-title { font-size: 20px; line-height: 28px; font-weight: 300; letter-spacing: -.01em }
+.zp-studio-empty-hint { font-size: 13px; line-height: 20px; color: var(--dsw-alias-label-secondary) }
+.zp-studio-start-list { display: flex; flex-direction: column; gap: 8px; margin-top: 4px }
+.zp-studio-start {
+  display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 12px;
+  border-radius: 10px; border: 1px solid var(--dsw-alias-border-l1);
+  background: var(--dsw-alias-bg-layer-1); text-align: left;
+}
+.zp-studio-start:hover { border-color: var(--dsw-alias-border-l2); background: var(--dsw-alias-bg-layer-2) }
+.zp-studio-start:disabled { opacity: .5; cursor: default }
+.zp-studio-start.is-primary { border-color: color-mix(in srgb, var(--dsw-alias-brand-primary) 40%, var(--dsw-alias-border-l1)); background: color-mix(in srgb, var(--dsw-alias-brand-primary) 6%, var(--dsw-alias-bg-layer-1)) }
+.zp-studio-start-icon { flex: none; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 8px; background: var(--dsw-alias-bg-layer-2); color: var(--dsw-alias-brand-primary) }
+.zp-studio-start-copy { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px }
+.zp-studio-start-name { font-size: 13px; line-height: 20px; font-weight: 600 }
+.zp-studio-start-desc { font-size: 11px; line-height: 16px; color: var(--dsw-alias-label-secondary) }
+.zp-studio-start-arrow { flex: none; color: var(--dsw-alias-label-tertiary) }
+.zp-studio-report-link { display: inline-flex; align-items: center; gap: 4px; align-self: flex-start; font-size: 12px; color: var(--dsw-alias-brand-primary) }
+.zp-studio-thread { display: flex; flex-direction: column; gap: 12px }
+.zp-msg { font-size: 13px; line-height: 22px; overflow-wrap: anywhere; animation: zp-fade-in .16s ease-out }
+.zp-msg.is-user { align-self: flex-end; max-width: 88%; padding: 8px 12px; border-radius: 10px; background: var(--dsw-alias-bg-layer-2); white-space: pre-wrap }
+.zp-msg.is-bot { width: 100% }
+.zp-msg.is-bot .zp-md { font-size: 13.5px; line-height: 23px }
+.zp-studio-error {
+  flex: none; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin: 0 12px 8px; padding: 8px 12px; border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--dsw-alias-state-error-primary) 36%, transparent);
+  color: var(--dsw-alias-state-error-primary); font-size: 12px; line-height: 18px;
+}
+.zp-studio-report-running {
+  flex: none; display: flex; align-items: center; gap: 6px;
+  margin: 0 12px 8px; padding: 8px 12px; border-radius: 8px;
+  background: var(--dsw-alias-bg-layer-2); color: var(--dsw-alias-label-secondary);
+  font-size: 12px; line-height: 18px;
+}
+.zp-studio-suggest { flex: none; display: flex; flex-wrap: wrap; gap: 4px 6px; padding: 0 12px 8px }
+.zp-studio-suggest button {
+  height: 26px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--dsw-alias-border-l1);
+  background: transparent; color: var(--dsw-alias-label-secondary); font-size: 12px;
+}
+.zp-studio-suggest button:hover:not(:disabled) { background: var(--dsw-alias-bg-layer-2); color: var(--dsw-alias-label-primary) }
+.zp-studio-suggest button:disabled { opacity: .5; cursor: default }
+.zp-studio-composer {
+  flex: none; margin: 0 12px 12px; padding: 8px;
+  border: 1px solid var(--dsw-alias-border-l1); border-radius: 12px;
+  background: var(--dsw-alias-bg-layer-1); box-shadow: var(--dsw-elevation-soft);
+}
+.zp-studio-composer:focus-within { border-color: color-mix(in srgb, var(--dsw-alias-brand-primary) 55%, var(--dsw-alias-border-l1)) }
+.zp-studio-composer-row { display: flex; align-items: flex-end; gap: 6px }
+.zp-studio-ta {
+  flex: 1; min-width: 0; min-height: 44px; max-height: 132px; padding: 4px 6px;
+  border: 0; outline: 0; background: transparent; resize: none;
+  font-family: inherit; font-size: 13px; line-height: 21px; color: var(--dsw-alias-label-primary);
+}
+.zp-studio-ta::placeholder { color: var(--dsw-alias-label-tertiary) }
+.zp-quote-chip {
+  display: flex; align-items: center; gap: 4px; min-width: 0;
+  margin-bottom: 6px; padding: 4px 8px; border-radius: 6px;
+  background: var(--dsw-alias-bg-layer-2); color: var(--dsw-alias-label-secondary);
+  font-size: 11px; line-height: 16px;
+}
+.zp-quote-chip span { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis }
+.zp-quote-chip button { flex: none; display: flex; color: var(--dsw-alias-label-tertiary) }
+.zp-studio-disclaimer { flex: none; padding: 0 16px 12px; color: var(--dsw-alias-label-caption); font-size: 10.5px; line-height: 15px }
+.zp-studio-chat .zp-typing { flex: none; padding: 2px 0 }
+.zp-canvas-tabs { flex: none; display: flex; align-items: center; gap: 4px; padding: 8px 16px 0 }
+.zp-canvas-tabs button {
+  display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0 12px;
+  border-radius: 8px; border: 1px solid transparent; color: var(--dsw-alias-label-secondary); font-size: 12px;
+}
+.zp-canvas-tabs button:hover { background: var(--dsw-alias-bg-layer-2) }
+.zp-canvas-tabs button.is-on { background: var(--dsw-alias-bg-layer-2); border-color: var(--dsw-alias-border-l1); color: var(--dsw-alias-label-primary) }
+.zp-report-artifact { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 12px 16px 16px; overflow: hidden }
+.zp-report-idle { justify-content: center; overflow-y: auto }
+.zp-report-head { flex: none; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap }
+.zp-report-head h2 { font-size: 16px; line-height: 24px; font-weight: 650 }
+.zp-report-meta { margin-top: 2px; color: var(--dsw-alias-label-secondary); font-size: 11px; line-height: 16px }
+.zp-report-actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap }
+.zp-pill-btn {
+  display: inline-flex; align-items: center; gap: 4px; height: 30px; padding: 0 12px;
+  border-radius: 999px; border: 1px solid var(--dsw-alias-border-l1);
+  background: var(--dsw-alias-bg-layer-1); color: var(--dsw-alias-label-secondary); font-size: 12px;
+}
+.zp-pill-btn:hover:not(:disabled) { background: var(--dsw-alias-bg-layer-2); color: var(--dsw-alias-label-primary) }
+.zp-pill-btn:disabled { opacity: .5; cursor: default }
+.zp-pill-btn.is-primary { background: var(--zp-fill-accent); border-color: transparent; color: var(--dsw-alias-label-primary-inverted) }
+.zp-body.is-studio-split .zp-report-chat-btn { display: none }
+.zp-report-note { flex: none; margin-top: 8px; padding: 6px 8px; border-radius: 8px; background: var(--dsw-alias-bg-layer-2); color: var(--dsw-alias-label-secondary); font-size: 11px; line-height: 16px }
+.zp-report-layout { flex: 1; min-height: 0; display: flex; gap: 16px; margin-top: 12px }
+.zp-report-toc { flex: 0 0 148px; min-width: 0; overflow-y: auto; padding-right: 8px; border-right: 1px solid var(--dsw-alias-border-l1) }
+.zp-report-toc button { border: 0; background: transparent; font-family: inherit; cursor: pointer; display: block; width: 100%; padding: 4px 8px; border-radius: 6px; text-align: left; color: var(--dsw-alias-label-secondary); font-size: 11px; line-height: 16px }
+.zp-report-toc button:hover { background: var(--dsw-alias-bg-layer-2); color: var(--dsw-alias-label-primary) }
+.zp-report-toc button.is-on { background: var(--dsw-alias-bg-layer-2); color: var(--dsw-alias-label-primary) }
+.zp-report-body { position: relative; flex: 1; min-width: 0; overflow-y: auto; padding: 0 8px 24px 0 }
+.zp-report-sec { padding: 0 0 16px }
+.zp-report-sec h2 { max-width: 720px; margin: 0 0 8px; font-size: 16px; line-height: 24px; font-weight: 600 }
+.zp-report-prose { max-width: 720px; font-size: 13px; line-height: 23px; color: var(--dsw-alias-label-primary) }
+.zp-report-prose p { margin: 0 0 8px }
+.zp-report-prose ul, .zp-report-prose ol { margin: 0 0 8px; padding-left: 16px }
+.zp-report-prose h3 { margin: 12px 0 6px; font-size: 14px; line-height: 22px; font-weight: 600 }
+.zp-report-prose blockquote { margin: 0 0 8px; padding-left: 8px; border-left: 2px solid var(--dsw-alias-border-l1); color: var(--dsw-alias-label-secondary) }
+.zp-report-pick {
+  border: 0; cursor: pointer;
+  position: absolute; z-index: 4; transform: translate(-50%, -100%);
+  display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0 12px;
+  border-radius: 999px; background: var(--zp-fill-accent); color: var(--dsw-alias-label-primary-inverted);
+  box-shadow: var(--dsw-elevation-prominent); font-size: 12px; white-space: nowrap;
+}
+.zp-report-progress-card { padding: 16px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 12px; background: var(--dsw-alias-bg-layer-1); box-shadow: var(--dsw-elevation-soft) }
+.zp-report-progress-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px }
+.zp-report-progress-head b { display: block; font-size: 14px; line-height: 22px; font-weight: 600 }
+.zp-report-progress-head span { display: block; margin-top: 2px; color: var(--dsw-alias-label-secondary); font-size: 11px; line-height: 16px }
+.zp-report-bar { height: 6px; margin-top: 12px; border-radius: 999px; background: var(--dsw-alias-bg-layer-2); overflow: hidden }
+.zp-report-bar i { display: block; height: 100%; border-radius: 999px; background: var(--zp-fill-accent); transition: width .3s ease }
+.zp-report-steps { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 12px; margin-top: 12px }
+.zp-report-step { display: flex; align-items: center; gap: 6px; color: var(--dsw-alias-label-tertiary); font-size: 11.5px; line-height: 17px }
+.zp-report-step i { flex: none; display: flex; align-items: center; justify-content: center; width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 0 0 1px var(--dsw-alias-border-l2) }
+.zp-report-step.is-active { color: var(--dsw-alias-label-secondary) }
+.zp-report-step.is-active i { box-shadow: inset 0 0 0 1.5px var(--dsw-alias-label-secondary) }
+.zp-report-step.is-done { color: var(--dsw-alias-label-secondary) }
+.zp-report-step.is-done i { background: var(--zp-fill-accent); color: var(--dsw-alias-label-primary-inverted); box-shadow: none }
+.zp-report-current { margin-top: 12px; color: var(--dsw-alias-label-secondary); font-size: 12px; line-height: 18px }
+.zp-report-error { max-width: 560px; margin: 0 auto; padding: 20px; border-radius: 12px; border: 1px solid color-mix(in srgb, var(--dsw-alias-state-error-primary) 32%, transparent); background: var(--dsw-alias-bg-layer-1) }
+.zp-report-error b { display: block; font-size: 14px; line-height: 22px; color: var(--dsw-alias-state-error-primary) }
+.zp-report-error p { margin: 6px 0 12px; color: var(--dsw-alias-label-secondary); font-size: 12px; line-height: 19px }
+.zp-report-empty { max-width: 640px; margin: auto; display: flex; flex-direction: column; align-items: flex-start; gap: 8px }
+.zp-report-empty-icon { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 12px; background: var(--dsw-alias-bg-layer-2); color: var(--dsw-alias-brand-primary) }
+.zp-report-empty h2 { font-size: 20px; line-height: 28px; font-weight: 300 }
+.zp-report-empty p { color: var(--dsw-alias-label-secondary); font-size: 13px; line-height: 21px }
+.zp-report-section-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 12px; margin: 4px 0 8px; width: 100%; color: var(--dsw-alias-label-secondary); font-size: 11.5px; line-height: 18px }
+.zp-report-fine { color: var(--dsw-alias-label-caption); font-size: 10.5px; line-height: 16px }
+.zp-reader { position: absolute; inset: 0; z-index: 65; display: flex; flex-direction: column; background: var(--dsw-alias-bg-base) }
+.zp-reader-head { flex: none; display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--dsw-alias-border-l1) }
+.zp-reader-title { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px }
+.zp-reader-title b { font-size: 14px; line-height: 21px; font-weight: 600 }
+.zp-reader-title span { color: var(--dsw-alias-label-secondary); font-size: 11px; line-height: 16px }
+.zp-reader-actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap }
+.zp-reader-body { flex: 1; min-height: 0; padding: 16px 24px 24px; display: flex }
+.zp-reader .zp-report-layout { flex: 1; min-height: 0 }
+.zp-reader .zp-report-toc { flex-basis: 180px }
+.zp-reader .zp-report-body { padding-right: 24px }
+.zp-reader .zp-report-sec h2 { font-size: 20px; line-height: 28px }
+.zp-reader .zp-report-prose { font-size: 14px; line-height: 26px }
+.zp-toast {
+  position: absolute; z-index: 80; left: 50%; bottom: 24px; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 8px; max-width: min(520px, calc(100% - 32px));
+  padding: 8px 16px; border-radius: 10px; background: var(--dsw-alias-label-primary);
+  color: var(--dsw-alias-label-primary-inverted); box-shadow: var(--dsw-elevation-prominent);
+  font-size: 12px; line-height: 18px; animation: zp-fade-in .16s ease-out;
+}
+.zp-toast.is-error { background: var(--dsw-alias-state-error-primary) }
+.zp-toast button { border: 0; background: transparent; cursor: pointer; flex: none; color: inherit; text-decoration: underline; text-underline-offset: 2px }
+.zp-settings-local { display: flex; flex-direction: column; gap: 4px; padding: 8px 0; border-top: 1px solid var(--dsw-alias-border-l1); margin-top: 8px }
+.zp-settings-local b { font-size: 12px; line-height: 18px; font-weight: 600 }
+.zp-settings-local > span { color: var(--dsw-alias-label-secondary); font-size: 11px; line-height: 17px }
+.zp-settings-confirm { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 4px }
+.zp-settings-confirm span { color: var(--dsw-alias-state-error-primary); font-size: 11px; line-height: 16px }
+.zp-root[data-studio="1"][data-w="mid"] .zp-report-section-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) }
+.zp-root[data-w="narrow"] .zp-studio-chat { flex-basis: auto; width: 100%; border-right: 0 }
+.zp-root[data-w="narrow"] .zp-report-layout { flex-direction: column; gap: 8px }
+.zp-root[data-w="narrow"] .zp-report-toc { flex: none; display: flex; gap: 4px; overflow-x: auto; padding: 0 0 6px; border-right: 0; border-bottom: 1px solid var(--dsw-alias-border-l1) }
+.zp-root[data-w="narrow"] .zp-report-toc button { width: auto; white-space: nowrap }
+.zp-root[data-w="narrow"] .zp-report-section-grid { grid-template-columns: 1fr }
+.zp-root[data-w="narrow"] .zp-report-steps { grid-template-columns: 1fr }
+.zp-root[data-w="narrow"] .zp-reader-head { flex-wrap: wrap }
+.zp-root[data-w="narrow"] .zp-reader-body { padding: 12px 16px 16px }
+
 /* ---------------- 深色主题：内容色提亮一档 ---------------- */
 body[data-ds-dark-theme] .zp-root {
   --zp-accent: #a78bfa;
@@ -3026,6 +3321,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           }),
           h('button', {
             className: 'zp-btn', type: 'button',
+            disabled: !props.hasChart || !name.trim(),
             onClick: function () {
               if (props.onSave(name)) setName('');
             }
@@ -3143,7 +3439,8 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
             h('button', { className: 'zp-btn', type: 'button', onClick: function () { props.onSelect(tri1); } },
               t('triPalace') + ' · ' + props.chart.palaces[tri1].name),
             h('button', { className: 'zp-btn', type: 'button', onClick: function () { props.onSelect(tri2); } },
-              t('triPalace') + ' · ' + props.chart.palaces[tri2].name))),
+              t('triPalace') + ' · ' + props.chart.palaces[tri2].name),
+            props.onQuote ? h('button', { className: 'zp-btn', type: 'button', onClick: props.onQuote }, t('quotePalace')) : null)),
         h('div', { className: 'zp-detail-body' },
           section(t('mainStars'),
             h('div', { className: 'zp-detail-stars' }, p.major.length
@@ -3321,11 +3618,29 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
     }
 
     /* ---------------- 解读记录：按命盘存本地（localStorage） ----------------
-       同一生辰（历法 / 年月日 / 闰月 / 时分 / 性别 / 经度）视为同一张盘。
-       只写浏览器本地，不上传、不写会话；最多保留 8 张盘，每张最多 24 条消息。 */
-    var READINGS_KEY = 'ziwei-pro.readings.v1';
+       同一生辰 + 同一排盘设置视为同一张盘；聊天、完整报告、最后停留的画布页签
+       一起保存。只写浏览器本地，不上传；最多 8 张盘，每张最多 24 条消息。 */
+    var READINGS_KEY = 'ziwei-pro.readings.v2';
+    var READINGS_V1_KEY = 'ziwei-pro.readings.v1';
     var LAST_CHART_KEY = 'ziwei-pro.lastChart.v1';
     var READINGS_MAX = 8;
+    function emptyReport() {
+      return { status: 'idle', text: '', startedAt: 0, finishedAt: 0, error: '', issue: null };
+    }
+    function normalizeReport(r) {
+      if (!r || typeof r !== 'object') return emptyReport();
+      var status = ['idle', 'running', 'done', 'error'].indexOf(r.status) >= 0 ? r.status : 'idle';
+      /* 刷新/重开时不可能真的还在跑，恢复成可继续的错误态 */
+      if (status === 'running') status = 'error';
+      return {
+        status: status,
+        text: String(r.text || '').slice(0, 120000),
+        startedAt: +r.startedAt || 0,
+        finishedAt: +r.finishedAt || 0,
+        error: String(r.error || ''),
+        issue: r.issue || null
+      };
+    }
     function readingInput(input) {
       var x = input || {};
       var lon = x.longitude;
@@ -3353,12 +3668,14 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       var settingsKey = [st.yearDivide || 'normal', st.monthDivide || 'exact', st.dayDivide || 'current', st.fixLeap === false ? 0 : 1].join(',');
       return [x.calendar, x.year, x.month, x.day, x.isLeap ? 1 : 0, x.hour, x.minute, x.gender, x.longitude, settingsKey].join('|');
     }
-    function loadReadingMap() {
+    function readStorageMap(key) {
       try {
-        var raw = JSON.parse(localStorage.getItem(READINGS_KEY) || '{}');
+        var raw = JSON.parse(localStorage.getItem(key) || '{}');
         return raw && typeof raw === 'object' ? raw : {};
       } catch (e) { return {}; }
     }
+    function loadReadingMap() { return readStorageMap(READINGS_KEY); }
+    function loadLegacyReadingMap() { return readStorageMap(READINGS_V1_KEY); }
     function writeReadingMap(map) {
       try { localStorage.setItem(READINGS_KEY, JSON.stringify(map)); return true; } catch (e) { return false; }
     }
@@ -3367,23 +3684,29 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       keys.slice(READINGS_MAX).forEach(function (k) { delete map[k]; });
       return map;
     }
+    function cleanThread(thread) {
+      return (Array.isArray(thread) ? thread : []).slice(-24).map(function (m) {
+        return {
+          role: m && m.role === 'user' ? 'user' : 'assistant',
+          content: String((m && m.content) || '').slice(0, 60000)
+        };
+      }).filter(function (m) { return m.role === 'user' || m.content; });
+    }
     function saveReadingRecord(key, data) {
       if (!key) return;
       var map = loadReadingMap();
-      if (!data || !Array.isArray(data.thread) || !data.thread.length) {
+      var thread = cleanThread(data && data.thread);
+      var report = normalizeReport(data && data.report);
+      if (!thread.length && !String(report.text || '').trim()) {
         delete map[key];
         writeReadingMap(map);
         return;
       }
       map[key] = {
-        thread: data.thread.slice(-24).map(function (m) {
-          return {
-            role: m && m.role === 'user' ? 'user' : 'assistant',
-            content: String((m && m.content) || '').slice(0, 60000)
-          };
-        }),
-        hasReport: !!data.hasReport,
-        lastMode: data.lastMode === 'report' ? 'report' : 'brief',
+        thread: thread,
+        report: report.text ? report : null,
+        studioTab: data && data.studioTab === 'report' ? 'report' : 'chart',
+        name: String((data && data.name) || ''),
         updatedAt: Date.now()
       };
       trimReadings(map);
@@ -3395,28 +3718,65 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         delete map[keys[0]];
       }
     }
+    function findLegacyReading(key) {
+      if (!key) return null;
+      /* v1 key = 前 9 段生辰；v1.7 起第 10 段是排盘设置。旧记录可迁移一次。 */
+      var prefix = String(key).split('|').slice(0, 9).join('|');
+      var map = loadLegacyReadingMap();
+      var hit = null;
+      Object.keys(map).some(function (k) {
+        if (k === prefix || k.indexOf(prefix + '|') === 0) { hit = map[k]; return true; }
+        return false;
+      });
+      if (!hit) return null;
+      var thread = cleanThread(hit.thread);
+      var report = emptyReport();
+      if (hit.hasReport) {
+        for (var i = thread.length - 1; i >= 0; i--) {
+          if (thread[i].role === 'assistant' && thread[i].content) {
+            report = { status: 'done', text: thread[i].content, startedAt: 0, finishedAt: 0, error: '', issue: null };
+            break;
+          }
+        }
+      }
+      return { thread: thread, report: report.status === 'done' ? report : null, studioTab: 'chart', updatedAt: hit.updatedAt || 0 };
+    }
     function loadReadingRecord(key) {
       if (!key) return null;
-      var map = loadReadingMap();
-      var rec = map[key];
-      if (!rec || !Array.isArray(rec.thread) || !rec.thread.length) return null;
-      var thread = rec.thread.filter(function (m) {
-        return m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string';
-      });
-      if (!thread.length) return null;
+      var rec = loadReadingMap()[key];
+      if (!rec) rec = findLegacyReading(key);
+      if (!rec || typeof rec !== 'object') return null;
+      var thread = cleanThread(rec.thread);
+      var report = normalizeReport(rec.report);
+      if (!thread.length && !String(report.text || '').trim()) return null;
       return {
         thread: thread,
-        hasReport: !!rec.hasReport,
-        lastMode: rec.lastMode === 'report' ? 'report' : 'brief',
+        report: report,
+        studioTab: rec.studioTab === 'report' ? 'report' : 'chart',
         updatedAt: rec.updatedAt || 0
       };
     }
     function clearReadingRecord(key) {
       if (!key) return;
       var map = loadReadingMap();
-      if (!map[key]) return;
-      delete map[key];
-      writeReadingMap(map);
+      var changed = false;
+      if (map[key]) { delete map[key]; changed = true; }
+      if (changed) writeReadingMap(map);
+      /* 清掉同生辰的旧版记录，避免迁移后残留 */
+      var legacy = loadLegacyReadingMap();
+      var prefix = String(key).split('|').slice(0, 9).join('|');
+      var legacyChanged = false;
+      Object.keys(legacy).forEach(function (k) {
+        if (k === prefix || k.indexOf(prefix + '|') === 0) { delete legacy[k]; legacyChanged = true; }
+      });
+      if (legacyChanged) {
+        try { localStorage.setItem(READINGS_V1_KEY, JSON.stringify(legacy)); } catch (e) { /* ignore */ }
+      }
+    }
+    function clearAllReadings() {
+      try { localStorage.removeItem(READINGS_KEY); } catch (e) { /* ignore */ }
+      try { localStorage.removeItem(READINGS_V1_KEY); } catch (e) { /* ignore */ }
+      try { localStorage.removeItem(LAST_CHART_KEY); } catch (e) { /* ignore */ }
     }
     function saveLastChart(input) {
       try { localStorage.setItem(LAST_CHART_KEY, JSON.stringify(readingInput(input))); } catch (e) { /* ignore */ }
@@ -3428,139 +3788,344 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       } catch (e) { return null; }
     }
 
-    function AIModal(props) {
+    /* ---------------- 解读工位：聊天 / 报告产物 ---------------- */
+    var REPORT_SECTION_TITLES = [
+      '命盘总览', '性格大略', '家庭关系', '婚姻情感', '子女培育', '财富管理', '健康养生',
+      '事业发展', '朋友贵人', '居家风水', '心灵福德', '出行迁移', '大限节奏', '综合建议'
+    ];
+    function splitReportSections(md) {
+      var lines = String(md || '').split('\n');
+      var out = [];
+      var cur = { title: '', body: [] };
+      lines.forEach(function (line) {
+        var m = /^##\s+(.+?)\s*$/.exec(line);
+        if (m) {
+          if (cur.title || cur.body.join('').trim()) out.push(cur);
+          cur = { title: m[1].replace(/^[一二三四五六七八九十百]+、\s*/, ''), body: [] };
+        } else {
+          cur.body.push(line);
+        }
+      });
+      if (cur.title || cur.body.join('').trim()) out.push(cur);
+      if (!out.length) out.push({ title: '', body: lines });
+      return out.map(function (sec, i) {
+        return { title: sec.title || REPORT_SECTION_TITLES[i] || ('第 ' + (i + 1) + ' 部分'), html: renderChatMd(sec.body.join('\n')) };
+      });
+    }
+    function countReportSections(md) {
+      var m = String(md || '').match(/^##\s+/gm);
+      return m ? Math.min(m.length, REPORT_SECTION_TITLES.length) : 0;
+    }
+    function fmtClock(ts) {
+      if (!ts) return '';
+      var d = new Date(ts);
+      return ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2) + ' ' +
+        ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
+    }
+
+    function StudioChat(props) {
       var t = props.t;
       var [q, setQ] = useState('');
-      var [showPreview, setShowPreview] = useState(false);
-      var bodyRef = useRef(null);
-      var boxRef = useDialogFocus();
-      useEffect(function () {
-        var el = bodyRef.current;
-        if (el) el.scrollTop = el.scrollHeight;
-      }, [props.thread, props.streaming]);
-
+      var scrollRef = useRef(null);
+      var taRef = useRef(null);
+      var stickRef = useRef(true);
       var thread = props.thread || [];
       var lastAssistant = '';
       for (var i = thread.length - 1; i >= 0; i--) {
-        if (thread[i].role === 'assistant') { lastAssistant = thread[i].content; break; }
+        if (thread[i].role === 'assistant') { lastAssistant = thread[i].content || ''; break; }
       }
-      /* 追问默认走 brief；完整报告是显式动作，不再藏在"下一次请求的模式"里 */
-      var submit = function () {
-        var question = q.trim();
-        if (!question || props.streaming) return;
+      useEffect(function () {
+        var el = scrollRef.current;
+        if (el && stickRef.current) el.scrollTop = el.scrollHeight;
+      }, [thread, props.streaming]);
+      useEffect(function () {
+        var el = taRef.current;
+        if (!el) return;
+        el.style.height = 'auto';
+        el.style.height = Math.min(el.scrollHeight, 132) + 'px';
+      }, [q]);
+      var submit = function (text) {
+        var value = String(text == null ? q : text).trim();
+        if (!value || props.streaming || props.reportRunning) return;
         setQ('');
-        props.onAsk(question, 'brief');
+        props.onAsk(value);
       };
-      var start = function (m) {
-        if (props.streaming) return;
-        props.onAsk('', m);
+      var start = function (mode) {
+        if (props.streaming || props.reportRunning) return;
+        if (mode === 'report') props.onGenerateReport();
+        else props.onAsk('');
       };
-      /* 空态的两个动作：一行一个，图标 + 名称 + 一句说明；点一次就出内容 */
       var startBtn = function (mode, iconName, name, desc, primary) {
         return h('button', {
-          className: 'zp-ai-start-btn' + (primary ? ' primary' : ''), type: 'button',
-          disabled: props.streaming, onClick: function () { start(mode); }
+          className: 'zp-studio-start' + (primary ? ' is-primary' : ''), type: 'button',
+          disabled: props.streaming || props.reportRunning,
+          onClick: function () { start(mode); }
         },
-        h('span', { className: 'zp-ai-start-glyph' }, h(Icon, { name: iconName, size: 15 })),
-        h('span', { className: 'zp-ai-start-copy' },
-          h('span', { className: 'zp-ai-start-name' }, name),
-          h('span', { className: 'zp-ai-start-desc' }, desc)),
-        h('span', { className: 'zp-ai-start-arrow' }, h(Icon, { name: 'caret', size: 14 })));
+        h('span', { className: 'zp-studio-start-icon' }, h(Icon, { name: iconName, size: 15 })),
+        h('span', { className: 'zp-studio-start-copy' },
+          h('span', { className: 'zp-studio-start-name' }, name),
+          h('span', { className: 'zp-studio-start-desc' }, desc)),
+        h('span', { className: 'zp-studio-start-arrow' }, h(Icon, { name: 'caret', size: 14 })));
       };
-      var showFullReport = !!lastAssistant && !props.hasReport && !props.streaming;
-
-      return h('div', { className: 'zp-overlay' },
-        h('div', { className: 'zp-overlay-mask', onClick: props.onClose, 'aria-hidden': true }),
-        h('aside', { className: 'zp-ai', role: 'dialog', 'data-region': 'DRAWER', 'aria-modal': 'true', 'aria-label': t('aiTitle'), tabIndex: -1,
-          ref: boxRef, onKeyDown: function (ev) { trapTab(ev, ev.currentTarget); } },
-          h('header', { className: 'zp-ai-head' },
-            h('div', { className: 'zp-ai-heading' },
-              h('span', { className: 'zp-ai-glyph' }, h(Icon, { name: 'sparkle', size: 15 })),
-              h('div', { className: 'zp-ai-title' }, t('aiTitle'))),
-            thread.length ? h('button', {
+      var hasThread = thread.length > 0;
+      return h('aside', { className: 'zp-studio-chat', 'aria-label': t('studioChatLabel') },
+        h('header', { className: 'zp-studio-head' },
+          h('button', {
+            className: 'zp-icon-btn', type: 'button', title: t('modeChart'), 'aria-label': t('modeChart'),
+            onClick: props.onExit
+          }, h(Icon, { name: 'back' })),
+          h('div', { className: 'zp-studio-title' },
+            h('b', null, t('aiTitle')),
+            h('span', null, props.contextLine + (props.selectedPalace ? ' · ' + props.selectedPalace : ''))),
+          h('div', { className: 'zp-studio-head-actions' },
+            hasThread ? h('button', {
               className: 'zp-icon-btn', type: 'button', title: t('aiNewChat'), 'aria-label': t('aiNewChat'),
-              disabled: props.streaming, onClick: props.onClear
+              disabled: props.streaming || props.reportRunning, onClick: props.onClear
             }, h(Icon, { name: 'newChat' })) : null,
-            h('button', {
-              className: 'zp-icon-btn', type: 'button', title: t('close'), 'aria-label': t('close'), onClick: props.onClose
-            }, h(Icon, { name: 'close' }))),
-          h('div', { className: 'zp-ai-body', ref: bodyRef },
-            thread.length === 0
-              ? h('div', { className: 'zp-ai-empty-wrap' },
-                h('div', { className: 'zp-ai-empty' },
-                  h('div', { className: 'zp-ai-empty-lead' }, t('aiEmptyLead')),
-                  h('div', { className: 'zp-ai-empty-hint' }, t('aiEmptyHint')),
-                  h('div', { className: 'zp-ai-start' },
-                    startBtn('brief', 'sparkle', t('aiStartBrief'), t('aiStartBriefDesc'), true),
-                    startBtn('report', 'report', t('aiStartReport'), t('aiStartReportDesc'), false))))
-              : h('div', { className: 'zp-chat-thread', role: 'log', 'aria-live': 'polite', 'aria-busy': props.streaming ? 'true' : 'false' },
-                thread.map(function (m, i) {
-                  /* 流式开始时的空 assistant 占位不画气泡，否则会出现一条空白横杠 */
-                  if (m.role !== 'user' && !String(m.content || '').trim()) return null;
-                  return h('div', { key: 'm' + i, className: m.role === 'user' ? 'zp-bubble zp-bubble-user' : 'zp-bubble zp-bubble-ai' },
-                    m.role === 'user'
-                      ? h('div', { className: 'zp-bubble-text' }, m.content)
-                      : h('div', { className: 'zp-md', dangerouslySetInnerHTML: { __html: renderChatMd(m.content) } }));
-                }),
-                props.streaming
-                  ? h('div', { className: 'zp-typing' },
-                    h('span', { className: 'zp-typing-dots', 'aria-hidden': true }, h('i'), h('i'), h('i')),
-                    h('span', null, props.thinkChars ? t('aiThinking') : t('interpStreaming'))) : null),
-            props.interpError ? h('div', { className: 'zp-ai-error' },
-              h('span', { className: 'zp-ai-error-text' }, props.interpError),
-              props.interpIssue && props.interpIssue.canContinue
-                ? h('button', {
-                  className: 'zp-mini-btn', type: 'button', disabled: props.streaming,
-                  onClick: function () { props.onContinue(); }
-                }, t('aiContinue'))
-                : null) : null),
-          h('footer', { className: 'zp-ai-foot' },
-            lastAssistant ? h('div', { className: 'zp-ai-tools' },
-              h('button', {
-                className: 'zp-mini-btn zp-mini-icon', type: 'button',
-                title: props.copied ? t('aiCopied') : t('aiCopy'), 'aria-label': props.copied ? t('aiCopied') : t('aiCopy'),
-                onClick: props.onCopy
-              }, h(Icon, { name: props.copied ? 'check' : 'copy', size: 14 })),
-              h('button', {
-                className: 'zp-mini-btn zp-mini-icon', type: 'button', title: t('previewHtml'), 'aria-label': t('previewHtml'),
-                'aria-expanded': showPreview ? 'true' : 'false',
-                onClick: function () { setShowPreview(!showPreview); }
-              }, h(Icon, { name: 'preview', size: 14 })),
-              h('button', {
-                className: 'zp-mini-btn zp-mini-icon', type: 'button', title: t('exportHtml'), 'aria-label': t('exportHtml'),
-                onClick: props.onExport
-              }, h(Icon, { name: 'export', size: 14 })),
-              showFullReport ? h('button', {
-                className: 'zp-mini-btn', type: 'button', title: t('aiFullReportHint'),
-                onClick: function () { start('report'); }
-              }, h(Icon, { name: 'report', size: 13 }), h('span', null, t('aiFullReport'))) : null,
-              h('button', {
-                className: 'zp-mini-btn zp-mini-btn-accent', type: 'button', title: t('handoffHint'), disabled: props.streaming,
-                onClick: function () { props.onHandoff(); }
-              }, h(Icon, { name: 'handoff', size: 13 }), props.handoffDone ? t('handoffDone') : t('handoff'))) : null,
-            h('div', { className: 'zp-ai-composer' },
-              h('textarea', {
-                className: 'zp-input zp-chat-ta', rows: 2, value: q,
-                placeholder: t('aiAskPh'), 'aria-label': t('aiAskPh'),
-                onChange: function (ev) { setQ(ev.target.value); },
-                onKeyDown: function (ev) {
-                  if (ev.key === 'Enter' && !ev.shiftKey) { ev.preventDefault(); submit(); }
-                }
-              }),
-              props.streaming
-                ? h('button', { className: 'zp-send zp-send-stop', type: 'button', title: t('aiStop'), 'aria-label': t('aiStop'), onClick: props.onStop },
-                  h(Icon, { name: 'stop', size: 15 }))
-                : h('button', {
-                  className: 'zp-send', type: 'button', disabled: !q.trim(),
-                  title: t('aiSend'), 'aria-label': t('aiSend'), onClick: submit
-                }, h(Icon, { name: 'send', size: 15 }))),
-            h('div', { className: 'zp-ai-disclaimer' }, t('disclaimerShort'))),
-          showPreview && lastAssistant ? h('div', { className: 'zp-ai-preview', 'data-region': 'PREVIEW' },
-            h('div', { className: 'zp-ai-preview-head' },
-              h('b', null, t('previewHtml')),
-              h('button', { className: 'zp-icon-btn', type: 'button', title: t('closePreview'), 'aria-label': t('closePreview'), onClick: function () { setShowPreview(false); } },
-                h(Icon, { name: 'close' }))),
-            h('iframe', { className: 'zp-preview-frame zp-preview-frame-full', srcDoc: props.previewHtml, title: t('previewHtml'), sandbox: 'allow-same-origin' })) : null));
+            props.onHandoff ? h('button', {
+              className: 'zp-icon-btn', type: 'button', title: t('handoffHint'), 'aria-label': t('handoff'),
+              disabled: props.streaming || props.reportRunning, onClick: props.onHandoff
+            }, h(Icon, { name: 'handoff' })) : null,
+            props.onOpenReport && props.hasReport ? h('button', {
+              className: 'zp-icon-btn', type: 'button', title: t('reportOpen'), 'aria-label': t('reportOpen'),
+              onClick: props.onOpenReport
+            }, h(Icon, { name: 'report' })) : null)),
+        h('div', {
+          className: 'zp-studio-scroll', ref: scrollRef,
+          onScroll: function (ev) {
+            var el = ev.currentTarget;
+            stickRef.current = (el.scrollHeight - el.scrollTop - el.clientHeight) < 48;
+          }
+        },
+        !hasThread
+          ? h('div', { className: 'zp-studio-empty' },
+            h('div', { className: 'zp-studio-empty-title' }, t('studioEmptyTitle')),
+            h('div', { className: 'zp-studio-empty-hint' }, t('studioEmptyHint')),
+            h('div', { className: 'zp-studio-start-list' },
+              startBtn('brief', 'sparkle', t('aiStartBrief'), t('aiStartBriefDesc'), true),
+              startBtn('report', 'report', t('aiStartReport'), t('aiStartReportDesc'), false)),
+            props.hasReport ? h('button', {
+              className: 'zp-studio-report-link', type: 'button', onClick: props.onOpenReport
+            }, h(Icon, { name: 'report', size: 13 }), t('reportOpen')) : null)
+          : h('div', { className: 'zp-studio-thread zp-chat-thread', role: 'log', 'aria-live': 'polite', 'aria-busy': props.streaming ? 'true' : 'false' },
+            thread.map(function (m, idx) {
+              if (m.role !== 'user' && !String(m.content || '').trim()) return null;
+              return h('div', { key: 'm' + idx, className: 'zp-msg ' + (m.role === 'user' ? 'is-user' : 'is-bot') },
+                m.role === 'user'
+                  ? m.content
+                  : h('div', { className: 'zp-md', dangerouslySetInnerHTML: { __html: renderChatMd(m.content) } }));
+            }),
+            props.streaming ? h('div', { className: 'zp-typing' },
+              h('span', { className: 'zp-typing-dots', 'aria-hidden': true }, h('i'), h('i'), h('i')),
+              h('span', null, props.thinkChars ? t('aiThinking') : t('interpStreaming'))) : null),
+        props.interpError ? h('div', { className: 'zp-studio-error' },
+          h('span', null, props.interpError),
+          props.interpIssue && props.interpIssue.canContinue
+            ? h('button', { className: 'zp-mini-btn', type: 'button', disabled: props.streaming, onClick: props.onContinue }, t('aiContinue'))
+            : null) : null,
+        props.reportRunning ? h('div', { className: 'zp-studio-report-running' },
+          h(Icon, { name: 'report', size: 13 }), t('reportRunningHint')) : null),
+        props.suggestions && props.suggestions.length
+          ? h('div', { className: 'zp-studio-suggest' }, props.suggestions.slice(0, 4).map(function (s, si) {
+            return h('button', { key: si, type: 'button', disabled: props.streaming || props.reportRunning, onClick: function () { submit(s); } }, s);
+          })) : null,
+        h('div', { className: 'zp-studio-composer' },
+          props.quote ? h('div', { className: 'zp-quote-chip' },
+            h(Icon, { name: 'quote', size: 12 }),
+            h('span', { title: props.quote.text }, props.quote.label + '：' + String(props.quote.text || '').slice(0, 70)),
+            h('button', { type: 'button', title: t('quoteRemove'), 'aria-label': t('quoteRemove'), onClick: props.onClearQuote }, h(Icon, { name: 'close', size: 11 }))) : null,
+          h('div', { className: 'zp-studio-composer-row' },
+            h('textarea', {
+              className: 'zp-studio-ta', rows: 2, ref: taRef, value: q,
+              placeholder: props.streaming || props.reportRunning ? t('studioWaitPh') : t('aiAskPh'),
+              'aria-label': t('aiAskPh'),
+              disabled: props.reportRunning,
+              onChange: function (ev) { setQ(ev.target.value); },
+              onKeyDown: function (ev) {
+                if (ev.nativeEvent && ev.nativeEvent.isComposing) return;
+                if (ev.key === 'Enter' && !ev.shiftKey) { ev.preventDefault(); submit(); }
+              }
+            }),
+            props.streaming || props.reportRunning
+              ? h('button', { className: 'zp-send zp-send-stop', type: 'button', title: t('aiStop'), 'aria-label': t('aiStop'), onClick: props.onStop },
+                h(Icon, { name: 'stop', size: 15 }))
+              : h('button', { className: 'zp-send', type: 'button', disabled: !q.trim(), title: t('aiSend'), 'aria-label': t('aiSend'), onClick: function () { submit(); } },
+                h(Icon, { name: 'send', size: 15 })))),
+        h('div', { className: 'zp-studio-disclaimer' }, t('disclaimerShort')));
+    }
+
+    function ReportProgress(props) {
+      var t = props.t;
+      var text = props.report.text || '';
+      var done = countReportSections(text);
+      var running = props.report.status === 'running';
+      var current = Math.min(done + 1, REPORT_SECTION_TITLES.length);
+      var chars = text.replace(/\s/g, '').length;
+      var pct = Math.round((done / REPORT_SECTION_TITLES.length) * 100);
+      return h('div', { className: 'zp-report-progress-card' },
+        h('div', { className: 'zp-report-progress-head' },
+          h('div', null,
+            h('b', null, running ? t('reportWriting') : t('reportPaused')),
+            h('span', null, t('reportProgressMeta').replace('{n}', done).replace('{total}', REPORT_SECTION_TITLES.length).replace('{chars}', chars))),
+          running ? h('button', { className: 'zp-mini-btn', type: 'button', onClick: props.onStop }, t('aiStop')) : null),
+        h('div', { className: 'zp-report-bar', role: 'progressbar', 'aria-valuenow': pct, 'aria-valuemin': 0, 'aria-valuemax': 100 },
+          h('i', { style: { width: pct + '%' } })),
+        h('div', { className: 'zp-report-steps' }, REPORT_SECTION_TITLES.map(function (name, i) {
+          var state = i < done ? 'is-done' : (running && i === done ? 'is-active' : '');
+          return h('div', { key: i, className: 'zp-report-step ' + state },
+            h('i', null, i < done ? h(Icon, { name: 'check', size: 9 }) : null),
+            h('span', null, name));
+        })),
+        running ? h('div', { className: 'zp-report-current' },
+          h('span', { className: 'zp-shimmer' }, t('reportCurrent').replace('{n}', current).replace('{name}', REPORT_SECTION_TITLES[current - 1] || ''))) : null);
+    }
+
+    function ReportDocument(props) {
+      var t = props.t;
+      var sections = props.sections || [];
+      var [active, setActive] = useState(0);
+      var bodyRef = useRef(null);
+      var [pick, setPick] = useState(null);
+      var goto = function (idx) {
+        setActive(idx);
+        var el = bodyRef.current && bodyRef.current.querySelector('[data-sec="' + idx + '"]');
+        if (el && el.scrollIntoView) el.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      };
+      var onPick = function () {
+        var sel = window.getSelection && window.getSelection();
+        var text = sel ? String(sel).trim() : '';
+        if (!text || text.length < 4 || !bodyRef.current) { setPick(null); return; }
+        var anchor = sel.anchorNode;
+        if (!anchor || !bodyRef.current.contains(anchor)) { setPick(null); return; }
+        try {
+          var range = sel.getRangeAt(0);
+          var rect = range.getBoundingClientRect();
+          var box = bodyRef.current.getBoundingClientRect();
+          setPick({ text: text.slice(0, 2400), x: Math.max(80, rect.left - box.left), y: Math.max(32, rect.top - box.top) });
+        } catch (e) { setPick(null); }
+      };
+      return h('div', { className: 'zp-report-layout' },
+        h('nav', { className: 'zp-report-toc', 'aria-label': t('reportToc') },
+          sections.map(function (sec, i) {
+            return h('button', { key: i, type: 'button', className: active === i ? 'is-on' : '', onClick: function () { goto(i); } }, sec.title);
+          })),
+        h('div', { className: 'zp-report-body', ref: bodyRef, onMouseUp: onPick, onScroll: function () { if (pick) setPick(null); } },
+          sections.map(function (sec, i) {
+            return h('section', { key: i, className: 'zp-report-sec', 'data-sec': i },
+              h('h2', null, sec.title),
+              h('div', { className: 'zp-report-prose', dangerouslySetInnerHTML: { __html: sec.html } }));
+          }),
+          pick ? h('button', {
+            className: 'zp-report-pick', type: 'button', style: { left: pick.x, top: pick.y },
+            onMouseDown: function (ev) { ev.preventDefault(); },
+            onClick: function () { props.onQuote({ label: t('reportQuoteLabel'), text: pick.text }); setPick(null); }
+          }, h(Icon, { name: 'quote', size: 12 }), t('reportQuoteAction')) : null));
+    }
+
+    function ReportArtifact(props) {
+      var t = props.t;
+      var report = props.report || emptyReport();
+      var running = report.status === 'running';
+      var done = report.status === 'done';
+      var sections = useMemo(function () { return splitReportSections(report.text); }, [report.text]);
+      var chars = String(report.text || '').replace(/\s/g, '').length;
+      if (done) {
+        var sectionCount = Math.min(sections.length, REPORT_SECTION_TITLES.length);
+        return h('div', { className: 'zp-report-artifact' },
+          h('header', { className: 'zp-report-head' },
+            h('div', null,
+              h('h2', null, t('reportTitle')),
+              h('div', { className: 'zp-report-meta' },
+                (sectionCount || REPORT_SECTION_TITLES.length) + ' / ' + REPORT_SECTION_TITLES.length + ' 部分 · ' + chars + ' 字' +
+                (report.finishedAt ? ' · ' + fmtClock(report.finishedAt) : ''))),
+            h('div', { className: 'zp-report-actions' },
+              props.onChat ? h('button', { className: 'zp-pill-btn zp-report-chat-btn', type: 'button', onClick: props.onChat },
+                h(Icon, { name: 'back', size: 13 }), t('modeRead')) : null,
+              h('button', { className: 'zp-pill-btn', type: 'button', onClick: props.onReader },
+                h(Icon, { name: 'expand', size: 13 }), t('reportReader')),
+              h('button', { className: 'zp-pill-btn', type: 'button', onClick: props.onExport },
+                h(Icon, { name: 'export', size: 13 }), t('exportHtml')),
+              h('button', { className: 'zp-pill-btn', type: 'button', onClick: props.onCopy },
+                h(Icon, { name: props.copied ? 'check' : 'copy', size: 13 }), props.copied ? t('aiCopied') : t('aiCopy')),
+              h('button', { className: 'zp-pill-btn', type: 'button', disabled: running, onClick: function () { props.onGenerate(false); } },
+                h(Icon, { name: 'refresh', size: 13 }), t('reportRegenerate')))),
+          sectionCount < REPORT_SECTION_TITLES.length
+            ? h('div', { className: 'zp-report-note' }, t('reportPartial'))
+            : null,
+          h(ReportDocument, {
+            t: t, sections: sections,
+            onQuote: function (q) { props.onQuote(q); }
+          }));
+      }
+      return h('div', { className: 'zp-report-artifact zp-report-idle' },
+        running ? h(ReportProgress, { t: t, report: report, onStop: props.onStop }) : null,
+        !running && report.status === 'error'
+          ? h('div', { className: 'zp-report-error' },
+            h('b', null, t('reportError')),
+            h('p', null, report.error || t('reportErrorHint')),
+            h('div', { className: 'zp-report-actions' },
+              report.text ? h('button', { className: 'zp-pill-btn', type: 'button', onClick: function () { props.onGenerate(true); } }, t('aiContinue')) : null,
+              h('button', { className: 'zp-pill-btn is-primary', type: 'button', onClick: function () { props.onGenerate(false); } }, t('reportRegenerate'))))
+          : null,
+        !running && report.status !== 'error'
+          ? h('div', { className: 'zp-report-empty' },
+            h('div', { className: 'zp-report-empty-icon' }, h(Icon, { name: 'report', size: 20 })),
+            h('h2', null, t('reportIdleTitle')),
+            h('p', null, t('reportIdleHint')),
+            h('div', { className: 'zp-report-section-grid' }, REPORT_SECTION_TITLES.map(function (name, i) {
+              return h('span', { key: i }, ('0' + (i + 1)).slice(-2) + ' ' + name);
+            })),
+            h('button', { className: 'zp-btn zp-btn-primary', type: 'button', onClick: function () { props.onGenerate(false); } },
+              h(Icon, { name: 'sparkle', size: 14 }), t('reportGenerate')),
+            h('div', { className: 'zp-report-fine' }, t('reportFinePrint')))
+          : null);
+    }
+
+    function ReportReader(props) {
+      var t = props.t;
+      var report = props.report || emptyReport();
+      var sections = useMemo(function () { return splitReportSections(report.text); }, [report.text]);
+      var ref = useDialogFocus();
+      var [fs, setFs] = useState(false);
+      var boxRef = useRef(null);
+      useEffect(function () {
+        var onEsc = function (ev) {
+          if (ev.key === 'Escape') { ev.preventDefault(); if (fs && document.exitFullscreen) { document.exitFullscreen().catch(function () {}); } else props.onClose(); }
+        };
+        window.addEventListener('keydown', onEsc);
+        return function () { window.removeEventListener('keydown', onEsc); };
+      }, [fs]);
+      var toggleFullscreen = function () {
+        var el = boxRef.current;
+        if (!el) return;
+        try {
+          if (!document.fullscreenElement && el.requestFullscreen) {
+            el.requestFullscreen().then(function () { setFs(true); }).catch(function () {});
+          } else if (document.exitFullscreen) {
+            document.exitFullscreen().then(function () { setFs(false); }).catch(function () {});
+          }
+        } catch (e) { /* ignore */ }
+      };
+      return h('div', { className: 'zp-reader', role: 'dialog', 'aria-modal': 'true', 'aria-label': t('reportTitle'), tabIndex: -1, ref: function (el) { boxRef.current = el; ref.current = el; }, onKeyDown: function (ev) { trapTab(ev, ev.currentTarget); } },
+        h('header', { className: 'zp-reader-head' },
+          h('button', { className: 'zp-icon-btn', type: 'button', title: t('backToBoard'), 'aria-label': t('backToBoard'), onClick: props.onClose }, h(Icon, { name: 'back' })),
+          h('div', { className: 'zp-reader-title' },
+            h('b', null, t('reportTitle')),
+            h('span', null, String(report.text || '').replace(/\s/g, '').length + ' 字 · ' + t('reportReader'))),
+          h('div', { className: 'zp-reader-actions' },
+            h('button', { className: 'zp-pill-btn', type: 'button', onClick: toggleFullscreen }, h(Icon, { name: 'expand', size: 13 }), fs ? t('exitFullscreen') : t('fullscreen')),
+            h('button', { className: 'zp-pill-btn', type: 'button', onClick: props.onExport }, h(Icon, { name: 'export', size: 13 }), t('exportHtml')),
+            h('button', { className: 'zp-pill-btn', type: 'button', onClick: props.onCopy }, h(Icon, { name: props.copied ? 'check' : 'copy', size: 13 }), props.copied ? t('aiCopied') : t('aiCopy')),
+            h('button', { className: 'zp-icon-btn', type: 'button', title: t('close'), 'aria-label': t('close'), onClick: props.onClose }, h(Icon, { name: 'close' })))),
+        h('div', { className: 'zp-reader-body' },
+          h(ReportDocument, { t: t, sections: sections, onQuote: props.onQuote })));
+    }
+
+    function Toast(props) {
+      if (!props.toast) return null;
+      return h('div', { className: 'zp-toast' + (props.toast.error ? ' is-error' : ''), role: 'status', 'aria-live': 'polite' },
+        h('span', null, props.toast.text),
+        props.toast.undo ? h('button', { type: 'button', onClick: props.toast.undo }, '撤销') : null);
     }
 
     /* ---------------- 设置：面板内居中弹层 ---------------- */
@@ -3568,6 +4133,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       var t = props.t;
       var boxRef = useDialogFocus();
       var [update, setUpdate] = useState(null);
+      var [confirmClear, setConfirmClear] = useState(false);
       var checkVersion = function () {
         if (update && update.checking) return;
         setUpdate({ checking: true });
@@ -3617,6 +4183,15 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
                 update && update.result && !update.result.ok
                   ? h('div', { className: 'zp-update-new' }, t('updateFailed').replace('{reason}', update.result.reason || 'unknown'))
                   : null),
+              h('div', { className: 'zp-settings-local' },
+                h('b', null, t('localDataTitle')),
+                h('span', null, t('localDataHint')),
+                confirmClear
+                  ? h('div', { className: 'zp-settings-confirm' },
+                    h('span', null, t('clearLocalConfirm')),
+                    h('button', { className: 'zp-mini-btn', type: 'button', onClick: function () { props.onClearAll(); setConfirmClear(false); } }, t('confirmClear')),
+                    h('button', { className: 'zp-mini-btn', type: 'button', onClick: function () { setConfirmClear(false); } }, t('cancel')))
+                  : h('button', { className: 'zp-mini-btn', type: 'button', onClick: function () { setConfirmClear(true); } }, t('clearLocal'))),
               h('div', { className: 'zp-settings-about' },
                 h('b', null, t('about')),
                 h('span', null, t('aboutText')),
@@ -3720,19 +4295,42 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         try { localStorage.setItem('ziwei-pro.showadj', v ? '1' : '0'); } catch (e) { /* ignore */ }
       };
 
-      /* AI 状态 */
+      /* AI / 工位状态 */
       var [modal, setModal] = useState(null);
-      var [interpreting, setInterpreting] = useState(false);
+      var [interpreting, setInterpreting] = useState(false);   /* 聊天流 */
       var [thread, setThread] = useState([]);
-      var [lastMode, setLastMode] = useState('brief');   /* 续写 / 交给会话沿用上一次的档位 */
-      var [hasReport, setHasReport] = useState(false);   /* 本轮对话是否已出过完整报告 */
+      var [report, setReport] = useState(emptyReport);          /* 完整报告是独立产物 */
+      var [studioOpen, setStudioOpenState] = useState(function () {
+        try { return localStorage.getItem('ziwei-pro.studio') === '1'; } catch (e) { return false; }
+      });
+      var setStudioOpen = function (v) {
+        setStudioOpenState(!!v);
+        try { localStorage.setItem('ziwei-pro.studio', v ? '1' : '0'); } catch (e) { /* ignore */ }
+      };
+      var [studioTab, setStudioTab] = useState('chart');       /* 画布页签: chart | report */
+      var [mobilePane, setMobilePane] = useState('chat');      /* 窄屏工位: chat | chart（预留，当前由 CSS 切换） */
       var [interpError, setInterpError] = useState('');
       var [interpIssue, setInterpIssue] = useState(null);   /* {kind, canContinue}: 截断/断连/超时的结构化原因 */
       var [thinkChars, setThinkChars] = useState(0);        /* 思考阶段已产出的字数（来自 start/thinking 事件） */
       var [interpCopied, setInterpCopied] = useState(false);
+      var [reportCopied, setReportCopied] = useState(false);
       var [handoffDone, setHandoffDone] = useState(false);
       var [synced, setSynced] = useState(false);
+      var [quote, setQuote] = useState(null);               /* {label, text}: 宫位/报告选段引用 */
+      var [readerOpen, setReaderOpen] = useState(false);
+      var [toast, setToast] = useState(null);
+      var toastTimerRef = useRef(null);
+      var showToast = function (text, opts) {
+        var o = opts || {};
+        setToast({ text: String(text || ''), error: !!o.error, undo: o.undo || null, key: Date.now() });
+        if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+        toastTimerRef.current = setTimeout(function () { setToast(null); }, o.undo ? 6000 : 3200);
+      };
       var chartKeyRef = useRef('');
+      var reportRunning = report.status === 'running';
+      var hasReport = report.status === 'done' && !!report.text;
+      var lastMode = hasReport ? 'report' : 'brief';
+      var busy = interpreting || reportRunning;
 
       /* 面板宽度监听：布局切换与盘面缩放都靠它，避免用 viewport media query 误判面板宽度 */
       var rootRef = useRef(null);
@@ -3788,14 +4386,16 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         setView('chart');
         var saved = loadReadingRecord(key);
         if (saved) {
-          setThread(saved.thread);
-          setHasReport(!!saved.hasReport);
-          setLastMode(saved.lastMode);
+          setThread(saved.thread || []);
+          setReport(normalizeReport(saved.report));
+          setStudioTab(saved.studioTab === 'report' ? 'report' : 'chart');
         } else {
           setThread([]);
-          setHasReport(false);
-          setLastMode('brief');
+          setReport(emptyReport());
+          setStudioTab('chart');
         }
+        setStudioOpen(false);
+        setMobilePane('chat');
         setInterpError('');
         setInterpIssue(null);
         setThinkChars(0);
@@ -3838,14 +4438,16 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       useEffect(function () {
         var key = chartKeyRef.current;
         if (!key || !chart) return;
-        if (interpreting) return;
+        if (interpreting || report.status === 'running') return;
         var hasAnswer = false;
         for (var hi = 0; hi < thread.length; hi++) {
           if (thread[hi].role === 'assistant' && String(thread[hi].content || '').trim()) { hasAnswer = true; break; }
         }
-        if (!hasAnswer) { clearReadingRecord(key); return; }
-        saveReadingRecord(key, { thread: thread, hasReport: hasReport, lastMode: lastMode });
-      }, [thread, hasReport, lastMode, interpreting, chart]);
+        if (!hasAnswer && report.status !== 'done') { clearReadingRecord(key); return; }
+        saveReadingRecord(key, {
+          thread: thread, report: report, studioTab: studioTab, name: form.name
+        });
+      }, [thread, report, studioTab, interpreting, chart, form.name]);
 
       var compute = function () {
         setError('');
@@ -3950,21 +4552,23 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         adoptChart(result, input);
       };
       var deleteSaved = function (id) {
+        var prev = library;
         var next = library.filter(function (x) { return x.id !== id; });
         setLibrary(next);
+        if (currentLibId === id) setCurrentLibId(null);
         try { localStorage.setItem('ziwei-pro.library', JSON.stringify(next)); } catch (e) { /* ignore */ }
+        showToast(t('libDeleted'), { undo: function () {
+          setLibrary(prev);
+          try { localStorage.setItem('ziwei-pro.library', JSON.stringify(prev)); } catch (e) { /* ignore */ }
+          showToast(t('undoDone'));
+        } });
       };
-
-      /* AI 解读 */
       var reportMeta = function () {
         return {
           chart: chart, name: form.name, place: form.place, occupation: form.occupation,
           gender: form.gender === 'female' ? 'female' : 'male'
         };
       };
-      /* 当前时间定位（虚岁/公历年）：面板问答与同步/交接共用同一份上下文。
-         问「这 10 年大运」却答成命格总纲，根因之一是旧 payload 只发 E.chartText(chart)，
-         既没有十二大限表，也没有“现在处于哪一段”。 */
       var nowPosition = function () {
         var cy = new Date().getFullYear();
         var birthYear = (chart && chart.lunar && chart.lunar.year) ? chart.lunar.year : (+form.year || 0);
@@ -3981,30 +4585,17 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         return E.chartText(chart);
       };
 
-      /* 面板内「直接聊」: 走 Harness host 的 SSE 通道, 用会话已配置的模型, 不需要另配 API Key */
+      /* 面板内「直接聊」/「写报告」共用一个 SSE 通道；报告与聊天是两条独立状态。 */
       var chatAbortRef = useRef(null);
       var stopReqRef = useRef(false);
-      var runInterpretation = function (question, mode) {
-        if (!chart || interpreting) return;
-        setLastMode(mode === 'report' ? 'report' : 'brief');
-        var history = thread.map(function (m) { return { role: m.role, content: m.content }; });
-        var asked = (question || '').trim();
-        var nextThread = thread.concat(asked ? [{ role: 'user', content: asked }] : []);
-        setThread(nextThread);
-        setInterpreting(true);
-        setInterpError('');
-        setInterpIssue(null);
-        setThinkChars(0);
-        setHandoffDone(false);
-        stopReqRef.current = false;
-
+      var buildInterpretBody = function (mode, question, history) {
         var pos = nowPosition();
         var selectedDecade = (tab === 'decadal' && decadalList[selDecadal]) ? decadalList[selDecadal].ageRange : null;
-        var body = {
+        return {
           chartText: chartContextText(),
           mode: mode === 'report' ? 'report' : 'brief',
-          question: asked,
-          history: history,
+          question: question || '',
+          history: (history || []).slice(-20),
           meta: {
             name: form.name, place: form.place, occupation: form.occupation,
             gender: form.gender === 'female' ? 'female' : 'male',
@@ -4013,37 +4604,20 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
             yearlyFocus: (tab === 'yearly') ? (parseInt(yearlyYear, 10) || pos.currentYear) : null
           }
         };
-
+      };
+      var openStream = function (opts) {
+        var body = buildInterpretBody(opts.mode, opts.question, opts.history);
         var controller = null;
         try { controller = new AbortController(); chatAbortRef.current = controller; } catch (e) { controller = null; }
-
-        /* done / error / EOF 三种收尾分开记：只有真的收到 done 才算写完。
-           旧实现把「读完流」一律当成功——服务端截断、连接中途断掉，都会显示成「写完了」。 */
         var settled = false;
         var gotDone = false;
-        var gotError = false;
         var produced = '';
-        var finish = function (errMsg, issue) {
+        var finish = function (err, issue) {
           if (settled) return;
           settled = true;
-          if (!errMsg && mode === 'report') setHasReport(true);
-          setInterpreting(false);
-          setThinkChars(0);
           chatAbortRef.current = null;
-          setInterpError(errMsg || '');
-          setInterpIssue(issue || null);
+          if (opts.onFinish) opts.onFinish(err || '', issue || null, produced);
         };
-        var replaceLastAssistant = function (text) {
-          setThread(function (prev) {
-            if (!prev.length) return prev;
-            var copy = prev.slice();
-            var last = copy[copy.length - 1];
-            if (!last || last.role !== 'assistant') return prev;
-            copy[copy.length - 1] = { role: 'assistant', content: text };
-            return copy;
-          });
-        };
-
         fetch('/ziwei/interpret', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -4061,27 +4635,14 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
             finish('浏览器不支持流式响应');
             return undefined;
           }
-          setThread(function (prev) { return prev.concat([{ role: 'assistant', content: '' }]); });
+          if (opts.onOpen) opts.onOpen();
           var reader = resp.body.getReader();
           var decoder = new TextDecoder();
           var buf = '';
-          var append = function (delta) {
-            produced += delta;
-            setThread(function (prev) {
-              if (!prev.length) return prev;
-              var copy = prev.slice();
-              var last = copy[copy.length - 1];
-              if (!last || last.role !== 'assistant') copy.push({ role: 'assistant', content: delta });
-              else copy[copy.length - 1] = { role: 'assistant', content: (last.content || '') + delta };
-              return copy;
-            });
-          };
           var pump = function () {
             return reader.read().then(function (chunk) {
               if (chunk.done) {
-                if (!gotDone && !gotError) {
-                  finish(t('aiDisconnected'), { kind: 'stream-closed', canContinue: !!produced.trim() });
-                }
+                if (!gotDone) finish(t('aiDisconnected'), { kind: 'stream-closed', canContinue: !!produced.trim() });
                 return;
               }
               buf += decoder.decode(chunk.value, { stream: true });
@@ -4096,16 +4657,18 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
                 if (!data) return;
                 var payload = null;
                 try { payload = JSON.parse(data); } catch (e) { return; }
-                if (ev === 'start') { setThinkChars(0); }
-                else if (ev === 'thinking') { setThinkChars((payload && payload.chars) || 0); }
-                else if (ev === 'delta' && payload && payload.text) { setThinkChars(0); append(payload.text); }
-                else if (ev === 'done') {
+                if (ev === 'start') {
+                  if (opts.onStart) opts.onStart();
+                } else if (ev === 'thinking') {
+                  if (opts.onThinking) opts.onThinking((payload && payload.chars) || 0);
+                } else if (ev === 'delta' && payload && payload.text) {
+                  produced += payload.text;
+                  if (opts.onDelta) opts.onDelta(payload.text);
+                } else if (ev === 'done') {
                   gotDone = true;
-                  /* done 带全文：以它为准，避免个别 delta 丢帧导致正文缺字 */
-                  if (payload && typeof payload.text === 'string' && payload.text) replaceLastAssistant(payload.text);
+                  if (opts.onDone) opts.onDone((payload && typeof payload.text === 'string') ? payload.text : produced);
                   finish('');
                 } else if (ev === 'error') {
-                  gotError = true;
                   finish((payload && payload.reason) || '解读失败', payload);
                 }
               });
@@ -4122,18 +4685,104 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           finish(String((e && e.message) || e), { kind: 'error', canContinue: !!produced.trim() });
         });
       };
-      /* 面板内「停止」：保留已生成部分，并允许接着写 */
+
+      var appendAssistant = function (text, replace) {
+        setThread(function (prev) {
+          var copy = prev.slice();
+          var last = copy[copy.length - 1];
+          if (replace && last && last.role === 'assistant') {
+            copy[copy.length - 1] = { role: 'assistant', content: String(text || '') };
+            return copy;
+          }
+          if (!last || last.role !== 'assistant') copy.push({ role: 'assistant', content: String(text || '') });
+          else copy[copy.length - 1] = { role: 'assistant', content: (last.content || '') + String(text || '') };
+          return copy;
+        });
+      };
+
+      var runChat = function (question) {
+        if (!chart || busy) return;
+        var asked = (question || '').trim();
+        var history = thread.map(function (m) { return { role: m.role, content: m.content }; });
+        var nextThread = thread.concat(asked ? [{ role: 'user', content: asked }] : []);
+        setThread(nextThread);
+        setInterpreting(true);
+        setInterpError('');
+        setInterpIssue(null);
+        setThinkChars(0);
+        setHandoffDone(false);
+        setQuote(null);
+        stopReqRef.current = false;
+        var added = false;
+        openStream({
+          mode: 'brief', question: asked, history: history,
+          onStart: function () { setThinkChars(0); },
+          onThinking: function (chars) { setThinkChars(chars); },
+          onDelta: function (text) {
+            setThinkChars(0);
+            appendAssistant(text, added);
+            added = true;
+          },
+          onDone: function (text) {
+            if (text) appendAssistant(text, added);
+            added = true;
+          },
+          onFinish: function (err, issue) {
+            setInterpreting(false);
+            setThinkChars(0);
+            setInterpError(err || '');
+            setInterpIssue(issue || null);
+          }
+        });
+      };
+
+      var runReport = function (opts) {
+        if (!chart || busy) return;
+        var cont = !!(opts && opts.continue);
+        setStudioOpen(true);
+        setStudioTab('report');
+        setMobilePane('chat');
+        setInterpError('');
+        setInterpIssue(null);
+        setReportCopied(false);
+        setQuote(null);
+        var base = cont ? String(report.text || '') : '';
+        setReport({
+          status: 'running', text: base, startedAt: Date.now(), finishedAt: 0,
+          error: '', issue: null
+        });
+        stopReqRef.current = false;
+        openStream({
+          mode: 'report',
+          question: cont ? t('aiContinuePrompt') : '',
+          history: cont && base ? [{ role: 'assistant', content: base }] : thread.slice(),
+          onThinking: function (chars) { setThinkChars(chars); },
+          onDelta: function (text) {
+            setThinkChars(0);
+            setReport(function (prev) { return Object.assign({}, prev, { text: (prev.text || '') + text }); });
+          },
+          onDone: function (text) {
+            setReport(function (prev) {
+              var full = cont ? (prev.text || '') + (text || '') : (text || prev.text || '');
+              return Object.assign({}, prev, { status: 'done', text: full, finishedAt: Date.now(), error: '', issue: null });
+            });
+          },
+          onFinish: function (err, issue) {
+            setReport(function (prev) {
+              if (prev.status === 'done') return prev;
+              return Object.assign({}, prev, { status: 'error', error: err || '', issue: issue || null, finishedAt: Date.now() });
+            });
+          }
+        });
+      };
       var stopInterpretation = function () {
         if (!chatAbortRef.current) return;
         stopReqRef.current = true;
         try { chatAbortRef.current.abort(); } catch (e) { /* ignore */ }
       };
-      /* 「同步给会话」: 只把当前命盘写进 host 上下文, 不新建会话。
-         之后在**任意**已有会话里说「读取工作台命盘并写鲲鹏报告」即可 —— 
-         agent 会用 ziwei_context 工具读到这张盘。 */
+
       var syncToSession = function () {
         if (!chart) return;
-        setInterpError('');
         fetch('/ziwei/context', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -4144,19 +4793,22 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
             gender: form.gender === 'female' ? 'female' : 'male'
           })
         }).then(function (r) { return r.json(); }).then(function (j) {
-          if (j && j.ok) { setSynced(true); setTimeout(function () { setSynced(false); }, 2200); }
-          else setInterpError((j && j.reason) || '同步失败');
-        }).catch(function (e) { setInterpError(String((e && e.message) || e)); });
+          if (j && j.ok) {
+            setSynced(true);
+            setTimeout(function () { setSynced(false); }, 2200);
+            showToast(t('synced'));
+          } else {
+            showToast((j && j.reason) || t('syncFailed'), { error: true });
+          }
+        }).catch(function (e) { showToast(String((e && e.message) || e), { error: true }); });
       };
 
-      /* 「交给会话」: host 新建一个 GUI 可见会话, 把命盘作为首条消息灌进去 */
       var lastAnswer = function () {
         for (var i = thread.length - 1; i >= 0; i--) if (thread[i].role === 'assistant') return thread[i].content || '';
         return '';
       };
       var handoffToSession = function (mode) {
-        if (!chart || interpreting) return;
-        setInterpError('');
+        if (!chart || busy) return;
         setHandoffDone(false);
         setInterpreting(true);
         var payload = {
@@ -4166,7 +4818,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           place: form.place || '',
           occupation: form.occupation || '',
           gender: form.gender === 'female' ? 'female' : 'male',
-          interpretation: lastAnswer(),
+          interpretation: (mode === 'report' && hasReport) ? report.text : lastAnswer(),
           mode: mode === 'report' ? 'report' : 'brief'
         };
         fetch('/ziwei/handoff', {
@@ -4179,49 +4831,82 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
             var j = out.j || {};
             if (j.ok && j.sessionId) {
               setHandoffDone(true);
+              showToast(t('handoffDone'));
               setTimeout(function () { setHandoffDone(false); }, 3000);
-              /* 新会话可能还没同步进客户端目录, openSession 会失败。
-                 失败就重试几次; 始终失败则如实告知去看侧栏, 不假装跳过去了。 */
               var tries = 0;
               var openIt = function () {
                 tries += 1;
                 if (actions.openSession(j.sessionId)) return;
                 if (tries < 6) { setTimeout(openIt, 350 * tries); return; }
-                setInterpError('会话已创建，但界面没能自动跳过去——请在左侧会话列表里打开新会话继续。');
+                showToast('会话已创建，但界面没能自动跳过去——请在左侧会话列表里打开新会话继续。', { error: true });
               };
               openIt();
             } else {
-              setInterpError(j.reason || ('交给会话失败 (HTTP ' + out.status + ')'));
+              showToast(j.reason || ('交给会话失败 (HTTP ' + out.status + ')'), { error: true });
             }
           })
-          .catch(function (e) { setInterpreting(false); setInterpError(String((e && e.message) || e)); });
+          .catch(function (e) { setInterpreting(false); showToast(String((e && e.message) || e), { error: true }); });
       };
+
       var clearThread = function () {
+        if (busy) return;
+        var prev = thread;
+        if (!prev.length) return;
         setThread([]);
         setInterpError('');
         setInterpIssue(null);
         setThinkChars(0);
-        setHasReport(false);
+        setQuote(null);
+        showToast(t('aiThreadCleared'), { undo: function () { setThread(prev); showToast(t('undoDone')); } });
       };
-      /* 最近一轮回答: 复制 / 导出 / 预览都以它为准 */
+      var clearAllReading = function () {
+        if (busy) return;
+        clearAllReadings();
+        setThread([]);
+        setReport(emptyReport());
+        setStudioTab('chart');
+        setInterpError('');
+        setInterpIssue(null);
+        setQuote(null);
+        showToast(t('aiRecordCleared'));
+      };
+
       var interpretation = useMemo(function () {
         for (var i = thread.length - 1; i >= 0; i--) if (thread[i].role === 'assistant') return thread[i].content || '';
         return '';
       }, [thread]);
-      var copyInterpretation = function () {
-        if (!interpretation) return;
-        setInterpCopied(true);
-        setTimeout(function () { setInterpCopied(false); }, 1600);
+      var copyText = function (text, done) {
+        if (!text) return;
+        var okay = function () { if (done) done(true); };
+        var fail = function () { if (done) done(false); };
         try {
           if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(interpretation).catch(function () { /* ignore */ });
+            navigator.clipboard.writeText(text).then(okay).catch(fail);
+            return;
           }
-        } catch (e) { /* ignore */ }
+          fail();
+        } catch (e) { fail(); }
+      };
+      var copyInterpretation = function () {
+        if (!interpretation) return;
+        copyText(interpretation, function (ok) {
+          setInterpCopied(ok);
+          if (ok) setTimeout(function () { setInterpCopied(false); }, 1600);
+          else showToast(t('copyFailed'), { error: true });
+        });
+      };
+      var copyReport = function () {
+        if (!hasReport) return;
+        copyText(report.text, function (ok) {
+          setReportCopied(ok);
+          if (ok) setTimeout(function () { setReportCopied(false); }, 1600);
+          else showToast(t('copyFailed'), { error: true });
+        });
       };
       var exportReportHtml = function () {
-        if (!interpretation) return;
+        if (!hasReport) { showToast(t('reportNeeded'), { error: true }); return; }
         try {
-          var html = actions.buildReportHtml(reportMeta(), interpretation);
+          var html = actions.buildReportHtml(reportMeta(), report.text);
           var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
           var url = URL.createObjectURL(blob);
           var a = document.createElement('a');
@@ -4232,29 +4917,21 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           document.body.appendChild(a);
           a.click();
           setTimeout(function () { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1500);
+          showToast(t('exported'));
         } catch (e) {
-          setInterpError('导出失败: ' + String((e && e.message) || e));
+          showToast(t('exportFailed') + ': ' + String((e && e.message) || e), { error: true });
         }
       };
-      var previewHtml = useMemo(function () {
-        if (!chart || !interpretation) return '';
-        try { return actions.buildReportHtml(reportMeta(), interpretation); } catch (e) { return ''; }
-      }, [chart, interpretation, form]);
-
-      /* 复制命盘 */
       var [copied, setCopied] = useState(false);
       var copyChart = function () {
         if (!chart) return;
-        setCopied(true);
-        setTimeout(function () { setCopied(false); }, 1600);
-        try {
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(E.chartText(chart)).catch(function () { /* ignore */ });
-          }
-        } catch (e) { /* ignore */ }
+        copyText(E.chartText(chart), function (ok) {
+          setCopied(ok);
+          if (ok) setTimeout(function () { setCopied(false); }, 1600);
+          else showToast(t('copyFailed'), { error: true });
+        });
       };
 
-      /* 启动自动打开 (设置可关) */
       useEffect(function () {
         if (!autoOpen) return;
         var timer = setTimeout(function () { actions.autoOpenPanel(); }, 250);
@@ -4269,6 +4946,16 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         : (panelW >= 1394 ? 'wide'
         : (panelW >= 1072 ? 'mid'
         : (panelW >= 908 ? 'compact' : 'narrow')));
+      /* 工位并排只在真正有余量时启用；宽档降为中档，让宫位详情落在盘面下方，避免被对话挤扁 */
+      var studioSplit = studioOpen && (layoutMode === 'wide' || layoutMode === 'mid');
+      if (studioSplit && layoutMode === 'wide') layoutMode = 'mid';
+      /* 示例盘识别：用默认生辰且没有额外姓名/地点/经度；只用于提示，不改变数据 */
+      var isSampleChart = !!chart &&
+        form.calendar === DEFAULT_FORM.calendar &&
+        +form.year === DEFAULT_FORM.year && +form.month === DEFAULT_FORM.month && +form.day === DEFAULT_FORM.day &&
+        !form.isLeap && +form.hour === DEFAULT_FORM.hour && +form.minute === DEFAULT_FORM.minute &&
+        form.gender === DEFAULT_FORM.gender && String(form.longitude || '') === '' &&
+        !String(form.name || '').trim() && !String(form.place || '').trim();
       var modeDefs = [['natal', t('tabNatal')], ['decadal', t('tabDecadal')], ['yearly', t('tabYearly')]];
       var curAgeForDecade = nowPosition().currentAge;
       var currentDecadalIdx = -1;
@@ -4277,14 +4964,58 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           if (curAgeForDecade >= decadalList[ci].ageRange[0] && curAgeForDecade <= decadalList[ci].ageRange[1]) { currentDecadalIdx = ci; break; }
         }
       }
+      var openStudio = function () {
+        if (!chart) return;
+        setStudioOpen(true);
+        setMobilePane('chat');
+      };
+      var closeStudio = function () {
+        setStudioOpen(false);
+      };
       var openAI = function () {
         if (!chart) return;
-        if (modal === 'ai') { closeModal(); return; }
-        openModal('ai');
-        /* 打开抽屉 ≠ 开始解读：这里只把当前盘带进空态，速览 / 完整报告 / 追问都由用户点。
-           点了就跑会在没打招呼的情况下花掉一次模型生成，用户也无法先看盘或先问自己的问题。 */
+        if (studioOpen) closeStudio(); else openStudio();
+      };
+      var askQuestion = function (text) {
+        var value = String(text || '').trim();
+        var q = quote;
+        if (!q && palaceSelected && value === t('suggestPalace')) {
+          q = {
+            label: t('quotePalaceLabel'),
+            text: (palaceSelected.name || '') + ' ' + (palaceSelected.gz || '') + ' · ' +
+              (palaceSelected.stars || []).map(function (st) { return st.name; }).join('、')
+          };
+        }
+        if (q) {
+          value = '【引用：' + q.label + '】\n' + q.text + '\n\n' + (value || '请针对这段展开说说。');
+        }
+        setQuote(null);
+        setStudioTab('chart');
+        runChat(value);
+      };
+      var generateReport = function (cont) {
+        if (!chart) return;
+        setStudioOpen(true);
+        runReport({ continue: !!cont });
+      };
+      var continueChat = function () { runChat(t('aiContinuePrompt')); };
+      var quoteFromReport = function (q) {
+        setQuote(q);
+        setStudioTab('chart');
+        setStudioOpen(true);
+        setMobilePane('chat');
+      };
+      var quotePalace = function () {
+        if (!palaceSelected) return;
+        setQuote({
+          label: t('quotePalaceLabel'),
+          text: (palaceSelected.name || '') + ' ' + (palaceSelected.gz || '') + ' · ' +
+            (palaceSelected.stars || []).map(function (st) { return st.name; }).join('、')
+        });
+        openStudio();
       };
       var editBirth = function () {
+        if (studioOpen) setStudioOpen(false);
         setRail(true);
         setFormCollapsed(false);
         try {
@@ -4358,12 +5089,14 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           }, h(Icon, { name: 'expand', size: 12 }), focus ? t('focusOff') : t('focusOn')) : null)) : null;
 
       /* 没盘时左栏必须始终可见（否则用户只剩空态、没有输入入口）；有盘才允许收起。 */
-      var railVisible = !chart || railOpen;
+      var railVisible = !studioOpen && (!chart || railOpen);
       return h('div', {
         className: 'zp-root',
         ref: rootRef,
         'data-w': layoutMode,
         'data-chart': chart ? '1' : undefined,
+        'data-studio': studioOpen ? '1' : undefined,
+        'data-canvas': studioOpen ? studioTab : undefined,
         'data-rail': railVisible ? 'open' : 'closed',
         /* 没有盘时不能进专注态：否则左栏（生辰输入）被隐藏且没有退出按钮 */
         'data-focus': (focus && chart) ? '1' : undefined
@@ -4390,14 +5123,30 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
             h('div', { className: 'zp-brand' },
               h('span', { className: 'zp-brand-name' }, t('brand')),
               h('span', { className: 'zp-brand-pro' }, t('brandPro'))),
+            chart && layoutMode !== 'narrow' ? h('div', { className: 'zp-mode-switch', role: 'group', 'aria-label': t('viewMode') },
+              h('button', {
+                type: 'button', className: !studioOpen ? 'is-on' : '',
+                'aria-pressed': !studioOpen ? 'true' : 'false',
+                onClick: closeStudio
+              }, t('modeChart')),
+              h('button', {
+                type: 'button', className: studioOpen ? 'is-on' : '',
+                'aria-pressed': studioOpen ? 'true' : 'false',
+                onClick: openStudio
+              }, h(Icon, { name: 'sparkle', size: 12 }), t('modeRead'),
+              (thread.length || hasReport) ? h('i', { className: 'zp-mode-dot', 'aria-hidden': true }) : null)) : null,
             /* 窄屏头部只留图标，补一个紧凑命主摘要，避免头部空荡 */
             chart && layoutMode === 'narrow' ? h('span', {
               className: 'zp-sum-chip zp-head-mini',
               title: (form.name || t('defaultName')) + ' · ' + chart.fiveElementsClass
             }, (form.name || t('defaultName')) + ' · ' + chart.fiveElementsClass) : null,
-            h('span', { className: 'zp-brand-tag' }, t('tagline')),
+            !chart ? h('span', { className: 'zp-brand-tag' }, t('tagline')) : null,
             chart ? h('div', { className: 'zp-head-sum' },
               h('span', { className: 'zp-sum-chip' }, h('b', null, form.name || t('defaultName'))),
+              isSampleChart ? h('span', { className: 'zp-sample-badge' }, t('sampleChart')) : null,
+              isSampleChart ? h('button', {
+                className: 'zp-sample-switch', type: 'button', onClick: editBirth
+              }, t('switchToMyBirth')) : null,
               h('span', { className: 'zp-sum-chip zp-sum-gz' },
                 [chart.pillars.yearly, chart.pillars.monthly, chart.pillars.daily, chart.pillars.hourly].join(' ')),
               h('span', { className: 'zp-sum-chip zp-sum-class' }, chart.fiveElementsClass)) : null,
@@ -4409,17 +5158,40 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
                 className: 'zp-icon-btn', type: 'button', title: t('syncHint'), 'aria-label': t('sync'), onClick: syncToSession
               }, h(Icon, { name: 'sync' }), h('span', { className: 'zp-btn-label' }, synced ? t('synced') : t('sync'))) : null,
               chart ? h('span', { className: 'zp-head-sep' }) : null,
-              h('button', {
-                className: 'zp-btn zp-btn-primary zp-btn-ai', type: 'button', disabled: !chart,
-                'aria-pressed': modal === 'ai' ? 'true' : 'false',
-                onClick: openAI
-              }, h(Icon, { name: 'sparkle', size: 14 }), h('span', null, t('ai'))),
+              chart && layoutMode === 'narrow' ? h('button', {
+                className: 'zp-btn zp-btn-primary zp-btn-ai', type: 'button',
+                'aria-pressed': studioOpen ? 'true' : 'false',
+                onClick: openStudio
+              }, h(Icon, { name: 'sparkle', size: 14 }), h('span', null, t('ai'))) : null,
               h('button', {
                 className: 'zp-icon-btn', type: 'button', title: t('settingsTitle'), 'aria-label': t('settingsTitle'),
                 'aria-pressed': modal === 'settings' ? 'true' : 'false',
                 onClick: function () { if (modal === 'settings') closeModal(); else openModal('settings'); }
               }, h(Icon, { name: 'settings' })))),
-          h('div', { className: 'zp-body' },
+          h('div', { className: 'zp-body' + (studioOpen ? ' is-studio' : '') + (studioSplit ? ' is-studio-split' : '') + (studioOpen && studioTab === 'report' ? ' is-studio-report' : '') },
+            studioOpen ? h(StudioChat, {
+              t: t,
+              thread: thread,
+              streaming: interpreting,
+              reportRunning: reportRunning,
+              thinkChars: thinkChars,
+              interpError: interpError,
+              interpIssue: interpIssue,
+              hasReport: hasReport,
+              quote: quote,
+              suggestions: hasReport ? [t('suggestCareer'), t('suggestLove'), t('suggestPlain'), t('suggestPalace')] : [],
+              contextLine: (isSampleChart ? t('sampleChart') + ' · ' : '') + (form.name || t('defaultName')) + ' · ' + (chart ? chart.fiveElementsClass : ''),
+              selectedPalace: palaceSelected ? (palaceSelected.name + ' ' + (palaceSelected.gz || '')) : '',
+              onExit: closeStudio,
+              onClear: clearThread,
+              onAsk: askQuestion,
+              onGenerateReport: function () { generateReport(false); },
+              onOpenReport: function () { setStudioOpen(true); setStudioTab('report'); },
+              onClearQuote: function () { setQuote(null); },
+              onContinue: continueChat,
+              onStop: stopInterpretation,
+              onHandoff: function () { handoffToSession(hasReport ? 'report' : 'brief'); }
+            }) : null,
             h('div', { className: 'zp-side', id: 'zp-rail' },
               /* 阅读优先：有盘时 命主信息 → 格局摘要 → 排盘输入 → 命盘库；
                  无盘时 Summary/Patterns 不渲染，输入自然回到顶部。 */
@@ -4430,8 +5202,34 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
                 collapsed: formCollapsed,
                 onToggleCollapse: function () { setFormCollapsed(!formCollapsed); }
               }),
-              h(Library, { items: library, current: currentLibId, t: t, onSave: saveChart, onLoad: loadSaved, onDelete: deleteSaved })),
+              h(Library, { items: library, current: currentLibId, t: t, hasChart: !!chart, onSave: saveChart, onLoad: loadSaved, onDelete: deleteSaved })),
             h('div', { className: 'zp-stage', tabIndex: chart ? 0 : -1, onKeyDown: onStageKeyDown },
+              studioOpen && chart ? h('div', { className: 'zp-canvas-tabs', role: 'tablist', 'aria-label': t('canvasTabs') },
+                h('button', {
+                  type: 'button', role: 'tab', 'aria-selected': studioTab !== 'report',
+                  className: studioTab !== 'report' ? 'is-on' : '',
+                  onClick: function () { setStudioTab('chart'); }
+                }, t('canvasChart')),
+                h('button', {
+                  type: 'button', role: 'tab', 'aria-selected': studioTab === 'report',
+                  className: studioTab === 'report' ? 'is-on' : '',
+                  onClick: function () { setStudioTab('report'); }
+                }, h(Icon, { name: 'report', size: 12 }), t('canvasReport'),
+                hasReport ? h('i', { className: 'zp-mode-dot', 'aria-hidden': true }) : null)) : null,
+              studioOpen && studioTab === 'report' && chart
+                ? h(ReportArtifact, {
+                  t: t,
+                  report: report,
+                  copied: reportCopied,
+                  onGenerate: generateReport,
+                  onStop: stopInterpretation,
+                  onCopy: copyReport,
+                  onExport: exportReportHtml,
+                  onReader: function () { setReaderOpen(true); },
+                  onQuote: quoteFromReport,
+                  onChat: function () { setStudioTab('chart'); }
+                })
+                : h(React.Fragment, null,
               timebar,
               !chart ? h('div', { className: 'zp-empty', 'data-region': 'EMPTY' },
                 h('div', { className: 'zp-empty-taiji' }, h(Taiji, null)),
@@ -4463,43 +5261,37 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
                     chart: chart,
                     palace: Object.assign({}, palaceSelected, { isSoul: selected === chart.soulIndex }),
                     t: t,
-                    onSelect: setSelected
+                    onSelect: setSelected,
+                    onQuote: quotePalace
                   }) : null),
                 palaceSelected && tab === 'decadal' ? h('div', { className: 'zp-kbd-hint' }, t('keyboardHint')) : null) : null,
               chart && view === 'patterns' ? h(PatternsView, { patterns: patterns, t: t }) : null,
-              chart && view === 'dict' ? h(DictView, { t: t }) : null)),
+              chart && view === 'dict' ? h(DictView, { t: t }) : null))),
           chart ? h('div', { className: 'zp-bottombar', 'data-region': 'BOTTOMBAR' },
             h('button', { className: 'zp-btn', type: 'button', onClick: editBirth },
               h(Icon, { name: 'panelLeft', size: 14 }), h('span', null, t('editBirthShort'))),
             h('button', { className: 'zp-btn zp-btn-primary', type: 'button', onClick: openAI },
-              h(Icon, { name: 'sparkle', size: 14 }), h('span', null, t('ai')))) : null
+              h(Icon, { name: 'sparkle', size: 14 }), h('span', null, studioOpen ? t('modeChart') : t('ai')))) : null
           )),
-        modal === 'ai' && chart ? h(AIModal, {
+        readerOpen && hasReport ? h(ReportReader, {
             t: t,
-            thread: thread,
-            streaming: interpreting,
-            interpError: interpError,
-            interpIssue: interpIssue,
-            thinkChars: thinkChars,
-            hasReport: hasReport,
-            onContinue: function () { runInterpretation(t('aiContinuePrompt'), lastMode); },
-            onStop: stopInterpretation,
-            copied: interpCopied,
-            previewHtml: previewHtml,
-            handoffDone: handoffDone,
-            onClose: closeModal,
-            onAsk: runInterpretation,
-            onClear: clearThread,
-            onHandoff: function () { handoffToSession(lastMode); },
-            onCopy: copyInterpretation,
-            onExport: exportReportHtml
+            report: report,
+            copied: reportCopied,
+            onClose: function () { setReaderOpen(false); },
+            onCopy: copyReport,
+            onExport: exportReportHtml,
+            onQuote: function (q) { setReaderOpen(false); quoteFromReport(q); }
           }) : null,
           modal === 'settings' ? h(SettingsModal, {
             t: t,
             autoOpen: autoOpen, setAutoOpen: setAutoOpen,
             showAdj: showAdj, setShowAdj: setShowAdj,
+            onClearAll: clearAllReading,
+            reportCount: thread.length,
+            hasReport: hasReport,
             onClose: closeModal
-          }) : null);
+          }) : null,
+          h(Toast, { toast: toast }));
     }
 
     /* ---------------- 默认表单 ---------------- */
