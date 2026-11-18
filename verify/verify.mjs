@@ -650,6 +650,25 @@ ok('chrome 避让不用魔法数字写死（顶部偏移只走 --dsh-frame-top-c
       fresh.length === 2 && fresh[0].content === '上一轮回答' && fresh[1].content === '新回答', JSON.stringify(fresh));
   }
   {
+    /* 三方四正：对宫 = +6，三合 = +4 / +8（mod 12） */
+    const rel = ui && typeof ui.relatedPalaces === 'function' ? ui.relatedPalaces : null;
+    const r0 = rel ? rel(0) : null;
+    const r10 = rel ? rel(10) : null;
+    ok('三方四正索引：0 → 对宫 6、三合 4/8；10 → 对宫 4、三合 2/6',
+      !!r0 && r0.opp === 6 && r0.tri[0] === 4 && r0.tri[1] === 8 &&
+      !!r10 && r10.opp === 4 && r10.tri[0] === 2 && r10.tri[1] === 6, JSON.stringify([r0, r10]));
+    /* 选宫后详情滚入视野：只在详情几乎全在首屏以下时滚，且只滚到露出详情顶部 200px（不来回跳） */
+    const reveal = ui && typeof ui.revealDelta === 'function' ? ui.revealDelta : null;
+    ok('详情几乎不可见时滚动到露出 200px（compact 实测：详情顶 672、视口底 717）',
+      !!reveal && reveal({ viewBottom: 717, obstruct: 0, detailTop: 672 }) === 155, reveal && String(reveal({ viewBottom: 717, obstruct: 0, detailTop: 672 })));
+    ok('详情已露出足够多时不滚动', !!reveal && reveal({ viewBottom: 717, obstruct: 0, detailTop: 500 }) === 0);
+    ok('窄屏扣掉贴底底栏的遮挡', !!reveal && reveal({ viewBottom: 717, obstruct: 51, detailTop: 700 }) === 234);
+    ok('滚动不把刚点的宫位推到吸顶时间栏下面（上限 = 宫位顶 − 时间栏底）',
+      !!reveal && reveal({ viewBottom: 717, obstruct: 0, detailTop: 672, cellTop: 182, stickyBottom: 136 }) === 46);
+    ok('刚点的宫位已贴着时间栏时不滚动',
+      !!reveal && reveal({ viewBottom: 717, obstruct: 0, detailTop: 672, cellTop: 130, stickyBottom: 136 }) === 0);
+  }
+  {
     /* 引用宫位：用引擎宫位对象的真实字段（stem/branch/major/minor），不能读不存在的 gz/stars */
     const soul = ch.palaces[ch.soulIndex];
     const quoteText = ui && typeof ui.palaceQuoteText === 'function' ? ui.palaceQuoteText(soul, '空宫') : '';

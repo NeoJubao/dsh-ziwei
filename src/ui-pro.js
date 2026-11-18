@@ -563,6 +563,16 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   background: color-mix(in srgb, var(--dsw-alias-bg-layer-1) 84%, var(--zp-accent) 16%);
   box-shadow: inset 0 0 0 2px var(--zp-accent);
 }
+/* 三方四正：选中宫的对宫与两个三合宫，淡色底 + 虚线内框 + 顶部小标签（选中反馈在任何宽度都留在盘内） */
+.zp-cell.rel-opp, .zp-cell.rel-tri {
+  background: color-mix(in srgb, var(--zp-fill-accent) 7%, var(--dsw-alias-bg-layer-1));
+  outline: 1px dashed color-mix(in srgb, var(--zp-fill-accent) 55%, transparent); outline-offset: -4px;
+}
+.zp-cell-rel {
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%); padding: 0 4px; border-radius: 0 0 4px 4px;
+  font-size: 9.5px; line-height: 14px; font-weight: 600; letter-spacing: .5px; pointer-events: none;
+  color: var(--dsw-alias-label-secondary); background: color-mix(in srgb, var(--zp-fill-accent) 18%, var(--dsw-alias-bg-layer-1));
+}
 .zp-cell.empty .zp-cell-name { color: var(--dsw-alias-label-secondary) }
 .zp-cell:focus-visible { outline: 2px solid var(--zp-accent); outline-offset: -2px }
 .zp-cell-top { display: flex; justify-content: space-between; align-items: baseline; gap: 2px 4px; flex-wrap: wrap; min-width: 0 }
@@ -1449,6 +1459,20 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         copy.push({ role: 'assistant', content: s });
         return copy;
       },
+      /* 三方四正：对宫 = +6，三合 = +4 / +8（宫位索引 mod 12）。 */
+      relatedPalaces: function (index) {
+        var i = +index;
+        return { opp: (i + 6) % 12, tri: [(i + 4) % 12, (i + 8) % 12] };
+      },
+      /* 选宫后详情要滚多少：详情露出不足 120px 才滚，滚到露出顶部 200px；obstruct 是贴底遮挡（窄屏底栏）。 */
+      revealDelta: function (o) {
+        var bottom = o.viewBottom - (o.obstruct || 0);
+        if (bottom - o.detailTop >= 120) return 0;
+        var want = o.detailTop - bottom + 200;
+        /* 不把刚点的宫位推到吸顶时间栏下面 */
+        if (typeof o.cellTop === 'number' && typeof o.stickyBottom === 'number') want = Math.min(want, o.cellTop - o.stickyBottom);
+        return Math.max(0, Math.round(want));
+      },
       /* 宫位的「宫名 干支」。引擎宫位对象只有 stem/branch，没有 gz 字段。 */
       palaceLabel: function (p) {
         if (!p) return '';
@@ -1793,14 +1817,17 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       var gods = [p.changsheng12, p.boshi12].filter(Boolean).join(' · ');
       var pos = CELL_POS[p.index] || { col: 1, row: 1 };
       var empty = !p.major.length;
+      var relLabel = props.relation === 'opp' ? t('oppPalace') : props.relation === 'tri' ? t('triPalace') : '';
       return h('div', {
-        className: 'zp-cell' + (props.selected ? ' on' : '') + (empty ? ' empty' : ''),
+        className: 'zp-cell' + (props.selected ? ' on' : '') + (empty ? ' empty' : '') +
+          (props.relation ? ' rel-' + props.relation : ''),
         style: { gridColumn: pos.col, gridRow: pos.row },
         onClick: props.onSelect,
         tabIndex: props.selected ? 0 : -1,
         role: 'button', 'aria-pressed': !!props.selected,
-        title: p.name + ' · ' + p.stem + p.branch
+        title: p.name + ' · ' + p.stem + p.branch + (relLabel ? ' · ' + relLabel : '')
       },
+        relLabel ? h('span', { className: 'zp-cell-rel', 'aria-hidden': true }, relLabel) : null,
         h('div', { className: 'zp-cell-top' },
           h('span', { className: 'zp-cell-name' },
             p.name,
@@ -1845,9 +1872,10 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
     function PalaceDetail(props) {
       var p = props.palace;
       var t = props.t;
-      var opp = (p.index + 6) % 12;
-      var tri1 = (p.index + 4) % 12;
-      var tri2 = (p.index + 8) % 12;
+      var rel = ZWUI.relatedPalaces(p.index);
+      var opp = rel.opp;
+      var tri1 = rel.tri[0];
+      var tri2 = rel.tri[1];
       var gods = [p.changsheng12, p.boshi12].filter(Boolean);
       var section = function (label, body) {
         return h('div', { className: 'zp-detail-section' },
@@ -3080,6 +3108,9 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         if (!chart || modal) return;
         var target = ev.target;
         if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT' || target.isContentEditable)) return;
+        /* 只在盘面宫格里接管：时间栏页签、工具页、详情按钮上的方向键不再去改一个看不见的选中宫 */
+        if (view !== 'chart' || ev.altKey || ev.metaKey || ev.ctrlKey) return;
+        if (!target || typeof target.closest !== 'function' || !target.closest('.zp-grid')) return;
         if (ev.key === 'ArrowLeft') { ev.preventDefault(); setSelected(function (s) { return ringStep(s < 0 ? chart.soulIndex : s, 'left'); }); }
         else if (ev.key === 'ArrowRight') { ev.preventDefault(); setSelected(function (s) { return ringStep(s < 0 ? chart.soulIndex : s, 'right'); }); }
         else if (ev.key === 'ArrowUp' || ev.key === 'ArrowDown') { ev.preventDefault(); setSelected(function (s) { return ringStep(s < 0 ? chart.soulIndex : s, 'opp'); }); }
@@ -3671,6 +3702,32 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
 
       /* 没盘时左栏必须始终可见（否则用户只剩空态、没有输入入口）；有盘才允许收起。 */
       var railVisible = !chart || railOpen;
+      /* 非 wide 档详情在盘面下方：点宫位后，详情几乎看不到就滚一小段把它露出来（见 ZWUI.revealDelta） */
+      var revealDetailSoon = function () {
+        var raf = window.requestAnimationFrame || function (f) { return setTimeout(f, 16); };
+        raf(function () {
+          raf(function () {
+            var root = rootRef.current;
+            var sc = root && root.querySelector('.zp-scroll');
+            var det = root && root.querySelector('.zp-detail');
+            if (!sc || !det) return;
+            var bar = root.querySelector('.zp-bottombar');
+            var barH = bar && bar.offsetParent ? bar.getBoundingClientRect().height : 0;
+            var cell = root.querySelector('.zp-cell.on');
+            var sticky = root.querySelector('.zp-timebar');
+            var stickyStyle = sticky ? window.getComputedStyle(sticky).position : '';
+            var delta = ZWUI.revealDelta({
+              viewBottom: sc.getBoundingClientRect().bottom, obstruct: barH, detailTop: det.getBoundingClientRect().top,
+              cellTop: cell ? cell.getBoundingClientRect().top : undefined,
+              stickyBottom: sticky && stickyStyle === 'sticky' ? sticky.getBoundingClientRect().bottom
+                : (root.querySelector('.zp-head') ? root.querySelector('.zp-head').getBoundingClientRect().bottom : undefined)
+            });
+            if (!delta) return;
+            var reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+            try { sc.scrollBy({ top: delta, behavior: reduce ? 'auto' : 'smooth' }); } catch (e) { sc.scrollTop += delta; }
+          });
+        });
+      };
       return h('div', {
         className: 'zp-root',
         ref: rootRef,
@@ -3763,12 +3820,17 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
                   h('div', { className: 'zp-board' },
                     h('div', { className: 'zp-grid' },
                       [3, 4, 5, 6, 2, 7, 1, 8, 0, 11, 10, 9].map(function (idx) {
+                        var rel = palaceSelected ? ZWUI.relatedPalaces(selected) : null;
                         return h(PalaceCell, {
                           key: idx,
                           palace: Object.assign({}, chart.palaces[idx], { isSoul: idx === chart.soulIndex }),
                           chart: chart,
                           selected: selected === idx,
-                          onSelect: function () { setSelected(idx); },
+                          relation: !rel ? null : idx === rel.opp ? 'opp' : rel.tri.indexOf(idx) >= 0 ? 'tri' : null,
+                          onSelect: function () {
+                            setSelected(idx);
+                            if (layoutMode !== 'wide' && tab === 'natal') revealDetailSoon();
+                          },
                           t: t,
                           showAdj: showAdj,
                           scope: scope,
