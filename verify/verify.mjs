@@ -661,6 +661,29 @@ ok('chrome 避让不用魔法数字写死（顶部偏移只走 --dsh-frame-top-c
       ? ui.pickPoint({ left: 110, top: 205 }, { left: 100, top: 200 }, 0, 0) : null;
     ok('报告选段按钮坐标在容器左上角时保留最小边距',
       !!pickEdge && pickEdge.x === 80 && pickEdge.y === 32, JSON.stringify(pickEdge));
+    /* ---- CSS 静态断言（批 A：A1–A4） ---- */
+    const cssRule = (sel) => {
+      const i = client.indexOf('\n' + sel + ' {');
+      if (i < 0) return '';
+      return client.slice(i, client.indexOf('}', i));
+    };
+    const btnRule = cssRule('.zp-btn');
+    ok('.zp-btn 是 inline-flex 且垂直居中（图标与文字同一行）',
+      /display:\s*inline-flex/.test(btnRule) && /align-items:\s*center/.test(btnRule), btnRule.slice(0, 160));
+    const narrowScroll = cssRule('.zp-root[data-w="narrow"] .zp-scroll');
+    const narrowPadX = (narrowScroll.match(/padding:\s*\d+(?:px)? (\d+)px/) || [])[1];
+    const barRule = cssRule('.zp-root[data-w="narrow"][data-chart="1"] .zp-bottombar');
+    const barMarginX = (barRule.match(/margin:\s*\S+ -(\d+)px/) || [])[1];
+    ok('窄屏底栏的负边距等于窄档滚动区左右内边距（不溢出）',
+      !!narrowPadX && narrowPadX === barMarginX, `scroll=${narrowPadX} bar=${barMarginX}`);
+    const chartScroll = cssRule('.zp-root[data-w="narrow"][data-chart="1"] .zp-scroll');
+    ok('有盘窄档滚动区底部内边距为 0（sticky 底栏贴住面板底边）',
+      /padding-bottom:\s*0\b/.test(chartScroll) && /margin:\s*\S+ -\d+px 0\b/.test(barRule), chartScroll + ' | ' + barRule.slice(0, 120));
+    ok('按钮颜色继承（:where 零权重重置，深色下不落回浏览器默认黑字）',
+      /:where\(\.zp-root\) button \{[^}]*color:\s*inherit/.test(client));
+    ok('程序聚焦的浮层容器带宿主约定的 data-dsh-automatic-focus，且不画焦点框',
+      /setAttribute\('data-dsh-automatic-focus'/.test(client) &&
+      /\.zp-root \[data-dsh-automatic-focus\]:focus \{[^}]*outline:\s*none/.test(client));
     const missing = [...used].filter((n) => !defined.has(n));
     ok('源码引用的图标都在 ICON_PATHS 里有定义', defined.size > 10 && missing.length === 0, 'missing: ' + missing.join(','));
   }

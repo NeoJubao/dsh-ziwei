@@ -1990,11 +1990,17 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   /* 设置弹层：上内边距取官方浮层 inset（68px 普通 / 全屏 20px），不钻到窗口标题带里 */
   padding-top: max(46px, var(--dsh-frame-overlay-top, 46px));
 }
+/* 宿主全局只给 button 重置了 font-family，没有 color，也没设 color-scheme：
+   没写颜色的按钮会落回浏览器默认黑字，深色主题下看不见。:where() 权重 0,0,1，不盖组件自己的颜色。 */
+:where(.zp-root) button { color: inherit }
+/* 浮层打开时程序聚焦容器（tabIndex=-1）。沿用宿主约定的 data-dsh-automatic-focus：容器不画焦点框，
+   内部控件的 :focus-visible 不受影响。 */
+.zp-root [data-dsh-automatic-focus]:focus { outline: none }
 .zp-scroll {
   height: 100%; overflow: auto; box-sizing: border-box;
   padding: 0 20px 40px; scrollbar-width: thin;
 }
-.zp-root[data-w="narrow"] .zp-scroll { padding: 0 14px 32px; }
+.zp-root[data-w="narrow"] .zp-scroll { padding: 0 16px 32px; }
 .zp-scroll-locked { overflow: hidden }
 .zp-scroll::-webkit-scrollbar { width: 9px; height: 9px; }
 .zp-scroll::-webkit-scrollbar-thumb {
@@ -2117,6 +2123,7 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
 }
 .zp-seg button.on { background: var(--zp-fill-accent); color: #fff }
 .zp-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
   box-sizing: border-box; background: var(--dsw-alias-bg-layer-2); border: 1px solid var(--dsw-alias-border-l1);
   border-radius: 9px; color: var(--dsw-alias-label-primary); padding: 0 13px; height: 32px;
   font-size: 12.5px; cursor: pointer; font-family: inherit;
@@ -2758,9 +2765,11 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
 .zp-toolview-title { font-size: 14px; font-weight: 650 }
 .zp-toolview-sub { font-size: 11px; color: var(--dsw-alias-label-secondary) }
 .zp-bottombar { display: none }
+/* sticky 的贴边位置按滚动区内边距内缩：有盘窄档把底部内边距让给底栏，底栏才真正贴住面板底边 */
+.zp-root[data-w="narrow"][data-chart="1"] .zp-scroll { padding-bottom: 0 }
 .zp-root[data-w="narrow"][data-chart="1"] .zp-bottombar {
   display: flex; align-items: center; gap: 8px; position: sticky; bottom: 0; z-index: 14;
-  margin: 12px -16px -32px; padding: 8px 16px;
+  margin: 12px -16px 0; padding: 8px 16px calc(8px + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--dsw-alias-border-l1);
   background: color-mix(in srgb, var(--dsw-alias-bg-base) 92%, transparent);
   -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
@@ -3164,7 +3173,10 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
            否则一打开抽屉，关闭/新对话按钮就被画上 focus ring，看起来像选错目标。
            Tab 仍会从容器进入第一个可聚焦控件。 */
         var box = boxRef.current;
-        try { if (box && typeof box.focus === 'function') box.focus(); } catch (e) { /* ignore */ }
+        try {
+          if (box && typeof box.setAttribute === 'function') box.setAttribute('data-dsh-automatic-focus', '');
+          if (box && typeof box.focus === 'function') box.focus();
+        } catch (e) { /* ignore */ }
         return function () {
           try { if (prev && typeof prev.focus === 'function') prev.focus(); } catch (e) { /* ignore */ }
         };
