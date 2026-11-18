@@ -79,10 +79,10 @@ window.__ModuleLoader__.load({
         suggestCareer: '重点讲事业与财运', suggestLove: '这十年感情要注意什么',
         suggestPlain: '说得再口语一点', suggestPalace: '解释一下当前宫位',
         copyFailed: '复制失败，请手动选择文本', syncFailed: '写入会话失败',
-        exported: '已导出 HTML', exportFailed: '导出失败',
+        exported: '已开始下载 HTML', exportFailed: '导出失败', copiedChart: '命盘已复制', clearBusy: '正在生成，写完后再清除', handoffWorking: '正在新建会话…', handoffNoNav: '会话已创建，但界面没能自动跳过去。请在左侧会话列表里打开新会话继续。', handoffFailedHttp: '交给会话失败（HTTP {status}）',
         aiThreadCleared: '已清空对话', aiRecordCleared: '已清除本机解读记录',
-        localDataTitle: '本机数据', localDataHint: '命盘、对话与报告只存在这个浏览器里；清除后不可恢复。',
-        clearLocal: '清除本机解读记录', clearLocalConfirm: '确定清除？命盘库会保留。',
+        localDataTitle: '本机数据', localDataHint: '命盘库、对话与报告只存在这个浏览器里。清除只删对话与报告，命盘库保留。',
+        clearLocal: '清除对话与报告', clearLocalConfirm: '确定清除？清除后不可恢复。',
         confirmClear: '确定清除', cancel: '取消', undo: '撤销',
         sampleChart: '示例盘', switchToMyBirth: '换成我的生辰', libDeleted: '已删除命盘', undoDone: '已撤销', view: '查看',
         reportSec01: '命盘总览', reportSec02: '性格大略', reportSec03: '家庭关系', reportSec04: '婚姻情感',
@@ -186,10 +186,10 @@ window.__ModuleLoader__.load({
         suggestCareer: 'Focus on career and money', suggestLove: 'What to watch in love this decade',
         suggestPlain: 'Make it more conversational', suggestPalace: 'Explain the current palace',
         copyFailed: 'Copy failed — select the text manually', syncFailed: 'Write to session failed',
-        exported: 'HTML exported', exportFailed: 'Export failed',
+        exported: 'HTML download started', exportFailed: 'Export failed', copiedChart: 'Chart copied', clearBusy: 'Generating — clear after it finishes', handoffWorking: 'Creating a session…', handoffNoNav: 'The session was created, but the view could not switch to it. Open it from the session list on the left.', handoffFailedHttp: 'Hand-off failed (HTTP {status})',
         aiThreadCleared: 'Conversation cleared', aiRecordCleared: 'Local reading records cleared',
-        localDataTitle: 'Local data', localDataHint: 'Charts, conversations and reports live only in this browser. Clearing cannot be undone.',
-        clearLocal: 'Clear local reading records', clearLocalConfirm: 'Clear now? Saved charts are kept.',
+        localDataTitle: 'Local data', localDataHint: 'Saved charts, conversations and reports live only in this browser. Clearing removes conversations and reports; saved charts stay.',
+        clearLocal: 'Clear conversations and reports', clearLocalConfirm: 'Clear now? This cannot be undone.',
         confirmClear: 'Clear', cancel: 'Cancel', undo: 'Undo',
         sampleChart: 'Sample chart', switchToMyBirth: 'Use my birth data', libDeleted: 'Chart deleted', undoDone: 'Undone', view: 'View',
         reportSec01: 'Chart overview', reportSec02: 'Character', reportSec03: 'Family', reportSec04: 'Marriage',
@@ -1354,6 +1354,7 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
 .zp-settings-local { display: flex; flex-direction: column; gap: 4px; padding: 8px 0; border-top: 1px solid var(--dsw-alias-border-l1); margin-top: 8px }
 .zp-settings-local b { font-size: 12px; line-height: 18px; font-weight: 600 }
 .zp-settings-local > span { color: var(--dsw-alias-label-secondary); font-size: 11px; line-height: 17px }
+.zp-settings-local > span.zp-settings-busy { color: var(--dsw-alias-state-warn-primary) }
 .zp-settings-confirm { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 4px }
 .zp-settings-confirm span { color: var(--dsw-alias-state-error-primary); font-size: 11px; line-height: 16px }
 .zp-root[data-studio="1"][data-w="mid"] .zp-report-section-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) }
@@ -2794,9 +2795,10 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
                 confirmClear
                   ? h('div', { className: 'zp-settings-confirm' },
                     h('span', null, t('clearLocalConfirm')),
-                    h('button', { className: 'zp-mini-btn', type: 'button', onClick: function () { props.onClearAll(); setConfirmClear(false); } }, t('confirmClear')),
+                    h('button', { className: 'zp-mini-btn', type: 'button', disabled: !!props.busy, onClick: function () { props.onClearAll(); setConfirmClear(false); } }, t('confirmClear')),
                     h('button', { className: 'zp-mini-btn', type: 'button', onClick: function () { setConfirmClear(false); } }, t('cancel')))
-                  : h('button', { className: 'zp-mini-btn', type: 'button', onClick: function () { setConfirmClear(true); } }, t('clearLocal'))),
+                  : h('button', { className: 'zp-mini-btn', type: 'button', disabled: !!props.busy, title: props.busy ? t('clearBusy') : undefined, onClick: function () { setConfirmClear(true); } }, t('clearLocal')),
+                props.busy ? h('span', { className: 'zp-settings-busy' }, t('clearBusy')) : null),
               h('div', { className: 'zp-settings-about' },
                 h('b', null, t('about')),
                 h('span', null, t('aboutText')),
@@ -2955,7 +2957,8 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       var reportRunning = report.status === 'running';
       var hasReport = report.status === 'done' && !!report.text;
       var lastMode = hasReport ? 'report' : 'brief';
-      var busy = interpreting || reportRunning;
+      var [handingOff, setHandingOff] = useState(false);
+      var busy = interpreting || reportRunning || handingOff;
 
       /* 面板宽度监听：布局切换与盘面缩放都靠它，避免用 viewport media query 误判面板宽度 */
       var rootRef = useRef(null);
@@ -3459,7 +3462,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
             chartText: E.chartText(chart),
             fullText: chartContextText(),
             name: form.name || '', place: form.place || '', occupation: form.occupation || '',
-            gender: form.gender === 'female' ? 'female' : 'male'
+            gender: birth.gender === 'female' ? 'female' : 'male'
           })
         }).then(function (r) { return r.json(); }).then(function (j) {
           if (j && j.ok) {
@@ -3479,14 +3482,15 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       var handoffToSession = function (mode) {
         if (!chart || busy) return;
         setHandoffDone(false);
-        setInterpreting(true);
+        setHandingOff(true);
+        showToast(t('handoffWorking'));
         var payload = {
           chartText: E.chartText(chart),
           fullText: chartContextText(),
           name: form.name || '',
           place: form.place || '',
           occupation: form.occupation || '',
-          gender: form.gender === 'female' ? 'female' : 'male',
+          gender: birth.gender === 'female' ? 'female' : 'male',
           interpretation: (mode === 'report' && hasReport) ? report.text : lastAnswer(),
           mode: mode === 'report' ? 'report' : 'brief'
         };
@@ -3496,7 +3500,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           body: JSON.stringify(payload)
         }).then(function (r) { return r.json().then(function (j) { return { status: r.status, j: j }; }); })
           .then(function (out) {
-            setInterpreting(false);
+            setHandingOff(false);
             var j = out.j || {};
             if (j.ok && j.sessionId) {
               setHandoffDone(true);
@@ -3507,14 +3511,14 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
                 tries += 1;
                 if (actions.openSession(j.sessionId)) return;
                 if (tries < 6) { setTimeout(openIt, 350 * tries); return; }
-                showToast('会话已创建，但界面没能自动跳过去——请在左侧会话列表里打开新会话继续。', { error: true });
+                showToast(t('handoffNoNav'), { error: true });
               };
               openIt();
             } else {
-              showToast(j.reason || ('交给会话失败 (HTTP ' + out.status + ')'), { error: true });
+              showToast(j.reason || t('handoffFailedHttp').replace('{status}', out.status), { error: true });
             }
           })
-          .catch(function (e) { setInterpreting(false); showToast(String((e && e.message) || e), { error: true }); });
+          .catch(function (e) { setHandingOff(false); showToast(String((e && e.message) || e), { error: true }); });
       };
 
       var clearThread = function () {
@@ -3596,8 +3600,11 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         if (!chart) return;
         copyText(E.chartText(chart), function (ok) {
           setCopied(ok);
-          if (ok) setTimeout(function () { setCopied(false); }, 1600);
-          else showToast(t('copyFailed'), { error: true });
+          if (ok) {
+            setTimeout(function () { setCopied(false); }, 1600);
+            /* compact / 窄屏顶栏只剩图标、看不到「已复制」，用提示条回执 */
+            if (layoutMode === 'compact' || layoutMode === 'narrow') showToast(t('copiedChart'));
+          } else showToast(t('copyFailed'), { error: true });
         });
       };
 
@@ -3977,6 +3984,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
             autoOpen: autoOpen, setAutoOpen: setAutoOpen,
             showAdj: showAdj, setShowAdj: setShowAdj,
             onClearAll: clearAllReading,
+            busy: busy,
             reportCount: thread.length,
             hasReport: hasReport,
             onClose: closeModal
