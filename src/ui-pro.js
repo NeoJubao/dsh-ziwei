@@ -69,7 +69,7 @@ window.__ModuleLoader__.load({
         reportQuoteLabel: '报告选段', reportQuoteAction: '让紫微师改这段',
         reportIdleTitle: '把这盘读成一份完整报告。',
         reportIdleHint: '14 个部分：命盘总览、性格、家庭、婚姻、财富、事业、大限与综合建议。约 2–3 分钟。',
-        reportGenerate: '生成完整报告', reportRegenerate: '重新生成', reportRegenerateConfirm: '再点一次，替换旧报告', reportRestored: '重新生成没有写出内容，已保留原报告',
+        reportGenerate: '生成完整报告', reportRegenerate: '重新生成', reportRegenerateConfirm: '再点一次，替换旧报告', reportRestored: '重新生成没有写出内容，已保留原报告', reportReadyToast: '完整报告写好了', aiAnswerReady: '紫微师回答好了', aiRunningBg: '正在生成，点开查看进度',
         reportFinePrint: '报告会保存在本机，可随时回来继续读；导出 HTML 后可离线阅读。',
         reportError: '报告生成中断', reportErrorHint: '已生成的部分会保留；可以接着写，或重新生成。',
         reportPartial: '报告已生成的部分保留；可以继续生成补齐。',
@@ -84,7 +84,7 @@ window.__ModuleLoader__.load({
         localDataTitle: '本机数据', localDataHint: '命盘、对话与报告只存在这个浏览器里；清除后不可恢复。',
         clearLocal: '清除本机解读记录', clearLocalConfirm: '确定清除？命盘库会保留。',
         confirmClear: '确定清除', cancel: '取消', undo: '撤销',
-        sampleChart: '示例盘', switchToMyBirth: '换成我的生辰', libDeleted: '已删除命盘', undoDone: '已撤销',
+        sampleChart: '示例盘', switchToMyBirth: '换成我的生辰', libDeleted: '已删除命盘', undoDone: '已撤销', view: '查看',
         reportSec01: '命盘总览', reportSec02: '性格大略', reportSec03: '家庭关系', reportSec04: '婚姻情感',
         reportSec05: '子女培育', reportSec06: '财富管理', reportSec07: '健康养生', reportSec08: '事业发展',
         reportSec09: '朋友贵人', reportSec10: '居家风水', reportSec11: '心灵福德', reportSec12: '出行迁移',
@@ -176,7 +176,7 @@ window.__ModuleLoader__.load({
         reportQuoteLabel: 'Report excerpt', reportQuoteAction: 'Ask Zi Wei to revise this',
         reportIdleTitle: 'Turn this chart into a full report.',
         reportIdleHint: '14 sections: overview, character, family, marriage, wealth, career, decades and advice. About 2–3 minutes.',
-        reportGenerate: 'Generate full report', reportRegenerate: 'Regenerate', reportRegenerateConfirm: 'Click again to replace', reportRestored: 'Regeneration produced nothing; the previous report was kept',
+        reportGenerate: 'Generate full report', reportRegenerate: 'Regenerate', reportRegenerateConfirm: 'Click again to replace', reportRestored: 'Regeneration produced nothing; the previous report was kept', reportReadyToast: 'The full report is ready', aiAnswerReady: 'The answer is ready', aiRunningBg: 'Generating — open to see progress',
         reportFinePrint: 'The report is stored locally and can be reopened; export HTML for offline reading.',
         reportError: 'Report generation interrupted', reportErrorHint: 'The partial report is kept; continue or regenerate.',
         reportPartial: 'The partial report is kept; continue to fill the rest.',
@@ -191,7 +191,7 @@ window.__ModuleLoader__.load({
         localDataTitle: 'Local data', localDataHint: 'Charts, conversations and reports live only in this browser. Clearing cannot be undone.',
         clearLocal: 'Clear local reading records', clearLocalConfirm: 'Clear now? Saved charts are kept.',
         confirmClear: 'Clear', cancel: 'Cancel', undo: 'Undo',
-        sampleChart: 'Sample chart', switchToMyBirth: 'Use my birth data', libDeleted: 'Chart deleted', undoDone: 'Undone',
+        sampleChart: 'Sample chart', switchToMyBirth: 'Use my birth data', libDeleted: 'Chart deleted', undoDone: 'Undone', view: 'View',
         reportSec01: 'Chart overview', reportSec02: 'Character', reportSec03: 'Family', reportSec04: 'Marriage',
         reportSec05: 'Children', reportSec06: 'Wealth', reportSec07: 'Health', reportSec08: 'Career',
         reportSec09: 'Mentors & friends', reportSec10: 'Home', reportSec11: 'Inner life', reportSec12: 'Travel & moves',
@@ -754,6 +754,9 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   background: color-mix(in srgb, var(--zp-accent) 10%, var(--dsw-alias-bg-layer-2));
 }
 .zp-btn-ai { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 14px }
+/* 抽屉关着但还在生成：主按钮上一颗呼吸点（减少动态偏好下由全局规则停掉动画） */
+.zp-run-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex: none; animation: zp-run-pulse 1.2s ease-in-out infinite }
+@keyframes zp-run-pulse { 0%, 100% { opacity: 1 } 50% { opacity: .35 } }
 .zp-btn-ai[aria-pressed="true"] { box-shadow: inset 0 0 0 1px color-mix(in srgb, #fff 35%, transparent) }
 .zp-root[data-w="narrow"] .zp-icon-btn { padding: 0; width: 32px }
 .zp-root[data-w="narrow"] .zp-icon-btn .zp-btn-label { display: none }
@@ -2710,9 +2713,10 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
 
     function Toast(props) {
       if (!props.toast) return null;
+      var action = props.toast.action;
       return h('div', { className: 'zp-toast' + (props.toast.error ? ' is-error' : ''), role: 'status', 'aria-live': 'polite' },
         h('span', null, props.toast.text),
-        props.toast.undo ? h('button', { type: 'button', onClick: props.toast.undo }, '撤销') : null);
+        action ? h('button', { type: 'button', onClick: function () { props.onDismiss(); action.run(); } }, action.label) : null);
     }
 
     /* ---------------- 设置：面板内居中弹层 ---------------- */
@@ -2894,6 +2898,14 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         setStudioOpenState(!!v);
         try { localStorage.setItem('ziwei-pro.studio', v ? '1' : '0'); } catch (e) { /* ignore */ }
       };
+      /* 流式回调闭包里的 studioOpen 是发起时的旧值；结束时要知道抽屉现在是否开着，读这个 ref */
+      var studioOpenRef = useRef(studioOpen);
+      studioOpenRef.current = studioOpen;
+      /* 抽屉关着时生成结束：弹一个带「查看」的提示（开着时用户自己看得到，不打扰） */
+      var announceInBackground = function (text, tab, isError) {
+        if (studioOpenRef.current) return;
+        showToast(text, { error: !!isError, action: { label: t('view'), run: function () { setStudioTab(tab); setStudioOpen(true); } } });
+      };
       var [studioTab, setStudioTab] = useState('chat');         /* 抽屉页签: chat | report */
       var [mobilePane, setMobilePane] = useState('chat');      /* 窄屏工位: chat | chart（预留，当前由 CSS 切换） */
       var [interpError, setInterpError] = useState('');
@@ -2907,11 +2919,17 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       var [readerOpen, setReaderOpen] = useState(false);
       var [toast, setToast] = useState(null);
       var toastTimerRef = useRef(null);
+      /* opts.undo：撤销动作（6 秒）；opts.action：{ label, run } 通用动作（如「查看」，8 秒） */
       var showToast = function (text, opts) {
         var o = opts || {};
-        setToast({ text: String(text || ''), error: !!o.error, undo: o.undo || null, key: Date.now() });
+        var action = o.action || (o.undo ? { label: t('undo'), run: o.undo } : null);
+        setToast({ text: String(text || ''), error: !!o.error, action: action, key: Date.now() });
         if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
-        toastTimerRef.current = setTimeout(function () { setToast(null); }, o.undo ? 6000 : 3200);
+        toastTimerRef.current = setTimeout(function () { setToast(null); }, o.action ? 8000 : (o.undo ? 6000 : 3200));
+      };
+      var dismissToast = function () {
+        if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+        setToast(null);
       };
       var chartKeyRef = useRef('');
       var reportRunning = report.status === 'running';
@@ -3339,6 +3357,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
             setThinkChars(0);
             setInterpError(err || '');
             setInterpIssue(issue || null);
+            announceInBackground(err || t('aiAnswerReady'), 'chat', !!err);
           }
         });
       };
@@ -3386,6 +3405,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
               if (prev.status === 'done') return prev;
               return Object.assign({}, prev, { status: 'error', error: err || '', issue: issue || null, finishedAt: Date.now() });
             });
+            announceInBackground(err ? t('reportError') + '：' + err : t('reportReadyToast'), 'report', !!err);
           }
         });
       };
@@ -3702,6 +3722,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
 
       /* 没盘时左栏必须始终可见（否则用户只剩空态、没有输入入口）；有盘才允许收起。 */
       var railVisible = !chart || railOpen;
+      var runningInBackground = (interpreting || reportRunning) && !studioOpen;
       /* 非 wide 档详情在盘面下方：点宫位后，详情几乎看不到就滚一小段把它露出来（见 ZWUI.revealDelta） */
       var revealDetailSoon = function () {
         var raf = window.requestAnimationFrame || function (f) { return setTimeout(f, 16); };
@@ -3783,10 +3804,12 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
               }, h(Icon, { name: 'sync' }), h('span', { className: 'zp-btn-label' }, synced ? t('synced') : t('sync'))) : null,
               chart ? h('span', { className: 'zp-head-sep' }) : null,
               chart ? h('button', {
-                className: 'zp-btn zp-btn-primary zp-btn-ai', type: 'button',
+                className: 'zp-btn zp-btn-primary zp-btn-ai' + (runningInBackground ? ' is-running' : ''), type: 'button',
                 'aria-pressed': studioOpen ? 'true' : 'false',
+                title: runningInBackground ? t('aiRunningBg') : undefined,
                 onClick: openAI
-              }, h(Icon, { name: 'sparkle', size: 14 }), h('span', null, studioOpen ? t('modeRead') : t('ai'))) : null,
+              }, h(Icon, { name: 'sparkle', size: 14 }), h('span', null, studioOpen ? t('modeRead') : t('ai')),
+                runningInBackground ? h('span', { className: 'zp-run-dot', 'aria-label': t('aiRunningBg') }) : null) : null,
               h('button', {
                 className: 'zp-icon-btn', type: 'button', title: t('settingsTitle'), 'aria-label': t('settingsTitle'),
                 'aria-pressed': modal === 'settings' ? 'true' : 'false',
@@ -3851,8 +3874,9 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           chart ? h('div', { className: 'zp-bottombar', 'data-region': 'BOTTOMBAR' },
             h('button', { className: 'zp-btn', type: 'button', onClick: editBirth },
               h(Icon, { name: 'panelLeft', size: 14 }), h('span', null, t('editBirthShort'))),
-            h('button', { className: 'zp-btn zp-btn-primary', type: 'button', onClick: openAI },
-              h(Icon, { name: 'sparkle', size: 14 }), h('span', null, t('ai')))) : null
+            h('button', { className: 'zp-btn zp-btn-primary' + (runningInBackground ? ' is-running' : ''), type: 'button', onClick: openAI, title: runningInBackground ? t('aiRunningBg') : undefined },
+              h(Icon, { name: 'sparkle', size: 14 }), h('span', null, t('ai')),
+              runningInBackground ? h('span', { className: 'zp-run-dot', 'aria-label': t('aiRunningBg') }) : null)) : null
           )),
         studioOpen && chart ? h(StudioDrawer, {
             t: t,
@@ -3903,7 +3927,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
             hasReport: hasReport,
             onClose: closeModal
           }) : null,
-          h(Toast, { toast: toast }));
+          h(Toast, { toast: toast, onDismiss: dismissToast }));
     }
 
     /* ---------------- 默认表单 ---------------- */
