@@ -1742,7 +1742,7 @@ window.__ModuleLoader__.load({
         studioWaitPh: '正在生成，先等这一轮写完…',
         canvasTabs: '画布视图', canvasChart: '盘面', canvasReport: '报告',
         reportTitle: '人生鲲鹏计划 · 完整报告', reportOpen: '查看完整报告',
-        reportRunningHint: '完整报告正在画布生成，写完会自动保存。',
+        reportRunningHint: '完整报告正在「报告」页签生成，写完会自动保存。',
         reportWriting: '正在写完整报告', reportPaused: '报告生成中断',
         reportProgressMeta: '已完成 {n}/{total} 部分 · {chars} 字',
         reportCurrent: '正在写第 {n} 部分 · {name}', reportToc: '报告目录',
@@ -1769,7 +1769,7 @@ window.__ModuleLoader__.load({
         reportSec05: '子女培育', reportSec06: '财富管理', reportSec07: '健康养生', reportSec08: '事业发展',
         reportSec09: '朋友贵人', reportSec10: '居家风水', reportSec11: '心灵福德', reportSec12: '出行迁移',
         reportSec13: '大限节奏', reportSec14: '综合建议',
-        timeScope: '命盘时间维度', backToBoard: '返回盘面',
+        timeScope: '命盘时间维度', backToBoard: '返回盘面', backToReading: '返回解读',
         prevDecade: '上一个大限', nextDecade: '下一个大限', backToCurrent: '回到当前',
         currentBadge: '当前', thisYear: '今年', prevYear: '上一年', nextYear: '下一年',
         collapseRail: '收起生辰栏', expandRail: '展开生辰栏', editBirthShort: '生辰',
@@ -1788,7 +1788,7 @@ window.__ModuleLoader__.load({
         sync: '写入会话', synced: '已写入 ✓',
         syncHint: '只把当前命盘写进会话上下文（不新建会话）；之后在任意会话里说「读取工作台命盘并写鲲鹏报告」即可', exportHtml: '导出精装 HTML', previewHtml: '预览报告', closePreview: '关闭预览',
         aiRetry: '重新解读',
-        autoOpen: '启动时自动打开工作台', showAdjSet: '宫格默认显示杂曜',
+        autoOpen: '启动时自动打开工作台', showAdjSet: '显示杂曜',
         settingsTitle: '设置', close: '关闭', about: '关于',
         versionLabel: '版本', checkUpdate: '检查更新', checking: '检查中…',
         updateHint: '仅点击时检查一次，不后台联网；更新需你自己执行命令。',
@@ -1851,7 +1851,7 @@ window.__ModuleLoader__.load({
         studioWaitPh: 'Generating — wait for this turn to finish…',
         canvasTabs: 'Canvas view', canvasChart: 'Chart', canvasReport: 'Report',
         reportTitle: 'Life Kunpeng Plan · Full Report', reportOpen: 'Open full report',
-        reportRunningHint: 'The full report is being written on the canvas; it saves when done.',
+        reportRunningHint: 'The full report is being written in the Report tab; it saves when done.',
         reportWriting: 'Writing the full report', reportPaused: 'Report paused',
         reportProgressMeta: '{n}/{total} sections · {chars} chars',
         reportCurrent: 'Writing section {n} · {name}', reportToc: 'Report contents',
@@ -1878,7 +1878,7 @@ window.__ModuleLoader__.load({
         reportSec05: 'Children', reportSec06: 'Wealth', reportSec07: 'Health', reportSec08: 'Career',
         reportSec09: 'Mentors & friends', reportSec10: 'Home', reportSec11: 'Inner life', reportSec12: 'Travel & moves',
         reportSec13: 'Decade rhythm', reportSec14: 'Advice',
-        timeScope: 'Time scope', backToBoard: 'Back to chart',
+        timeScope: 'Time scope', backToBoard: 'Back to chart', backToReading: 'Back to reading',
         prevDecade: 'Previous decade', nextDecade: 'Next decade', backToCurrent: 'Back to current',
         currentBadge: 'Current', thisYear: 'This year', prevYear: 'Previous year', nextYear: 'Next year',
         collapseRail: 'Collapse birth panel', expandRail: 'Expand birth panel', editBirthShort: 'Birth data',
@@ -1897,7 +1897,7 @@ window.__ModuleLoader__.load({
         sync: 'Write to session', synced: 'Written ✓',
         syncHint: 'Write this chart into the session context (no new session); then ask the agent to read it.', exportHtml: 'Export HTML', previewHtml: 'Preview', closePreview: 'Close Preview',
         aiRetry: 'Retry',
-        autoOpen: 'Open workbench on launch', showAdjSet: 'Show adjective stars in cells by default',
+        autoOpen: 'Open workbench on launch', showAdjSet: 'Show adjective stars',
         settingsTitle: 'Settings', close: 'Close', about: 'About',
         versionLabel: 'Version', checkUpdate: 'Check for updates', checking: 'Checking…',
         updateHint: 'Manual check only — no background polling; updates are installed by you.',
@@ -2404,6 +2404,8 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
 .zp-list-item.on { border-color: var(--zp-accent); background: color-mix(in srgb, var(--zp-accent) 8%, transparent) }
 .zp-list-item b { font-weight: 650; white-space: nowrap }
 .zp-list-item .zp-list-sub { color: var(--dsw-alias-label-secondary); font-size: 11px; margin-left: auto; white-space: nowrap }
+.zp-list-load { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 8px; padding: 0; border: 0; background: transparent; font: inherit; text-align: left; cursor: pointer }
+.zp-list-load:focus-visible { outline: 2px solid var(--zp-fill-accent); outline-offset: 2px; border-radius: 4px }
 .zp-list-del {
   background: none; border: none; color: var(--dsw-alias-label-secondary); cursor: pointer;
   font-size: 13px; padding: 1px 5px; border-radius: 6px; font-family: inherit; line-height: 1.4;
@@ -3307,21 +3309,21 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
             h('input', {
               className: 'zp-input', type: 'number', value: f.year, min: 1900, max: 2100, style: { flex: 1, minWidth: 0 },
               'aria-label': t('year'),
-              onChange: function (ev) { set({ year: ev.target.value }); }
+              onChange: function (ev) { set({ year: ev.target.value, isLeap: false }); }
             }),
             h('input', {
               className: 'zp-input', type: 'number', value: f.month, min: 1, max: 12, style: { width: 58, flex: 'none' },
               'aria-label': t('month'),
-              onChange: function (ev) { set({ month: ev.target.value }); }
+              onChange: function (ev) { set({ month: ev.target.value, isLeap: false }); }
             }),
             h('input', {
-              className: 'zp-input', type: 'number', value: f.day, min: 1, max: 30, style: { width: 58, flex: 'none' },
+              className: 'zp-input', type: 'number', value: f.day, min: 1, max: lunarMode ? 30 : 31, style: { width: 58, flex: 'none' },
               'aria-label': t('day'),
               onChange: function (ev) { set({ day: ev.target.value }); }
             }),
             lunarMode ? h('label', { className: 'zp-row', style: { fontSize: 11.5, color: 'var(--dsw-alias-label-secondary)', gap: 4, flex: 'none' } },
               h('input', {
-                type: 'checkbox', checked: !!f.isLeap, disabled: !leapAvailable,
+                type: 'checkbox', checked: !!f.isLeap && leapAvailable, disabled: !leapAvailable,
                 onChange: function (ev) { set({ isLeap: ev.target.checked }); }
               }), t('leap')) : null)),
         h('div', { key: 'r3', className: 'zp-field' },
@@ -3477,14 +3479,19 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         props.items.length === 0
           ? h('div', { style: { fontSize: 11.5, color: 'var(--dsw-alias-label-secondary)' } }, t('libEmpty'))
           : props.items.map(function (item) {
+            /* 整行可点，但加载是一个真正的按钮（键盘可达）；删除按钮是它的兄弟，不嵌套 */
             return h('div', {
               key: item.id, className: 'zp-list-item' + (props.current === item.id ? ' on' : ''),
               onClick: function () { props.onLoad(item); }
             },
-              h('b', null, item.name),
-              h('span', { className: 'zp-list-sub' }, item.input.year + '-' + item.input.month + '-' + item.input.day),
               h('button', {
-                className: 'zp-list-del', type: 'button', title: t('libDelete'),
+                className: 'zp-list-load', type: 'button', 'aria-current': props.current === item.id ? 'true' : undefined,
+                onClick: function (ev) { ev.stopPropagation(); props.onLoad(item); }
+              },
+                h('b', null, item.name),
+                h('span', { className: 'zp-list-sub' }, item.input.year + '-' + item.input.month + '-' + item.input.day)),
+              h('button', {
+                className: 'zp-list-del', type: 'button', title: t('libDelete'), 'aria-label': t('libDelete') + ' · ' + item.name,
                 onClick: function (ev) { ev.stopPropagation(); props.onDelete(item.id); }
               }, '×'));
           }));
@@ -4424,7 +4431,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       };
       return h('div', { className: 'zp-reader', role: 'dialog', 'aria-modal': 'true', 'aria-label': t('reportTitle'), tabIndex: -1, ref: function (el) { boxRef.current = el; ref.current = el; }, onKeyDown: function (ev) { trapTab(ev, ev.currentTarget); } },
         h('header', { className: 'zp-reader-head' },
-          h('button', { className: 'zp-icon-btn', type: 'button', title: t('backToBoard'), 'aria-label': t('backToBoard'), onClick: props.onClose }, h(Icon, { name: 'back' })),
+          h('button', { className: 'zp-icon-btn', type: 'button', title: t('backToReading'), 'aria-label': t('backToReading'), onClick: props.onClose }, h(Icon, { name: 'back' })),
           h('div', { className: 'zp-reader-title' },
             h('b', null, t('reportTitle')),
             h('span', null, String(report.text || '').replace(/\s/g, '').length + ' 字 · ' + t('reportReader'))),
