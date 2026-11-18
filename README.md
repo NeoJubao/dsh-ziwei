@@ -24,19 +24,20 @@ official DeepSeek product.
 
 ---
 
-## v5 dogfood：命盘工位（1.7.0-dogfood.1）
+## v5 dogfood：抽屉 + 报告产物（1.7.0-dogfood.2）
 
 > 这一节只属于分支 `feat/v5-chart-studio`，不是 main 的发布状态。
 > 用 `git switch feat/v5-chart-studio` 进入，`git switch main` 回到稳定版；
 > 切换后刷新 GUI 即可。v5 的解读记录写在 `ziwei-pro.readings.v2`，切回 main 不会读取。
 
-v5 只借自媒体工作台的**交互骨架**，不换视觉皮肤：宽屏「对话 + 盘面/报告画布」并排，盘面不被抽屉遮住；
-完整报告是独立产物，有阶段进度、全屏阅读、选中改写；示例盘有明确标识；复制/保存/同步/删除都有真实反馈。
+v5 只借自媒体工作台的**交互骨架**，不换视觉皮肤。dogfood.1 的宽屏并排试验已撤回；
+dogfood.2 保留右侧抽屉，并把完整报告做成抽屉内独立页签：
+阶段进度、完成阅读面、全屏阅读、选中改写；示例盘有明确标识；复制/保存/同步/删除都有真实反馈。
 
-| 工位 | 报告 |
+| 抽屉 | 报告 |
 |---|---|
-| ![v5 工位：左对话右盘面](docs/assets/v5-studio.jpg) | ![v5 报告产物](docs/assets/v5-report.jpg) |
-| ![v5 窄屏工位](docs/assets/v5-narrow.jpg) | ![v5 全屏阅读](docs/assets/v5-reader.jpg) |
+| ![v5 右侧抽屉：对话](docs/assets/v5-drawer.jpg) | ![v5 抽屉内报告页签](docs/assets/v5-drawer-report.jpg) |
+| ![v5 窄屏抽屉](docs/assets/v5-drawer-narrow.jpg) | ![v5 全屏阅读](docs/assets/v5-reader.jpg) |
 
 规划与取舍见 **[docs/design/v5-chart-studio-plan.md](docs/design/v5-chart-studio-plan.md)**。
 

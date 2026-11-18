@@ -1,9 +1,9 @@
 # 界面契约 · 结构（layout.md）
 
-> **v5 dogfood（1.7.0-dogfood.1）**：新增「命盘工位」交互——宽屏左侧 `CHAT` 对话 + 右侧画布
-> （盘面 / 报告），窄屏单栏切换；报告产物、全屏阅读、宫位/选段引用。RegionId 暂未扩充
-> （`CHAT`/`REPORT` 用组件 class 标记，不新增 `data-region`），完整设计见
-> [v5-chart-studio-plan.md](../design/v5-chart-studio-plan.md)。旧 `DRAWER` 作为回退样式保留。
+> **v5 dogfood（1.7.0-dogfood.2）**：解读恢复为右侧抽屉（560px，窄屏铺满），抽屉内
+> 「对话 / 报告」页签；报告产物、全屏阅读、宫位/选段引用都在抽屉内。dogfood.1 的宽屏并排
+> 已撤回。RegionId 暂未扩充（抽屉沿用 `DRAWER` 语义；报告/对话用 class 标记），完整设计见
+> [v5-chart-studio-plan.md](../design/v5-chart-studio-plan.md)。
 >
 > > **给编码 agent 的三句话：**
 > 1. 动手改界面结构之前，先走 §1 落位决策树。能落到某个 RegionId，直接实现，不用改本文。

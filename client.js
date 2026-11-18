@@ -1692,7 +1692,7 @@ window.__ModuleLoader__.load({
     const { useState, useEffect, useMemo, useRef } = React;
     const E = window.ZWEngine;
     /* 构建时由 build.mjs 注入 package.json 的版本号；未构建的源码里保留占位符。 */
-    const APP_VERSION = "1.7.0-dogfood.1";
+    const APP_VERSION = "1.7.0-dogfood.2";
 
     /* ---------------- i18n ---------------- */
     const DICT = {
@@ -1737,7 +1737,7 @@ window.__ModuleLoader__.load({
         aiFullReport: '完整报告', aiFullReportHint: '基于当前命盘生成完整鲲鹏报告（14 部分）',
         aiEmptyLead: '命盘已带入', aiEmptyHint: '直接提问，或先看一份解读。',
         viewMode: '工作台视图', modeChart: '看盘', modeRead: '解读',
-        studioChatLabel: '紫微师对话', studioEmptyTitle: '说一句话，把这盘读懂。',
+        studioChatLabel: '紫微师对话', studioTabs: '解读面板', studioChatTab: '对话', studioReportTab: '报告', studioEmptyTitle: '说一句话，把这盘读懂。',
         studioEmptyHint: '可以直接问，也可以先看一份解读；命盘和对话会一起保留。',
         studioWaitPh: '正在生成，先等这一轮写完…',
         canvasTabs: '画布视图', canvasChart: '盘面', canvasReport: '报告',
@@ -1844,7 +1844,7 @@ window.__ModuleLoader__.load({
         aiFullReport: 'Full report', aiFullReportHint: 'Generate the full 14-part Kunpeng report for this chart',
         aiEmptyLead: 'Chart ready', aiEmptyHint: 'Ask directly, or start with a reading.',
         viewMode: 'Workbench view', modeChart: 'Chart', modeRead: 'Reading',
-        studioChatLabel: 'Zi Wei chat', studioEmptyTitle: 'Say one thing, and we read the chart.',
+        studioChatLabel: 'Zi Wei chat', studioTabs: 'Reading panel', studioChatTab: 'Chat', studioReportTab: 'Report', studioEmptyTitle: 'Say one thing, and we read the chart.',
         studioEmptyHint: 'Ask directly, or start with a reading. The chart and conversation stay together.',
         studioWaitPh: 'Generating — wait for this turn to finish…',
         canvasTabs: 'Canvas view', canvasChart: 'Chart', canvasReport: 'Report',
@@ -2063,7 +2063,7 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
 /* ---------------- 卡片 ---------------- */
 .zp-card {
   background: var(--dsw-alias-bg-layer-1); border: 1px solid var(--dsw-alias-border-l1);
-  border-radius: 14px; padding: 14px 16px;
+  border-radius: 14px; padding: 16px;
 }
 .zp-card-title {
   font-size: 11px; font-weight: 800; letter-spacing: 1.8px; color: var(--dsw-alias-label-secondary);
@@ -2345,7 +2345,7 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
 /* ---------------- 宫位详情 ---------------- */
 .zp-detail {
   background: var(--dsw-alias-bg-layer-1); border: 1px solid var(--dsw-alias-border-l1);
-  border-radius: 14px; padding: 14px 16px; margin-top: 12px; min-width: 0;
+  border-radius: 14px; padding: 16px; margin-top: 12px; min-width: 0;
 }
 .zp-root:not([data-w="wide"]) .zp-detail { max-width: 760px; margin-left: auto; margin-right: auto }
 .zp-root[data-w="wide"] .zp-detail { margin-top: 0; position: sticky; top: 64px }
@@ -3015,6 +3015,50 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
 .zp-root[data-w="narrow"] .zp-report-steps { grid-template-columns: 1fr }
 .zp-root[data-w="narrow"] .zp-reader-head { flex-wrap: wrap }
 .zp-root[data-w="narrow"] .zp-reader-body { padding: 12px 16px 16px }
+
+/* ---------------- v5 抽屉（默认解读形态） ---------------- */
+.zp-drawer-overlay { position: absolute; inset: 0; z-index: 55; display: flex; justify-content: flex-end }
+.zp-drawer-mask {
+  position: absolute; inset: 0; animation: zp-fade-in .14s ease-out;
+  background: color-mix(in srgb, var(--dsw-alias-label-primary) 26%, transparent);
+}
+.zp-drawer {
+  position: relative; z-index: 1; width: min(560px, 100%); height: 100%; min-width: 0;
+  display: flex; flex-direction: column; overflow: hidden;
+  background: var(--dsw-alias-bg-base); border-left: 1px solid var(--dsw-alias-border-l1);
+  box-shadow: var(--dsw-elevation-prominent);
+  animation: zp-drawer-in .2s cubic-bezier(.2, .8, .2, 1) both;
+}
+@keyframes zp-drawer-in { from { opacity: 0; transform: translateX(16px) } }
+.zp-drawer-head {
+  flex: none; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 8px 12px; border-bottom: 1px solid var(--dsw-alias-border-l1);
+}
+.zp-drawer-title { flex: 1 1 150px; min-width: 0; display: flex; flex-direction: column; gap: 2px }
+.zp-drawer-title b { font-size: 13px; line-height: 20px; font-weight: 600 }
+.zp-drawer-title span { color: var(--dsw-alias-label-secondary); font-size: 11px; line-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.zp-drawer-tabs { display: inline-flex; align-items: center; gap: 2px; padding: 4px; border-radius: 8px; background: var(--dsw-alias-bg-layer-2); flex: none }
+.zp-drawer-tabs button {
+  display: inline-flex; align-items: center; gap: 4px; border: 0; background: transparent;
+  height: 26px; padding: 0 12px; border-radius: 6px; color: var(--dsw-alias-label-secondary);
+  font-family: inherit; font-size: 12px; cursor: pointer; white-space: nowrap;
+}
+.zp-drawer-tabs button.is-on { background: var(--dsw-alias-bg-layer-1); color: var(--dsw-alias-label-primary); box-shadow: var(--dsw-elevation-soft) }
+.zp-drawer-actions { display: flex; align-items: center; gap: 2px; flex: none }
+.zp-drawer-body { flex: 1; min-height: 0; display: flex; flex-direction: column }
+.zp-drawer .zp-studio-chat { flex: 1 1 auto; width: auto; border-right: 0 }
+.zp-drawer .zp-studio-scroll { padding: 16px }
+.zp-drawer .zp-studio-composer { margin: 0 12px 8px }
+.zp-drawer .zp-studio-disclaimer { padding: 0 16px 8px }
+.zp-drawer .zp-report-artifact { flex: 1; min-height: 0; padding: 12px 16px 16px }
+.zp-drawer .zp-report-head h2 { font-size: 16px; line-height: 24px }
+.zp-drawer .zp-report-actions { gap: 4px }
+.zp-drawer .zp-pill-btn { height: 28px; padding: 0 12px; font-size: 11px }
+.zp-drawer .zp-report-toc { flex-basis: 124px }
+.zp-drawer .zp-report-prose { font-size: 13px; line-height: 22px; max-width: none }
+.zp-drawer .zp-report-sec h2 { font-size: 16px; max-width: none }
+.zp-drawer .zp-report-chat-btn { display: none }
+.zp-root[data-w="narrow"] .zp-drawer { width: 100%; border-left: 0; box-shadow: none }
 
 /* ---------------- 深色主题：内容色提亮一档 ---------------- */
 body[data-ds-dark-theme] .zp-root {
@@ -3705,7 +3749,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       map[key] = {
         thread: thread,
         report: report.text ? report : null,
-        studioTab: data && data.studioTab === 'report' ? 'report' : 'chart',
+        studioTab: data && data.studioTab === 'report' ? 'report' : 'chat',
         name: String((data && data.name) || ''),
         updatedAt: Date.now()
       };
@@ -3739,7 +3783,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           }
         }
       }
-      return { thread: thread, report: report.status === 'done' ? report : null, studioTab: 'chart', updatedAt: hit.updatedAt || 0 };
+      return { thread: thread, report: report.status === 'done' ? report : null, studioTab: 'chat', updatedAt: hit.updatedAt || 0 };
     }
     function loadReadingRecord(key) {
       if (!key) return null;
@@ -3752,7 +3796,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       return {
         thread: thread,
         report: report,
-        studioTab: rec.studioTab === 'report' ? 'report' : 'chart',
+        studioTab: rec.studioTab === 'report' ? 'report' : 'chat',
         updatedAt: rec.updatedAt || 0
       };
     }
@@ -3869,7 +3913,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       };
       var hasThread = thread.length > 0;
       return h('aside', { className: 'zp-studio-chat', 'aria-label': t('studioChatLabel') },
-        h('header', { className: 'zp-studio-head' },
+        props.hideHead ? null : h('header', { className: 'zp-studio-head' },
           h('button', {
             className: 'zp-icon-btn', type: 'button', title: t('modeChart'), 'aria-label': t('modeChart'),
             onClick: props.onExit
@@ -3952,6 +3996,86 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
               : h('button', { className: 'zp-send', type: 'button', disabled: !q.trim(), title: t('aiSend'), 'aria-label': t('aiSend'), onClick: function () { submit(); } },
                 h(Icon, { name: 'send', size: 15 })))),
         h('div', { className: 'zp-studio-disclaimer' }, t('disclaimerShort')));
+    }
+
+    function StudioDrawer(props) {
+      var t = props.t;
+      var boxRef = useDialogFocus();
+      var tab = props.tab === 'report' ? 'report' : 'chat';
+      var hasThread = (props.thread || []).length > 0;
+      var busy = props.streaming || props.reportRunning;
+      return h('div', { className: 'zp-drawer-overlay' },
+        h('div', { className: 'zp-drawer-mask', onClick: props.onClose, 'aria-hidden': true }),
+        h('aside', {
+          className: 'zp-drawer', role: 'dialog', 'aria-modal': 'true', 'aria-label': t('aiTitle'),
+          tabIndex: -1, ref: boxRef, onKeyDown: function (ev) { trapTab(ev, ev.currentTarget); }
+        },
+        h('header', { className: 'zp-drawer-head' },
+          h('div', { className: 'zp-drawer-title' },
+            h('b', null, t('aiTitle')),
+            h('span', null, props.contextLine + (props.selectedPalace ? ' · ' + props.selectedPalace : ''))),
+          h('div', { className: 'zp-drawer-tabs', role: 'tablist', 'aria-label': t('studioTabs') },
+            h('button', {
+              type: 'button', role: 'tab', 'aria-selected': tab === 'chat',
+              className: tab === 'chat' ? 'is-on' : '',
+              onClick: function () { props.onTab('chat'); }
+            }, t('studioChatTab')),
+            h('button', {
+              type: 'button', role: 'tab', 'aria-selected': tab === 'report',
+              className: tab === 'report' ? 'is-on' : '',
+              onClick: function () { props.onTab('report'); }
+            }, h(Icon, { name: 'report', size: 12 }), t('studioReportTab'),
+            (props.hasReport || props.reportRunning) ? h('i', { className: 'zp-mode-dot', 'aria-hidden': true }) : null)),
+          h('div', { className: 'zp-drawer-actions' },
+            hasThread ? h('button', {
+              className: 'zp-icon-btn', type: 'button', title: t('aiNewChat'), 'aria-label': t('aiNewChat'),
+              disabled: busy, onClick: props.onClear
+            }, h(Icon, { name: 'newChat' })) : null,
+            h('button', {
+              className: 'zp-icon-btn', type: 'button', title: t('handoffHint'), 'aria-label': t('handoff'),
+              disabled: busy, onClick: props.onHandoff
+            }, h(Icon, { name: 'handoff' })),
+            h('button', {
+              className: 'zp-icon-btn', type: 'button', title: t('close'), 'aria-label': t('close'), onClick: props.onClose
+            }, h(Icon, { name: 'close' })))),
+        h('div', { className: 'zp-drawer-body' },
+          tab === 'report'
+            ? h(ReportArtifact, {
+              t: t,
+              report: props.report,
+              copied: props.reportCopied,
+              onGenerate: props.onGenerate,
+              onStop: props.onStop,
+              onCopy: props.onReportCopy,
+              onExport: props.onExport,
+              onReader: props.onReader,
+              onQuote: props.onQuote,
+              onChat: function () { props.onTab('chat'); }
+            })
+            : h(StudioChat, {
+              t: t,
+              hideHead: true,
+              thread: props.thread,
+              streaming: props.streaming,
+              reportRunning: props.reportRunning,
+              thinkChars: props.thinkChars,
+              interpError: props.interpError,
+              interpIssue: props.interpIssue,
+              hasReport: props.hasReport,
+              quote: props.quote,
+              suggestions: props.suggestions,
+              contextLine: props.contextLine,
+              selectedPalace: props.selectedPalace,
+              onExit: props.onClose,
+              onClear: props.onClear,
+              onAsk: props.onAsk,
+              onGenerateReport: props.onGenerateReport,
+              onOpenReport: function () { props.onTab('report'); },
+              onClearQuote: props.onClearQuote,
+              onContinue: props.onContinue,
+              onStop: props.onStop,
+              onHandoff: props.onHandoff
+            }))));
     }
 
     function ReportProgress(props) {
@@ -4307,7 +4431,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         setStudioOpenState(!!v);
         try { localStorage.setItem('ziwei-pro.studio', v ? '1' : '0'); } catch (e) { /* ignore */ }
       };
-      var [studioTab, setStudioTab] = useState('chart');       /* 画布页签: chart | report */
+      var [studioTab, setStudioTab] = useState('chat');         /* 抽屉页签: chat | report */
       var [mobilePane, setMobilePane] = useState('chat');      /* 窄屏工位: chat | chart（预留，当前由 CSS 切换） */
       var [interpError, setInterpError] = useState('');
       var [interpIssue, setInterpIssue] = useState(null);   /* {kind, canContinue}: 截断/断连/超时的结构化原因 */
@@ -4388,7 +4512,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         if (saved) {
           setThread(saved.thread || []);
           setReport(normalizeReport(saved.report));
-          setStudioTab(saved.studioTab === 'report' ? 'report' : 'chart');
+          setStudioTab(saved.studioTab === 'report' ? 'report' : 'chat');
         } else {
           setThread([]);
           setReport(emptyReport());
@@ -4946,9 +5070,6 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         : (panelW >= 1394 ? 'wide'
         : (panelW >= 1072 ? 'mid'
         : (panelW >= 908 ? 'compact' : 'narrow')));
-      /* 工位并排只在真正有余量时启用；宽档降为中档，让宫位详情落在盘面下方，避免被对话挤扁 */
-      var studioSplit = studioOpen && (layoutMode === 'wide' || layoutMode === 'mid');
-      if (studioSplit && layoutMode === 'wide') layoutMode = 'mid';
       /* 示例盘识别：用默认生辰且没有额外姓名/地点/经度；只用于提示，不改变数据 */
       var isSampleChart = !!chart &&
         form.calendar === DEFAULT_FORM.calendar &&
@@ -4964,10 +5085,19 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           if (curAgeForDecade >= decadalList[ci].ageRange[0] && curAgeForDecade <= decadalList[ci].ageRange[1]) { currentDecadalIdx = ci; break; }
         }
       }
+      useEffect(function () {
+        if (!studioOpen) return undefined;
+        var onEsc = function (ev) {
+          if (ev.key === 'Escape' && !readerOpen) { ev.preventDefault(); setStudioOpen(false); }
+        };
+        window.addEventListener('keydown', onEsc);
+        return function () { window.removeEventListener('keydown', onEsc); };
+      }, [studioOpen, readerOpen]);
       var openStudio = function () {
         if (!chart) return;
         setStudioOpen(true);
         setMobilePane('chat');
+        setStudioTab('chat');
       };
       var closeStudio = function () {
         setStudioOpen(false);
@@ -5001,7 +5131,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       var continueChat = function () { runChat(t('aiContinuePrompt')); };
       var quoteFromReport = function (q) {
         setQuote(q);
-        setStudioTab('chart');
+        setStudioTab('chat');
         setStudioOpen(true);
         setMobilePane('chat');
       };
@@ -5089,14 +5219,12 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           }, h(Icon, { name: 'expand', size: 12 }), focus ? t('focusOff') : t('focusOn')) : null)) : null;
 
       /* 没盘时左栏必须始终可见（否则用户只剩空态、没有输入入口）；有盘才允许收起。 */
-      var railVisible = !studioOpen && (!chart || railOpen);
+      var railVisible = !chart || railOpen;
       return h('div', {
         className: 'zp-root',
         ref: rootRef,
         'data-w': layoutMode,
         'data-chart': chart ? '1' : undefined,
-        'data-studio': studioOpen ? '1' : undefined,
-        'data-canvas': studioOpen ? studioTab : undefined,
         'data-rail': railVisible ? 'open' : 'closed',
         /* 没有盘时不能进专注态：否则左栏（生辰输入）被隐藏且没有退出按钮 */
         'data-focus': (focus && chart) ? '1' : undefined
@@ -5123,18 +5251,6 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
             h('div', { className: 'zp-brand' },
               h('span', { className: 'zp-brand-name' }, t('brand')),
               h('span', { className: 'zp-brand-pro' }, t('brandPro'))),
-            chart && layoutMode !== 'narrow' ? h('div', { className: 'zp-mode-switch', role: 'group', 'aria-label': t('viewMode') },
-              h('button', {
-                type: 'button', className: !studioOpen ? 'is-on' : '',
-                'aria-pressed': !studioOpen ? 'true' : 'false',
-                onClick: closeStudio
-              }, t('modeChart')),
-              h('button', {
-                type: 'button', className: studioOpen ? 'is-on' : '',
-                'aria-pressed': studioOpen ? 'true' : 'false',
-                onClick: openStudio
-              }, h(Icon, { name: 'sparkle', size: 12 }), t('modeRead'),
-              (thread.length || hasReport) ? h('i', { className: 'zp-mode-dot', 'aria-hidden': true }) : null)) : null,
             /* 窄屏头部只留图标，补一个紧凑命主摘要，避免头部空荡 */
             chart && layoutMode === 'narrow' ? h('span', {
               className: 'zp-sum-chip zp-head-mini',
@@ -5158,40 +5274,17 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
                 className: 'zp-icon-btn', type: 'button', title: t('syncHint'), 'aria-label': t('sync'), onClick: syncToSession
               }, h(Icon, { name: 'sync' }), h('span', { className: 'zp-btn-label' }, synced ? t('synced') : t('sync'))) : null,
               chart ? h('span', { className: 'zp-head-sep' }) : null,
-              chart && layoutMode === 'narrow' ? h('button', {
+              chart ? h('button', {
                 className: 'zp-btn zp-btn-primary zp-btn-ai', type: 'button',
                 'aria-pressed': studioOpen ? 'true' : 'false',
-                onClick: openStudio
-              }, h(Icon, { name: 'sparkle', size: 14 }), h('span', null, t('ai'))) : null,
+                onClick: openAI
+              }, h(Icon, { name: 'sparkle', size: 14 }), h('span', null, studioOpen ? t('modeRead') : t('ai'))) : null,
               h('button', {
                 className: 'zp-icon-btn', type: 'button', title: t('settingsTitle'), 'aria-label': t('settingsTitle'),
                 'aria-pressed': modal === 'settings' ? 'true' : 'false',
                 onClick: function () { if (modal === 'settings') closeModal(); else openModal('settings'); }
               }, h(Icon, { name: 'settings' })))),
-          h('div', { className: 'zp-body' + (studioOpen ? ' is-studio' : '') + (studioSplit ? ' is-studio-split' : '') + (studioOpen && studioTab === 'report' ? ' is-studio-report' : '') },
-            studioOpen ? h(StudioChat, {
-              t: t,
-              thread: thread,
-              streaming: interpreting,
-              reportRunning: reportRunning,
-              thinkChars: thinkChars,
-              interpError: interpError,
-              interpIssue: interpIssue,
-              hasReport: hasReport,
-              quote: quote,
-              suggestions: hasReport ? [t('suggestCareer'), t('suggestLove'), t('suggestPlain'), t('suggestPalace')] : [],
-              contextLine: (isSampleChart ? t('sampleChart') + ' · ' : '') + (form.name || t('defaultName')) + ' · ' + (chart ? chart.fiveElementsClass : ''),
-              selectedPalace: palaceSelected ? (palaceSelected.name + ' ' + (palaceSelected.gz || '')) : '',
-              onExit: closeStudio,
-              onClear: clearThread,
-              onAsk: askQuestion,
-              onGenerateReport: function () { generateReport(false); },
-              onOpenReport: function () { setStudioOpen(true); setStudioTab('report'); },
-              onClearQuote: function () { setQuote(null); },
-              onContinue: continueChat,
-              onStop: stopInterpretation,
-              onHandoff: function () { handoffToSession(hasReport ? 'report' : 'brief'); }
-            }) : null,
+          h('div', { className: 'zp-body' },
             h('div', { className: 'zp-side', id: 'zp-rail' },
               /* 阅读优先：有盘时 命主信息 → 格局摘要 → 排盘输入 → 命盘库；
                  无盘时 Summary/Patterns 不渲染，输入自然回到顶部。 */
@@ -5204,32 +5297,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
               }),
               h(Library, { items: library, current: currentLibId, t: t, hasChart: !!chart, onSave: saveChart, onLoad: loadSaved, onDelete: deleteSaved })),
             h('div', { className: 'zp-stage', tabIndex: chart ? 0 : -1, onKeyDown: onStageKeyDown },
-              studioOpen && chart ? h('div', { className: 'zp-canvas-tabs', role: 'tablist', 'aria-label': t('canvasTabs') },
-                h('button', {
-                  type: 'button', role: 'tab', 'aria-selected': studioTab !== 'report',
-                  className: studioTab !== 'report' ? 'is-on' : '',
-                  onClick: function () { setStudioTab('chart'); }
-                }, t('canvasChart')),
-                h('button', {
-                  type: 'button', role: 'tab', 'aria-selected': studioTab === 'report',
-                  className: studioTab === 'report' ? 'is-on' : '',
-                  onClick: function () { setStudioTab('report'); }
-                }, h(Icon, { name: 'report', size: 12 }), t('canvasReport'),
-                hasReport ? h('i', { className: 'zp-mode-dot', 'aria-hidden': true }) : null)) : null,
-              studioOpen && studioTab === 'report' && chart
-                ? h(ReportArtifact, {
-                  t: t,
-                  report: report,
-                  copied: reportCopied,
-                  onGenerate: generateReport,
-                  onStop: stopInterpretation,
-                  onCopy: copyReport,
-                  onExport: exportReportHtml,
-                  onReader: function () { setReaderOpen(true); },
-                  onQuote: quoteFromReport,
-                  onChat: function () { setStudioTab('chart'); }
-                })
-                : h(React.Fragment, null,
+              h(React.Fragment, null,
               timebar,
               !chart ? h('div', { className: 'zp-empty', 'data-region': 'EMPTY' },
                 h('div', { className: 'zp-empty-taiji' }, h(Taiji, null)),
@@ -5271,8 +5339,39 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
             h('button', { className: 'zp-btn', type: 'button', onClick: editBirth },
               h(Icon, { name: 'panelLeft', size: 14 }), h('span', null, t('editBirthShort'))),
             h('button', { className: 'zp-btn zp-btn-primary', type: 'button', onClick: openAI },
-              h(Icon, { name: 'sparkle', size: 14 }), h('span', null, studioOpen ? t('modeChart') : t('ai')))) : null
+              h(Icon, { name: 'sparkle', size: 14 }), h('span', null, t('ai')))) : null
           )),
+        studioOpen && chart ? h(StudioDrawer, {
+            t: t,
+            tab: studioTab,
+            onTab: setStudioTab,
+            thread: thread,
+            streaming: interpreting,
+            reportRunning: reportRunning,
+            thinkChars: thinkChars,
+            interpError: interpError,
+            interpIssue: interpIssue,
+            hasReport: hasReport,
+            report: report,
+            reportCopied: reportCopied,
+            quote: quote,
+            suggestions: hasReport ? [t('suggestCareer'), t('suggestLove'), t('suggestPlain'), t('suggestPalace')] : [],
+            contextLine: (isSampleChart ? t('sampleChart') + ' · ' : '') + (form.name || t('defaultName')) + ' · ' + (chart ? chart.fiveElementsClass : ''),
+            selectedPalace: palaceSelected ? (palaceSelected.name + ' ' + (palaceSelected.gz || '')) : '',
+            onClose: closeStudio,
+            onClear: clearThread,
+            onAsk: askQuestion,
+            onGenerateReport: function () { generateReport(false); },
+            onGenerate: generateReport,
+            onStop: stopInterpretation,
+            onReportCopy: copyReport,
+            onExport: exportReportHtml,
+            onReader: function () { setReaderOpen(true); },
+            onQuote: quoteFromReport,
+            onClearQuote: function () { setQuote(null); },
+            onContinue: continueChat,
+            onHandoff: function () { handoffToSession(hasReport ? 'report' : 'brief'); }
+          }) : null,
         readerOpen && hasReport ? h(ReportReader, {
             t: t,
             report: report,

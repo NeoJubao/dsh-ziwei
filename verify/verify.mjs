@@ -446,8 +446,8 @@ ok('client 走官方 locale 服务（register + bind，不再读 tr.i18n）',
 ok('client 可访问性契约在位（aria-live / aria-pressed / dialog / 焦点陷阱）',
   /role: 'log'/.test(client) && /'aria-live': 'polite'/.test(client) && /'aria-pressed':/.test(client) &&
   /'aria-modal': 'true'/.test(client) && /trapTab/.test(client) && /t\(\'reportTitle\'\)/.test(client));
-ok('v5: 工位并排 + 画布页签 + 报告阅读器',
-  /studioSplit/.test(client) && /'data-studio'/.test(client) && /zp-canvas-tabs/.test(client) &&
+ok('v5: 右侧抽屉 + 对话/报告页签 + 报告阅读器',
+  /StudioDrawer/.test(client) && /zp-drawer-overlay/.test(client) && /zp-drawer-tabs/.test(client) &&
   /ReportArtifact/.test(client) && /ReportReader/.test(client) && /studioOpen/.test(client));
 ok('v5: 报告与聊天分离，导出/复制走 report.text',
   /var runReport = function/.test(client) && /report\.status === 'running'/.test(client) &&

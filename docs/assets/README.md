@@ -48,10 +48,9 @@ README 顶部的截图位需要真实界面截图。**当前仓库还没有这�
 
 无头 Chrome 物化真实 `client.js`，示例生辰；不含真实客户数据：
 
-- `v5-studio.jpg`：宽屏工位（左对话 + 右盘面）
-- `v5-report.jpg`：完整报告产物（14 部分）
+- `v5-drawer.jpg`：右侧解读抽屉（对话）
+- `v5-drawer-report.jpg`：抽屉内「报告」页签（14 部分）
+- `v5-drawer-narrow.jpg`：窄屏抽屉
 - `v5-reader.jpg`：报告全屏阅读
-- `v5-narrow.jpg`：窄屏工位
-- `v5-progress.jpg`：报告阶段进度
 
 这组截图用于 dogfood 分支说明，不作为 main 的发布截图。
