@@ -4660,6 +4660,12 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         window.addEventListener('resize', onWinResize);
         return function () { window.removeEventListener('resize', onWinResize); };
       }, []);
+      /* 改生辰 / 打开左栏时必须退出专注态：专注态隐藏左栏，否则这些按钮点了没反应 */
+      var exitFocus = function () {
+        if (!focus) return;
+        setFocus(false);
+        try { localStorage.setItem('ziwei-pro.focus', '0'); } catch (e) { /* ignore */ }
+      };
       var toggleFocus = function () {
         setFocus(function (prev) {
           var next = !prev;
@@ -4723,7 +4729,8 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         setThinkChars(0);
         setError('');
         setFormCollapsed(true);
-        if (panelW > 0 && panelW < 908) setRail(false);
+        /* 窄屏出盘后收起左栏只是这一次的临时让位，不写进偏好（否则拉宽窗口后左栏仍是收起的） */
+        if (panelW > 0 && panelW < 908) setRailOpenState(false);
         saveLastChart(input);
       };
 
@@ -5349,12 +5356,26 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       };
       var editBirth = function () {
         if (studioOpen) setStudioOpen(false);
+        exitFocus();
         setRail(true);
         setFormCollapsed(false);
-        try {
-          var sc = rootRef.current && rootRef.current.querySelector('.zp-scroll');
-          if (sc) { if (sc.scrollTo) sc.scrollTo({ top: 0, behavior: 'smooth' }); else sc.scrollTop = 0; }
-        } catch (e) { /* ignore */ }
+        /* 滚到表单卡本身（窄屏有盘时表单排在盘面下面，滚回顶部看到的是盘面），停在吸顶顶栏下方 */
+        var raf = window.requestAnimationFrame || function (f) { return setTimeout(f, 16); };
+        raf(function () {
+          raf(function () {
+            try {
+              var root = rootRef.current;
+              var sc = root && root.querySelector('.zp-scroll');
+              var card = root && root.querySelector('.zp-input-card');
+              if (!sc) return;
+              var head = root.querySelector('.zp-head');
+              var top = card
+                ? sc.scrollTop + card.getBoundingClientRect().top - sc.getBoundingClientRect().top - (head ? head.getBoundingClientRect().height : 0) - 8
+                : 0;
+              if (sc.scrollTo) sc.scrollTo({ top: Math.max(0, top), behavior: 'smooth' }); else sc.scrollTop = Math.max(0, top);
+            } catch (e) { /* ignore */ }
+          });
+        });
       };
       var stepDecade = function (delta) {
         if (!decadalList.length) return;
@@ -5476,7 +5497,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
               'aria-label': railVisible ? t('collapseRail') : t('expandRail'),
               'aria-expanded': railVisible ? 'true' : 'false',
               'aria-controls': 'zp-rail',
-              onClick: function () { setRail(!railVisible); }
+              onClick: function () { if (!railVisible) exitFocus(); setRail(!railVisible); }
             }, h(Icon, { name: 'panelLeft' })) : null,
             h('div', { className: 'zp-brand' },
               h('span', { className: 'zp-brand-name' }, t('brand')),
