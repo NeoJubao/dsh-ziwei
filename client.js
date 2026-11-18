@@ -1725,7 +1725,7 @@ window.__ModuleLoader__.load({
         mainStars: '主星', minorStars: '辅星', adjStars: '杂曜',
         showAdj: '显示杂曜', hideAdj: '隐藏杂曜', adjChip: '杂曜',
         editBirth: '改生辰', collapseForm: '收起', expandForm: '展开',
-        focusOn: '专注看盘', focusOff: '退出专注', emptyPalace: '空宫',
+        emptyPalace: '空宫',
         emptyCta: '用示例生辰先排一盘', defaultName: '命主',
         oppPalace: '对宫', triPalace: '三合', detailTitle: '宫位详情',
         mutagenTitle: '四化', noMutagen: '—',
@@ -1755,10 +1755,10 @@ window.__ModuleLoader__.load({
         reportPartial: '报告已生成的部分保留；可以继续生成补齐。',
         reportReader: '全屏阅读', reportNeeded: '先生成完整报告',
         fullscreen: '全屏', exitFullscreen: '退出全屏',
-        quoteRemove: '取消引用', quotePalaceLabel: '当前宫位', quotePalace: '引用宫位',
+        quoteRemove: '取消引用', quotePalaceLabel: '当前宫位', quotePalace: '问这一宫',
         suggestCareer: '重点讲事业与财运', suggestLove: '这十年感情要注意什么',
         suggestPlain: '说得再口语一点', suggestPalace: '解释一下当前宫位',
-        copyFailed: '复制失败，请手动选择文本', syncFailed: '写入会话失败',
+        copyFailed: '复制失败，请手动选择文本',
         exported: '已开始下载 HTML', exportFailed: '导出失败', copiedChart: '命盘已复制', clearBusy: '正在生成，写完后再清除', handoffWorking: '正在新建会话…', handoffNoNav: '会话已创建，但界面没能自动跳过去。请在左侧会话列表里打开新会话继续。', handoffFailedHttp: '交给会话失败（HTTP {status}）',
         aiThreadCleared: '已清空对话', aiRecordCleared: '已清除本机解读记录',
         localDataTitle: '本机数据', localDataHint: '命盘库、对话与报告只存在这个浏览器里。清除只删对话与报告，命盘库保留。',
@@ -1774,8 +1774,8 @@ window.__ModuleLoader__.load({
         currentBadge: '当前', thisYear: '今年', prevYear: '上一年', nextYear: '下一年',
         collapseRail: '收起生辰栏', expandRail: '展开生辰栏', editBirthShort: '生辰',
         chartTools: '工具', openPatterns: '格局分析', openDict: '星曜词典',
-        handoff: '新会话解读', handoffDone: '已开新会话 ✓',
-        handoffHint: '把当前命盘交给会话；之后在对话里说「继续聊这个盘」或「写鲲鹏报告」即可',
+        handoff: '在新会话里继续', handoffDone: '已开新会话',
+        handoffHint: '把这张盘和已有解读交给一个新的 DSH 会话，在那里接着聊',
         disclaimerShort: '传统文化解读，非科学结论，仅供参考。具体决策请咨询专业人士。',
         aiInterpreting: '解读中…', interpStreaming: '正在生成…',
         aiThinking: '紫微师正在思考…', aiStop: '停止', aiContinue: '继续生成',
@@ -1785,8 +1785,7 @@ window.__ModuleLoader__.load({
         aiDisconnected: '连接中断，内容可能不完整；可点「继续生成」接着写',
         aiContinuePrompt: '请接着上文继续写：从断处接着写，不要重复已写内容，也不要重新开头。',
         aiCopy: '复制', aiCopied: '已复制',
-        sync: '写入会话', synced: '已写入 ✓',
-        syncHint: '只把当前命盘写进会话上下文（不新建会话）；之后在任意会话里说「读取工作台命盘并写鲲鹏报告」即可', exportHtml: '导出精装 HTML', previewHtml: '预览报告', closePreview: '关闭预览',
+        exportHtml: '导出精装 HTML', previewHtml: '预览报告', closePreview: '关闭预览',
         aiRetry: '重新解读',
         autoOpen: '启动时自动打开工作台', showAdjSet: '显示杂曜',
         settingsTitle: '设置', close: '关闭', about: '关于',
@@ -1798,7 +1797,7 @@ window.__ModuleLoader__.load({
         aboutText: '紫微斗数 Pro · 算法依据《紫微斗数全书》安星诀，与开源库 iztro 逐字段交叉验证。真太阳时校正含经度差与均时差。本工具仅供研究参考。',
         signature: '紫微师 · 金聚｜道商意象紫微九诀',
         contactWechat: '微信：neo2025new',
-        libTitle: '命盘库', libName: '盘名', libSave: '保存', libEmpty: '暂无保存的命盘', libDelete: '删除',
+        libTitle: '命盘库', libName: '盘名', libNamePh: '盘名（可不填）', patternsAll: '查看全部', libSave: '保存', libEmpty: '暂无保存的命盘', libDelete: '删除',
         patternTitle: '格局分析', patternEmpty: '未检测到显著格局',
         dictTitle: '星曜词典', dictPlaceholder: '搜索星曜…',
         keyboardHint: '点盘面后：←→ 切换宫位 · ↑↓ 跳对宫',
@@ -1834,7 +1833,7 @@ window.__ModuleLoader__.load({
         mainStars: 'Major', minorStars: 'Minor', adjStars: 'Adj',
         showAdj: 'Show adj', hideAdj: 'Hide adj', adjChip: 'Adj',
         editBirth: 'Edit birth data', collapseForm: 'Collapse', expandForm: 'Expand',
-        focusOn: 'Focus chart', focusOff: 'Exit focus', emptyPalace: 'Empty',
+        emptyPalace: 'Empty',
         emptyCta: 'Draw a sample chart', defaultName: 'Native',
         oppPalace: 'Opposite', triPalace: 'Trine', detailTitle: 'Palace Detail',
         mutagenTitle: 'Transforms', noMutagen: '—',
@@ -1864,10 +1863,10 @@ window.__ModuleLoader__.load({
         reportPartial: 'The partial report is kept; continue to fill the rest.',
         reportReader: 'Full screen', reportNeeded: 'Generate the full report first',
         fullscreen: 'Full screen', exitFullscreen: 'Exit full screen',
-        quoteRemove: 'Remove quote', quotePalaceLabel: 'Current palace', quotePalace: 'Quote palace',
+        quoteRemove: 'Remove quote', quotePalaceLabel: 'Current palace', quotePalace: 'Ask about this palace',
         suggestCareer: 'Focus on career and money', suggestLove: 'What to watch in love this decade',
         suggestPlain: 'Make it more conversational', suggestPalace: 'Explain the current palace',
-        copyFailed: 'Copy failed — select the text manually', syncFailed: 'Write to session failed',
+        copyFailed: 'Copy failed — select the text manually',
         exported: 'HTML download started', exportFailed: 'Export failed', copiedChart: 'Chart copied', clearBusy: 'Generating — clear after it finishes', handoffWorking: 'Creating a session…', handoffNoNav: 'The session was created, but the view could not switch to it. Open it from the session list on the left.', handoffFailedHttp: 'Hand-off failed (HTTP {status})',
         aiThreadCleared: 'Conversation cleared', aiRecordCleared: 'Local reading records cleared',
         localDataTitle: 'Local data', localDataHint: 'Saved charts, conversations and reports live only in this browser. Clearing removes conversations and reports; saved charts stay.',
@@ -1883,8 +1882,8 @@ window.__ModuleLoader__.load({
         currentBadge: 'Current', thisYear: 'This year', prevYear: 'Previous year', nextYear: 'Next year',
         collapseRail: 'Collapse birth panel', expandRail: 'Expand birth panel', editBirthShort: 'Birth data',
         chartTools: 'Tools', openPatterns: 'Patterns', openDict: 'Star dictionary',
-        handoff: 'New session', handoffDone: 'Session opened ✓',
-        handoffHint: 'Hand this chart to the session so the agent can continue the reading.',
+        handoff: 'Continue in a new session', handoffDone: 'New session opened',
+        handoffHint: 'Hand this chart and the reading so far to a new DSH session and keep talking there',
         disclaimerShort: 'Traditional interpretation, not a scientific conclusion. Consult a professional for decisions.',
         aiInterpreting: 'Reading…', interpStreaming: 'Writing…',
         aiThinking: 'Zi Wei Master is thinking…', aiStop: 'Stop', aiContinue: 'Continue',
@@ -1894,8 +1893,7 @@ window.__ModuleLoader__.load({
         aiDisconnected: 'Connection lost; the answer may be incomplete — press Continue to resume.',
         aiContinuePrompt: 'Continue from where you stopped; do not repeat or restart the answer.',
         aiCopy: 'Copy', aiCopied: 'Copied',
-        sync: 'Write to session', synced: 'Written ✓',
-        syncHint: 'Write this chart into the session context (no new session); then ask the agent to read it.', exportHtml: 'Export HTML', previewHtml: 'Preview', closePreview: 'Close Preview',
+        exportHtml: 'Export HTML', previewHtml: 'Preview', closePreview: 'Close Preview',
         aiRetry: 'Retry',
         autoOpen: 'Open workbench on launch', showAdjSet: 'Show adjective stars',
         settingsTitle: 'Settings', close: 'Close', about: 'About',
@@ -1907,7 +1905,7 @@ window.__ModuleLoader__.load({
         aboutText: 'Zi Wei Dou Shu Pro. Algorithm verified field-by-field against the open-source iztro library. True solar time correction included.',
         signature: 'Zi Wei Master · Jin Ju｜Daoshang Yixiang Ziwei Nine Keys',
         contactWechat: 'WeChat: neo2025new',
-        libTitle: 'Chart Library', libName: 'Name', libSave: 'Save', libEmpty: 'No saved charts', libDelete: 'Delete',
+        libTitle: 'Chart Library', libName: 'Name', libNamePh: 'Name (optional)', patternsAll: 'See all', libSave: 'Save', libEmpty: 'No saved charts', libDelete: 'Delete',
         patternTitle: 'Patterns', patternEmpty: 'No notable patterns detected',
         dictTitle: 'Star Dictionary', dictPlaceholder: 'Search stars…',
         keyboardHint: 'Click chart: ←→ palace · ↑↓ opposite',
@@ -1944,7 +1942,7 @@ window.__ModuleLoader__.load({
  * - 所有底色/边框/文字只走 --dsw-alias-* token；星曜/四化等内容色单列
  * - 命盘盘面优先占宽: 布局按面板实测宽度切换 (data-w)，不再用 viewport media query
  * - 盘面字号用容器查询单位 (cqw) 随盘宽等比缩放，窄面板下不挤字
- * - 支持深色主题 (body[data-ds-dark-theme]) 与专注看盘 (data-focus)
+ * - 支持深色主题 (body[data-ds-dark-theme])
  * ================================================================ */
 .zp-root {
   --zp-accent: #7c5cf0;
@@ -2714,15 +2712,6 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
 .zp-root[data-w="narrow"] .zp-detail-body { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) }
 .zp-root[data-w="narrow"] .zp-card { padding: 12px 14px }
 
-/* ---------------- 专注看盘 ----------------
- * 注意：这些规则靠「同特异性 + 位置靠后」覆盖上面的 data-w / has-detail 规则，
- * 必须保持在布局规则之后、深色主题之前；往后追加布局规则会静默破坏专注态。 */
-
-.zp-root[data-focus="1"] .zp-side { display: none }
-.zp-root[data-focus="1"] .zp-body { grid-template-columns: minmax(0, 1fr) }
-.zp-root[data-focus="1"] .zp-board-wrap.has-detail, .zp-root[data-focus="1"] .zp-board-wrap { display: block }
-.zp-root[data-focus="1"] .zp-board { max-width: 820px }
-.zp-root[data-focus="1"] .zp-detail { display: none }
 
 /* ---------------- v3：AppBar / TimeBar / Rail / BottomBar ---------------- */
 .zp-head { flex-wrap: nowrap; min-height: 56px; box-sizing: border-box }
@@ -3151,6 +3140,16 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         copy.push({ role: 'assistant', content: s });
         return copy;
       },
+      /* 命盘库不填名时的自动盘名：有称呼用称呼，否则「公历日期 时辰 性别」。 */
+      autoChartName: function (input, timeName, labels) {
+        var x = input || {};
+        var nm = String(x.name || '').trim();
+        if (nm) return nm;
+        var lb = labels || { male: '男', female: '女' };
+        var pad = function (n) { return ('0' + (+n || 0)).slice(-2); };
+        return [(+x.year || 0) + '-' + pad(x.month) + '-' + pad(x.day), timeName || '', x.gender === 'female' ? lb.female : lb.male]
+          .filter(Boolean).join(' ');
+      },
       /* 两份输入是不是同一张盘：只比会改变命盘的字段（含排盘设置），沿用解读记录 key 的归一化。 */
       sameBirthInput: function (a, b) {
         if (!a || !b) return false;
@@ -3466,12 +3465,12 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         h('div', { className: 'zp-row', style: { marginBottom: 8 } },
           h('input', {
             className: 'zp-input', type: 'text', value: name, maxLength: 20, style: { flex: 1, minWidth: 0 },
-            placeholder: t('libName'), 'aria-label': t('libName'),
+            placeholder: t('libNamePh'), 'aria-label': t('libName'),
             onChange: function (ev) { setName(ev.target.value); }
           }),
           h('button', {
             className: 'zp-btn', type: 'button',
-            disabled: !props.hasChart || !name.trim(),
+            disabled: !props.hasChart,
             onClick: function () {
               if (props.onSave(name)) setName('');
             }
@@ -3632,7 +3631,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           h('button', {
             className: 'zp-mini-btn zp-patterns-all', type: 'button',
             onClick: props.onOpen
-          }, t('openPatterns') + ' ›')),
+          }, t('patternsAll') + ' ›')),
         items.length
           ? items.map(function (p, i) {
             return h('div', { key: i, className: 'zp-pattern-mini' },
@@ -3699,12 +3698,6 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       copy: [
         ['rect', { x: 5.6, y: 5.6, width: 7.6, height: 7.6, rx: 1.6 }],
         ['path', { d: 'M10.6 5.6V4.3c0-.9-.7-1.6-1.6-1.6H4.3c-.9 0-1.6.7-1.6 1.6v4.7c0 .9.7 1.6 1.6 1.6h1.3' }]
-      ],
-      sync: [
-        ['path', { d: 'M13.2 6.4a5.2 5.2 0 0 0-9.1-1.7' }],
-        ['path', { d: 'M2.8 9.6a5.2 5.2 0 0 0 9.1 1.7' }],
-        ['path', { d: 'M13.2 2.9v3.5h-3.5' }],
-        ['path', { d: 'M2.8 13.1v-3.5h3.5' }]
       ],
       settings: [
         ['circle', { cx: 8, cy: 8, r: 2.1 }],
@@ -4158,9 +4151,9 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
               disabled: busy, onClick: props.onClear
             }, h(Icon, { name: 'newChat' })) : null,
             h('button', {
-              className: 'zp-icon-btn', type: 'button', title: t('handoffHint'), 'aria-label': t('handoff'),
+              className: 'zp-pill-btn zp-handoff-btn', type: 'button', title: t('handoffHint'),
               disabled: busy, onClick: props.onHandoff
-            }, h(Icon, { name: 'handoff' })),
+            }, h(Icon, { name: 'handoff', size: 13 }), h('span', null, t('handoff'))),
             h('button', {
               className: 'zp-icon-btn', type: 'button', title: t('close'), 'aria-label': t('close'), onClick: props.onClose
             }, h(Icon, { name: 'close' })))),
@@ -4481,9 +4474,6 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
               h('label', { className: 'zp-check' },
                 h('input', { type: 'checkbox', checked: props.autoOpen, onChange: function (ev) { props.setAutoOpen(ev.target.checked); } }),
                 h('span', null, t('autoOpen'))),
-              h('label', { className: 'zp-check' },
-                h('input', { type: 'checkbox', checked: props.showAdj, onChange: function (ev) { props.setShowAdj(ev.target.checked); } }),
-                h('span', null, t('showAdjSet'))),
               h('div', { className: 'zp-update' },
                 h('div', { className: 'zp-update-row' },
                   h('span', null, t('versionLabel')),
@@ -4580,13 +4570,19 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
 
       /* 布局：面板实测宽度（0 = 尚未测量，按窄面板安全兜底）、专注看盘、生辰输入折叠 */
       var [panelW, setPanelW] = useState(0);
-      var [focus, setFocus] = useState(function () {
-        try { return localStorage.getItem('ziwei-pro.focus') === '1'; } catch (e) { return false; }
-      });
       var [formCollapsed, setFormCollapsed] = useState(false);
       /* v3：左栏可收起（窄屏出盘后自动收起，给盘面让宽）；view 区分「盘面」与工具视图 */
       var [railOpen, setRailOpenState] = useState(function () {
-        try { return localStorage.getItem('ziwei-pro.rail') !== '0'; } catch (e) { return true; }
+        try {
+          /* 旧版「专注看盘」已并入左栏开关：旧的专注偏好一次性迁移为「左栏收起」，然后删掉这个键 */
+          if (localStorage.getItem('ziwei-pro.focus') === '1') {
+            localStorage.removeItem('ziwei-pro.focus');
+            localStorage.setItem('ziwei-pro.rail', '0');
+            return false;
+          }
+          localStorage.removeItem('ziwei-pro.focus');
+          return localStorage.getItem('ziwei-pro.rail') !== '0';
+        } catch (e) { return true; }
       });
       var setRail = function (v) {
         setRailOpenState(!!v);
@@ -4653,7 +4649,6 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       var [interpCopied, setInterpCopied] = useState(false);
       var [reportCopied, setReportCopied] = useState(false);
       var [handoffDone, setHandoffDone] = useState(false);
-      var [synced, setSynced] = useState(false);
       var [quote, setQuote] = useState(null);               /* {label, text}: 宫位/报告选段引用 */
       var [readerOpen, setReaderOpen] = useState(false);
       var [toast, setToast] = useState(null);
@@ -4704,19 +4699,6 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         window.addEventListener('resize', onWinResize);
         return function () { window.removeEventListener('resize', onWinResize); };
       }, []);
-      /* 改生辰 / 打开左栏时必须退出专注态：专注态隐藏左栏，否则这些按钮点了没反应 */
-      var exitFocus = function () {
-        if (!focus) return;
-        setFocus(false);
-        try { localStorage.setItem('ziwei-pro.focus', '0'); } catch (e) { /* ignore */ }
-      };
-      var toggleFocus = function () {
-        setFocus(function (prev) {
-          var next = !prev;
-          try { localStorage.setItem('ziwei-pro.focus', next ? '1' : '0'); } catch (e) { /* ignore */ }
-          return next;
-        });
-      };
 
       /* 浮层（抽屉 / 设置）是 .zp-root 内的绝对定位层：只在工作台范围内出现，
          不按视口坐标算位置，也不受祖先 transform / 侧栏变化影响；打开时锁住背景滚动。 */
@@ -4897,10 +4879,15 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
 
       /* 命盘库操作 */
       var saveChart = function (name) {
-        if (!chart || !name || !String(name).trim()) return false;
+        if (!chart) return false;
+        /* 不填盘名也能存：用称呼，或「公历日期 时辰 性别」（农历输入也按公历日期命名，避免歧义） */
+        var sd = String(chart.solarDate || '').split('-');
+        var finalName = String(name || '').trim() || ZWUI.autoChartName(
+          { name: form.name, year: sd[0], month: sd[1], day: sd[2], gender: birth.gender },
+          chart.timeName, { male: t('male'), female: t('female') });
         var entry = {
           id: 'lib-' + Date.now(),
-          name: name.trim(),
+          name: finalName,
           input: {
             name: form.name, calendar: birth.calendar, year: birth.year, month: birth.month, day: birth.day,
             isLeap: birth.isLeap, hour: birth.hour, minute: birth.minute, gender: birth.gender,
@@ -5197,27 +5184,6 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         try { chatAbortRef.current.abort(); } catch (e) { /* ignore */ }
       };
 
-      var syncToSession = function () {
-        if (!chart) return;
-        fetch('/ziwei/context', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chartText: E.chartText(chart),
-            fullText: chartContextText(),
-            name: form.name || '', place: form.place || '', occupation: form.occupation || '',
-            gender: birth.gender === 'female' ? 'female' : 'male'
-          })
-        }).then(function (r) { return r.json(); }).then(function (j) {
-          if (j && j.ok) {
-            setSynced(true);
-            setTimeout(function () { setSynced(false); }, 2200);
-            showToast(t('synced'));
-          } else {
-            showToast((j && j.reason) || t('syncFailed'), { error: true });
-          }
-        }).catch(function (e) { showToast(String((e && e.message) || e), { error: true }); });
-      };
 
       var lastAnswer = function () {
         for (var i = thread.length - 1; i >= 0; i--) if (thread[i].role === 'assistant') return thread[i].content || '';
@@ -5451,7 +5417,6 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       };
       var editBirth = function () {
         if (studioOpen) setStudioOpen(false);
-        exitFocus();
         setRail(true);
         setFormCollapsed(false);
         /* 滚到表单卡本身（窄屏有盘时表单排在盘面下面，滚回顶部看到的是盘面），停在吸顶顶栏下方 */
@@ -5531,11 +5496,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           view === 'chart' ? h('button', {
             className: 'zp-toggle' + (showAdj ? ' on' : ''), type: 'button', 'aria-pressed': !!showAdj,
             title: showAdj ? t('hideAdj') : t('showAdj'), onClick: function () { setShowAdj(!showAdj); }
-          }, h(Icon, { name: 'adj', size: 12 }), t('adjChip')) : null,
-          view === 'chart' ? h('button', {
-            className: 'zp-toggle' + (focus ? ' on' : ''), type: 'button', 'aria-pressed': !!focus,
-            title: focus ? t('focusOff') : t('focusOn'), onClick: toggleFocus
-          }, h(Icon, { name: 'expand', size: 12 }), focus ? t('focusOff') : t('focusOn')) : null)) : null;
+          }, h(Icon, { name: 'adj', size: 12 }), t('adjChip')) : null)) : null;
 
       /* 没盘时左栏必须始终可见（否则用户只剩空态、没有输入入口）；有盘才允许收起。 */
       var railVisible = !chart || railOpen;
@@ -5572,8 +5533,6 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         'data-w': layoutMode,
         'data-chart': chart ? '1' : undefined,
         'data-rail': railVisible ? 'open' : 'closed',
-        /* 没有盘时不能进专注态：否则左栏（生辰输入）被隐藏且没有退出按钮 */
-        'data-focus': (focus && chart) ? '1' : undefined
       },
         h('div', { className: 'zp-scroll' + (modal ? ' zp-scroll-locked' : '') },
           h('div', { className: 'zp-inner' },
@@ -5592,7 +5551,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
               'aria-label': railVisible ? t('collapseRail') : t('expandRail'),
               'aria-expanded': railVisible ? 'true' : 'false',
               'aria-controls': 'zp-rail',
-              onClick: function () { if (!railVisible) exitFocus(); setRail(!railVisible); }
+              onClick: function () { setRail(!railVisible); }
             }, h(Icon, { name: 'panelLeft' })) : null,
             h('div', { className: 'zp-brand' },
               h('span', { className: 'zp-brand-name' }, t('brand')),
@@ -5616,9 +5575,6 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
               chart ? h('button', {
                 className: 'zp-icon-btn', type: 'button', title: t('copy'), 'aria-label': t('copy'), onClick: copyChart
               }, h(Icon, { name: 'copy' }), h('span', { className: 'zp-btn-label' }, copied ? t('copied') : t('copy'))) : null,
-              chart ? h('button', {
-                className: 'zp-icon-btn', type: 'button', title: t('syncHint'), 'aria-label': t('sync'), onClick: syncToSession
-              }, h(Icon, { name: 'sync' }), h('span', { className: 'zp-btn-label' }, synced ? t('synced') : t('sync'))) : null,
               chart ? h('span', { className: 'zp-head-sep' }) : null,
               chart ? h('button', {
                 className: 'zp-btn zp-btn-primary zp-btn-ai' + (runningInBackground ? ' is-running' : ''), type: 'button',
@@ -5746,7 +5702,6 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           modal === 'settings' ? h(SettingsModal, {
             t: t,
             autoOpen: autoOpen, setAutoOpen: setAutoOpen,
-            showAdj: showAdj, setShowAdj: setShowAdj,
             onClearAll: clearAllReading,
             busy: busy,
             reportCount: thread.length,

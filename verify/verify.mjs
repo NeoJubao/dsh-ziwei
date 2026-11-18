@@ -342,10 +342,12 @@ section('3. 打包产物');
 const client = readFileSync(join(root, 'client.js'), 'utf8');
 ok('client.js 含引擎 + 内核 + UI', /ZWEngine/.test(client) && /ZWCore/.test(client) && /__ModuleLoader__/.test(client));
 ok('client.js 不再直连 api.deepseek.com', !/api\.deepseek\.com/.test(client));
-ok('client.js 走 host 通道（interpret + context + handoff，三条都有入口）',
-  /\/ziwei\/interpret/.test(client) && /\/ziwei\/context/.test(client) && /\/ziwei\/handoff/.test(client) && /syncToSession/.test(client));
+/* v5 批 C：会话入口合并为「在新会话里继续」（/ziwei/handoff 先写上下文再开会话，ziwei_context 照常可读）；
+   /ziwei/context 路由仍在 host 上，但面板不再单独调用它 */
+ok('client.js 走 host 通道（interpret + handoff），不再有单独的「写入会话」',
+  /\/ziwei\/interpret/.test(client) && /\/ziwei\/handoff/.test(client) && !/syncToSession/.test(client) && !/'\/ziwei\/context'/.test(client));
 ok('client.js 不再引用已删除的 interpretChart', !/interpretChart/.test(client));
-ok('client.js 含新 UI 文案与组件', /zp-chat-thread/.test(client) && /交给会话/.test(client));
+ok('client.js 含新 UI 文案与组件', /zp-chat-thread/.test(client) && /在新会话里继续/.test(client));
 /* P0-2: 旧版浏览器明文 API Key 必须消失（只保留升级清理逻辑） */
 ok('client 不再持久化 API Key（已无消费方）',
   !/localStorage\.setItem\('ziwei-workbench\.apikey'/.test(client) && !/type: 'password'/.test(client) && /removeItem\('ziwei-workbench\.apikey'\)/.test(client));
@@ -678,6 +680,17 @@ ok('chrome 避让不用魔法数字写死（顶部偏移只走 --dsh-frame-top-c
     ok('生辰一致判断：改了出生时辰就不是同一张盘', !!same && same(Object.assign({}, formSame, { hour: '10' }), snap) === false);
     ok('生辰一致判断：改了晚子时口径就不是同一张盘',
       !!same && same(Object.assign({}, formSame, { settings: Object.assign({}, snap.settings, { dayDivide: 'forward' }) }), snap) === false);
+  }
+  {
+    /* 批 C 功能收束：一个任务只留一条路径 */
+    ok('不再有「专注看盘」（并入左栏开关）', !/toggleFocus/.test(client) && !/data-focus/.test(client) && !/focusOn/.test(client));
+    ok('设置里不再重复「显示杂曜」（时间栏开关是唯一入口）', !/t\('showAdjSet'\)/.test(client));
+    const autoName = ui && typeof ui.autoChartName === 'function' ? ui.autoChartName : null;
+    ok('命盘库不填名时自动命名：日期 + 时辰 + 性别',
+      !!autoName && autoName({ name: '', year: 1990, month: 6, day: 15, gender: 'male' }, '申时') === '1990-06-15 申时 男',
+      autoName && autoName({ name: '', year: 1990, month: 6, day: 15, gender: 'male' }, '申时'));
+    ok('命盘库不填名时有称呼就用称呼',
+      !!autoName && autoName({ name: ' 张三 ', year: 1992, month: 5, day: 3, gender: 'female' }, '巳时') === '张三');
   }
   {
     /* 引用宫位：用引擎宫位对象的真实字段（stem/branch/major/minor），不能读不存在的 gz/stars */
