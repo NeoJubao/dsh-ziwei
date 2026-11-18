@@ -682,6 +682,19 @@ ok('chrome 避让不用魔法数字写死（顶部偏移只走 --dsh-frame-top-c
       !!same && same(Object.assign({}, formSame, { settings: Object.assign({}, snap.settings, { dayDivide: 'forward' }) }), snap) === false);
   }
   {
+    /* 出生城市：城市名查内置表（城市中心近似经度，0.1°），也接受直接填经度 */
+    const pb = ui && typeof ui.parseBirthplace === 'function' ? ui.parseBirthplace : null;
+    const P = (x) => pb ? pb(x) : null;
+    ok('出生城市：北京 → 东经 116.4', !!pb && P('北京').kind === 'city' && P('北京').city === '北京' && P('北京').lon === 116.4, JSON.stringify(P('北京')));
+    ok('出生城市：「北京市」去掉市字也能认', !!pb && P('北京市').city === '北京');
+    ok('出生城市：「四川成都」取包含的城市 → 成都 104.1', !!pb && P('四川成都').city === '成都' && P('四川成都').lon === 104.1, JSON.stringify(P('四川成都')));
+    ok('出生城市：「吉林长春」省名与城市同名时取后面的城市 → 长春', !!pb && P('吉林长春').city === '长春', JSON.stringify(P('吉林长春')));
+    ok('出生城市：直接填经度 116.4 / 东经105.97°', !!pb && P('116.4').kind === 'number' && P('116.4').lon === 116.4 && P('东经105.97°').lon === 105.97, JSON.stringify(P('东经105.97°')));
+    ok('出生城市：查不到 → unknown 且不给经度', !!pb && P('火星基地').kind === 'unknown' && P('火星基地').lon === null);
+    ok('出生城市：空 → empty（按钟表时间排盘）', !!pb && P('  ').kind === 'empty' && P('  ').lon === null);
+    ok('出生城市：越界数字不当经度', !!pb && P('400').kind === 'unknown');
+  }
+  {
     /* 批 C 功能收束：一个任务只留一条路径 */
     ok('不再有「专注看盘」（并入左栏开关）', !/toggleFocus/.test(client) && !/data-focus/.test(client) && !/focusOn/.test(client));
     ok('设置里不再重复「显示杂曜」（时间栏开关是唯一入口）', !/t\('showAdjSet'\)/.test(client));

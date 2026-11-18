@@ -1703,15 +1703,22 @@ window.__ModuleLoader__.load({
         year: '年', month: '月', day: '日', leap: '闰月',
         time: '出生时间', hour: '时', minute: '分',
         gender: '性别', male: '男', female: '女',
-        lonLabel: '出生地经度', lonPh: '如 116.4（真太阳时校正，可留空）',
-        placeLabel: '籍贯', placePh: '选填，用于报告',
-        occupationLabel: '职业 / 诉求', occupationPh: '选填，用于报告',
-        compute: '排 盘',
-        settings: '排盘设置', yearDivide: '年柱', ydNormal: '正月初一', ydExact: '立春',
-        monthDivide: '月柱', mdNormal: '农历月', mdExact: '节气',
-        monthDivideHint: '四柱月柱默认按节气；命宫/星曜仍按农历月，不受此处影响。',
-        dayDivide: '晚子时', ddForward: '按次日', ddCurrent: '按当日',
-        fixLeap: '闰月', flTrue: '下半月按下月', flFalse: '整月按本月',
+        cityLabel: '出生城市（选填）', cityPh: '如 北京、成都，或直接填经度',
+        cityHintEmpty: '不填就按钟表时间排盘',
+        cityHintCity: '按{city}（东经 {lon}°）校正真太阳时',
+        cityHintLon: '按东经 {lon}° 校正真太阳时',
+        cityHintUnknown: '没找到「{text}」，先按钟表时间排盘。可以换个写法，或直接填经度（如 116.4）',
+        noCity: '未填出生地',
+        occupationLabel: '职业 / 想问的方向', occupationPh: '选填，会写进完整报告',
+        compute: '排盘', moreOptions: '更多选项',
+        yearDivide: '年柱分界', ydNormal: '正月初一', ydExact: '立春',
+        yearDivideHint: '新的一年从哪天算起，只影响四柱的年柱',
+        monthDivide: '月柱分界', mdNormal: '农历月', mdExact: '节气',
+        monthDivideHint: '只影响四柱的月柱，不影响命宫和星曜',
+        dayDivide: '晚子时（23–24 点出生）', ddForward: '算第二天', ddCurrent: '算当天',
+        dayDivideHint: '晚上 11 点到 12 点之间出生，算当天还是第二天',
+        fixLeap: '闰月出生', flTrue: '下半月算下个月', flFalse: '整月算本月',
+        fixLeapHint: '只在农历闰月出生时有影响',
         summaryTitle: '命主信息', solarLabel: '公历', lunarLabel: '农历',
         zodiac: '生肖', sign: '星座', soul: '命宫', body: '身宫', class5: '五行局',
         soulMaster: '命主', bodyMaster: '身主', startAge: '起运', solarTime: '真太阳时',
@@ -1812,14 +1819,22 @@ window.__ModuleLoader__.load({
         year: 'Year', month: 'Month', day: 'Day', leap: 'Leap',
         time: 'Birth Time', hour: 'Hr', minute: 'Min',
         gender: 'Gender', male: 'Male', female: 'Female',
-        lonLabel: 'Longitude °E', lonPh: 'e.g. 116.4 (true solar time)',
-        placeLabel: 'Place', placePh: 'optional', occupationLabel: 'Occupation / Focus', occupationPh: 'optional',
-        compute: 'Draw Chart',
-        settings: 'Options', yearDivide: 'Year', ydNormal: 'LNY', ydExact: 'Lichun',
-        monthDivide: 'Month', mdNormal: 'Lunar', mdExact: 'Terms',
-        monthDivideHint: 'Month pillar uses solar terms by default; palaces and stars still use the lunar month.',
-        dayDivide: 'Late Rat', ddForward: 'Next Day', ddCurrent: 'Same Day',
-        fixLeap: 'Leap', flTrue: '2nd half next', flFalse: 'whole month',
+        cityLabel: 'Birth city (optional)', cityPh: 'e.g. Beijing in Chinese, or a longitude',
+        cityHintEmpty: 'Leave empty to use clock time',
+        cityHintCity: 'True solar time from {city} ({lon}°E)',
+        cityHintLon: 'True solar time from {lon}°E',
+        cityHintUnknown: 'No match for "{text}", using clock time. Try another spelling or enter a longitude (e.g. 116.4)',
+        noCity: 'No birthplace',
+        occupationLabel: 'Occupation / focus', occupationPh: 'Optional, goes into the full report',
+        compute: 'Draw chart', moreOptions: 'More options',
+        yearDivide: 'Year starts at', ydNormal: 'Lunar New Year', ydExact: 'Lichun',
+        yearDivideHint: 'Only affects the year pillar',
+        monthDivide: 'Month starts at', mdNormal: 'Lunar month', mdExact: 'Solar term',
+        monthDivideHint: 'Only affects the month pillar, not palaces or stars',
+        dayDivide: 'Born 23:00–24:00', ddForward: 'Next day', ddCurrent: 'Same day',
+        dayDivideHint: 'Whether a birth between 11 pm and midnight counts as the same day',
+        fixLeap: 'Leap-month birth', flTrue: '2nd half = next month', flFalse: 'Whole month',
+        fixLeapHint: 'Only matters for births in a lunar leap month',
         summaryTitle: 'Profile', solarLabel: 'Solar', lunarLabel: 'Lunar',
         zodiac: 'Zodiac', sign: 'Sign', soul: 'Soul', body: 'Body', class5: 'Class',
         soulMaster: 'Soul Star', bodyMaster: 'Body Star', startAge: 'Start', solarTime: 'True Solar',
@@ -2598,6 +2613,12 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
 .zp-settings-title { font-size: 14px; font-weight: 750; letter-spacing: .5px }
 .zp-settings-body { padding: 16px; overflow: auto }
 .zp-settings-hint { font-size: 11px; color: var(--dsw-alias-label-secondary); margin-top: 4px; line-height: 1.55 }
+.zp-settings-hint.is-warn { color: var(--dsw-alias-state-warn-primary) }
+/* 表单「更多选项」：职业与排盘口径，默认收起 */
+.zp-more { margin-bottom: 12px }
+.zp-more > summary { font-size: 12px; line-height: 18px; color: var(--dsw-alias-label-secondary); cursor: pointer }
+.zp-more > summary:focus-visible { outline: 2px solid var(--zp-fill-accent); outline-offset: 2px; border-radius: 4px }
+.zp-more-body { padding-top: 8px }
 .zp-check {
   display: flex; align-items: center; gap: 8px; font-size: 12.5px;
   margin-bottom: 10px; cursor: pointer; color: var(--dsw-alias-label-primary);
@@ -3116,6 +3137,29 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
 }
 `;
 
+    /* ---------------- 出生城市 → 经度 ----------------
+     * 城市中心近似经度（东经，0.1°；0.1° ≈ 0.4 分钟真太阳时）。自编常用城市表：直辖市、省会/首府、港澳台、主要地级市。
+     * 用户也可以直接填经度；查不到的城市按钟表时间排盘并提示。 */
+    var CITY_LON = {
+      '北京': 116.4, '天津': 117.2, '上海': 121.5, '重庆': 106.5,
+      '石家庄': 114.5, '太原': 112.5, '呼和浩特': 111.7, '沈阳': 123.4, '长春': 125.3, '哈尔滨': 126.5,
+      '南京': 118.8, '杭州': 120.2, '合肥': 117.3, '福州': 119.3, '南昌': 115.9, '济南': 117.0,
+      '郑州': 113.6, '武汉': 114.3, '长沙': 112.9, '广州': 113.3, '南宁': 108.4, '海口': 110.3,
+      '成都': 104.1, '贵阳': 106.6, '昆明': 102.7, '拉萨': 91.1, '西安': 108.9, '兰州': 103.8,
+      '西宁': 101.8, '银川': 106.2, '乌鲁木齐': 87.6, '香港': 114.2, '澳门': 113.5, '台北': 121.6,
+      '深圳': 114.1, '苏州': 120.6, '无锡': 120.3, '常州': 120.0, '南通': 120.9, '徐州': 117.3,
+      '扬州': 119.4, '宁波': 121.6, '温州': 120.7, '绍兴': 120.6, '嘉兴': 120.8, '金华': 119.6,
+      '台州': 121.4, '厦门': 118.1, '泉州': 118.7, '青岛': 120.4, '烟台': 121.4, '潍坊': 119.2,
+      '临沂': 118.4, '淄博': 118.1, '济宁': 116.6, '大连': 121.6, '鞍山': 123.0, '吉林': 126.6,
+      '大庆': 125.1, '佛山': 113.1, '东莞': 113.8, '珠海': 113.6, '汕头': 116.7, '中山': 113.4,
+      '惠州': 114.4, '洛阳': 112.5, '唐山': 118.2, '保定': 115.5, '邯郸': 114.5, '秦皇岛': 119.6,
+      '大同': 113.3, '包头': 109.8, '芜湖': 118.4, '九江': 116.0, '赣州': 114.9, '襄阳': 112.1,
+      '宜昌': 111.3, '株洲': 113.1, '衡阳': 112.6, '桂林': 110.3, '柳州': 109.4, '三亚': 109.5,
+      '绵阳': 104.7, '宜宾': 104.6, '南充': 106.1, '遵义': 106.9, '大理': 100.2, '丽江': 100.2,
+      '宝鸡': 107.2, '咸阳': 108.7, '汉中': 107.0, '延安': 109.5, '天水': 105.7, '喀什': 76.0
+    };
+    var CITY_NAMES = Object.keys(CITY_LON);
+
     /* ---------------- 界面纯逻辑 ----------------
      * 无副作用、不依赖 React，由 apply() 暴露为 window.ZWUi 供自检断言
      * （见 verify/verify.mjs 与 docs/specs/2026-11-18_v5-ux-polish.md）。 */
@@ -3139,6 +3183,25 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         }
         copy.push({ role: 'assistant', content: s });
         return copy;
+      },
+      /* 出生城市框的解析：empty（不填，按钟表时间）/ city（查到城市）/ number（直接填经度）/ unknown（查不到）。
+         城市名取文本里包含的最长城市名；一样长时取靠后的那个（「吉林长春」→ 长春）。 */
+      parseBirthplace: function (text) {
+        var raw = String(text == null ? '' : text).trim();
+        if (!raw) return { kind: 'empty', lon: null, city: null };
+        var num = raw.replace(/^东经\s*/, '').replace(/\s*(°|度)?\s*(E|东)?$/i, '');
+        if (/^-?\d+(\.\d+)?$/.test(num)) {
+          var v = +num;
+          return v >= 60 && v <= 140 ? { kind: 'number', lon: v, city: null } : { kind: 'unknown', lon: null, city: null };
+        }
+        var best = null, bestAt = -1;
+        for (var ci = 0; ci < CITY_NAMES.length; ci++) {
+          var nm = CITY_NAMES[ci];
+          var at = raw.lastIndexOf(nm);
+          if (at < 0) continue;
+          if (!best || nm.length > best.length || (nm.length === best.length && at > bestAt)) { best = nm; bestAt = at; }
+        }
+        return best ? { kind: 'city', lon: CITY_LON[best], city: best } : { kind: 'unknown', lon: null, city: null };
       },
       /* 命盘库不填名时的自动盘名：有称呼用称呼，否则「公历日期 时辰 性别」。 */
       autoChartName: function (input, timeName, labels) {
@@ -3277,8 +3340,26 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         f.year + '-' + pad2(f.month) + '-' + pad2(f.day),
         pad2(f.hour) + ':' + pad2(f.minute),
         f.gender === 'female' ? t('female') : t('male'),
-        (f.longitude === '' || f.longitude === null || f.longitude === undefined) ? t('uncorrected') : f.longitude + '°E'
+        (f.longitude === '' || f.longitude === null || f.longitude === undefined) ? t('noCity') : (f.place || (f.longitude + '°E'))
       ].join(' · ');
+      /* 出生城市框：显示 city，旧表单没有 city 时退回籍贯 / 经度数字 */
+      var cityText = f.city != null ? f.city
+        : (f.place || ((f.longitude === '' || f.longitude == null) ? '' : String(f.longitude)));
+      var cityParsed = ZWUI.parseBirthplace(cityText);
+      var hasLon = !(f.longitude === '' || f.longitude == null);
+      var cityHint = hasLon
+        ? (cityParsed.kind === 'city'
+          ? t('cityHintCity').replace('{city}', cityParsed.city).replace('{lon}', f.longitude)
+          : t('cityHintLon').replace('{lon}', f.longitude))
+        : (cityParsed.kind === 'unknown' ? t('cityHintUnknown').replace('{text}', cityText.trim()) : t('cityHintEmpty'));
+      var onCity = function (v) {
+        var r = ZWUI.parseBirthplace(v);
+        set({
+          city: v,
+          longitude: r.lon == null ? '' : String(r.lon),
+          place: r.kind === 'city' ? r.city : (r.kind === 'unknown' ? String(v).trim() : '')
+        });
+      };
 
       var setSetting = function (k, v) {
         var next = Object.assign({}, f.settings);
@@ -3345,38 +3426,33 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
                 options: [{ value: 'male', label: t('male') }, { value: 'female', label: t('female') }],
                 onChange: function (v) { set({ gender: v }); }
               })))),
-        h('div', { key: 'r4', className: 'zp-row', style: { gap: 8, alignItems: 'flex-start' } },
-          h('div', { className: 'zp-field', style: { flex: 1, marginBottom: 9 } },
-            h('label', { className: 'zp-field-label' }, t('lonLabel')),
-            h('input', {
-              className: 'zp-input', type: 'number', value: f.longitude, min: 60, max: 140, step: 'any',
-              placeholder: t('lonPh'), 'aria-label': t('lonLabel'),
-              onChange: function (ev) { set({ longitude: ev.target.value }); }
-            })),
-          h('div', { className: 'zp-field', style: { flex: 1, marginBottom: 9 } },
-            h('label', { className: 'zp-field-label' }, t('placeLabel')),
-            h('input', {
-              className: 'zp-input', type: 'text', value: f.place || '', maxLength: 30,
-              placeholder: t('placePh'), 'aria-label': t('placeLabel'),
-              onChange: function (ev) { set({ place: ev.target.value }); }
-            }))),
-        h('div', { key: 'r5', className: 'zp-field' },
-          h('label', { className: 'zp-field-label' }, t('occupationLabel')),
+        h('div', { key: 'r4', className: 'zp-field' },
+          h('label', { className: 'zp-field-label', htmlFor: 'zp-city' }, t('cityLabel')),
           h('input', {
-            className: 'zp-input', type: 'text', value: f.occupation || '', maxLength: 60,
-            placeholder: t('occupationPh'), 'aria-label': t('occupationLabel'),
-            onChange: function (ev) { set({ occupation: ev.target.value }); }
-          })),
-        h('details', { key: 'r6', style: { marginBottom: 10 } },
-          h('summary', { style: { fontSize: 11, color: 'var(--dsw-alias-label-secondary)', cursor: 'pointer', letterSpacing: '.5px' } }, t('settings')),
-          h('div', { style: { paddingTop: 8 } },
+            id: 'zp-city', className: 'zp-input', type: 'text', value: cityText, maxLength: 30, list: 'zp-city-list',
+            placeholder: t('cityPh'), autoComplete: 'off',
+            onChange: function (ev) { onCity(ev.target.value); }
+          }),
+          h('datalist', { id: 'zp-city-list' }, CITY_NAMES.map(function (nm) { return h('option', { key: nm, value: nm }); })),
+          h('div', { className: 'zp-settings-hint' + (cityParsed.kind === 'unknown' && !hasLon ? ' is-warn' : '') }, cityHint)),
+        h('details', { key: 'r6', className: 'zp-more' },
+          h('summary', null, t('moreOptions')),
+          h('div', { className: 'zp-more-body' },
+            h('div', { className: 'zp-field' },
+              h('label', { className: 'zp-field-label', htmlFor: 'zp-occupation' }, t('occupationLabel')),
+              h('input', {
+                id: 'zp-occupation', className: 'zp-input', type: 'text', value: f.occupation || '', maxLength: 60,
+                placeholder: t('occupationPh'),
+                onChange: function (ev) { set({ occupation: ev.target.value }); }
+              })),
             h('div', { className: 'zp-field' },
               h('label', { className: 'zp-field-label' }, t('yearDivide')),
               h(Seg, {
                 value: f.settings.yearDivide,
                 options: [{ value: 'normal', label: t('ydNormal') }, { value: 'exact', label: t('ydExact') }],
                 onChange: function (v) { setSetting('yearDivide', v); }
-              })),
+              }),
+              h('div', { className: 'zp-settings-hint' }, t('yearDivideHint'))),
             h('div', { className: 'zp-field' },
               h('label', { className: 'zp-field-label' }, t('monthDivide')),
               h(Seg, {
@@ -3391,22 +3467,21 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
                 value: f.settings.dayDivide,
                 options: [{ value: 'forward', label: t('ddForward') }, { value: 'current', label: t('ddCurrent') }],
                 onChange: function (v) { setSetting('dayDivide', v); }
-              })),
+              }),
+              h('div', { className: 'zp-settings-hint' }, t('dayDivideHint'))),
             h('div', { className: 'zp-field' },
               h('label', { className: 'zp-field-label' }, t('fixLeap')),
               h(Seg, {
                 value: f.settings.fixLeap,
                 options: [{ value: true, label: t('flTrue') }, { value: false, label: t('flFalse') }],
                 onChange: function (v) { setSetting('fixLeap', v); }
-              })))),
+              }),
+              h('div', { className: 'zp-settings-hint' }, t('fixLeapHint'))))),
         props.dirty ? h('div', { key: 'r6d', className: 'zp-dirty-note', role: 'status' }, t('formDirty')) : null,
         h('button', { key: 'r7', className: 'zp-btn' + (props.hasChart ? '' : ' zp-btn-primary'), type: 'button', style: { width: '100%' }, onClick: props.onCompute },
           t('compute'))
       ];
       if (props.error) formBody.push(h('div', { key: 'r8', className: 'zp-error' }, props.error));
-      formBody.push(h('div', { key: 'r9', className: 'zp-note' },
-        h('div', null, t('note1')),
-        h('div', null, t('note2'))));
 
       return h('div', { className: 'zp-card zp-input-card', 'data-region': 'SIDE_FORM' },
         h('div', { className: 'zp-card-title' }, t('formTitle'),
@@ -4891,7 +4966,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           input: {
             name: form.name, calendar: birth.calendar, year: birth.year, month: birth.month, day: birth.day,
             isLeap: birth.isLeap, hour: birth.hour, minute: birth.minute, gender: birth.gender,
-            longitude: birth.longitude, place: form.place, occupation: form.occupation,
+            longitude: birth.longitude, city: form.city, place: form.place, occupation: form.occupation,
             settings: birth.settings
           }
         };
@@ -5715,7 +5790,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
     const DEFAULT_FORM = {
       name: '', calendar: 'solar', year: 1990, month: 6, day: 15,
       isLeap: false, hour: 15, minute: 30, gender: 'male',
-      longitude: '', place: '', occupation: '',
+      longitude: '', city: '', place: '', occupation: '',
       /* dayDivide 默认 current（按当日），与紫微师/独立版 iztro runner 一致 */
       settings: { yearDivide: 'normal', monthDivide: 'exact', dayDivide: 'current', fixLeap: true }
     };
