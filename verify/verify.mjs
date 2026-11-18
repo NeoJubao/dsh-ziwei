@@ -424,6 +424,10 @@ ok('v1.7: 换盘按命盘 key 恢复该盘记录；没有记录才清空，且�
 ok('v1.7: 解读记录按命盘持久化（最多 8 张 / 每张 24 条）',
   /ziwei-pro\.readings\.v1/.test(client) && /READINGS_MAX = 8/.test(client) &&
   /slice\(-24\)/.test(client) && /saveReadingRecord/.test(client) && /clearReadingRecord/.test(client));
+ok('v1.7: 解读记录 key 含排盘设置（换月柱/晚子时口径不会套回旧解读）',
+  /function readingKeyOf/.test(client) && /settingsKey/.test(client) &&
+  /yearDivide/.test(client) && /monthDivide/.test(client) && /dayDivide/.test(client) &&
+  /settingsKey\]\.join/.test(client));
 ok('v1.7: 启动时恢复上一次命盘与它的解读记录',
   /ziwei-pro\.lastChart\.v1/.test(client) && /loadLastChart/.test(client) && /restoredRef/.test(client));
 ok('v1.7: 流式空回答不再画空白气泡，改为思考提示点',

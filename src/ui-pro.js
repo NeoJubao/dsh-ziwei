@@ -1668,7 +1668,10 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
     }
     function readingKeyOf(input) {
       var x = readingInput(input);
-      return [x.calendar, x.year, x.month, x.day, x.isLeap ? 1 : 0, x.hour, x.minute, x.gender, x.longitude].join('|');
+      var st = x.settings || {};
+      /* 排盘设置会改变命盘（月柱口径 / 晚子时 / 闰月），必须进 key，否则换设置会套回旧解读 */
+      var settingsKey = [st.yearDivide || 'normal', st.monthDivide || 'exact', st.dayDivide || 'current', st.fixLeap === false ? 0 : 1].join(',');
+      return [x.calendar, x.year, x.month, x.day, x.isLeap ? 1 : 0, x.hour, x.minute, x.gender, x.longitude, settingsKey].join('|');
     }
     function loadReadingMap() {
       try {
