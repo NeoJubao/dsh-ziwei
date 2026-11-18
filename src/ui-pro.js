@@ -2634,22 +2634,30 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       var ref = useDialogFocus();
       var [fs, setFs] = useState(false);
       var boxRef = useRef(null);
+      /* 全屏状态以浏览器为准：系统/宿主也可能用 Esc 退出全屏，不能只靠按钮回调维护 fs */
+      useEffect(function () {
+        var sync = function () { setFs(!!document.fullscreenElement); };
+        document.addEventListener('fullscreenchange', sync);
+        return function () { document.removeEventListener('fullscreenchange', sync); };
+      }, []);
+      var closeRef = useRef(props.onClose);
+      closeRef.current = props.onClose;
       useEffect(function () {
         var onEsc = function (ev) {
-          if (ev.key === 'Escape') { ev.preventDefault(); if (fs && document.exitFullscreen) { document.exitFullscreen().catch(function () {}); } else props.onClose(); }
+          if (ev.key !== 'Escape' || ev.isComposing) return;
+          ev.preventDefault();
+          if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(function () {});
+          else closeRef.current();
         };
         window.addEventListener('keydown', onEsc);
         return function () { window.removeEventListener('keydown', onEsc); };
-      }, [fs]);
+      }, []);
       var toggleFullscreen = function () {
         var el = boxRef.current;
         if (!el) return;
         try {
-          if (!document.fullscreenElement && el.requestFullscreen) {
-            el.requestFullscreen().then(function () { setFs(true); }).catch(function () {});
-          } else if (document.exitFullscreen) {
-            document.exitFullscreen().then(function () { setFs(false); }).catch(function () {});
-          }
+          if (!document.fullscreenElement && el.requestFullscreen) el.requestFullscreen().catch(function () {});
+          else if (document.exitFullscreen) document.exitFullscreen().catch(function () {});
         } catch (e) { /* ignore */ }
       };
       return h('div', { className: 'zp-reader', role: 'dialog', 'aria-modal': 'true', 'aria-label': t('reportTitle'), tabIndex: -1, ref: function (el) { boxRef.current = el; ref.current = el; }, onKeyDown: function (ev) { trapTab(ev, ev.currentTarget); } },
