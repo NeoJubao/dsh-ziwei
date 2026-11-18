@@ -417,10 +417,20 @@ ok('v3.3: 空态是一行一个的动作卡（图标 / 名称 / 说明 / 箭头�
   /zp-ai-start-btn/.test(client) && /zp-ai-start-glyph/.test(client) &&
   /zp-ai-start-desc/.test(client) && /zp-ai-start-arrow/.test(client) &&
   !/zp-ai-start \.zp-btn/.test(client));
-ok('v3.3: 换盘仍清空旧解读（不串盘），且清空后不会自己生成',
-  /换盘 = 换解读对象/.test(client) && (client.match(/setThread\(\[\]\)/g) || []).length >= 2);
+ok('v1.7: 换盘按命盘 key 恢复该盘记录；没有记录才清空，且不自动生成',
+  /var adoptChart = function/.test(client) && /chartKeyRef\.current = key/.test(client) &&
+  /loadReadingRecord\(key\)/.test(client) && /setThread\(saved\.thread\)/.test(client) &&
+  /setThread\(\[\]\)/.test(client) && !/runInterpretation\('', 'brief'\)/.test(client));
+ok('v1.7: 解读记录按命盘持久化（最多 8 张 / 每张 24 条）',
+  /ziwei-pro\.readings\.v1/.test(client) && /READINGS_MAX = 8/.test(client) &&
+  /slice\(-24\)/.test(client) && /saveReadingRecord/.test(client) && /clearReadingRecord/.test(client));
+ok('v1.7: 启动时恢复上一次命盘与它的解读记录',
+  /ziwei-pro\.lastChart\.v1/.test(client) && /loadLastChart/.test(client) && /restoredRef/.test(client));
+ok('v1.7: 流式空回答不再画空白气泡，改为思考提示点',
+  /m\.role !== 'user' && !String\(m\.content \|\| ''\)\.trim\(\)/.test(client) &&
+  /zp-typing-dots/.test(client) && !/aiThinking\) \+ '（'/.test(client));
 ok('client 大限默认停在当前段（不是第 0 段）且流年选择进 payload',
-  /function currentDecadeIndex|var currentDecadeIndex = function/.test(client) && /setSelDecadal\(currentDecadeIndex\(result\.chart\)\)/.test(client) && /yearlyFocus:/.test(client));
+  /function currentDecadeIndex|var currentDecadeIndex = function/.test(client) && /setSelDecadal\(currentDecadeIndex\(result\)\)/.test(client) && /yearlyFocus:/.test(client));
 ok('client 问答 payload 带完整上下文与当前年龄（大限定位）',
   /var chartContextText = function/.test(client) && /chartText: chartContextText\(\)/.test(client) &&
   /currentAge: pos\.currentAge/.test(client) && /decadalFocus: selectedDecade/.test(client));

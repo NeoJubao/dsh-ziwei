@@ -69,8 +69,12 @@ official DeepSeek product.
   设置改为面板内弹层，顶栏按钮分层。
 - **「新会话解读」**：一键用 Host `sessionController` 真开新会话，把命盘与已有解读
   灌成首条消息，长报告交给会话 / 子代理跑。
+- **解读记录按命盘保存**：同一生辰再次打开（含重启面板）会恢复上次的命盘与对话/报告；
+  最多保留 8 张盘、每张 24 条消息。记录只存在浏览器 localStorage，不上传；
+  「新对话」会清空当前这张盘的记录。
 - **隐私**：生辰与命盘只在本地浏览器 / 本机 Host 路由 / 你配置的模型 provider 之间流转；
-  浏览器 localStorage 只存偏好与命盘库，**不存 API Key**（旧版遗留键会在启动时清理）。
+  浏览器 localStorage 存偏好、命盘库、上次命盘与按命盘保存的解读记录，**不存 API Key**
+  （旧版遗留键会在启动时清理）。
 
 ## 安装
 
@@ -350,9 +354,11 @@ v3 做两次分离：
 - **排盘在浏览器内完成**（引擎是纯函数），生辰不会因为「排盘」被发到 Host。
 - 「解读」「交给会话」会把**命盘文本（含出生四要素）**发给本机 Host 路由，再由 Host 交给
   你配置的模型 provider。插件不额外向第三方上传数据；模型请求的数据路径属 DSH 会话本身。
-- 浏览器 localStorage 只存：`ziwei-pro.form`（表单）、`ziwei-pro.library`（命盘库）、
-  `ziwei-pro.focus`、`ziwei-pro.autopen`、`ziwei-pro.showadj`。**不存 API Key**；
-  旧版遗留的 `ziwei-workbench.apikey` 会在初始化时被自动清理。
+- 浏览器 localStorage 存：`ziwei-pro.form`（表单）、`ziwei-pro.library`（命盘库）、
+  `ziwei-pro.lastChart.v1`（上次命盘）、`ziwei-pro.readings.v1`（按命盘保存的解读对话与报告，
+  最多 8 张盘 / 每张 24 条）、`ziwei-pro.focus`、`ziwei-pro.autopen`、`ziwei-pro.showadj`。
+  **不存 API Key**；旧版遗留的 `ziwei-workbench.apikey` 会在初始化时被自动清理。
+- 解读记录只在本机浏览器里，不上传；换设备 / 清浏览器数据后不会同步。
 - 诊断日志（`host-diag.log` / `interpret-diag.log`）只记录模型、档位、预算、结束原因、
   耗时与 token 用量，不含生辰原文；`ZIWEI_DIAG=0` 关闭；两者都不会进 npm 包。
 - 详细威胁边界见 [SECURITY.md](SECURITY.md)。

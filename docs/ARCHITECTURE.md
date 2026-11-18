@@ -125,8 +125,10 @@
   darwin 桌面端避让窗口 chrome：`--dsh-frame-top-clearance` / `--dsh-frame-leading-clearance` /
   `--dsh-frame-overlay-top`（均带 `0px` 兜底），并用 `isolation: isolate` 把内部 z-index 收进
   面板自身上下文，避免盖住 frame 的 `shell.leading` 退出控件。
-- **浏览器 localStorage 只存偏好与命盘库**：`ziwei-pro.form`（表单）、`ziwei-pro.library`
-  （命盘库）、`ziwei-pro.focus`、`ziwei-pro.autopen`、`ziwei-pro.showadj`。
+- **浏览器 localStorage 存偏好、命盘库与解读记录**：`ziwei-pro.form`（表单）、
+  `ziwei-pro.library`（命盘库）、`ziwei-pro.lastChart.v1`（上次命盘）、
+  `ziwei-pro.readings.v1`（按命盘保存的对话/报告，最多 8 张盘）、`ziwei-pro.focus`、
+  `ziwei-pro.autopen`、`ziwei-pro.showadj`。均只在本机浏览器，不上传。
   **不存 API Key**；旧版本遗留的 `ziwei-workbench.apikey` 会在初始化时被清理。
 
 ## 4. 构建链（`build.mjs`）

@@ -50,7 +50,7 @@ window.__ModuleLoader__.load({
         oppPalace: '对宫', triPalace: '三合', detailTitle: '宫位详情',
         mutagenTitle: '四化', noMutagen: '—',
         ai: '紫微师解读', aiTitle: '紫微师解读',
-        aiSend: '发送', aiNewChat: '新对话', aiAskPh: '追问命盘，Enter 发送',
+        aiSend: '发送', aiNewChat: '新对话', aiAskPh: '想问什么？事业、财运、大限…（Enter 发送）',
         aiStartBrief: '速览解读', aiStartReport: '完整鲲鹏报告',
         aiStartBriefDesc: '命格总纲与当前大限，几分钟读完',
         aiStartReportDesc: '14 个部分，可导出精装 HTML',
@@ -64,8 +64,8 @@ window.__ModuleLoader__.load({
         handoff: '新会话解读', handoffDone: '已开新会话 ✓',
         handoffHint: '把当前命盘交给会话；之后在对话里说「继续聊这个盘」或「写鲲鹏报告」即可',
         disclaimerShort: '传统文化解读，非科学结论，仅供参考。具体决策请咨询专业人士。',
-        aiInterpreting: '解读中…', interpStreaming: '生成中…',
-        aiThinking: '思考中…', aiStop: '停止', aiContinue: '继续生成',
+        aiInterpreting: '解读中…', interpStreaming: '正在生成…',
+        aiThinking: '紫微师正在思考…', aiStop: '停止', aiContinue: '继续生成',
         aiStopped: '已停止生成，内容可能不完整；可点「继续生成」接着写',
         aiDisconnected: '连接中断，内容可能不完整；可点「继续生成」接着写',
         aiContinuePrompt: '请接着上文继续写：从断处接着写，不要重复已写内容，也不要重新开头。',
@@ -124,7 +124,7 @@ window.__ModuleLoader__.load({
         oppPalace: 'Opposite', triPalace: 'Trine', detailTitle: 'Palace Detail',
         mutagenTitle: 'Transforms', noMutagen: '—',
         ai: 'Reading', aiTitle: 'Zi Wei Reading',
-        aiSend: 'Send', aiNewChat: 'New chat', aiAskPh: 'Follow-up — Enter to send',
+        aiSend: 'Send', aiNewChat: 'New chat', aiAskPh: 'Ask about career, money, decades… (Enter to send)',
         aiStartBrief: 'Quick reading', aiStartReport: 'Full Kunpeng report',
         aiStartBriefDesc: 'Core profile and current decade, a few minutes',
         aiStartReportDesc: '14 parts, exportable to HTML',
@@ -138,8 +138,8 @@ window.__ModuleLoader__.load({
         handoff: 'New session', handoffDone: 'Session opened ✓',
         handoffHint: 'Hand this chart to the session so the agent can continue the reading.',
         disclaimerShort: 'Traditional interpretation, not a scientific conclusion. Consult a professional for decisions.',
-        aiInterpreting: 'Reading…', interpStreaming: 'Generating…',
-        aiThinking: 'Thinking…', aiStop: 'Stop', aiContinue: 'Continue',
+        aiInterpreting: 'Reading…', interpStreaming: 'Writing…',
+        aiThinking: 'Zi Wei Master is thinking…', aiStop: 'Stop', aiContinue: 'Continue',
         aiStopped: 'Stopped; the answer may be incomplete — press Continue to resume.',
         aiDisconnected: 'Connection lost; the answer may be incomplete — press Continue to resume.',
         aiContinuePrompt: 'Continue from where you stopped; do not repeat or restart the answer.',
@@ -876,7 +876,19 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   vertical-align: top; text-align: left; word-break: break-word;
 }
 .zp-md-table th { background: var(--dsw-alias-bg-layer-2); font-weight: 600 }
-.zp-typing { font-size: 12px; color: var(--dsw-alias-label-secondary); padding: 6px 2px }
+.zp-typing { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--dsw-alias-label-secondary); padding: 6px 2px }
+.zp-typing-dots { display: inline-flex; align-items: center; gap: 4px }
+.zp-typing-dots i {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--dsw-alias-label-tertiary);
+  animation: zp-typing-blink 1.2s ease-in-out infinite;
+}
+.zp-typing-dots i:nth-child(2) { animation-delay: .15s }
+.zp-typing-dots i:nth-child(3) { animation-delay: .3s }
+@keyframes zp-typing-blink {
+  0%, 100% { opacity: .25; transform: translateY(0) }
+  50% { opacity: 1; transform: translateY(-1px) }
+}
 .zp-chat-ta { flex: 1; resize: vertical; min-height: 46px; max-height: 180px; font-family: inherit; line-height: 1.6; font-size: 13px }
 .zp-preview-frame {
   width: 100%; height: 60vh; border: 1px solid var(--dsw-alias-border-l1);
@@ -1628,6 +1640,111 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         .replace(/\n/g, '<br>');
     }
 
+    /* ---------------- 解读记录：按命盘存本地（localStorage） ----------------
+       同一生辰（历法 / 年月日 / 闰月 / 时分 / 性别 / 经度）视为同一张盘。
+       只写浏览器本地，不上传、不写会话；最多保留 8 张盘，每张最多 24 条消息。 */
+    var READINGS_KEY = 'ziwei-pro.readings.v1';
+    var LAST_CHART_KEY = 'ziwei-pro.lastChart.v1';
+    var READINGS_MAX = 8;
+    function readingInput(input) {
+      var x = input || {};
+      var lon = x.longitude;
+      lon = (lon === '' || lon === null || lon === undefined) ? '' : String(+lon);
+      return {
+        name: String(x.name || ''),
+        calendar: x.calendar === 'lunar' ? 'lunar' : 'solar',
+        year: +x.year || 0,
+        month: +x.month || 0,
+        day: +x.day || 0,
+        isLeap: !!x.isLeap,
+        hour: +x.hour || 0,
+        minute: +x.minute || 0,
+        gender: x.gender === 'female' ? 'female' : 'male',
+        longitude: lon,
+        place: String(x.place || ''),
+        occupation: String(x.occupation || ''),
+        settings: Object.assign({}, x.settings || {})
+      };
+    }
+    function readingKeyOf(input) {
+      var x = readingInput(input);
+      return [x.calendar, x.year, x.month, x.day, x.isLeap ? 1 : 0, x.hour, x.minute, x.gender, x.longitude].join('|');
+    }
+    function loadReadingMap() {
+      try {
+        var raw = JSON.parse(localStorage.getItem(READINGS_KEY) || '{}');
+        return raw && typeof raw === 'object' ? raw : {};
+      } catch (e) { return {}; }
+    }
+    function writeReadingMap(map) {
+      try { localStorage.setItem(READINGS_KEY, JSON.stringify(map)); return true; } catch (e) { return false; }
+    }
+    function trimReadings(map) {
+      var keys = Object.keys(map).sort(function (a, b) { return (map[b].updatedAt || 0) - (map[a].updatedAt || 0); });
+      keys.slice(READINGS_MAX).forEach(function (k) { delete map[k]; });
+      return map;
+    }
+    function saveReadingRecord(key, data) {
+      if (!key) return;
+      var map = loadReadingMap();
+      if (!data || !Array.isArray(data.thread) || !data.thread.length) {
+        delete map[key];
+        writeReadingMap(map);
+        return;
+      }
+      map[key] = {
+        thread: data.thread.slice(-24).map(function (m) {
+          return {
+            role: m && m.role === 'user' ? 'user' : 'assistant',
+            content: String((m && m.content) || '').slice(0, 60000)
+          };
+        }),
+        hasReport: !!data.hasReport,
+        lastMode: data.lastMode === 'report' ? 'report' : 'brief',
+        updatedAt: Date.now()
+      };
+      trimReadings(map);
+      var tries = 0;
+      while (!writeReadingMap(map) && tries < READINGS_MAX) {
+        tries++;
+        var keys = Object.keys(map).sort(function (a, b) { return (map[a].updatedAt || 0) - (map[b].updatedAt || 0); });
+        if (!keys.length) break;
+        delete map[keys[0]];
+      }
+    }
+    function loadReadingRecord(key) {
+      if (!key) return null;
+      var map = loadReadingMap();
+      var rec = map[key];
+      if (!rec || !Array.isArray(rec.thread) || !rec.thread.length) return null;
+      var thread = rec.thread.filter(function (m) {
+        return m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string';
+      });
+      if (!thread.length) return null;
+      return {
+        thread: thread,
+        hasReport: !!rec.hasReport,
+        lastMode: rec.lastMode === 'report' ? 'report' : 'brief',
+        updatedAt: rec.updatedAt || 0
+      };
+    }
+    function clearReadingRecord(key) {
+      if (!key) return;
+      var map = loadReadingMap();
+      if (!map[key]) return;
+      delete map[key];
+      writeReadingMap(map);
+    }
+    function saveLastChart(input) {
+      try { localStorage.setItem(LAST_CHART_KEY, JSON.stringify(readingInput(input))); } catch (e) { /* ignore */ }
+    }
+    function loadLastChart() {
+      try {
+        var raw = JSON.parse(localStorage.getItem(LAST_CHART_KEY) || 'null');
+        return raw && raw.year ? readingInput(raw) : null;
+      } catch (e) { return null; }
+    }
+
     function AIModal(props) {
       var t = props.t;
       var [q, setQ] = useState('');
@@ -1695,15 +1812,17 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
                     startBtn('report', 'report', t('aiStartReport'), t('aiStartReportDesc'), false))))
               : h('div', { className: 'zp-chat-thread', role: 'log', 'aria-live': 'polite', 'aria-busy': props.streaming ? 'true' : 'false' },
                 thread.map(function (m, i) {
+                  /* 流式开始时的空 assistant 占位不画气泡，否则会出现一条空白横杠 */
+                  if (m.role !== 'user' && !String(m.content || '').trim()) return null;
                   return h('div', { key: 'm' + i, className: m.role === 'user' ? 'zp-bubble zp-bubble-user' : 'zp-bubble zp-bubble-ai' },
                     m.role === 'user'
                       ? h('div', { className: 'zp-bubble-text' }, m.content)
                       : h('div', { className: 'zp-md', dangerouslySetInnerHTML: { __html: renderChatMd(m.content) } }));
                 }),
                 props.streaming
-                  ? h('div', { className: 'zp-typing' }, props.thinkChars
-                    ? t('aiThinking') + '（' + props.thinkChars + ' 字）'
-                    : t('interpStreaming')) : null),
+                  ? h('div', { className: 'zp-typing' },
+                    h('span', { className: 'zp-typing-dots', 'aria-hidden': true }, h('i'), h('i'), h('i')),
+                    h('span', null, props.thinkChars ? t('aiThinking') : t('interpStreaming'))) : null),
             props.interpError ? h('div', { className: 'zp-ai-error' },
               h('span', { className: 'zp-ai-error-text' }, props.interpError),
               props.interpIssue && props.interpIssue.canContinue
@@ -1930,6 +2049,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       var [interpCopied, setInterpCopied] = useState(false);
       var [handoffDone, setHandoffDone] = useState(false);
       var [synced, setSynced] = useState(false);
+      var chartKeyRef = useRef('');
 
       /* 面板宽度监听：布局切换与盘面缩放都靠它，避免用 viewport media query 误判面板宽度 */
       var rootRef = useRef(null);
@@ -1973,33 +2093,95 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         return function () { window.removeEventListener('keydown', onEsc); };
       }, [modal]);
 
-      /* 计算 */
-      var compute = function () {
-        setError('');
-        var result = E.computeChart({
-          calendar: form.calendar,
-          year: +form.year, month: +form.month, day: +form.day,
-          isLeapMonth: !!form.isLeap,
-          hour: +form.hour, minute: +form.minute,
-          gender: form.gender,
-          longitude: (form.longitude === '' || form.longitude === null || form.longitude === undefined) ? undefined : +form.longitude,
-          settings: form.settings
-        });
-        if (result.error) { setError(result.error); return; }
+      /* 换盘：设置命盘状态，并按「命盘 key」恢复/清空解读记录 */
+      var adoptChart = function (result, input) {
+        var key = readingKeyOf(input);
+        chartKeyRef.current = key;
         setChart(result);
         setSelected(result.soulIndex);
-        setSelDecadal(currentDecadeIndex(result.chart));
+        setSelDecadal(currentDecadeIndex(result));
         setYearlyYear(String(new Date().getFullYear()));
         setTab('natal');
         setView('chart');
-        /* 换盘 = 换解读对象：旧对话清掉，避免旧回答串到新盘上 */
-        setThread([]);
+        var saved = loadReadingRecord(key);
+        if (saved) {
+          setThread(saved.thread);
+          setHasReport(!!saved.hasReport);
+          setLastMode(saved.lastMode);
+        } else {
+          setThread([]);
+          setHasReport(false);
+          setLastMode('brief');
+        }
         setInterpError('');
         setInterpIssue(null);
-        setHasReport(false);
-        /* 出盘后收起生辰表单，把纵向空间让给盘面；点「改生辰」再展开 */
+        setThinkChars(0);
+        setError('');
         setFormCollapsed(true);
         if (panelW > 0 && panelW < 908) setRail(false);
+        saveLastChart(input);
+      };
+
+      /* 启动时恢复上一次的命盘；解读记录随命盘 key 一起回来。没有记录就停在空态。 */
+      var restoredRef = useRef(false);
+      useEffect(function () {
+        if (restoredRef.current) return;
+        restoredRef.current = true;
+        var input = loadLastChart();
+        if (!input) return;
+        var result;
+        try {
+          result = E.computeChart({
+            calendar: input.calendar,
+            year: +input.year, month: +input.month, day: +input.day,
+            isLeapMonth: !!input.isLeap,
+            hour: +input.hour, minute: +input.minute,
+            gender: input.gender,
+            longitude: input.longitude === '' ? undefined : +input.longitude,
+            settings: input.settings
+          });
+        } catch (e) { return; }
+        if (!result || result.error) return;
+        var nextForm = Object.assign({}, DEFAULT_FORM, input, {
+          settings: Object.assign({}, DEFAULT_FORM.settings, input.settings || {})
+        });
+        setFormRaw(nextForm);
+        try { localStorage.setItem('ziwei-pro.form', JSON.stringify(nextForm)); } catch (e) { /* ignore */ }
+        adoptChart(result, input);
+      }, []);
+
+      /* 解读记录落盘：流式过程中不写，结束（interpreting=false）后一次写；
+         清空对话（thread=[]）则删除这张盘的记录。 */
+      useEffect(function () {
+        var key = chartKeyRef.current;
+        if (!key || !chart) return;
+        if (interpreting) return;
+        var hasAnswer = false;
+        for (var hi = 0; hi < thread.length; hi++) {
+          if (thread[hi].role === 'assistant' && String(thread[hi].content || '').trim()) { hasAnswer = true; break; }
+        }
+        if (!hasAnswer) { clearReadingRecord(key); return; }
+        saveReadingRecord(key, { thread: thread, hasReport: hasReport, lastMode: lastMode });
+      }, [thread, hasReport, lastMode, interpreting, chart]);
+
+      var compute = function () {
+        setError('');
+        var input = {
+          name: form.name, calendar: form.calendar,
+          year: +form.year, month: +form.month, day: +form.day,
+          isLeap: !!form.isLeap, hour: +form.hour, minute: +form.minute,
+          gender: form.gender, longitude: form.longitude,
+          place: form.place, occupation: form.occupation, settings: form.settings
+        };
+        var result = E.computeChart({
+          calendar: input.calendar, year: input.year, month: input.month, day: input.day,
+          isLeapMonth: input.isLeap, hour: input.hour, minute: input.minute,
+          gender: input.gender,
+          longitude: (input.longitude === '' || input.longitude === null || input.longitude === undefined) ? undefined : +input.longitude,
+          settings: input.settings
+        });
+        if (!result || result.error) { setError((result && result.error) || '排盘失败'); return; }
+        adoptChart(result, input);
       };
 
       /* 大限/流年/格局 */
@@ -2062,28 +2244,27 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         return true;
       };
       var loadSaved = function (item) {
-        setFormRaw(Object.assign({}, DEFAULT_FORM, item.input, {
-          settings: Object.assign({}, DEFAULT_FORM.settings, item.input.settings || {})
-        }));
-        var result = E.computeChart(Object.assign({}, item.input, {
-          hour: +item.input.hour, minute: +item.input.minute,
-          isLeapMonth: !!item.input.isLeap,
-          longitude: (item.input.longitude === '' || item.input.longitude === null || item.input.longitude === undefined) ? undefined : +item.input.longitude
-        }));
-        if (result.error) { setError(result.error); return; }
-        setChart(result);
-        setSelected(result.soulIndex);
-        setSelDecadal(currentDecadeIndex(result.chart));
-        setYearlyYear(String(new Date().getFullYear()));
-        setTab('natal');
-        setView('chart');
+        var input = readingInput(item.input);
+        var result;
+        try {
+          result = E.computeChart({
+            calendar: input.calendar,
+            year: input.year, month: input.month, day: input.day,
+            isLeapMonth: input.isLeap,
+            hour: input.hour, minute: input.minute,
+            gender: input.gender,
+            longitude: input.longitude === '' ? undefined : +input.longitude,
+            settings: input.settings
+          });
+        } catch (e) { setError(String((e && e.message) || e)); return; }
+        if (!result || result.error) { setError((result && result.error) || '排盘失败'); return; }
+        var nextForm = Object.assign({}, DEFAULT_FORM, input, {
+          settings: Object.assign({}, DEFAULT_FORM.settings, input.settings || {})
+        });
+        setFormRaw(nextForm);
+        try { localStorage.setItem('ziwei-pro.form', JSON.stringify(nextForm)); } catch (e) { /* ignore */ }
         setCurrentLibId(item.id);
-        setThread([]);
-        setInterpError('');
-        setInterpIssue(null);
-        setHasReport(false);
-        setError('');
-        setFormCollapsed(true);
+        adoptChart(result, input);
       };
       var deleteSaved = function (id) {
         var next = library.filter(function (x) { return x.id !== id; });
