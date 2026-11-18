@@ -10,6 +10,7 @@ window.__ModuleLoader__.load({
     const React = require('react');
     const h = React.createElement;
     const { useState, useEffect, useMemo, useRef } = React;
+    const useLayoutEffect = React.useLayoutEffect || useEffect;
     const E = window.ZWEngine;
     /* 构建时由 build.mjs 注入 package.json 的版本号；未构建的源码里保留占位符。 */
     const APP_VERSION = '__ZIWEI_VERSION__';
@@ -17,6 +18,7 @@ window.__ModuleLoader__.load({
     /* ---------------- i18n ---------------- */
     const DICT = {
       'zh-CN': {
+        luckTitle: '运限', emptyTitle: '还没有命盘', sampleBirth: '示例生辰',
         askExamples: '也可以直接问', askEx1: '今年事业怎么样', askEx2: '这十年感情要注意什么', askEx3: '我适合做什么工作',
         brand: '紫微斗数', brandPro: 'Pro', 
         formTitle: '出生信息', name: '称呼', namePh: '选填',
@@ -121,6 +123,7 @@ window.__ModuleLoader__.load({
         copy: '复制命盘', copied: '已复制',
       },
       'en-US': {
+        luckTitle: 'Luck periods', emptyTitle: 'No chart yet', sampleBirth: 'Sample',
         askExamples: 'Or just ask', askEx1: 'How is my career this year?', askEx2: 'What should I watch for in love this decade?', askEx3: 'What kind of work suits me?',
         brand: 'Zi Wei Dou Shu', brandPro: 'Pro', 
         formTitle: 'Birth details', name: 'Name', namePh: 'Optional',
@@ -535,10 +538,11 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   container-type: inline-size;
 }
 .zp-cell {
-  background: var(--dsw-alias-bg-layer-1);
+  /* border-box：min-height 指整格高度（含内边距），盘面按可用高度适配时才算得准 */
+  box-sizing: border-box; background: var(--dsw-alias-bg-layer-1);
   padding: 8px;
   padding: clamp(6px, 1.35cqw, 11px);
-  min-height: 96px; min-height: clamp(96px, 19cqw, 150px);
+  min-height: 96px; min-height: clamp(84px, min(19cqw, var(--zp-cell-fit, 150px)), 150px);
   cursor: pointer; display: flex; flex-direction: column; gap: 2px;
   position: relative; min-width: 0; transition: background .12s, box-shadow .12s;
 }
@@ -562,11 +566,11 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
 .zp-cell:focus-visible { outline: 2px solid var(--zp-accent); outline-offset: -2px }
 .zp-cell-top { display: flex; justify-content: space-between; align-items: baseline; gap: 2px 4px; flex-wrap: wrap; min-width: 0 }
 .zp-cell-name {
-  font-size: 13px; font-size: clamp(11px, 1.95cqw, 14px);
+  font-size: 13px; font-size: clamp(13px, 1.95cqw, 14px);
   font-weight: 800; letter-spacing: .5px; white-space: nowrap;
 }
 .zp-cell-gz {
-  font-size: 10px; font-size: clamp(8.5px, 1.35cqw, 10.5px);
+  font-size: 10.5px;
   color: var(--dsw-alias-label-secondary); letter-spacing: 1px; white-space: nowrap;
 }
 .zp-mark {
@@ -580,11 +584,11 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
 .zp-stars-minor { margin-top: 1px }
 .zp-stars-scope { opacity: .92 }
 .zp-star {
-  font-size: 13px; font-size: clamp(10.5px, 2.05cqw, 14.5px);
+  font-size: 13.5px; font-size: clamp(13.5px, 2.05cqw, 14px);
   font-weight: 800; white-space: nowrap;
 }
 .zp-star.major { color: var(--zp-star-color, var(--dsw-alias-label-primary)) }
-.zp-star.minor-line { font-size: 11.5px; font-size: clamp(9.5px, 1.7cqw, 12px); font-weight: 650 }
+.zp-star.minor-line { font-size: 12px; font-weight: 650 }
 .zp-star.good { color: var(--zp-good) }
 .zp-star.bad { color: var(--zp-bad) }
 .zp-star.adj { color: var(--dsw-alias-label-secondary); font-weight: 500 }
@@ -594,12 +598,12 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   border: 1px dashed var(--dsw-alias-border-l2); border-radius: 4px; padding: 0 4px;
 }
 .zp-bright {
-  font-size: 8.5px; font-size: clamp(7.5px, 1.15cqw, 9.5px); font-weight: 700;
+  font-size: 9.5px; font-weight: 700;
   color: var(--zp-gold-dim); border: 1px solid currentColor; border-radius: 3px;
   padding: 0 2px; margin-left: 2px; vertical-align: 1px;
 }
 .zp-mu-badge {
-  font-size: 8.5px; font-size: clamp(7.5px, 1.15cqw, 9.5px); font-weight: 800; color: #fff;
+  font-size: 9.5px; font-weight: 800; color: #fff;
   border-radius: 3px; padding: 0 2.5px; margin-left: 2px; vertical-align: 1px;
 }
 .zp-mu-badge.lu { background: var(--zp-mu-lu) }
@@ -607,7 +611,7 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
 .zp-mu-badge.ke { background: var(--zp-mu-ke) }
 .zp-mu-badge.ji { background: var(--zp-mu-ji) }
 .zp-adj-line {
-  font-size: 9.5px; font-size: clamp(8.5px, 1.45cqw, 10.5px);
+  font-size: 10.5px;
   color: var(--dsw-alias-label-secondary); line-height: 1.45; opacity: .9; margin-top: 1px;
 }
 .zp-cell-scope {
@@ -619,11 +623,11 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   margin-top: auto; padding-top: 3px; min-width: 0;
 }
 .zp-cell-dec {
-  font-size: 9.5px; font-size: clamp(8.5px, 1.3cqw, 10.5px);
+  font-size: 10.5px;
   color: var(--zp-gold-dim); letter-spacing: .3px; white-space: nowrap;
 }
 .zp-cell-gods {
-  font-size: 9px; font-size: clamp(8px, 1.2cqw, 10px);
+  font-size: 9.5px;
   color: var(--dsw-alias-label-secondary); opacity: .8; white-space: nowrap;
   overflow: hidden; text-overflow: ellipsis;
 }
@@ -687,12 +691,8 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
 .zp-detail-stars .zp-star { font-size: 14px }
 .zp-detail-stars .zp-star.minor-line { font-size: 12px }
 .zp-detail-stars .zp-star.adj { font-size: 12px }
-.zp-detail-chips { display: flex; flex-wrap: wrap; gap: 6px }
-.zp-chip {
-  font-size: 11px; border: 1px solid var(--dsw-alias-border-l1); background: var(--dsw-alias-bg-layer-2);
-  border-radius: 8px; padding: 3px 8px; line-height: 1.6;
-}
-.zp-chip b { font-weight: 700 }
+.zp-detail-kv { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 12px; font-size: 12px; line-height: 18px }
+.zp-detail-kv > span:nth-child(odd) { color: var(--dsw-alias-label-secondary); white-space: nowrap }
 
 /* ---------------- 列表（命盘库 / 大限） ---------------- */
 .zp-list-item {
@@ -1005,14 +1005,18 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
 .zp-dict-name { font-size: 13px; font-weight: 750; margin-bottom: 3px; letter-spacing: .5px }
 .zp-dict-desc { font-size: 11px; color: var(--dsw-alias-label-secondary); line-height: 1.6 }
 .zp-empty {
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
-  max-width: 560px; margin: 0 auto; width: 100%;
-  padding: 48px 20px; text-align: center; color: var(--dsw-alias-label-secondary);
-  border: 1px dashed var(--dsw-alias-border-l1); border-radius: 16px; background: var(--dsw-alias-bg-layer-1);
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-rows: repeat(4, minmax(0, 1fr)); gap: 4px;
+  max-width: var(--zp-board-max); margin: 0 auto; width: 100%; aspect-ratio: 5 / 4; box-sizing: border-box;
+  text-align: center; color: var(--dsw-alias-label-secondary);
 }
+.zp-empty-cell { border: 1px dashed var(--dsw-alias-border-l1); border-radius: 8px; background: var(--dsw-alias-bg-layer-1); opacity: .6 }
+.zp-empty-center { grid-column: 2 / 4; grid-row: 2 / 4; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 16px; min-width: 0 }
 .zp-empty-taiji { opacity: .3 }
 .zp-empty-title { font-size: 14px; letter-spacing: 1px; color: var(--dsw-alias-label-primary); font-weight: 650 }
-.zp-empty-hint { font-size: 12px; line-height: 1.7 }
+.zp-empty-hint { font-size: 12px; line-height: 1.7; text-wrap: balance; max-width: 26em }
+
+/* 左栏可见时命盘信息卡已有四柱与五行局，顶栏不再重复 */
+.zp-root[data-rail="open"] .zp-head .zp-sum-gz, .zp-root[data-rail="open"] .zp-head .zp-sum-class { display: none }
 
 /* ---------------- 窄面板微调 ---------------- */
 .zp-root[data-w="narrow"] .zp-head-actions .zp-btn { height: 30px; padding: 0 10px; font-size: 12px }
@@ -1367,13 +1371,13 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
 .zp-drawer-title { flex: 1 1 150px; min-width: 0; display: flex; flex-direction: column; gap: 2px }
 .zp-drawer-title b { font-size: 13px; line-height: 20px; font-weight: 600 }
 .zp-drawer-title span { color: var(--dsw-alias-label-secondary); font-size: 11px; line-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
-.zp-drawer-tabs { display: inline-flex; align-items: center; gap: 2px; padding: 4px; border-radius: 8px; background: var(--dsw-alias-bg-layer-2); flex: none }
+.zp-drawer-tabs { display: inline-flex; align-items: center; gap: 2px; padding: 4px; border-radius: 8px; background: color-mix(in srgb, var(--dsw-alias-label-primary) 5%, transparent); flex: none }
 .zp-drawer-tabs button {
   display: inline-flex; align-items: center; gap: 4px; border: 0; background: transparent;
   height: 26px; padding: 0 12px; border-radius: 6px; color: var(--dsw-alias-label-secondary);
   font-family: inherit; font-size: 12px; cursor: pointer; white-space: nowrap;
 }
-.zp-drawer-tabs button.is-on { background: var(--dsw-alias-bg-layer-1); color: var(--dsw-alias-label-primary); box-shadow: var(--dsw-elevation-soft) }
+.zp-drawer-tabs button.is-on { background: var(--dsw-alias-bg-layer-1); color: var(--dsw-alias-label-primary); box-shadow: inset 0 0 0 1px var(--dsw-alias-border-l2) }
 .zp-drawer-actions { display: flex; align-items: center; gap: 2px; flex: none }
 .zp-drawer-body { flex: 1; min-height: 0; display: flex; flex-direction: column }
 .zp-drawer .zp-studio-chat { flex: 1 1 auto; width: auto; border-right: 0 }
@@ -1768,6 +1772,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
 
       return h('div', { className: 'zp-card zp-input-card', 'data-region': 'SIDE_FORM' },
         h('div', { className: 'zp-card-title' }, t('formTitle'),
+          props.sampleForm ? h('span', { className: 'zp-sample-badge zp-form-sample' }, t('sampleBirth')) : null,
           h('span', { className: 'zp-title-actions' },
             h('button', { className: 'zp-link-btn', type: 'button', onClick: onToggle },
               collapsed ? t('expandForm') : t('collapseForm')))),
@@ -1969,11 +1974,12 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           p.adjective.length ? section(t('adjStars'),
             h('div', { className: 'zp-detail-stars' },
               p.adjective.map(function (n) { return h('span', { key: n, className: 'zp-star adj' }, n); }))) : null,
-          section(t('decadal') + ' · ' + t('smallLimit') + ' · ' + t('twelveGods'),
-            h('div', { className: 'zp-detail-chips' },
-              h('span', { className: 'zp-chip' }, t('decadal') + ' ', h('b', null, p.decadal.stem + p.decadal.branch + ' ' + p.decadal.range[0] + '~' + p.decadal.range[1] + '岁')),
-              h('span', { className: 'zp-chip' }, t('smallLimit') + ' ', h('b', null, p.ages.join(', '))),
-              gods.length ? h('span', { className: 'zp-chip' }, t('twelveGods') + ' ', h('b', null, gods.join(' · '))) : null))));
+          /* 运限是只读信息：用键值行，不画成像按钮的胶囊 */
+          section(t('luckTitle'),
+            h('div', { className: 'zp-detail-kv' },
+              h('span', null, t('decadal')), h('span', null, p.decadal.stem + p.decadal.branch + ' · ' + p.decadal.range[0] + '–' + p.decadal.range[1] + ' 岁'),
+              h('span', null, t('smallLimit')), h('span', null, p.ages.join('、') + ' 岁'),
+              gods.length ? h('span', null, t('twelveGods')) : null, gods.length ? h('span', null, gods.join(' · ')) : null))));
     }
 
     /* ---------------- 格局分析 / 星曜词典 ---------------- */
@@ -2925,8 +2931,9 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       };
       var [yearlyYear, setYearlyYear] = useState(String(new Date().getFullYear()));
 
-      /* 布局：面板实测宽度（0 = 尚未测量，按窄面板安全兜底）、专注看盘、生辰输入折叠 */
+      /* 布局：面板实测宽高（0 = 尚未测量，按窄面板安全兜底）、生辰输入折叠 */
       var [panelW, setPanelW] = useState(0);
+      var [panelH, setPanelH] = useState(0);
       var [formCollapsed, setFormCollapsed] = useState(false);
       /* v3：左栏可收起（窄屏出盘后自动收起，给盘面让宽）；view 区分「盘面」与工具视图 */
       var [railOpen, setRailOpenState] = useState(function () {
@@ -3044,6 +3051,8 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
             var next = Math.round(w);
             return Math.abs(prev - next) >= 6 ? next : prev;
           });
+          var hh = Math.round(el.getBoundingClientRect().height);
+          if (hh > 0) setPanelH(function (prev) { return Math.abs(prev - hh) >= 6 ? hh : prev; });
         };
         var boxWidth = function () { return el.getBoundingClientRect().width; };
         apply(boxWidth());
@@ -3056,6 +3065,26 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         window.addEventListener('resize', onWinResize);
         return function () { window.removeEventListener('resize', onWinResize); };
       }, []);
+
+      /* 盘面按可用高度适配：让时间栏 + 四行宫格尽量落在首屏。
+         量出盘面顶部到滚动区可视底边（减去窄屏底栏）的高度，扣掉宫格间隙与边框，均分给四行；
+         宫格最小高度取 min(宽度比例, 这个值)，并夹在 84–150px 之间（CSS 里 clamp）。 */
+      useLayoutEffect(function () {
+        var root = rootRef.current;
+        if (!root) return;
+        var sc = root.querySelector('.zp-scroll');
+        var board = root.querySelector('.zp-board');
+        var cell = root.querySelector('.zp-cell');
+        if (!sc || !board || !cell) { root.style.removeProperty('--zp-cell-fit'); return; }
+        var sr = sc.getBoundingClientRect();
+        var br = board.getBoundingClientRect();
+        var top = br.top - sr.top + sc.scrollTop;
+        var bar = root.querySelector('.zp-bottombar');
+        var barH = bar && bar.offsetParent ? bar.getBoundingClientRect().height : 0;
+        var extra = br.height - 4 * cell.getBoundingClientRect().height;
+        var fit = Math.floor((sc.clientHeight - top - barH - 16 - extra) / 4);
+        if (fit > 0) root.style.setProperty('--zp-cell-fit', fit + 'px');
+      });
 
       /* 浮层（抽屉 / 设置）是 .zp-root 内的绝对定位层：只在工作台范围内出现，
          不按视口坐标算位置，也不受祖先 transform / 侧栏变化影响；打开时锁住背景滚动。 */
@@ -3953,6 +3982,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
               h(InputForm, {
                 form: form, setForm: setForm, t: t, onCompute: compute, error: error, hasChart: !!chart,
                 dirty: formDirty,
+                sampleForm: ZWUI.sameBirthInput(form, DEFAULT_FORM) && !String(form.name || '').trim(),
                 collapsed: formCollapsed,
                 onToggleCollapse: function () { setFormCollapsed(!formCollapsed); }
               }),
@@ -3961,10 +3991,15 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
               h(React.Fragment, null,
               timebar,
               !chart ? h('div', { className: 'zp-empty', 'data-region': 'EMPTY' },
-                h('div', { className: 'zp-empty-taiji' }, h(Taiji, null)),
-                h('div', { className: 'zp-empty-title' }, t('brand') + ' ' + t('brandPro')),
-                h('div', { className: 'zp-empty-hint' }, t('emptyState')),
-                h('button', { className: 'zp-btn', type: 'button', onClick: computeSample }, t('emptyCta'))) : null,
+                /* 淡色盘面骨架：一眼看出排出来是什么样子 */
+                Object.keys(CELL_POS).map(function (k) {
+                  return h('span', { key: k, className: 'zp-empty-cell', 'aria-hidden': true, style: { gridColumn: CELL_POS[k].col, gridRow: CELL_POS[k].row } });
+                }),
+                h('div', { className: 'zp-empty-center' },
+                  h('div', { className: 'zp-empty-taiji' }, h(Taiji, null)),
+                  h('div', { className: 'zp-empty-title' }, t('emptyTitle')),
+                  h('div', { className: 'zp-empty-hint' }, t('emptyState')),
+                  h('button', { className: 'zp-btn', type: 'button', onClick: computeSample }, t('emptyCta')))) : null,
               chart && view === 'chart' && tab === 'yearly' && yearlyChart && yearlyChart.error
                 ? h('div', { className: 'zp-error', style: { marginBottom: 12 } }, yearlyChart.error)
                 : null,
