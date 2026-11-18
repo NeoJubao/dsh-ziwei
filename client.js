@@ -4165,6 +4165,8 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
               onExport: props.onExport,
               onReader: props.onReader,
               onQuote: props.onQuote,
+              position: props.readPosition,
+              onPosition: props.onReadPosition,
               onChat: function () { props.onTab('chat'); }
             })
             : h(StudioChat, {
@@ -4224,9 +4226,33 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
     function ReportDocument(props) {
       var t = props.t;
       var sections = props.sections || [];
-      var [active, setActive] = useState(0);
+      var [active, setActive] = useState(props.position ? props.position.sec : 0);
       var bodyRef = useRef(null);
       var [pick, setPick] = useState(null);
+      /* 回到上次读到的位置：按「第几部分 + 部分内偏移」记，抽屉与全屏阅读宽度不同也能对上 */
+      useEffect(function () {
+        var body = bodyRef.current;
+        var pos = props.position;
+        if (!body || !pos) return;
+        var el = body.querySelector('[data-sec="' + pos.sec + '"]');
+        if (el) body.scrollTop = el.offsetTop + (pos.offset || 0);
+      }, []);
+      var spyRef = useRef(0);
+      var onBodyScroll = function () {
+        if (pick) setPick(null);
+        if (spyRef.current) return;
+        var raf = window.requestAnimationFrame || function (f) { return setTimeout(f, 16); };
+        spyRef.current = raf(function () {
+          spyRef.current = 0;
+          var body = bodyRef.current;
+          if (!body) return;
+          var secs = body.querySelectorAll('[data-sec]');
+          var cur = 0;
+          for (var i = 0; i < secs.length; i++) { if (secs[i].offsetTop <= body.scrollTop + 24) cur = i; else break; }
+          setActive(cur);
+          if (props.onPosition) props.onPosition({ sec: cur, offset: Math.max(0, body.scrollTop - (secs[cur] ? secs[cur].offsetTop : 0)) });
+        });
+      };
       var goto = function (idx) {
         setActive(idx);
         var el = bodyRef.current && bodyRef.current.querySelector('[data-sec="' + idx + '"]');
@@ -4251,7 +4277,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           sections.map(function (sec, i) {
             return h('button', { key: i, type: 'button', className: active === i ? 'is-on' : '', onClick: function () { goto(i); } }, sec.title);
           })),
-        h('div', { className: 'zp-report-body', ref: bodyRef, onMouseUp: onPick, onScroll: function () { if (pick) setPick(null); } },
+        h('div', { className: 'zp-report-body', ref: bodyRef, onMouseUp: onPick, onScroll: onBodyScroll },
           sections.map(function (sec, i) {
             return h('section', { key: i, className: 'zp-report-sec', 'data-sec': i },
               h('h2', null, sec.title),
@@ -4307,7 +4333,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
               h('button', { className: 'zp-pill-btn is-primary', type: 'button', onClick: function () { props.onGenerate(true); } },
                 h(Icon, { name: 'sparkle', size: 13 }), t('aiContinue')),
               regenerateBtn(false))),
-          h(ReportDocument, { t: t, sections: sections, onQuote: function (q) { props.onQuote(q); } }));
+          h(ReportDocument, { t: t, sections: sections, position: props.position, onPosition: props.onPosition, onQuote: function (q) { props.onQuote(q); } }));
       }
       if (done) {
         var sectionCount = Math.min(sections.length, REPORT_SECTION_TITLES.length);
@@ -4332,7 +4358,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
             ? h('div', { className: 'zp-report-note' }, t('reportPartial'))
             : null,
           h(ReportDocument, {
-            t: t, sections: sections,
+            t: t, sections: sections, position: props.position, onPosition: props.onPosition,
             onQuote: function (q) { props.onQuote(q); }
           }));
       }
@@ -4403,7 +4429,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
             h('button', { className: 'zp-pill-btn', type: 'button', onClick: props.onCopy }, h(Icon, { name: props.copied ? 'check' : 'copy', size: 13 }), props.copied ? t('aiCopied') : t('aiCopy')),
             h('button', { className: 'zp-icon-btn', type: 'button', title: t('close'), 'aria-label': t('close'), onClick: props.onClose }, h(Icon, { name: 'close' })))),
         h('div', { className: 'zp-reader-body' },
-          h(ReportDocument, { t: t, sections: sections, onQuote: props.onQuote })));
+          h(ReportDocument, { t: t, sections: sections, position: props.position, onPosition: props.onPosition, onQuote: props.onQuote })));
     }
 
     function Toast(props) {
@@ -4599,6 +4625,9 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       studioOpenRef.current = studioOpen;
       /* 未发送的草稿：按命盘 key 存在内存里，不落盘 */
       var draftsRef = useRef({});
+      /* 报告读到哪：按命盘 key 存在内存里（第几部分 + 部分内偏移），抽屉和全屏阅读共用 */
+      var readPosRef = useRef({});
+      var onReadPosition = function (pos) { readPosRef.current[chartKeyRef.current] = pos; };
       /* 抽屉关着时生成结束：弹一个带「查看」的提示（开着时用户自己看得到，不打扰） */
       var announceInBackground = function (text, tab, isError) {
         if (studioOpenRef.current) return;
@@ -5327,11 +5356,13 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         window.addEventListener('keydown', onEsc);
         return function () { window.removeEventListener('keydown', onEsc); };
       }, [studioOpen, readerOpen]);
-      var openStudio = function () {
+      /* 打开抽屉回到上次的页签（报告读到一半再打开仍在报告）；需要对话页的调用方显式传 'chat' */
+      var openStudio = function (tab) {
         if (!chart) return;
         setStudioOpen(true);
         setMobilePane('chat');
-        setStudioTab('chat');
+        if (tab) setStudioTab(tab);
+        else if (studioTab !== 'report') setStudioTab('chat');
       };
       var closeStudio = function () {
         setStudioOpen(false);
@@ -5368,7 +5399,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       var quotePalace = function () {
         if (!palaceSelected) return;
         setQuote({ label: t('quotePalaceLabel'), text: ZWUI.palaceQuoteText(palaceSelected, t('emptyPalace')) });
-        openStudio();
+        openStudio('chat');
       };
       var editBirth = function () {
         if (studioOpen) setStudioOpen(false);
@@ -5618,6 +5649,8 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
               runningInBackground ? h('span', { className: 'zp-run-dot', 'aria-label': t('aiRunningBg') }) : null)) : null
           )),
         studioOpen && chart ? h(StudioDrawer, {
+            readPosition: readPosRef.current[chartKeyRef.current] || null,
+            onReadPosition: onReadPosition,
             draft: draftsRef.current[chartKeyRef.current] || '',
             onDraft: function (v) { draftsRef.current[chartKeyRef.current] = v; },
             t: t,
@@ -5655,6 +5688,8 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
             report: report,
             copied: reportCopied,
             onClose: function () { setReaderOpen(false); },
+            position: readPosRef.current[chartKeyRef.current] || null,
+            onPosition: onReadPosition,
             onCopy: copyReport,
             onExport: exportReportHtml,
             onQuote: function (q) { setReaderOpen(false); quoteFromReport(q); }
