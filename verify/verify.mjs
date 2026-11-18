@@ -619,6 +619,52 @@ ok('chrome 避让不用魔法数字写死（顶部偏移只走 --dsh-frame-top-c
     /\.md-table\{/.test(htmlDoc) && /<table class="md-table">/.test(htmlDoc) &&
     /page-break-inside:avoid/.test(htmlDoc) && /<\/html>/.test(htmlDoc));
 
+  /* ---- 界面纯逻辑（window.ZWUi，v5 体验打磨 spec 2026-11-18_v5-ux-polish） ---- */
+  const ui = win.ZWUi;
+  ok('client 暴露界面纯逻辑（window.ZWUi）', !!ui && typeof ui.mergeReportText === 'function');
+  if (ui && typeof ui.mergeReportText === 'function') {
+    /* 续写时流式增量已经累计进正文；done 携带的是本轮全文。收尾必须是「续写前正文 + 本轮全文」 */
+    ok('报告续写收尾：续写前正文 + 本轮正文，不重复拼接',
+      ui.mergeReportText({ cont: true, base: '第一部分。', accumulated: '第一部分。第二部分。', done: '第二部分。' }) === '第一部分。第二部分。');
+    ok('报告首次生成收尾：以 done 全文为准',
+      ui.mergeReportText({ cont: false, base: '', accumulated: '半截', done: '完整全文' }) === '完整全文');
+    ok('报告首次生成收尾：done 为空时保留已累计正文',
+      ui.mergeReportText({ cont: false, base: '', accumulated: '已写部分', done: '' }) === '已写部分');
+  }
+  {
+    /* 引用宫位：用引擎宫位对象的真实字段（stem/branch/major/minor），不能读不存在的 gz/stars */
+    const soul = ch.palaces[ch.soulIndex];
+    const quoteText = ui && typeof ui.palaceQuoteText === 'function' ? ui.palaceQuoteText(soul, '空宫') : '';
+    const starNames = soul.major.concat(soul.minor).map((s) => s.name);
+    ok('引用宫位文本含宫名、干支与本宫星曜',
+      quoteText.startsWith(soul.name + ' ' + soul.stem + soul.branch + ' · ') &&
+      starNames.length > 0 && starNames.every((n) => quoteText.includes(n)), quoteText);
+    const emptyText = ui && typeof ui.palaceQuoteText === 'function'
+      ? ui.palaceQuoteText({ name: '迁移', stem: '庚', branch: '辰', major: [], minor: [] }, '空宫') : '';
+    ok('引用空宫时写明空宫', emptyText === '迁移 庚辰 · 空宫', emptyText);
+  }
+  {
+    /* 图标表完整：源码里用到的图标名都必须在 ICON_PATHS 里有定义，否则渲染成空白 svg */
+    const table = (client.match(/const ICON_PATHS = \{([\s\S]*?)\n    \};/) || [])[1] || '';
+    const defined = new Set([...table.matchAll(/^      (\w+): \[/gm)].map((m) => m[1]));
+    const used = new Set([
+      ...[...client.matchAll(/h\(Icon, \{ name: '(\w+)'/g)].map((m) => m[1]),
+      ...[...client.matchAll(/h\(Icon, \{ name: [^,}]*\? '(\w+)' : '(\w+)'/g)].flatMap((m) => [m[1], m[2]]),
+      ...[...client.matchAll(/startBtn\('\w+', '(\w+)'/g)].map((m) => m[1])
+    ]);
+    /* 报告选段按钮坐标：按钮绝对定位在可滚动的正文容器里，必须计入 scrollTop/scrollLeft */
+    const pick = ui && typeof ui.pickPoint === 'function'
+      ? ui.pickPoint({ left: 340, top: 260 }, { left: 100, top: 200 }, 900, 0) : null;
+    ok('报告选段按钮坐标计入正文滚动量（滚过第一屏后仍贴着选区）',
+      !!pick && pick.x === 240 && pick.y === 960, JSON.stringify(pick));
+    const pickEdge = ui && typeof ui.pickPoint === 'function'
+      ? ui.pickPoint({ left: 110, top: 205 }, { left: 100, top: 200 }, 0, 0) : null;
+    ok('报告选段按钮坐标在容器左上角时保留最小边距',
+      !!pickEdge && pickEdge.x === 80 && pickEdge.y === 32, JSON.stringify(pickEdge));
+    const missing = [...used].filter((n) => !defined.has(n));
+    ok('源码引用的图标都在 ICON_PATHS 里有定义', defined.size > 10 && missing.length === 0, 'missing: ' + missing.join(','));
+  }
+
   /* H3 动态: 布局服务可用时, 主面板必须真的能通过官方 API 回到 Conversation。
    * 用第二次 apply 注入一个假 layout, 从 main 注册项里取出 ProApp 的 actions 调用。 */
   {

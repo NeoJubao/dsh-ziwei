@@ -1410,6 +1410,38 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
 }
 `;
 
+    /* ---------------- 界面纯逻辑 ----------------
+     * 无副作用、不依赖 React，由 apply() 暴露为 window.ZWUi 供自检断言
+     * （见 verify/verify.mjs 与 docs/specs/2026-11-18_v5-ux-polish.md）。 */
+    var ZWUI = {
+      /* 报告收尾正文。流式增量已累计进 accumulated；done 是本轮全文。
+         续写时本轮全文只接在续写前正文 base 之后，不能再接在 accumulated 之后（否则重复）。 */
+      mergeReportText: function (o) {
+        var done = String((o && o.done) || '');
+        if (o && o.cont) return String(o.base || '') + done;
+        return done || String((o && o.accumulated) || '');
+      },
+      /* 宫位的「宫名 干支」。引擎宫位对象只有 stem/branch，没有 gz 字段。 */
+      palaceLabel: function (p) {
+        if (!p) return '';
+        return String(p.name || '') + ' ' + String(p.stem || '') + String(p.branch || '');
+      },
+      /* 引用宫位时带给模型的文本：宫名 干支 · 主星与辅星名；无星时写空宫。 */
+      palaceQuoteText: function (p, emptyLabel) {
+        if (!p) return '';
+        var names = [].concat(p.major || [], p.minor || []).map(function (s) { return s && s.name; }).filter(Boolean);
+        return ZWUI.palaceLabel(p) + ' · ' + (names.length ? names.join('、') : String(emptyLabel || ''));
+      },
+      /* 报告选段浮动按钮的坐标。按钮绝对定位在可滚动的正文容器内，
+         所以视口差之外还要加上容器的滚动量；左/上保留最小边距。 */
+      pickPoint: function (rangeRect, boxRect, scrollTop, scrollLeft) {
+        return {
+          x: Math.max(80, rangeRect.left - boxRect.left + (scrollLeft || 0)),
+          y: Math.max(32, rangeRect.top - boxRect.top + (scrollTop || 0))
+        };
+      }
+    };
+
     /* ---------------- 基础组件 ---------------- */
     function Seg(props) {
       return h('div', { className: 'zp-seg', role: 'group' },
@@ -1954,6 +1986,14 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       ],
       adj: [
         ['path', { d: 'M8 2.4v11.2M3.1 5.2l9.8 5.6M12.9 5.2L3.1 10.8' }]
+      ],
+      quote: [
+        ['path', { d: 'M3 3.4h10M3 6.2h10M3 9h6.4' }],
+        ['path', { d: 'M3 12.6h4.4' }]
+      ],
+      refresh: [
+        ['path', { d: 'M13 7.6A5 5 0 1 1 11.4 4' }],
+        ['path', { d: 'M13.2 2.6v3.2H10' }]
       ]
     };
 
@@ -2445,7 +2485,8 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           var range = sel.getRangeAt(0);
           var rect = range.getBoundingClientRect();
           var box = bodyRef.current.getBoundingClientRect();
-          setPick({ text: text.slice(0, 2400), x: Math.max(80, rect.left - box.left), y: Math.max(32, rect.top - box.top) });
+          var pt = ZWUI.pickPoint(rect, box, bodyRef.current.scrollTop, bodyRef.current.scrollLeft);
+          setPick({ text: text.slice(0, 2400), x: pt.x, y: pt.y });
         } catch (e) { setPick(null); }
       };
       return h('div', { className: 'zp-report-layout' },
@@ -3207,7 +3248,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           },
           onDone: function (text) {
             setReport(function (prev) {
-              var full = cont ? (prev.text || '') + (text || '') : (text || prev.text || '');
+              var full = ZWUI.mergeReportText({ cont: cont, base: base, accumulated: prev.text, done: text });
               return Object.assign({}, prev, { status: 'done', text: full, finishedAt: Date.now(), error: '', issue: null });
             });
           },
@@ -3430,11 +3471,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         var value = String(text || '').trim();
         var q = quote;
         if (!q && palaceSelected && value === t('suggestPalace')) {
-          q = {
-            label: t('quotePalaceLabel'),
-            text: (palaceSelected.name || '') + ' ' + (palaceSelected.gz || '') + ' · ' +
-              (palaceSelected.stars || []).map(function (st) { return st.name; }).join('、')
-          };
+          q = { label: t('quotePalaceLabel'), text: ZWUI.palaceQuoteText(palaceSelected, t('emptyPalace')) };
         }
         if (q) {
           value = '【引用：' + q.label + '】\n' + q.text + '\n\n' + (value || '请针对这段展开说说。');
@@ -3457,11 +3494,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
       };
       var quotePalace = function () {
         if (!palaceSelected) return;
-        setQuote({
-          label: t('quotePalaceLabel'),
-          text: (palaceSelected.name || '') + ' ' + (palaceSelected.gz || '') + ' · ' +
-            (palaceSelected.stars || []).map(function (st) { return st.name; }).join('、')
-        });
+        setQuote({ label: t('quotePalaceLabel'), text: ZWUI.palaceQuoteText(palaceSelected, t('emptyPalace')) });
         openStudio();
       };
       var editBirth = function () {
@@ -3677,7 +3710,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
             quote: quote,
             suggestions: hasReport ? [t('suggestCareer'), t('suggestLove'), t('suggestPlain'), t('suggestPalace')] : [],
             contextLine: (isSampleChart ? t('sampleChart') + ' · ' : '') + (form.name || t('defaultName')) + ' · ' + (chart ? chart.fiveElementsClass : ''),
-            selectedPalace: palaceSelected ? (palaceSelected.name + ' ' + (palaceSelected.gz || '')) : '',
+            selectedPalace: palaceSelected ? ZWUI.palaceLabel(palaceSelected) : '',
             onClose: closeStudio,
             onClear: clearThread,
             onAsk: askQuestion,
@@ -3979,6 +4012,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         try {
           if (typeof window !== 'undefined') {
             window.ZWReport = { REPORT_CSS: REPORT_CSS, escHtml: escHtml, mdToHtml: mdToHtml, mdToChatHtml: mdToChatHtml, buildReportHtml: buildReportHtml };
+            window.ZWUi = ZWUI;
           }
         } catch (e) { /* 非浏览器环境忽略 */ }
 
