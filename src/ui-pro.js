@@ -3063,6 +3063,8 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         }
         chartKeyRef.current = key;
         setChartInput(input);
+        setQuote(null);
+        setToast(function (cur) { return cur && cur.action ? null : cur; });
         setChart(result);
         setSelected(result.soulIndex);
         setSelDecadal(currentDecadeIndex(result));
@@ -3249,21 +3251,36 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         adoptChart(result, input);
       };
       var deleteSaved = function (id) {
-        var prev = library;
+        var idx = -1;
+        for (var di = 0; di < library.length; di++) { if (library[di].id === id) { idx = di; break; } }
+        if (idx < 0) return;
+        var removed = library[idx];
+        var wasCurrent = currentLibId === id;
         var next = library.filter(function (x) { return x.id !== id; });
         setLibrary(next);
-        if (currentLibId === id) setCurrentLibId(null);
+        if (wasCurrent) setCurrentLibId(null);
         try { localStorage.setItem('ziwei-pro.library', JSON.stringify(next)); } catch (e) { /* ignore */ }
+        /* 撤销 = 把这一条插回当前列表原位置；不用删除前的快照覆盖（会丢掉之后新存的盘） */
         showToast(t('libDeleted'), { undo: function () {
-          setLibrary(prev);
-          try { localStorage.setItem('ziwei-pro.library', JSON.stringify(prev)); } catch (e) { /* ignore */ }
+          setLibrary(function (cur) {
+            if (cur.some(function (x) { return x.id === removed.id; })) return cur;
+            /* 命盘库按保存时间新→旧排列（id = lib-<毫秒>），按时间插回 */
+            var ts = function (x) { return +String(x.id || '').replace('lib-', '') || 0; };
+            var restored = cur.slice();
+            var at = -1;
+            for (var ai = 0; ai < restored.length; ai++) { if (ts(restored[ai]) < ts(removed)) { at = ai; break; } }
+            restored.splice(at < 0 ? restored.length : at, 0, removed);
+            try { localStorage.setItem('ziwei-pro.library', JSON.stringify(restored)); } catch (e) { /* ignore */ }
+            return restored;
+          });
+          if (wasCurrent) setCurrentLibId(removed.id);
           showToast(t('undoDone'));
         } });
       };
       var reportMeta = function () {
         return {
           chart: chart, name: form.name, place: form.place, occupation: form.occupation,
-          gender: form.gender === 'female' ? 'female' : 'male'
+          gender: birth.gender === 'female' ? 'female' : 'male'
         };
       };
       var nowPosition = function () {
@@ -3570,7 +3587,13 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         setInterpIssue(null);
         setThinkChars(0);
         setQuote(null);
-        showToast(t('aiThreadCleared'), { undo: function () { setThread(prev); showToast(t('undoDone')); } });
+        var clearedKey = chartKeyRef.current;
+        showToast(t('aiThreadCleared'), { undo: function () {
+          /* 撤销只回到被清空的那张盘；已经换盘就不再把旧对话写进新盘 */
+          if (chartKeyRef.current !== clearedKey) return;
+          setThread(prev);
+          showToast(t('undoDone'));
+        } });
       };
       var clearAllReading = function () {
         if (busy) return;
