@@ -1,6 +1,11 @@
 # 界面契约 · 结构（layout.md）
 
-> **给编码 agent 的三句话：**
+> **v5 dogfood（1.7.0-dogfood.1）**：新增「命盘工位」交互——宽屏左侧 `CHAT` 对话 + 右侧画布
+> （盘面 / 报告），窄屏单栏切换；报告产物、全屏阅读、宫位/选段引用。RegionId 暂未扩充
+> （`CHAT`/`REPORT` 用组件 class 标记，不新增 `data-region`），完整设计见
+> [v5-chart-studio-plan.md](../design/v5-chart-studio-plan.md)。旧 `DRAWER` 作为回退样式保留。
+>
+> > **给编码 agent 的三句话：**
 > 1. 动手改界面结构之前，先走 §1 落位决策树。能落到某个 RegionId，直接实现，不用改本文。
 > 2. 落不下来，**停**。不要自己新开区域 / 栏 / 浮层，走 §9 变更流程。
 > 3. 代码里每个区域标记（`data-region`）的值都必须在 §2 白名单里；表外名字即违规。
