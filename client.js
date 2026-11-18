@@ -1780,6 +1780,8 @@ window.__ModuleLoader__.load({
         aiInterpreting: '解读中…', interpStreaming: '正在生成…',
         aiThinking: '紫微师正在思考…', aiStop: '停止', aiContinue: '继续生成',
         aiStopped: '已停止生成，内容可能不完整；可点「继续生成」接着写',
+        aiStoppedEmpty: '已停止生成。',
+        aiDisconnectedEmpty: '连接中断，没有收到内容；可以重新解读。',
         aiDisconnected: '连接中断，内容可能不完整；可点「继续生成」接着写',
         aiContinuePrompt: '请接着上文继续写：从断处接着写，不要重复已写内容，也不要重新开头。',
         aiCopy: '复制', aiCopied: '已复制',
@@ -1887,6 +1889,8 @@ window.__ModuleLoader__.load({
         aiInterpreting: 'Reading…', interpStreaming: 'Writing…',
         aiThinking: 'Zi Wei Master is thinking…', aiStop: 'Stop', aiContinue: 'Continue',
         aiStopped: 'Stopped; the answer may be incomplete — press Continue to resume.',
+        aiStoppedEmpty: 'Stopped.',
+        aiDisconnectedEmpty: 'Connection lost before any text arrived — you can retry.',
         aiDisconnected: 'Connection lost; the answer may be incomplete — press Continue to resume.',
         aiContinuePrompt: 'Continue from where you stopped; do not repeat or restart the answer.',
         aiCopy: 'Copy', aiCopied: 'Copied',
@@ -4081,7 +4085,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           h('span', null, props.interpError),
           props.interpIssue && props.interpIssue.canContinue
             ? h('button', { className: 'zp-mini-btn', type: 'button', disabled: props.streaming, onClick: props.onContinue }, t('aiContinue'))
-            : null) : null,
+            : (props.onRetry ? h('button', { className: 'zp-mini-btn', type: 'button', disabled: props.streaming || props.reportRunning, onClick: props.onRetry }, t('aiRetry')) : null)) : null,
         props.reportRunning ? h('div', { className: 'zp-studio-report-running' },
           h(Icon, { name: 'report', size: 13 }), t('reportRunningHint')) : null),
         props.suggestions && props.suggestions.length
@@ -4190,6 +4194,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
               onOpenReport: function () { props.onTab('report'); },
               onClearQuote: props.onClearQuote,
               onContinue: props.onContinue,
+              onRetry: props.onRetry,
               onStop: props.onStop,
               onHandoff: props.onHandoff,
               draft: props.draft,
@@ -4726,7 +4731,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         if (chatAbortRef.current && prevKey && prevKey !== key) {
           var keptReport = report.status === 'running'
             ? Object.assign({}, report, {
-                status: 'error', error: t('aiStopped'), finishedAt: Date.now(),
+                status: 'error', error: String(report.text || '').trim() ? t('aiStopped') : t('aiStoppedEmpty'), finishedAt: Date.now(),
                 issue: { kind: 'stopped', canContinue: !!String(report.text || '').trim() }
               })
             : report;
@@ -5024,7 +5029,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           var pump = function () {
             return reader.read().then(function (chunk) {
               if (chunk.done) {
-                if (!gotDone) finish(t('aiDisconnected'), { kind: 'stream-closed', canContinue: !!produced.trim() });
+                if (!gotDone) finish(produced.trim() ? t('aiDisconnected') : t('aiDisconnectedEmpty'), { kind: 'stream-closed', canContinue: !!produced.trim() });
                 return;
               }
               buf += decoder.decode(chunk.value, { stream: true });
@@ -5060,7 +5065,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           return pump();
         }).catch(function (e) {
           if (e && e.name === 'AbortError') {
-            if (stopReqRef.current) finish(t('aiStopped'), { kind: 'stopped', canContinue: !!produced.trim() });
+            if (stopReqRef.current) finish(produced.trim() ? t('aiStopped') : t('aiStoppedEmpty'), { kind: 'stopped', canContinue: !!produced.trim() });
             else finish('');
             return;
           }
@@ -5072,11 +5077,17 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         setThread(function (prev) { return ZWUI.applyAssistantText(prev, text, mode); });
       };
 
-      var runChat = function (question) {
+      /* opts.cont：续写——续写提示词不进对话气泡，本轮接在上一条回答后面；
+         opts.baseThread：重试时用去掉失败那一轮的对话作底，问题不重复出现。 */
+      var runChat = function (question, opts) {
+        var o = opts || {};
         if (!chart || busy) return;
         var asked = (question || '').trim();
-        var history = thread.map(function (m) { return { role: m.role, content: m.content }; });
-        var nextThread = thread.concat(asked ? [{ role: 'user', content: asked }] : []);
+        var baseThread = o.baseThread || thread;
+        var history = baseThread.map(function (m) { return { role: m.role, content: m.content }; });
+        var lastMsg = baseThread[baseThread.length - 1];
+        var contBase = o.cont && lastMsg && lastMsg.role === 'assistant' ? String(lastMsg.content || '') : '';
+        var nextThread = baseThread.concat(asked && !o.cont ? [{ role: 'user', content: asked }] : []);
         setThread(nextThread);
         setInterpreting(true);
         setInterpError('');
@@ -5085,7 +5096,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         setHandoffDone(false);
         setQuote(null);
         stopReqRef.current = false;
-        var added = false;
+        var added = !!contBase;
         openStream({
           mode: 'brief', question: asked, history: history,
           onStart: function () { setThinkChars(0); },
@@ -5096,7 +5107,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
             added = true;
           },
           onDone: function (text) {
-            if (text) appendAssistant(text, added ? 'replace' : 'new');
+            if (text) appendAssistant(contBase ? ZWUI.mergeReportText({ cont: true, base: contBase, done: text }) : text, added ? 'replace' : 'new');
             added = true;
           },
           onFinish: function (err, issue) {
@@ -5389,7 +5400,14 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         setStudioOpen(true);
         runReport({ continue: !!cont });
       };
-      var continueChat = function () { runChat(t('aiContinuePrompt')); };
+      var continueChat = function () { runChat(t('aiContinuePrompt'), { cont: true }); };
+      /* 重新解读：去掉失败那一轮（最后一条提问及其后的半截回答），用同一个问题再问一次 */
+      var retryChat = function () {
+        var idx = -1;
+        for (var ri = thread.length - 1; ri >= 0; ri--) { if (thread[ri].role === 'user') { idx = ri; break; } }
+        if (idx < 0) { runChat('', { baseThread: [] }); return; }
+        runChat(thread[idx].content, { baseThread: thread.slice(0, idx) });
+      };
       var quoteFromReport = function (q) {
         setQuote(q);
         setStudioTab('chat');
@@ -5681,6 +5699,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
             onQuote: quoteFromReport,
             onClearQuote: function () { setQuote(null); },
             onContinue: continueChat,
+            onRetry: retryChat,
             onHandoff: function () { handoffToSession(hasReport ? 'report' : 'brief'); }
           }) : null,
         readerOpen && hasReport ? h(ReportReader, {
