@@ -669,6 +669,17 @@ ok('chrome 避让不用魔法数字写死（顶部偏移只走 --dsh-frame-top-c
       !!reveal && reveal({ viewBottom: 717, obstruct: 0, detailTop: 672, cellTop: 130, stickyBottom: 136 }) === 0);
   }
   {
+    /* 表单与当前命盘的生辰是否一致：只比会改变命盘的字段；表单里是字符串，快照里是数字 */
+    const same = ui && typeof ui.sameBirthInput === 'function' ? ui.sameBirthInput : null;
+    const snap = { name: '甲', calendar: 'solar', year: 1992, month: 5, day: 3, isLeap: false, hour: 9, minute: 30, gender: 'male', longitude: '105.97', place: '', occupation: '',
+      settings: { yearDivide: 'normal', monthDivide: 'exact', dayDivide: 'current', fixLeap: true } };
+    const formSame = Object.assign({}, snap, { year: '1992', month: '5', day: '3', hour: '9', minute: '30', name: '乙', place: '成都', occupation: '设计' });
+    ok('生辰一致判断：只改称呼/籍贯/职业、数字以字符串出现，仍算同一张盘', !!same && same(formSame, snap) === true);
+    ok('生辰一致判断：改了出生时辰就不是同一张盘', !!same && same(Object.assign({}, formSame, { hour: '10' }), snap) === false);
+    ok('生辰一致判断：改了晚子时口径就不是同一张盘',
+      !!same && same(Object.assign({}, formSame, { settings: Object.assign({}, snap.settings, { dayDivide: 'forward' }) }), snap) === false);
+  }
+  {
     /* 引用宫位：用引擎宫位对象的真实字段（stem/branch/major/minor），不能读不存在的 gz/stars */
     const soul = ch.palaces[ch.soulIndex];
     const quoteText = ui && typeof ui.palaceQuoteText === 'function' ? ui.palaceQuoteText(soul, '空宫') : '';

@@ -1749,7 +1749,7 @@ window.__ModuleLoader__.load({
         reportQuoteLabel: '报告选段', reportQuoteAction: '让紫微师改这段',
         reportIdleTitle: '把这盘读成一份完整报告。',
         reportIdleHint: '14 个部分：命盘总览、性格、家庭、婚姻、财富、事业、大限与综合建议。约 2–3 分钟。',
-        reportGenerate: '生成完整报告', reportRegenerate: '重新生成', reportRegenerateConfirm: '再点一次，替换旧报告', reportRestored: '重新生成没有写出内容，已保留原报告', reportReadyToast: '完整报告写好了', aiAnswerReady: '紫微师回答好了', aiRunningBg: '正在生成，点开查看进度',
+        reportGenerate: '生成完整报告', reportRegenerate: '重新生成', reportRegenerateConfirm: '再点一次，替换旧报告', reportRestored: '重新生成没有写出内容，已保留原报告', reportReadyToast: '完整报告写好了', formDirty: '生辰已改，点「排 盘」更新命盘；解读和命盘库仍按当前命盘', aiAnswerReady: '紫微师回答好了', aiRunningBg: '正在生成，点开查看进度',
         reportFinePrint: '报告会保存在本机，可随时回来继续读；导出 HTML 后可离线阅读。',
         reportError: '报告生成中断', reportErrorHint: '已生成的部分会保留；可以接着写，或重新生成。',
         reportPartial: '报告已生成的部分保留；可以继续生成补齐。',
@@ -1856,7 +1856,7 @@ window.__ModuleLoader__.load({
         reportQuoteLabel: 'Report excerpt', reportQuoteAction: 'Ask Zi Wei to revise this',
         reportIdleTitle: 'Turn this chart into a full report.',
         reportIdleHint: '14 sections: overview, character, family, marriage, wealth, career, decades and advice. About 2–3 minutes.',
-        reportGenerate: 'Generate full report', reportRegenerate: 'Regenerate', reportRegenerateConfirm: 'Click again to replace', reportRestored: 'Regeneration produced nothing; the previous report was kept', reportReadyToast: 'The full report is ready', aiAnswerReady: 'The answer is ready', aiRunningBg: 'Generating — open to see progress',
+        reportGenerate: 'Generate full report', reportRegenerate: 'Regenerate', reportRegenerateConfirm: 'Click again to replace', reportRestored: 'Regeneration produced nothing; the previous report was kept', reportReadyToast: 'The full report is ready', formDirty: 'Birth data changed. Press Compute to update; readings and the library still use the current chart', aiAnswerReady: 'The answer is ready', aiRunningBg: 'Generating — open to see progress',
         reportFinePrint: 'The report is stored locally and can be reopened; export HTML for offline reading.',
         reportError: 'Report generation interrupted', reportErrorHint: 'The partial report is kept; continue or regenerate.',
         reportPartial: 'The partial report is kept; continue to fill the rest.',
@@ -2434,6 +2434,8 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   background: color-mix(in srgb, var(--zp-accent) 10%, var(--dsw-alias-bg-layer-2));
 }
 .zp-btn-ai { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 14px }
+/* 表单改过但还没排盘：排盘按钮上方一条提示 */
+.zp-dirty-note { margin: 8px 0; padding: 4px 8px; border-radius: 6px; font-size: 12px; line-height: 18px; color: var(--dsw-alias-state-warn-primary); background: color-mix(in srgb, var(--dsw-alias-state-warn-primary) 10%, transparent) }
 /* 抽屉关着但还在生成：主按钮上一颗呼吸点（减少动态偏好下由全局规则停掉动画） */
 .zp-run-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex: none; animation: zp-run-pulse 1.2s ease-in-out infinite }
 @keyframes zp-run-pulse { 0%, 100% { opacity: 1 } 50% { opacity: .35 } }
@@ -3142,6 +3144,11 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         copy.push({ role: 'assistant', content: s });
         return copy;
       },
+      /* 两份输入是不是同一张盘：只比会改变命盘的字段（含排盘设置），沿用解读记录 key 的归一化。 */
+      sameBirthInput: function (a, b) {
+        if (!a || !b) return false;
+        return readingKeyOf(a) === readingKeyOf(b);
+      },
       /* 三方四正：对宫 = +6，三合 = +4 / +8（宫位索引 mod 12）。 */
       relatedPalaces: function (index) {
         var i = +index;
@@ -3386,6 +3393,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
                 options: [{ value: true, label: t('flTrue') }, { value: false, label: t('flFalse') }],
                 onChange: function (v) { setSetting('fixLeap', v); }
               })))),
+        props.dirty ? h('div', { key: 'r6d', className: 'zp-dirty-note', role: 'status' }, t('formDirty')) : null,
         h('button', { key: 'r7', className: 'zp-btn' + (props.hasChart ? '' : ' zp-btn-primary'), type: 'button', style: { width: '100%' }, onClick: props.onCompute },
           t('compute'))
       ];
@@ -3405,6 +3413,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
             h('button', { className: 'zp-btn', type: 'button', style: { height: 30 }, onClick: onToggle }, t('editBirth')),
             h('button', { className: 'zp-btn' + (props.hasChart ? '' : ' zp-btn-primary'), type: 'button', style: { height: 30 }, onClick: props.onCompute }, t('compute')))
           : h('div', null, formBody),
+        collapsed && props.dirty ? h('div', { className: 'zp-dirty-note', role: 'status' }, t('formDirty')) : null,
         collapsed && props.error ? h('div', { className: 'zp-error' }, props.error) : null);
     }
 
@@ -4619,6 +4628,10 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         setToast(null);
       };
       var chartKeyRef = useRef('');
+      /* 当前命盘排盘时的输入快照：存库、解读、示例盘判断里会改变命盘的字段都以它为准，不读还没排的表单 */
+      var [chartInput, setChartInput] = useState(null);
+      var birth = chartInput || form;
+      var formDirty = !!chart && !!chartInput && !ZWUI.sameBirthInput(form, chartInput);
       var reportRunning = report.status === 'running';
       var hasReport = report.status === 'done' && !!report.text;
       var lastMode = hasReport ? 'report' : 'brief';
@@ -4686,6 +4699,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           setInterpreting(false);
         }
         chartKeyRef.current = key;
+        setChartInput(input);
         setChart(result);
         setSelected(result.soulIndex);
         setSelDecadal(currentDecadeIndex(result));
@@ -4828,10 +4842,10 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           id: 'lib-' + Date.now(),
           name: name.trim(),
           input: {
-            name: form.name, calendar: form.calendar, year: form.year, month: form.month, day: form.day,
-            isLeap: form.isLeap, hour: form.hour, minute: form.minute, gender: form.gender,
-            longitude: form.longitude, place: form.place, occupation: form.occupation,
-            settings: form.settings
+            name: form.name, calendar: birth.calendar, year: birth.year, month: birth.month, day: birth.day,
+            isLeap: birth.isLeap, hour: birth.hour, minute: birth.minute, gender: birth.gender,
+            longitude: birth.longitude, place: form.place, occupation: form.occupation,
+            settings: birth.settings
           }
         };
         var next = [entry].concat(library).slice(0, 60);
@@ -4910,7 +4924,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           history: (history || []).slice(-20),
           meta: {
             name: form.name, place: form.place, occupation: form.occupation,
-            gender: form.gender === 'female' ? 'female' : 'male',
+            gender: birth.gender === 'female' ? 'female' : 'male',
             currentAge: pos.currentAge, currentYear: pos.currentYear,
             decadalFocus: selectedDecade,
             yearlyFocus: (tab === 'yearly') ? (parseInt(yearlyYear, 10) || pos.currentYear) : null
@@ -5269,10 +5283,10 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         : (panelW >= 908 ? 'compact' : 'narrow')));
       /* 示例盘识别：用默认生辰且没有额外姓名/地点/经度；只用于提示，不改变数据 */
       var isSampleChart = !!chart &&
-        form.calendar === DEFAULT_FORM.calendar &&
-        +form.year === DEFAULT_FORM.year && +form.month === DEFAULT_FORM.month && +form.day === DEFAULT_FORM.day &&
-        !form.isLeap && +form.hour === DEFAULT_FORM.hour && +form.minute === DEFAULT_FORM.minute &&
-        form.gender === DEFAULT_FORM.gender && String(form.longitude || '') === '' &&
+        birth.calendar === DEFAULT_FORM.calendar &&
+        +birth.year === DEFAULT_FORM.year && +birth.month === DEFAULT_FORM.month && +birth.day === DEFAULT_FORM.day &&
+        !birth.isLeap && +birth.hour === DEFAULT_FORM.hour && +birth.minute === DEFAULT_FORM.minute &&
+        birth.gender === DEFAULT_FORM.gender && String(birth.longitude || '') === '' &&
         !String(form.name || '').trim() && !String(form.place || '').trim();
       var modeDefs = [['natal', t('tabNatal')], ['decadal', t('tabDecadal')], ['yearly', t('tabYearly')]];
       var curAgeForDecade = nowPosition().currentAge;
@@ -5510,6 +5524,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
               chart ? h(PatternsSummary, { patterns: patterns, t: t, onOpen: function () { setView('patterns'); } }) : null,
               h(InputForm, {
                 form: form, setForm: setForm, t: t, onCompute: compute, error: error, hasChart: !!chart,
+                dirty: formDirty,
                 collapsed: formCollapsed,
                 onToggleCollapse: function () { setFormCollapsed(!formCollapsed); }
               }),
