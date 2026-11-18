@@ -4043,7 +4043,8 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
             stickRef.current = (el.scrollHeight - el.scrollTop - el.clientHeight) < 48;
           }
         },
-        !hasThread
+        /* 速览解读不带用户提问，thread 仍为空：生成中也要离开空态，让「正在思考」立刻可见 */
+        !hasThread && !props.streaming
           ? h('div', { className: 'zp-studio-empty' },
             h('div', { className: 'zp-studio-empty-title' }, t('studioEmptyTitle')),
             h('div', { className: 'zp-studio-empty-hint' }, t('studioEmptyHint')),
