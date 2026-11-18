@@ -17,8 +17,9 @@ window.__ModuleLoader__.load({
     /* ---------------- i18n ---------------- */
     const DICT = {
       'zh-CN': {
-        brand: '紫微斗数', brandPro: 'Pro', tagline: '专业排盘 · 智能解读',
-        formTitle: '排盘输入', name: '姓名', namePh: '命主称呼（选填）',
+        askExamples: '也可以直接问', askEx1: '今年事业怎么样', askEx2: '这十年感情要注意什么', askEx3: '我适合做什么工作',
+        brand: '紫微斗数', brandPro: 'Pro', 
+        formTitle: '出生信息', name: '称呼', namePh: '选填',
         calendar: '历法', solar: '公历', lunar: '农历',
         year: '年', month: '月', day: '日', leap: '闰月',
         time: '出生时间', hour: '时', minute: '分',
@@ -39,102 +40,90 @@ window.__ModuleLoader__.load({
         dayDivideHint: '晚上 11 点到 12 点之间出生，算当天还是第二天',
         fixLeap: '闰月出生', flTrue: '下半月算下个月', flFalse: '整月算本月',
         fixLeapHint: '只在农历闰月出生时有影响',
-        summaryTitle: '命主信息', solarLabel: '公历', lunarLabel: '农历',
+        summaryTitle: '命盘信息', solarLabel: '公历', lunarLabel: '农历',
         zodiac: '生肖', sign: '星座', soul: '命宫', body: '身宫', class5: '五行局',
         soulMaster: '命主', bodyMaster: '身主', startAge: '起运', solarTime: '真太阳时',
-        uncorrected: '未校正', boundaryWarn: '⚠ 时辰边界告警：校正后时刻贴近时辰交界，请核对出生钟表时间',
-        tabNatal: '本命盘', tabDecadal: '大限', tabYearly: '流年', tabPatterns: '格局分析', tabDict: '星曜词典',
-        decadalListTitle: '十二大限', decadalInfoTitle: '大限四化',
-        yearlyLabel: '流年', yearlyYear: '年份', yearlyPlaceholder: '如 2026',
+        uncorrected: '未校正', boundaryWarn: '出生时间离两个时辰的交界很近，请确认钟表时间是否准确',
+        tabNatal: '本命盘', tabDecadal: '大限', tabYearly: '流年', 
+        yearlyYear: '年份', 
         smallLimit: '小限', decadal: '大限', twelveGods: '十二神',
         bodyMark: '身', mingMark: '命',
-        palace: '宫', emptyState: '填写出生信息，点击「排 盘」开始',
+        emptyState: '在左边填好生辰后点「排盘」，也可以先看一张示例盘',
         mainStars: '主星', minorStars: '辅星', adjStars: '杂曜',
         showAdj: '显示杂曜', hideAdj: '隐藏杂曜', adjChip: '杂曜',
         editBirth: '改生辰', collapseForm: '收起', expandForm: '展开',
         emptyPalace: '空宫',
-        emptyCta: '用示例生辰先排一盘', defaultName: '命主',
-        oppPalace: '对宫', triPalace: '三合', detailTitle: '宫位详情',
-        mutagenTitle: '四化', noMutagen: '—',
+        emptyCta: '看示例盘', defaultName: '未命名',
+        oppPalace: '对宫', triPalace: '三合', 
+        mutagenTitle: '四化', 
         ai: '紫微师解读', aiTitle: '紫微师解读',
-        aiSend: '发送', aiNewChat: '新对话', aiAskPh: '问事业、财运、大限…（Enter 发送）',
-        aiStartBrief: '速览解读', aiStartReport: '完整鲲鹏报告',
-        aiStartBriefDesc: '命格总纲与当前大限，几分钟读完',
-        aiStartReportDesc: '14 个部分，可导出精装 HTML',
-        aiFullReport: '完整报告', aiFullReportHint: '基于当前命盘生成完整鲲鹏报告（14 部分）',
-        aiEmptyLead: '命盘已带入', aiEmptyHint: '直接提问，或先看一份解读。',
-        viewMode: '工作台视图', modeChart: '看盘', modeRead: '解读',
-        studioChatLabel: '紫微师对话', studioTabs: '解读面板', studioChatTab: '对话', studioReportTab: '报告', studioEmptyTitle: '说一句话，把这盘读懂。',
-        studioEmptyHint: '可以直接问，也可以先看一份解读；命盘和对话会一起保留。',
-        studioWaitPh: '正在生成，先等这一轮写完…',
-        canvasTabs: '画布视图', canvasChart: '盘面', canvasReport: '报告',
-        reportTitle: '人生鲲鹏计划 · 完整报告', reportOpen: '查看完整报告',
-        reportRunningHint: '完整报告正在「报告」页签生成，写完会自动保存。',
+        aiSend: '发送', aiNewChat: '新对话', aiAskPh: '想问什么？比如：今年适合换工作吗',
+        aiStartBrief: '速览解读', aiStartReport: '完整报告',
+        aiStartBriefDesc: '性格和眼下这十年，一分钟读完',
+        aiStartReportDesc: '14 个方面，约 3 分钟，可下载',
+        modeChart: '看盘', modeRead: '解读',
+        studioChatLabel: '紫微师对话', studioTabs: '解读面板', studioChatTab: '对话', studioReportTab: '报告', 
+        studioWaitPh: '正在回答，写完再问下一个',
+        reportTitle: '完整报告', reportOpen: '查看完整报告',
+        reportRunningHint: '完整报告正在写，在「报告」里看进度',
         reportWriting: '正在写完整报告', reportPaused: '报告生成中断',
         reportProgressMeta: '已完成 {n}/{total} 部分 · {chars} 字',
-        reportCurrent: '正在写第 {n} 部分 · {name}', reportToc: '报告目录',
-        reportQuoteLabel: '报告选段', reportQuoteAction: '让紫微师改这段',
-        reportIdleTitle: '把这盘读成一份完整报告。',
-        reportIdleHint: '14 个部分：命盘总览、性格、家庭、婚姻、财富、事业、大限与综合建议。约 2–3 分钟。',
-        reportGenerate: '生成完整报告', reportRegenerate: '重新生成', reportRegenerateConfirm: '再点一次，替换旧报告', reportRestored: '重新生成没有写出内容，已保留原报告', reportReadyToast: '完整报告写好了', formDirty: '生辰已改，点「排 盘」更新命盘；解读和命盘库仍按当前命盘', aiAnswerReady: '紫微师回答好了', aiRunningBg: '正在生成，点开查看进度',
-        reportFinePrint: '报告会保存在本机，可随时回来继续读；导出 HTML 后可离线阅读。',
-        reportError: '报告生成中断', reportErrorHint: '已生成的部分会保留；可以接着写，或重新生成。',
-        reportPartial: '报告已生成的部分保留；可以继续生成补齐。',
+        reportCurrent: '正在写第 {n} 部分 · {name}', reportToc: '目录',
+        reportQuoteLabel: '报告里的一段', reportQuoteAction: '就这段问紫微师',
+        reportIdleTitle: '完整报告',
+        reportIdleHint: '14 个方面，约 3 分钟。写完自动保存在本机，可以下载。',
+        reportGenerate: '生成完整报告', reportRegenerate: '重新生成', reportRegenerateConfirm: '再点一次，替换旧报告', reportRestored: '重新生成没有写出内容，已保留原报告', reportReadyToast: '完整报告写好了', formDirty: '生辰改了，点「排盘」更新；在那之前，解读和保存都按当前这张盘', aiAnswerReady: '紫微师回答好了', aiRunningBg: '正在生成，点开查看进度',
+        reportError: '报告没写完', reportErrorHint: '已写的部分保留着，可以接着写',
+        reportPartial: '这份报告还没写完全部 14 个方面',
         reportReader: '全屏阅读', reportNeeded: '先生成完整报告',
         fullscreen: '全屏', exitFullscreen: '退出全屏',
-        quoteRemove: '取消引用', quotePalaceLabel: '当前宫位', quotePalace: '问这一宫',
+        quoteRemove: '取消引用', quotePalaceLabel: '这一宫', quotePalace: '问这一宫',
         suggestCareer: '重点讲事业与财运', suggestLove: '这十年感情要注意什么',
-        suggestPlain: '说得再口语一点', suggestPalace: '解释一下当前宫位',
+        suggestPlain: '说得再通俗一点', suggestPalace: '讲讲我选的这一宫',
         copyFailed: '复制失败，请手动选择文本',
-        exported: '已开始下载 HTML', exportFailed: '导出失败', copiedChart: '命盘已复制', clearBusy: '正在生成，写完后再清除', handoffWorking: '正在新建会话…', handoffNoNav: '会话已创建，但界面没能自动跳过去。请在左侧会话列表里打开新会话继续。', handoffFailedHttp: '交给会话失败（HTTP {status}）',
-        aiThreadCleared: '已清空对话', aiRecordCleared: '已清除本机解读记录',
+        exported: '已开始下载报告', exportFailed: '下载失败', copiedChart: '命盘已复制', clearBusy: '正在生成，写完后再清除', handoffWorking: '正在新建会话…', handoffNoNav: '会话已创建，但界面没能自动跳过去。请在左侧会话列表里打开新会话继续。', handoffFailedHttp: '没能打开新会话（HTTP {status}）',
+        aiThreadCleared: '已清空对话', aiRecordCleared: '已清除对话与报告',
         localDataTitle: '本机数据', localDataHint: '命盘库、对话与报告只存在这个浏览器里。清除只删对话与报告，命盘库保留。',
         clearLocal: '清除对话与报告', clearLocalConfirm: '确定清除？清除后不可恢复。',
         confirmClear: '确定清除', cancel: '取消', undo: '撤销',
         sampleChart: '示例盘', switchToMyBirth: '换成我的生辰', libDeleted: '已删除命盘', undoDone: '已撤销', view: '查看',
-        reportSec01: '命盘总览', reportSec02: '性格大略', reportSec03: '家庭关系', reportSec04: '婚姻情感',
-        reportSec05: '子女培育', reportSec06: '财富管理', reportSec07: '健康养生', reportSec08: '事业发展',
-        reportSec09: '朋友贵人', reportSec10: '居家风水', reportSec11: '心灵福德', reportSec12: '出行迁移',
-        reportSec13: '大限节奏', reportSec14: '综合建议',
         timeScope: '命盘时间维度', backToBoard: '返回盘面', backToReading: '返回解读',
         prevDecade: '上一个大限', nextDecade: '下一个大限', backToCurrent: '回到当前',
         currentBadge: '当前', thisYear: '今年', prevYear: '上一年', nextYear: '下一年',
-        collapseRail: '收起生辰栏', expandRail: '展开生辰栏', editBirthShort: '生辰',
-        chartTools: '工具', openPatterns: '格局分析', openDict: '星曜词典',
+        collapseRail: '收起左栏', expandRail: '展开左栏', editBirthShort: '生辰',
+        openPatterns: '格局分析', openDict: '星曜词典',
         handoff: '在新会话里继续', handoffDone: '已开新会话',
         handoffHint: '把这张盘和已有解读交给一个新的 DSH 会话，在那里接着聊',
-        disclaimerShort: '传统文化解读，非科学结论，仅供参考。具体决策请咨询专业人士。',
-        aiInterpreting: '解读中…', interpStreaming: '正在生成…',
-        aiThinking: '紫微师正在思考…', aiStop: '停止', aiContinue: '继续生成',
-        aiStopped: '已停止生成，内容可能不完整；可点「继续生成」接着写',
-        aiStoppedEmpty: '已停止生成。',
-        aiDisconnectedEmpty: '连接中断，没有收到内容；可以重新解读。',
-        aiDisconnected: '连接中断，内容可能不完整；可点「继续生成」接着写',
+        disclaimerShort: '传统文化解读，仅供参考，不构成专业建议',
+        interpStreaming: '正在回答…',
+        aiThinking: '紫微师正在思考…', aiStop: '停止', aiContinue: '接着写',
+        aiStopped: '已停止，内容可能不完整，可以接着写',
+        aiStoppedEmpty: '已停止',
+        aiDisconnectedEmpty: '连接断了，没收到内容，可以重试',
+        aiDisconnected: '连接断了，内容可能不完整，可以接着写',
         aiContinuePrompt: '请接着上文继续写：从断处接着写，不要重复已写内容，也不要重新开头。',
         aiCopy: '复制', aiCopied: '已复制',
-        exportHtml: '导出精装 HTML', previewHtml: '预览报告', closePreview: '关闭预览',
-        aiRetry: '重新解读',
-        autoOpen: '启动时自动打开工作台', showAdjSet: '显示杂曜',
+        exportHtml: '下载报告', 
+        aiRetry: '重试',
+        autoOpen: '启动时自动打开工作台', 
         settingsTitle: '设置', close: '关闭', about: '关于',
         versionLabel: '版本', checkUpdate: '检查更新', checking: '检查中…',
-        updateHint: '仅点击时检查一次，不后台联网；更新需你自己执行命令。',
-        upToDate: '已是最新（{version}）', updateAvailable: '发现新版本 {latest}；更新：',
+        updateHint: '只在你点击时联网检查一次；更新要在终端里执行下面的命令',
+        upToDate: '已是最新（{version}）', updateAvailable: '有新版本 {latest}，在终端执行：',
         updateFailed: '检查失败：{reason}',
         backToConversation: '返回会话',
-        aboutText: '紫微斗数 Pro · 算法依据《紫微斗数全书》安星诀，与开源库 iztro 逐字段交叉验证。真太阳时校正含经度差与均时差。本工具仅供研究参考。',
+        aboutText: '排盘依据《紫微斗数全书》安星诀，与开源库 iztro 逐项核对过；填了出生城市就按经度和均时差校正真太阳时。仅供研究和参考。',
         signature: '紫微师 · 金聚｜道商意象紫微九诀',
         contactWechat: '微信：neo2025new',
-        libTitle: '命盘库', libName: '盘名', libNamePh: '盘名（可不填）', patternsAll: '查看全部', libSave: '保存', libEmpty: '暂无保存的命盘', libDelete: '删除',
-        patternTitle: '格局分析', patternEmpty: '未检测到显著格局',
+        libTitle: '命盘库', libName: '盘名', libNamePh: '盘名（可不填）', patternsAll: '查看全部', libSave: '保存', libEmpty: '还没有保存的命盘', libDelete: '删除',
+        patternTitle: '格局分析', patternEmpty: '没有明显的格局',
         dictTitle: '星曜词典', dictPlaceholder: '搜索星曜…',
-        keyboardHint: '点盘面后：←→ 切换宫位 · ↑↓ 跳对宫',
         copy: '复制命盘', copied: '已复制',
-        note1: '算法依据《紫微斗数全书》安星诀（14 主星 · 14 辅星 · 38 杂曜 · 十二神 · 大限小限 · 流曜），与开源库 iztro 逐字段交叉验证。',
-        note2: '流派选项：年柱可按正月初一或立春分界；月柱可按农历月或节气；晚子时可换日或按当日；闰月下半月可按下月。'
       },
       'en-US': {
-        brand: 'Zi Wei Dou Shu', brandPro: 'Pro', tagline: 'Charting · Analysis',
-        formTitle: 'Birth Data', name: 'Name', namePh: 'Name (optional)',
+        askExamples: 'Or just ask', askEx1: 'How is my career this year?', askEx2: 'What should I watch for in love this decade?', askEx3: 'What kind of work suits me?',
+        brand: 'Zi Wei Dou Shu', brandPro: 'Pro', 
+        formTitle: 'Birth details', name: 'Name', namePh: 'Optional',
         calendar: 'Calendar', solar: 'Solar', lunar: 'Lunar',
         year: 'Year', month: 'Month', day: 'Day', leap: 'Leap',
         time: 'Birth Time', hour: 'Hr', minute: 'Min',
@@ -155,98 +144,86 @@ window.__ModuleLoader__.load({
         dayDivideHint: 'Whether a birth between 11 pm and midnight counts as the same day',
         fixLeap: 'Leap-month birth', flTrue: '2nd half = next month', flFalse: 'Whole month',
         fixLeapHint: 'Only matters for births in a lunar leap month',
-        summaryTitle: 'Profile', solarLabel: 'Solar', lunarLabel: 'Lunar',
+        summaryTitle: 'Chart', solarLabel: 'Solar', lunarLabel: 'Lunar',
         zodiac: 'Zodiac', sign: 'Sign', soul: 'Soul', body: 'Body', class5: 'Class',
         soulMaster: 'Soul Star', bodyMaster: 'Body Star', startAge: 'Start', solarTime: 'True Solar',
-        uncorrected: 'uncorrected', boundaryWarn: '⚠ Near hour boundary — verify clock time',
-        tabNatal: 'Natal', tabDecadal: 'Decades', tabYearly: 'Yearly', tabPatterns: 'Patterns', tabDict: 'Dictionary',
-        decadalListTitle: 'Decades', decadalInfoTitle: 'Decade Transforms',
-        yearlyLabel: 'Yearly', yearlyYear: 'Year', yearlyPlaceholder: 'e.g. 2026',
+        uncorrected: 'uncorrected', boundaryWarn: 'The birth time is close to the boundary between two double-hours; please check the clock time',
+        tabNatal: 'Natal', tabDecadal: 'Decades', tabYearly: 'Yearly', 
+        yearlyYear: 'Year', 
         smallLimit: 'Xiaoxian', decadal: 'Decade', twelveGods: 'Gods',
         bodyMark: 'Body', mingMark: 'Soul',
-        palace: 'Palace', emptyState: 'Fill birth data and press "Draw Chart"',
+        emptyState: 'Fill in the birth details on the left and press Draw chart, or look at a sample chart first',
         mainStars: 'Major', minorStars: 'Minor', adjStars: 'Adj',
         showAdj: 'Show adj', hideAdj: 'Hide adj', adjChip: 'Adj',
         editBirth: 'Edit birth data', collapseForm: 'Collapse', expandForm: 'Expand',
         emptyPalace: 'Empty',
-        emptyCta: 'Draw a sample chart', defaultName: 'Native',
-        oppPalace: 'Opposite', triPalace: 'Trine', detailTitle: 'Palace Detail',
-        mutagenTitle: 'Transforms', noMutagen: '—',
+        emptyCta: 'View a sample chart', defaultName: 'Untitled',
+        oppPalace: 'Opposite', triPalace: 'Trine', 
+        mutagenTitle: 'Transforms', 
         ai: 'Reading', aiTitle: 'Zi Wei Reading',
-        aiSend: 'Send', aiNewChat: 'New chat', aiAskPh: 'Ask about career, money, decades… (Enter)',
-        aiStartBrief: 'Quick reading', aiStartReport: 'Full Kunpeng report',
-        aiStartBriefDesc: 'Core profile and current decade, a few minutes',
-        aiStartReportDesc: '14 parts, exportable to HTML',
-        aiFullReport: 'Full report', aiFullReportHint: 'Generate the full 14-part Kunpeng report for this chart',
-        aiEmptyLead: 'Chart ready', aiEmptyHint: 'Ask directly, or start with a reading.',
-        viewMode: 'Workbench view', modeChart: 'Chart', modeRead: 'Reading',
-        studioChatLabel: 'Zi Wei chat', studioTabs: 'Reading panel', studioChatTab: 'Chat', studioReportTab: 'Report', studioEmptyTitle: 'Say one thing, and we read the chart.',
-        studioEmptyHint: 'Ask directly, or start with a reading. The chart and conversation stay together.',
-        studioWaitPh: 'Generating — wait for this turn to finish…',
-        canvasTabs: 'Canvas view', canvasChart: 'Chart', canvasReport: 'Report',
-        reportTitle: 'Life Kunpeng Plan · Full Report', reportOpen: 'Open full report',
-        reportRunningHint: 'The full report is being written in the Report tab; it saves when done.',
+        aiSend: 'Send', aiNewChat: 'New chat', aiAskPh: 'Ask anything, e.g. is this a good year to change jobs?',
+        aiStartBrief: 'Quick reading', aiStartReport: 'Full report',
+        aiStartBriefDesc: 'Personality and the current decade, a one-minute read',
+        aiStartReportDesc: '14 areas, about 3 minutes, downloadable',
+        modeChart: 'Chart', modeRead: 'Reading',
+        studioChatLabel: 'Zi Wei chat', studioTabs: 'Reading panel', studioChatTab: 'Chat', studioReportTab: 'Report', 
+        studioWaitPh: 'Answering; ask the next question when it finishes',
+        reportTitle: 'Full report', reportOpen: 'Open full report',
+        reportRunningHint: 'The full report is being written; see progress under Report',
         reportWriting: 'Writing the full report', reportPaused: 'Report paused',
         reportProgressMeta: '{n}/{total} sections · {chars} chars',
-        reportCurrent: 'Writing section {n} · {name}', reportToc: 'Report contents',
-        reportQuoteLabel: 'Report excerpt', reportQuoteAction: 'Ask Zi Wei to revise this',
-        reportIdleTitle: 'Turn this chart into a full report.',
-        reportIdleHint: '14 sections: overview, character, family, marriage, wealth, career, decades and advice. About 2–3 minutes.',
-        reportGenerate: 'Generate full report', reportRegenerate: 'Regenerate', reportRegenerateConfirm: 'Click again to replace', reportRestored: 'Regeneration produced nothing; the previous report was kept', reportReadyToast: 'The full report is ready', formDirty: 'Birth data changed. Press Compute to update; readings and the library still use the current chart', aiAnswerReady: 'The answer is ready', aiRunningBg: 'Generating — open to see progress',
-        reportFinePrint: 'The report is stored locally and can be reopened; export HTML for offline reading.',
-        reportError: 'Report generation interrupted', reportErrorHint: 'The partial report is kept; continue or regenerate.',
-        reportPartial: 'The partial report is kept; continue to fill the rest.',
+        reportCurrent: 'Writing section {n} · {name}', reportToc: 'Contents',
+        reportQuoteLabel: 'From the report', reportQuoteAction: 'Ask about this passage',
+        reportIdleTitle: 'Full report',
+        reportIdleHint: '14 areas, about 3 minutes. Saved on this device when done, and downloadable.',
+        reportGenerate: 'Generate full report', reportRegenerate: 'Regenerate', reportRegenerateConfirm: 'Click again to replace', reportRestored: 'Regeneration produced nothing; the previous report was kept', reportReadyToast: 'The full report is ready', formDirty: 'Birth details changed. Press Draw chart to update; until then, readings and saves use the current chart', aiAnswerReady: 'The answer is ready', aiRunningBg: 'Generating — open to see progress',
+        reportError: 'The report is unfinished', reportErrorHint: 'What was written is kept; you can continue it',
+        reportPartial: 'This report does not cover all 14 areas yet',
         reportReader: 'Full screen', reportNeeded: 'Generate the full report first',
         fullscreen: 'Full screen', exitFullscreen: 'Exit full screen',
-        quoteRemove: 'Remove quote', quotePalaceLabel: 'Current palace', quotePalace: 'Ask about this palace',
+        quoteRemove: 'Remove quote', quotePalaceLabel: 'This palace', quotePalace: 'Ask about this palace',
         suggestCareer: 'Focus on career and money', suggestLove: 'What to watch in love this decade',
-        suggestPlain: 'Make it more conversational', suggestPalace: 'Explain the current palace',
+        suggestPlain: 'Say it more plainly', suggestPalace: 'Explain the palace I selected',
         copyFailed: 'Copy failed — select the text manually',
-        exported: 'HTML download started', exportFailed: 'Export failed', copiedChart: 'Chart copied', clearBusy: 'Generating — clear after it finishes', handoffWorking: 'Creating a session…', handoffNoNav: 'The session was created, but the view could not switch to it. Open it from the session list on the left.', handoffFailedHttp: 'Hand-off failed (HTTP {status})',
-        aiThreadCleared: 'Conversation cleared', aiRecordCleared: 'Local reading records cleared',
+        exported: 'Report download started', exportFailed: 'Download failed', copiedChart: 'Chart copied', clearBusy: 'Generating — clear after it finishes', handoffWorking: 'Creating a session…', handoffNoNav: 'The session was created, but the view could not switch to it. Open it from the session list on the left.', handoffFailedHttp: 'Could not open a new session (HTTP {status})',
+        aiThreadCleared: 'Conversation cleared', aiRecordCleared: 'Conversations and reports cleared',
         localDataTitle: 'Local data', localDataHint: 'Saved charts, conversations and reports live only in this browser. Clearing removes conversations and reports; saved charts stay.',
         clearLocal: 'Clear conversations and reports', clearLocalConfirm: 'Clear now? This cannot be undone.',
         confirmClear: 'Clear', cancel: 'Cancel', undo: 'Undo',
         sampleChart: 'Sample chart', switchToMyBirth: 'Use my birth data', libDeleted: 'Chart deleted', undoDone: 'Undone', view: 'View',
-        reportSec01: 'Chart overview', reportSec02: 'Character', reportSec03: 'Family', reportSec04: 'Marriage',
-        reportSec05: 'Children', reportSec06: 'Wealth', reportSec07: 'Health', reportSec08: 'Career',
-        reportSec09: 'Mentors & friends', reportSec10: 'Home', reportSec11: 'Inner life', reportSec12: 'Travel & moves',
-        reportSec13: 'Decade rhythm', reportSec14: 'Advice',
         timeScope: 'Time scope', backToBoard: 'Back to chart', backToReading: 'Back to reading',
         prevDecade: 'Previous decade', nextDecade: 'Next decade', backToCurrent: 'Back to current',
         currentBadge: 'Current', thisYear: 'This year', prevYear: 'Previous year', nextYear: 'Next year',
-        collapseRail: 'Collapse birth panel', expandRail: 'Expand birth panel', editBirthShort: 'Birth data',
-        chartTools: 'Tools', openPatterns: 'Patterns', openDict: 'Star dictionary',
+        collapseRail: 'Hide side panel', expandRail: 'Show side panel', editBirthShort: 'Birth data',
+        openPatterns: 'Patterns', openDict: 'Star dictionary',
         handoff: 'Continue in a new session', handoffDone: 'New session opened',
         handoffHint: 'Hand this chart and the reading so far to a new DSH session and keep talking there',
-        disclaimerShort: 'Traditional interpretation, not a scientific conclusion. Consult a professional for decisions.',
-        aiInterpreting: 'Reading…', interpStreaming: 'Writing…',
+        disclaimerShort: 'Traditional interpretation for reference only, not professional advice',
+        interpStreaming: 'Answering…',
         aiThinking: 'Zi Wei Master is thinking…', aiStop: 'Stop', aiContinue: 'Continue',
-        aiStopped: 'Stopped; the answer may be incomplete — press Continue to resume.',
-        aiStoppedEmpty: 'Stopped.',
-        aiDisconnectedEmpty: 'Connection lost before any text arrived — you can retry.',
-        aiDisconnected: 'Connection lost; the answer may be incomplete — press Continue to resume.',
+        aiStopped: 'Stopped; the answer may be incomplete. You can continue it',
+        aiStoppedEmpty: 'Stopped',
+        aiDisconnectedEmpty: 'Connection lost before any text arrived. You can retry',
+        aiDisconnected: 'Connection lost; the answer may be incomplete. You can continue it',
         aiContinuePrompt: 'Continue from where you stopped; do not repeat or restart the answer.',
         aiCopy: 'Copy', aiCopied: 'Copied',
-        exportHtml: 'Export HTML', previewHtml: 'Preview', closePreview: 'Close Preview',
+        exportHtml: 'Download report', 
         aiRetry: 'Retry',
-        autoOpen: 'Open workbench on launch', showAdjSet: 'Show adjective stars',
+        autoOpen: 'Open workbench on launch', 
         settingsTitle: 'Settings', close: 'Close', about: 'About',
         versionLabel: 'Version', checkUpdate: 'Check for updates', checking: 'Checking…',
-        updateHint: 'Manual check only — no background polling; updates are installed by you.',
-        upToDate: 'Up to date ({version})', updateAvailable: 'Version {latest} available. Update with:',
+        updateHint: 'Checks online only when you click; to update, run the command below in a terminal',
+        upToDate: 'Up to date ({version})', updateAvailable: 'Version {latest} is available. Run in a terminal:',
         updateFailed: 'Check failed: {reason}',
         backToConversation: 'Back to conversation',
-        aboutText: 'Zi Wei Dou Shu Pro. Algorithm verified field-by-field against the open-source iztro library. True solar time correction included.',
+        aboutText: 'Chart placement follows the classic star-placement rules and is checked field by field against the open-source iztro library. With a birth city, true solar time is corrected for longitude and the equation of time. For research and reference only.',
         signature: 'Zi Wei Master · Jin Ju｜Daoshang Yixiang Ziwei Nine Keys',
         contactWechat: 'WeChat: neo2025new',
-        libTitle: 'Chart Library', libName: 'Name', libNamePh: 'Name (optional)', patternsAll: 'See all', libSave: 'Save', libEmpty: 'No saved charts', libDelete: 'Delete',
-        patternTitle: 'Patterns', patternEmpty: 'No notable patterns detected',
+        libTitle: 'Chart Library', libName: 'Name', libNamePh: 'Name (optional)', patternsAll: 'See all', libSave: 'Save', libEmpty: 'No saved charts yet', libDelete: 'Delete',
+        patternTitle: 'Patterns', patternEmpty: 'No notable patterns',
         dictTitle: 'Star Dictionary', dictPlaceholder: 'Search stars…',
-        keyboardHint: 'Click chart: ←→ palace · ↑↓ opposite',
         copy: 'Copy Chart', copied: 'Copied',
-        note1: 'Algorithm per the classic ZWDS star-placement rules (14 major + 14 minor + 38 adjective stars), cross-verified with iztro.',
-        note2: 'School options: year pillar by LNY or Lichun; month pillar by lunar month or solar terms.'
+        
       }
     };
 
@@ -367,11 +344,6 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   color: var(--zp-accent); border: 1px solid color-mix(in srgb, var(--zp-accent) 45%, transparent);
   border-radius: 6px; padding: 0 6px;
 }
-.zp-brand-tag {
-  display: none; font-size: 11px; color: var(--dsw-alias-label-secondary); letter-spacing: .5px;
-  border-left: 1px solid var(--dsw-alias-border-l1); padding-left: 10px; margin-left: 2px;
-}
-.zp-root[data-w="wide"] .zp-brand-tag { display: inline }
 .zp-head-sum { display: none; align-items: center; gap: 6px; min-width: 0; flex: 1 1 0; overflow: hidden }
 .zp-root[data-w="mid"] .zp-head-sum, .zp-root[data-w="wide"] .zp-head-sum, .zp-root[data-w="compact"] .zp-head-sum { display: flex }
 .zp-sum-chip {
@@ -479,10 +451,6 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
 }
 .zp-error { color: var(--dsw-alias-state-error-primary); font-size: 12px; margin-top: 8px; line-height: 1.55 }
 .zp-warn { color: var(--dsw-alias-state-warn-primary); font-size: 11px; margin-top: 6px; line-height: 1.55 }
-.zp-note {
-  font-size: 11px; color: var(--dsw-alias-label-secondary); line-height: 1.65;
-  margin-top: 12px; border-top: 1px dashed var(--dsw-alias-border-l1); padding-top: 10px;
-}
 
 /* ---------------- 命主信息 ---------------- */
 .zp-pillars { display: flex; gap: 6px; margin-bottom: 10px }
@@ -725,7 +693,6 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   border-radius: 8px; padding: 3px 8px; line-height: 1.6;
 }
 .zp-chip b { font-weight: 700 }
-.zp-kbd-hint { font-size: 10.5px; color: var(--dsw-alias-label-secondary); margin-top: 10px; letter-spacing: .5px }
 
 /* ---------------- 列表（命盘库 / 大限） ---------------- */
 .zp-list-item {
@@ -1210,8 +1177,6 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
 .zp-studio-head-actions { display: flex; gap: 2px; flex: none }
 .zp-studio-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px }
 .zp-studio-empty { margin: auto 0; display: flex; flex-direction: column; gap: 12px }
-.zp-studio-empty-title { font-size: 20px; line-height: 28px; font-weight: 300; letter-spacing: -.01em }
-.zp-studio-empty-hint { font-size: 13px; line-height: 20px; color: var(--dsw-alias-label-secondary) }
 .zp-studio-start-list { display: flex; flex-direction: column; gap: 8px; margin-top: 4px }
 .zp-studio-start {
   display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 12px;
@@ -1245,6 +1210,8 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   font-size: 12px; line-height: 18px;
 }
 .zp-studio-suggest { flex: none; display: flex; flex-wrap: wrap; gap: 4px 6px; padding: 0 12px 8px }
+.zp-studio-examples { align-items: center }
+.zp-studio-examples > span { font-size: 12px; line-height: 18px; color: var(--dsw-alias-label-secondary) }
 .zp-studio-suggest button {
   height: 26px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--dsw-alias-border-l1);
   background: transparent; color: var(--dsw-alias-label-secondary); font-size: 12px;
@@ -1344,8 +1311,6 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
 .zp-report-empty-icon { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 12px; background: var(--dsw-alias-bg-layer-2); color: var(--dsw-alias-brand-primary) }
 .zp-report-empty h2 { font-size: 20px; line-height: 28px; font-weight: 300 }
 .zp-report-empty p { color: var(--dsw-alias-label-secondary); font-size: 13px; line-height: 21px }
-.zp-report-section-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 12px; margin: 4px 0 8px; width: 100%; color: var(--dsw-alias-label-secondary); font-size: 11.5px; line-height: 18px }
-.zp-report-fine { color: var(--dsw-alias-label-caption); font-size: 10.5px; line-height: 16px }
 .zp-reader { position: absolute; inset: 0; z-index: 65; display: flex; flex-direction: column; background: var(--dsw-alias-bg-base) }
 .zp-reader-head { flex: none; display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--dsw-alias-border-l1) }
 .zp-reader-title { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px }
@@ -1373,12 +1338,10 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
 .zp-settings-local > span.zp-settings-busy { color: var(--dsw-alias-state-warn-primary) }
 .zp-settings-confirm { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 4px }
 .zp-settings-confirm span { color: var(--dsw-alias-state-error-primary); font-size: 11px; line-height: 16px }
-.zp-root[data-studio="1"][data-w="mid"] .zp-report-section-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) }
 .zp-root[data-w="narrow"] .zp-studio-chat { flex-basis: auto; width: 100%; border-right: 0 }
 .zp-root[data-w="narrow"] .zp-report-layout { flex-direction: column; gap: 8px }
 .zp-root[data-w="narrow"] .zp-report-toc { flex: none; display: flex; gap: 4px; overflow-x: auto; padding: 0 0 6px; border-right: 0; border-bottom: 1px solid var(--dsw-alias-border-l1) }
 .zp-root[data-w="narrow"] .zp-report-toc button { width: auto; white-space: nowrap }
-.zp-root[data-w="narrow"] .zp-report-section-grid { grid-template-columns: 1fr }
 .zp-root[data-w="narrow"] .zp-report-steps { grid-template-columns: 1fr }
 .zp-root[data-w="narrow"] .zp-reader-head { flex-wrap: wrap }
 .zp-root[data-w="narrow"] .zp-reader-body { padding: 12px 16px 16px }
@@ -1963,7 +1926,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           h('span', { className: 'zp-center-chip' }, c.zodiac)),
         h('div', { className: 'zp-center-sub' },
           t('soulMaster') + ' ' + c.soulMaster + ' · ' + t('bodyMaster') + ' ' + c.bodyMaster),
-        h('div', { className: 'zp-center-dec' }, t('startAge') + ' ' + c.startAge + ' 岁起运'));
+        h('div', { className: 'zp-center-dec' }, t('startAge') + ' ' + c.startAge + ' 岁'));
     }
 
     /* ---------------- 宫位详情 ---------------- */
@@ -2010,8 +1973,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
             h('div', { className: 'zp-detail-chips' },
               h('span', { className: 'zp-chip' }, t('decadal') + ' ', h('b', null, p.decadal.stem + p.decadal.branch + ' ' + p.decadal.range[0] + '~' + p.decadal.range[1] + '岁')),
               h('span', { className: 'zp-chip' }, t('smallLimit') + ' ', h('b', null, p.ages.join(', '))),
-              gods.length ? h('span', { className: 'zp-chip' }, t('twelveGods') + ' ', h('b', null, gods.join(' · '))) : null))),
-        h('div', { className: 'zp-kbd-hint' }, t('keyboardHint')));
+              gods.length ? h('span', { className: 'zp-chip' }, t('twelveGods') + ' ', h('b', null, gods.join(' · '))) : null))));
     }
 
     /* ---------------- 格局分析 / 星曜词典 ---------------- */
@@ -2457,11 +2419,15 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
         /* 速览解读不带用户提问，thread 仍为空：生成中也要离开空态，让「正在思考」立刻可见 */
         !hasThread && !props.streaming
           ? h('div', { className: 'zp-studio-empty' },
-            h('div', { className: 'zp-studio-empty-title' }, t('studioEmptyTitle')),
-            h('div', { className: 'zp-studio-empty-hint' }, t('studioEmptyHint')),
             h('div', { className: 'zp-studio-start-list' },
               startBtn('brief', 'sparkle', t('aiStartBrief'), t('aiStartBriefDesc'), true),
               startBtn('report', 'report', t('aiStartReport'), t('aiStartReportDesc'), false)),
+            /* 不知道问什么的人，点一个例子就直接发出去 */
+            h('div', { className: 'zp-studio-suggest zp-studio-examples' },
+              h('span', null, t('askExamples')),
+              [t('askEx1'), t('askEx2'), t('askEx3')].map(function (eq, qi) {
+                return h('button', { key: qi, type: 'button', disabled: props.streaming || props.reportRunning, onClick: function () { submit(eq); } }, eq);
+              })),
             props.hasReport ? h('button', {
               className: 'zp-studio-report-link', type: 'button', onClick: props.onOpenReport
             }, h(Icon, { name: 'report', size: 13 }), t('reportOpen')) : null)
@@ -2775,12 +2741,8 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
             h('div', { className: 'zp-report-empty-icon' }, h(Icon, { name: 'report', size: 20 })),
             h('h2', null, t('reportIdleTitle')),
             h('p', null, t('reportIdleHint')),
-            h('div', { className: 'zp-report-section-grid' }, REPORT_SECTION_TITLES.map(function (name, i) {
-              return h('span', { key: i }, ('0' + (i + 1)).slice(-2) + ' ' + name);
-            })),
             h('button', { className: 'zp-btn zp-btn-primary', type: 'button', onClick: function () { props.onGenerate(false); } },
-              h(Icon, { name: 'sparkle', size: 14 }), t('reportGenerate')),
-            h('div', { className: 'zp-report-fine' }, t('reportFinePrint')))
+              h(Icon, { name: 'sparkle', size: 14 }), t('reportGenerate')))
           : null);
     }
 
@@ -3697,7 +3659,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           var now = new Date();
           var ymd = now.getFullYear() + ('0' + (now.getMonth() + 1)).slice(-2) + ('0' + now.getDate()).slice(-2);
           a.href = url;
-          a.download = '人生鲲鹏计划_' + (form.name || '命主') + '_' + ymd + '.html';
+          a.download = '人生鲲鹏计划_' + (form.name || t('defaultName')) + '_' + ymd + '.html';
           document.body.appendChild(a);
           a.click();
           setTimeout(function () { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1500);
@@ -3956,7 +3918,6 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
               className: 'zp-sum-chip zp-head-mini' + (isSampleChart ? ' is-sample' : ''),
               title: chartDisplayName + ' · ' + chart.fiveElementsClass
             }, chartDisplayName + ' · ' + chart.fiveElementsClass) : null,
-            !chart ? h('span', { className: 'zp-brand-tag' }, t('tagline')) : null,
             chart ? h('div', { className: 'zp-head-sum' },
               isSampleChart ? null : h('span', { className: 'zp-sum-chip' }, h('b', null, form.name || t('defaultName'))),
               isSampleChart ? h('span', { className: 'zp-sample-badge' }, t('sampleChart')) : null,
@@ -4036,8 +3997,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
                     t: t,
                     onSelect: setSelected,
                     onQuote: quotePalace
-                  }) : null),
-                palaceSelected && tab === 'decadal' ? h('div', { className: 'zp-kbd-hint' }, t('keyboardHint')) : null) : null,
+                  }) : null)) : null,
               chart && view === 'patterns' ? h(PatternsView, { patterns: patterns, t: t }) : null,
               chart && view === 'dict' ? h(DictView, { t: t }) : null))),
           chart ? h('div', { className: 'zp-bottombar', 'data-region': 'BOTTOMBAR' },
@@ -4318,7 +4278,7 @@ body[data-ds-dark-theme] .zp-mu { background: color-mix(in srgb, currentColor 18
           var c = meta.chart;
           var today = new Date();
           var ymd = today.getFullYear() + ('0' + (today.getMonth() + 1)).slice(-2) + ('0' + today.getDate()).slice(-2);
-          var name = meta.name || '命主';
+          var name = meta.name || '未命名';
           /* 阳/阴由年干决定（甲丙戊庚壬为阳），只看性别会有一半标错 */
           var yearStem = (c.pillars && c.pillars.yearly) ? String(c.pillars.yearly).charAt(0) : '甲';
           var yang = '甲丙戊庚壬'.indexOf(yearStem) >= 0;

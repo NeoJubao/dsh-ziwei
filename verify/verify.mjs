@@ -682,6 +682,25 @@ ok('chrome 避让不用魔法数字写死（顶部偏移只走 --dsh-frame-top-c
       !!same && same(Object.assign({}, formSame, { settings: Object.assign({}, snap.settings, { dayDivide: 'forward' }) }), snap) === false);
   }
   {
+    /* 文案检查（批 C「去 AI 味」）：界面字典里不放装饰符号和口号，不出现方法论品牌词；
+       每个中文键都有引用；中英键一一对应 */
+    const zhBlock = (client.match(/'zh-CN': \{([\s\S]*?)\n      \},\n      'en-US': \{/) || [])[1] || '';
+    const enBlock = (client.match(/'en-US': \{([\s\S]*?)\n      \}\n    \};/) || [])[1] || '';
+    const keysOf = (blk) => [...blk.matchAll(/(?:^|[\s,{])(\w+): '/g)].map((m) => m[1]);
+    const zhKeys = keysOf(zhBlock), enKeys = keysOf(enBlock);
+    const zhValues = [...zhBlock.matchAll(/\w+: '((?:[^'\\]|\\.)*)'/g)].map((m) => m[1]);
+    const banned = ['✓', '⚠', '画布', '把这盘读懂', '智能解读', '鲲鹏'];
+    const hits = banned.filter((w) => zhValues.some((v) => v.includes(w)));
+    ok('界面文案不含装饰符号、口号和「鲲鹏」品牌词（品牌只留在导出报告）', zhKeys.length > 100 && hits.length === 0, 'hits: ' + hits.join(','));
+    const afterDict = client.slice(client.indexOf("'en-US': {") + enBlock.length);
+    const unusedKeys = zhKeys.filter((k) => !new RegExp("t\\('" + k + "'\\)|'" + k + "'").test(afterDict));
+    ok('界面字典没有无引用的键', unusedKeys.length === 0, unusedKeys.join(' '));
+    const zhSet = new Set(zhKeys), enSet = new Set(enKeys);
+    const onlyZh = zhKeys.filter((k) => !enSet.has(k)), onlyEn = enKeys.filter((k) => !zhSet.has(k));
+    ok('中英文案键一一对应', onlyZh.length === 0 && onlyEn.length === 0, 'zh only: ' + onlyZh.join(' ') + ' | en only: ' + onlyEn.join(' '));
+    ok('默认称呼不再是「命主」（和星曜术语「命主 禄存」撞名）', !/defaultName: '命主'/.test(zhBlock));
+  }
+  {
     /* 出生城市：城市名查内置表（城市中心近似经度，0.1°），也接受直接填经度 */
     const pb = ui && typeof ui.parseBirthplace === 'function' ? ui.parseBirthplace : null;
     const P = (x) => pb ? pb(x) : null;
