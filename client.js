@@ -2573,7 +2573,7 @@ const useLayoutEffect = React.useLayoutEffect || useEffect;
 /* 引擎在 factory 开头由 __ziweiBootstrapKernel() 物化，这里只取引用 */
 const E = window.ZWEngine;
 /* 构建时由 build.mjs 换成 package.json 的版本号 */
-const APP_VERSION = "1.7.0-dogfood.3";
+const APP_VERSION = "2.0.0-dogfood.1";
 /* ---- src/ui/10-i18n.js ---- */
 /* 10-i18n：界面字典和 t()
  * DICT 由 build.mjs 从 i18n/NN-*.json 生成：{ 'zh-CN': {...}, 'en-US': {...} }，一个键的中英文写在一起。
