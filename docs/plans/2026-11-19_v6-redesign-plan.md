@@ -4,6 +4,7 @@
 - 分支：`feature/v6-redesign`（从 `feat/v5-ux-polish` 拉出）
 - 执行方式：子 agent 逐个任务执行。主会话负责文档、3D 场景、复核和提交；其余任务各派一个实现 agent。
 - 设计参考：`docs/design/v6-prototype/`（下文的"原型"都指这里的文件，行号以这里为准）
+- 进度（2026-11-20）：T0、T1、T2、T3a、T3c、T4 已完成并提交；全部视图的样式表已由主会话按界面约定换算好（`src/ui/css/`，每个文件开头写明了它期待的结构），后面的视图任务只写组件、文案和检查。`client.js` 仍是 v5。
 
 ## 全局约束
 
@@ -28,6 +29,7 @@
 - **界面约定先行。** T1 把 spec §4.6 写成 `docs/ui-contract/v6/` 下三份文档，体检脚本加 `--profile v6`（基线全 0）。之后的每个视图任务都要过 v6 的体检。
 - **预览。** `node verify/ui-v6.mjs --write-preview` 把 v6 的 bundle 写到 `audit/preview-shell/client.v6.js`（`audit/` 不进仓库）。预览壳用宿主真实的 CSS 变量 + React 18.3.1 渲染面板，`/ziwei/interpret` 用模拟流，另有"反复挂载卸载"和"强制没有 WebGL"两个开关。
 - **并行。** 文件互不重叠的任务可以同时做，各用自己的工作树；合回分支时用 `git merge --squash`。会碰同一个文件的任务按顺序做。
+- **样式先于组件。** 样式表由主会话从原型换算（类名加前缀、颜色接宿主变量、字号 / 间距 / 圆角 / 时长收到档位、视口断点换成面板宽度分档），视图任务按样式表开头注释里的结构写组件，不重新设计；确实缺规则时做最小改动并在汇报里列出。
 
 ## 文件清单
 
@@ -62,11 +64,11 @@
 
 文件：`build.mjs`、`src/ui/` 的全部文件（多数是占位）、`verify/client-harness.mjs`、`verify/ui-v6.mjs`、`verify/ui-v6-shell.mjs`、`verify/all.mjs`、`scripts/audit-ui.mjs`、`docs/ui-contract/v6/*`。
 
-- [ ] `build.mjs` 重构：把 `KERNEL_HEAD` / `KERNEL_TAIL` 和拼接逻辑提成导出函数，文件被直接运行时才执行构建。`assembleUiV5(root, { version })` 读 `src/ui-pro.js` 并替换版本占位符。证明：`node build.mjs && git diff --exit-code -- client.js engine-built.js`。
-- [ ] `assembleUi(root, { version })` 返回 `{ text, map }`：按文件名顺序拼 `src/ui/NN-*.js`；把 `css/NN-*.css` 拼起来注入 `40-styles.js` 的 `` `/*__ZIWEI_CSS__*/` ``，把 `css/85-prose.css` 另外注入 `30-report.js` 的 `` `/*__ZIWEI_CSS:prose__*/` ``；把 `i18n/NN-*.json` 合成 `{ 'zh-CN': {...}, 'en-US': {...} }` 注入 `10-i18n.js`。注入用函数替换或 split/join，不用带 `$` 语义的字符串替换。遇到 `\r`、缺结尾换行、i18n 键重复、CSS 含反引号 / `${` / 反斜杠、版本占位符不是恰好一次，直接抛错。`map` 记录每个文件在 `text` 里的起止位置，供体检脚本报行号。
-- [ ] `assembleSky(root)`：`vendor/three-r128.min.js` 和 `src/sky.js` 都在时返回 `__ziweiBootstrapSky` 的完整函数文本（形状见下），并核对 Three.js 的 SHA-384；任一文件不在时返回空串（T2 完成之前就是空串）。
-- [ ] `assembleClient({ engine, zcore, sky, ui })` = `KERNEL_HEAD + engine + '\n' + zcore + KERNEL_TAIL + sky + ui`。
-- [ ] v6 bundle 的形状：
+- [x] `build.mjs` 重构：把 `KERNEL_HEAD` / `KERNEL_TAIL` 和拼接逻辑提成导出函数，文件被直接运行时才执行构建。`assembleUiV5(root, { version })` 读 `src/ui-pro.js` 并替换版本占位符。证明：`node build.mjs && git diff --exit-code -- client.js engine-built.js`。
+- [x] `assembleUi(root, { version })` 返回 `{ text, map }`：按文件名顺序拼 `src/ui/NN-*.js`；把 `css/NN-*.css` 拼起来注入 `40-styles.js` 的 `` `/*__ZIWEI_CSS__*/` ``，把 `css/85-prose.css` 另外注入 `30-report.js` 的 `` `/*__ZIWEI_CSS:prose__*/` ``；把 `i18n/NN-*.json` 合成 `{ 'zh-CN': {...}, 'en-US': {...} }` 注入 `10-i18n.js`。注入用函数替换或 split/join，不用带 `$` 语义的字符串替换。遇到 `\r`、缺结尾换行、i18n 键重复、CSS 含反引号 / `${` / 反斜杠、版本占位符不是恰好一次，直接抛错。`map` 记录每个文件在 `text` 里的起止位置，供体检脚本报行号。
+- [x] `assembleSky(root)`：`vendor/three-r128.min.js` 和 `src/sky.js` 都在时返回 `__ziweiBootstrapSky` 的完整函数文本（形状见下），并核对 Three.js 的 SHA-384；任一文件不在时返回空串（T2 完成之前就是空串）。
+- [x] `assembleClient({ engine, zcore, sky, ui })` = `KERNEL_HEAD + engine + '\n' + zcore + KERNEL_TAIL + sky + ui`。
+- [x] v6 bundle 的形状：
 
   ```
   function __ziweiBootstrapSky() {
@@ -87,9 +89,9 @@
   });
   ```
 
-- [ ] `verify/client-harness.mjs`：`loadBundle(text)`（和 `verify/verify.mjs` 第 512–560 行同一套假环境）、`renderShallow`、`renderDeep`（递归调用函数组件；`useState(init)` 返回初值，effect 不执行）、`find` / `text` / `diffTrees`、`memoryStorage()`、`fakeFetch(script)`。
-- [ ] `verify/ui-v6.mjs`：拼出 v6 → 跑 `verify/ui-v6-*.mjs` → 汇总；`--write-preview` 只写 `audit/preview-shell/client.v6.js`。输出风格和其他自检一致（`== 标题 ==`、✅ / ❌、`N 通过, M 失败`，退出码 0 / 1）。
-- [ ] `verify/ui-v6-shell.mjs`（先写、先看它失败）：
+- [x] `verify/client-harness.mjs`：`loadBundle(text)`（和 `verify/verify.mjs` 第 512–560 行同一套假环境）、`renderShallow`、`renderDeep`（递归调用函数组件；`useState(init)` 返回初值，effect 不执行）、`find` / `text` / `diffTrees`、`memoryStorage()`、`fakeFetch(script)`。
+- [x] `verify/ui-v6.mjs`：拼出 v6 → 跑 `verify/ui-v6-*.mjs` → 汇总；`--write-preview` 只写 `audit/preview-shell/client.v6.js`。输出风格和其他自检一致（`== 标题 ==`、✅ / ❌、`N 通过, M 失败`，退出码 0 / 1）。
+- [x] `verify/ui-v6-shell.mjs`（先写、先看它失败）：
   - 每个 `src/ui/*.js` 单独能过语法检查；拼起来没有重名的顶层声明；整个 bundle 能在裸 vm 里求值。
   - 只注册一个 id 为 `@local/ziwei-workbench` 的入口；求值之后、`factory()` 之前没有 `ZWEngine`、`ZWCore`、`THREE`。
   - `factory()` 返回带 `inject`（含 `slots`、`uiWorkspace`）和 `apply` 的对象；`apply()` 注册 `sidebar.panellist` 和 key 为 `ziwei` 的 `main`。
@@ -98,11 +100,11 @@
   - 不出现 `setInterval(`、`position: fixed`、`api.deepseek.com`、`__ZIWEI_VERSION__`；`id: '@local/ziwei-workbench'` 恰好一次。
   - 中英文字典键集合相等；中文值里没有 ✓ ⚠ 画布 鲲鹏 智能解读；每个键在字典之后的源码里被引用过。
   - `tierOf(w)`：0 → narrow，719 → narrow，720 → mid，1179 → mid，1180 → wide。
-- [ ] `docs/ui-contract/v6/`：按 spec §4.6 写三份文档，表格格式沿用旧版（体检脚本靠表头找表）。`audit-baseline.json` 全 0。
-- [ ] `scripts/audit-ui.mjs --profile v6`：改动点见附录 B。v5 的 profile 行为不变。
-- [ ] 骨架：`00-head`、`10-i18n` + `i18n/00-common.json`、`20-util`（`const ZWUI = {}`、`tierOf`）、`27-zwui`、`40-styles` + `css/00-tokens.css`（token、`--zp-*` 浅深两套、宿主约定规则）+ `css/10-base.css`、`50-parts`（Icon、图标表）、`90-app`（`ProApp` 只渲染根节点、顶栏、返回会话、一个空的首页占位；`Boundary`；`apply`）。其余文件建好、写一行文件头注释。
-- [ ] `verify/all.mjs` 加第 9 组"v6 界面（ui-v6）"。
-- [ ] `node build.mjs && node verify/all.mjs` 全绿；`node scripts/audit-ui.mjs --profile v6` 无 FAIL。
+- [x] `docs/ui-contract/v6/`：按 spec §4.6 写三份文档，表格格式沿用旧版（体检脚本靠表头找表）。`audit-baseline.json` 全 0。
+- [x] `scripts/audit-ui.mjs --profile v6`：改动点见附录 B。v5 的 profile 行为不变。
+- [x] 骨架：`00-head`、`10-i18n` + `i18n/00-common.json`、`20-util`（`const ZWUI = {}`、`tierOf`）、`27-zwui`、`40-styles` + `css/00-tokens.css`（token、`--zp-*` 浅深两套、宿主约定规则）+ `css/10-base.css`、`50-parts`（Icon、图标表）、`90-app`（`ProApp` 只渲染根节点、顶栏、返回会话、一个空的首页占位；`Boundary`；`apply`）。其余文件建好、写一行文件头注释。
+- [x] `verify/all.mjs` 加第 9 组"v6 界面（ui-v6）"。
+- [x] `node build.mjs && node verify/all.mjs` 全绿；`node scripts/audit-ui.mjs --profile v6` 无 FAIL。
 
 ### T2：3D 场景（主会话）
 
@@ -121,9 +123,9 @@
 
 文件：`20-util.js`、`21-storage.js`、`27-zwui.js`、`verify/ui-v6-storage.mjs`、`verify/fixtures/storage-v5.json`。
 
-- [ ] 从 `src/ui-pro.js` 原样搬：`ZWUI` 的全部纯函数（第 1430–1541 行一带，含 100 城的经度表）、`DEFAULT_FORM`、`readingInput` / `readingKeyOf` / 解读记录的读写和 v1 迁移（第 2143–2313 行）、表单的 `formV133` 迁移、各偏好的读写。全部改成从注入的 `storage` 读写。
-- [ ] 新增：命盘库的增 / 改名 / 改生辰 / 删 / 撤销 / `openedAt`；首页取最近 8 张；一次性导入（spec §3.7）；`ziwei-pro.sky`。
-- [ ] 检查（先写）：
+- [x] 从 `src/ui-pro.js` 原样搬：`ZWUI` 的全部纯函数（第 1430–1541 行一带，含 100 城的经度表）、`DEFAULT_FORM`、`readingInput` / `readingKeyOf` / 解读记录的读写和 v1 迁移（第 2143–2313 行）、表单的 `formV133` 迁移、各偏好的读写。全部改成从注入的 `storage` 读写。
+- [x] 新增：命盘库的增 / 改名 / 改生辰 / 删 / 撤销 / `openedAt`；首页取最近 8 张；一次性导入（spec §3.7）；`ziwei-pro.sky`。
+- [x] 检查（先写）：
   - `verify/verify.mjs` 第 626–756 行那张 `ZWUi` 断言表（去掉 `revealDelta`）在 v6 的 `ZWUi` 上全部通过。
   - `readingKeyOf(黄金用例) === 'solar|1992|5|3|0|9|30|male|105.97|normal,exact,current,1'`。
   - v5 形状的 fixture 能读出命盘库、上次命盘、按 key 的对话和报告；一条 9 段的 v1 记录只迁移一次。
@@ -138,16 +140,17 @@
 
 文件：`23-birth.js`、`24-scope.js`、`25-board.js`、`verify/ui-v6-scope.mjs`、`verify/fixtures/horoscope-reference.json`。
 
-- [ ] `parseDate` / `parseTime` / 时辰换算：行为以原型 `app.js` 第 108–162 行为准，改成纯函数（不读界面状态；公历 / 农历作为参数）。"不确定"不返回默认时间。
-- [ ] `horoscopeAt(chart, when)`：调用 `E.computeHoroscope`，传入的命盘副本把 `yearDivide`、`monthDivide` 都设成 `'normal'`（运限按农历分界，spec §3.3）。出生之前返回 null。
-- [ ] 流月单位：`lunarUnit(when)` 用 `E.solar2lunar` 得到 `{ year, month, leap, half }` 和显示用的文字；`stepScope(chart, tab, when, dir)`：流日 ±1 天，流月走到相邻流月单位的第一天（包括 2025 年 六月 → 闰六月下半 → 七月），流年 ±1 年，大限 ±10 年；越界返回 null。
-- [ ] 童限：`decadalInfo(chart, h)` 返回 `{ childhood, range }`，不从 `palaces[index].decadal.range` 硬取。
-- [ ] `relWord` / `whenLine` / `scopeCardModel(chart, { tab, when }, today)`：每个页签一份数据（标题、时间行、要点句、四化、是否有前后翻、是否显示"回到今天"）。
-- [ ] `scopeRequest(chart, h, tab, when)`：大限 → `{ decadalFocus }`，流年 → `{ yearlyFocus }`，流月 / 流日 → `{ contextBlock, focusLine }`（定位文字不超过 600 字）。
-- [ ] `planetItem(id, chart, todayHoroscope)`、`homeStatus(chart, todayHoroscope)`、`quickLook(chart, today)`（速览）。
-- [ ] 盘面：三方四正复用 `relatedPalaces`；`ringStep` 沿用 v5 的走法（`src/ui-pro.js` 第 1870 行）；`linePoints(rects, sel)` 返回四个朝向中宫的端点和一个稳定的 key。
-- [ ] 参考表：用本机 iztro 2.6.1 对照环境（仓库外，不入库）导出黄金用例在约 40 个日期上的运限（大限、流年、流月、流日各自的宫位序号、干支、四化），覆盖 2025 年闰六月前后、2026 年春节前后、换大限前后、起运之前。只把结果存成 fixture。
-- [ ] 检查（先写）：
+- [x] `parseDate` / `parseTime` / 时辰换算：行为以原型 `app.js` 第 108–162 行为准，改成纯函数（不读界面状态；公历 / 农历作为参数）。"不确定"不返回默认时间。
+- [x] `horoscopeAt(chart, when)`：调用 `E.computeHoroscope`，传入的命盘副本把 `yearDivide`、`monthDivide` 都设成 `'normal'`（运限按农历分界，spec §3.3）。出生之前返回 null。
+- [x] 流月单位：`lunarUnit(when)` 用 `E.solar2lunar` 得到 `{ year, month, leap, half }` 和显示用的文字；`stepScope(chart, tab, when, dir)`：流日 ±1 天，流月走到相邻流月单位的第一天（包括 2025 年 六月 → 闰六月下半 → 七月），流年 ±1 年，大限 ±10 年；越界返回 null。
+- [x] 童限：`decadalInfo(chart, h)` 返回 `{ childhood, range }`，不从 `palaces[index].decadal.range` 硬取。
+- [x] `relWord` / `whenLine` / `scopeCardModel(chart, { tab, when }, today)`：每个页签一份数据（标题、时间行、要点句、四化、是否有前后翻、是否显示"回到今天"）。
+- [x] `scopeRequest(chart, h, tab, when)`：大限 → `{ decadalFocus }`，流年 → `{ yearlyFocus }`，流月 / 流日 → `{ contextBlock, focusLine }`（定位文字不超过 600 字）。
+- [x] `planetItem(id, chart, todayHoroscope)`、`homeStatus(chart, todayHoroscope)`、`quickLook(chart, today)`（速览）。
+- [x] 盘面：三方四正复用 `relatedPalaces`；`ringStep` 沿用 v5 的走法（`src/ui-pro.js` 第 1870 行）；`linePoints(rects, sel)` 返回四个朝向中宫的端点和一个稳定的 key。
+- 结果：iztro 2.6.1 的 `horoscopeDivide` 默认就是 `'normal'`；`horoscopeAt` 在 45 个日期上四层全部一致，不加包装时有 19 处流月干支不同。闰月下半和下个月是同一个流月单位；流年、大限按农历年前后翻。
+- [x] 参考表：用本机 iztro 2.6.1 对照环境（仓库外，不入库）导出黄金用例在约 40 个日期上的运限（大限、流年、流月、流日各自的宫位序号、干支、四化），覆盖 2025 年闰六月前后、2026 年春节前后、换大限前后、起运之前。只把结果存成 fixture。
+- [x] 检查（先写）：
   - `parseDate`：`1990年6月15日`、`90.6.15`、`农历1990年五月廿三`、不存在的闰月、2 月 30 日。
   - `parseTime`：`下午三点半`、`15:30`、`申时`、`晚子时`、`25点`、`不确定`。
   - `horoscopeAt` 在参考表的每个日期上和 iztro 一致。
@@ -161,11 +164,11 @@
 
 文件：`30-report.js`、`css/85-prose.css`、`verify/ui-v6-report.mjs`。
 
-- [ ] 以原型的 `report.js` 为底：`mdToHtml`、`splitSections`、`sectionHtml`、`emblemSvg`、`boardHtml`、`buildReportHtml`。去掉 `sampleReport`。并入 v5 的 `mdToChatHtml` 和 `escHtml`（`src/ui-pro.js` 第 4196–4311 行）。对外是 `window.ZWReport`。
-- [ ] 正文版式拆到 `css/85-prose.css`（字号、间距收到 spec §4.6 的档位）；导出文件独有的样式留在 JS 里。导出文件里那段内联脚本（打印按钮、目录高亮）保留。
-- [ ] 四化配色用 v5 的（权蓝、科金）。
-- [ ] `progress(md)` 返回 `{ done, total: 14, current }`。
-- [ ] 检查（先写）：
+- [x] 以原型的 `report.js` 为底：`mdToHtml`、`splitSections`、`sectionHtml`、`emblemSvg`、`boardHtml`、`buildReportHtml`。去掉 `sampleReport`。并入 v5 的 `mdToChatHtml` 和 `escHtml`（`src/ui-pro.js` 第 4196–4311 行）。对外是 `window.ZWReport`。
+- [x] 正文版式拆到 `css/85-prose.css`（字号、间距收到 spec §4.6 的档位）；导出文件独有的样式留在 JS 里。导出文件里那段内联脚本（打印按钮、目录高亮）保留。
+- [x] 四化配色用 v5 的（权蓝、科金）。
+- [x] `progress(md)` 返回 `{ done, total: 14, current }`。
+- [x] 检查（先写）：
   - `verify/verify.mjs` 第 598–622 行原样通过。
   - `mdToHtml('<img onerror=1>')` 被转义，只放行 `<br>`；称呼里的 `<script>` 在导出文件的标题里被转义。
   - `splitSections`：标题写到一半也算一个部分；往后追加文字，前面各部分的 `html` 严格相等。
