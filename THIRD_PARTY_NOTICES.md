@@ -73,4 +73,42 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ---
 
+## 5. three.js r128 — MIT（首页 3D 场景，代码随包分发）
+
+- 上游项目：<https://github.com/mrdoob/three.js>
+- 版本：`r128`（0.128.0）的 UMD 压缩版 `build/three.min.js`，603,445 字节
+- 取得方式：<https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js>，
+  SHA-384（base64）`CI3ELBVUz9XQO+97x6nwMDPosPR5XvsxW2ua7N1Xeygeh1IxtgqtCkGfQY9WWdHu`，与 cdnjs 公布的 SRI 一致
+- 在本仓库的位置：`vendor/three-r128.min.js`（逐字节原样，不修改）；`build.mjs` 把它拼进 `client.js`，
+  包在一个懒加载函数里，只在首页 3D 星图第一次显示时执行
+- 用途：场景管理、PBR 金属材质和环境贴图预滤波。星球、尘埃盘、星云和后期处理的着色器是本项目自己写的
+- 为什么这样引入：见 `docs/adr/0004-vendored-three-for-home-scene.md`。`package.json` 没有因此增加任何依赖
+- 许可：MIT。按 MIT 条款，以下版权声明与许可全文必须随任何副本分发。
+
+```text
+The MIT License
+
+Copyright © 2010-2021 three.js authors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+```
+
+---
+
 *本文件随 npm 分发包一起发布（发布脚本会把本文件加入包内文件清单）。*
