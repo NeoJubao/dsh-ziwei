@@ -180,14 +180,14 @@
 
 依赖 T3a。文件：`22-stream.js`、`26-store.js`、`verify/ui-v6-store.mjs`。这是逻辑上风险最高的一步。
 
-- [ ] `22-stream.js`：SSE 解析和结束语义照搬 v5 的 `openStream`（`src/ui-pro.js` 第 3364–3463 行），`fetch` 由调用方注入。
-- [ ] `26-store.js`：`createStore({ storage, fetch, now, engine })`，每个 factory 只建一个。内容：
+- [x] `22-stream.js`：SSE 解析和结束语义照搬 v5 的 `openStream`（`src/ui-pro.js` 第 3364–3463 行），`fetch` 由调用方注入。
+- [x] `26-store.js`：`createStore({ storage, fetch, now, engine, core, setTimeout, clearTimeout, openSession })`；`getStore()` 给出每个 factory 唯一的默认实例。内容：
   - `session`（spec §4.4）及其动作：`openChart`、`goHome`、`setTab`、`selectPalace`、`stepScope`、`backToNow`、`setPane`、`setPanel`、引导问答的 reducer。
   - `readings`：按命盘 key 的对话和报告。
   - `jobs`：`ask`（含空问题的速览）、`continueChat`、`retryChat`、`startReport` / `continueReport` / `regenerateReport`、`stop`。任务把增量写进 `readings`，结束时落盘；`pagehide` 时把写了一半的报告按可继续落盘。
-  - 订阅：`subscribe(fn)`；`select(selectorName)` 给视图用的派生数据。
-- [ ] 请求体由 `buildInterpretBody(state)` 生成：`chartText === ZWCore.fullChartText(chart, pos)`（流月 / 流日时在末尾追加定位文字），`meta` 里的 `decadalFocus` / `yearlyFocus` / `currentAge` / `currentYear` 和 v5 同名同义。
-- [ ] 检查（先写）：
+  - 订阅：`subscribe(fn)`；派生数据用读函数（`currentChart()`、`horoscope()`、`reading()`、`job()` 等），没有做 `select(selectorName)`。完整接口见 `src/ui/26-store.js` 的头注释。
+- [x] 请求体由 `buildInterpretBody(state)` 生成：`chartText === ZWCore.fullChartText(chart, pos)`（流月 / 流日时在末尾追加定位文字），`meta` 里的 `decadalFocus` / `yearlyFocus` / `currentAge` / `currentYear` 和 v5 同名同义。层级定位只在从时间卡发起的提问里带（spec §3.4），这一点和 v5 不同。
+- [x] 检查（先写）：
   - 假流 delta、delta、done → 干净结束；没有 done 就关闭 → `stream-closed` 且可继续；HTTP 503 带 `{reason}` → 显示这个原因；用户停止 → `stopped`。
   - 对话：续写接在同一条回答后面；重试去掉失败的那一轮；忙的时候第二次提问被忽略；空问题的速览不产生用户气泡。
   - 报告：续写的结果等于原文加新文；重新写却一个字没写出来 → 恢复原报告。
