@@ -93,8 +93,9 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   text-wrap: balance;
   text-shadow: 0 0 12px var(--dsw-alias-bg-base), 0 0 2px var(--dsw-alias-bg-base);
 }
-.zp-status strong { color: var(--dsw-alias-label-primary); font-weight: 600 }
-.zp-status .zp-st { color: var(--zp-c, var(--dsw-alias-label-primary)); font-weight: 600 }
+/* 宫名、星名不从中间断行 */
+.zp-status strong { color: var(--dsw-alias-label-primary); font-weight: 600; white-space: nowrap }
+.zp-status .zp-st { color: var(--zp-c, var(--dsw-alias-label-primary)); font-weight: 600; white-space: nowrap }
 .zp-status > span { display: block; animation: zp-rise 240ms ease both }
 .zp-receipts { display: flex; flex-wrap: wrap; gap: 6px }
 .zp-receipts:empty { display: none }
@@ -309,24 +310,49 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
 .zp-home[data-onboarding] .zp-gesture { opacity: 0 }
 .zp-home[data-onboarding] .zp-planets * { pointer-events: none }
 
-/* ---------------- 没有 3D：静态星图 + 一排圆点 ---------------- */
-.zp-home[data-nogl] .zp-sky {
+/* ---------------- 没有 3D：静态星图 + 一排圆点 ----------------
+ * 首页改成上下两段：对话栏在下面按自己的高度排，星图那段拿剩下的高度。
+ * 高度不够时缩小徽记；标签放不下就横向滚动（不换行，不会把对话栏顶出去）。 */
+.zp-home[data-nogl] {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 16px;
-  padding: 48px 20px 0;
 }
-.zp-home .zp-emblem { flex: none; width: min(300px, 56%); aspect-ratio: 1; margin-top: 24px }
+.zp-root .zp-home[data-nogl] .zp-sky {
+  position: relative;
+  top: 0;
+  /* 盖在对话栏上面：标签的菜单会伸到对话栏那一段 */
+  z-index: 4;
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  width: 100%;
+  min-height: 0;
+  padding-top: 48px;
+}
+.zp-home .zp-emblem { flex: 0 1 300px; max-width: 100%; min-height: 0; aspect-ratio: 1; margin-top: 24px }
+/* 文字背后那团虚化是给 3D 准备的，这里没有东西要虚化 */
+.zp-home[data-nogl] .zp-col { flex: none }
+.zp-home[data-nogl] .zp-col::before { display: none }
 .zp-planets.zp-flat {
   position: static;
+  flex: none;
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  justify-content: safe center;
   gap: 16px;
-  overflow: visible;
+  max-width: 100%;
+  /* 下面留出菜单的位置（菜单在标签下方，不留就会被横向滚动的容器裁掉）；两边留出"⋯"按钮伸出去的那一截 */
+  margin-bottom: -48px;
+  padding: 0 20px 48px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
 }
-.zp-planets.zp-flat .zp-ptag { position: relative; display: flex; flex-direction: column; align-items: center }
+.zp-planets.zp-flat .zp-ptag { position: relative; flex: none; display: flex; flex-direction: column; align-items: center }
 .zp-planets.zp-flat .zp-ptag::before {
   content: "";
   width: 40px;
@@ -335,5 +361,7 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   background: radial-gradient(circle at 32% 30%, var(--zp-orb-hi) 0, var(--zp-c, var(--zp-gold)) 40%, color-mix(in srgb, var(--zp-c, var(--zp-gold)) 40%, var(--zp-orb-lo)) 100%);
 }
 .zp-planets.zp-flat .zp-ptag-in { transform: none }
+/* 平铺时菜单靠标签左边对齐（居中会被横向滚动的容器裁掉一截） */
+.zp-planets.zp-flat .zp-ptag-menu { left: 0; transform: none }
 .zp-planets.zp-flat .zp-ptag-main i { display: block }
 .zp-home[data-onboarding][data-nogl] .zp-planets { display: none }
