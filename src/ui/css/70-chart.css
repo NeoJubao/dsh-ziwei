@@ -82,7 +82,8 @@
   min-height: 24px;
   padding: 0 2px;
   border-radius: 4px;
-  background: var(--dsw-alias-bg-layer-2);
+  /* 淡底色用悬停底色（一层叠色）：宿主浅色主题里 bg-layer-1/2/3 是同一个白，拿它们当底色看不见 */
+  background: var(--dsw-alias-interactive-bg-hover);
   white-space: nowrap;
 }
 .zp-mut span:empty { visibility: hidden }
@@ -121,7 +122,7 @@
 .zp-root .zp-pat:hover { background: var(--dsw-alias-interactive-bg-hover) }
 .zp-root .zp-pat[aria-pressed="true"] {
   border-color: var(--dsw-alias-label-tertiary);
-  background: var(--dsw-alias-bg-layer-2);
+  background: var(--dsw-alias-interactive-bg-hover);
   color: var(--dsw-alias-label-primary);
 }
 .zp-lv {
@@ -221,7 +222,7 @@
   text-align: left;
   transition: border-color 120ms ease, background-color 120ms ease, box-shadow 120ms ease;
 }
-.zp-cell:hover { background: var(--dsw-alias-bg-layer-2) }
+.zp-cell:hover { background-image: linear-gradient(var(--dsw-alias-interactive-bg-hover), var(--dsw-alias-interactive-bg-hover)) }
 .zp-cell[aria-pressed="true"] {
   border-color: var(--zp-zi);
   background: color-mix(in srgb, var(--zp-zi) 10%, var(--dsw-alias-bg-layer-1));
@@ -298,7 +299,7 @@
   line-height: 1.32;
   white-space: nowrap;
 }
-.zp-board .zp-star sup {
+.zp-board .zp-star sup, .zp-detail .zp-star sup {
   margin-left: 2px;
   color: var(--dsw-alias-label-caption);
   font-family: var(--dsh-font-family-text-default, sans-serif);
