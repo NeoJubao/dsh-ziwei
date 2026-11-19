@@ -195,7 +195,7 @@
    字体：宋体栈只给分部标题、小标题、心法和编号；引用用楷体，其余跟宿主正文字体。 */
 .zp-root .zr-prose {
   --zr-paper: var(--dsw-alias-bg-layer-1);
-  --zr-fill: var(--dsw-alias-bg-layer-2);
+  --zr-fill: var(--dsw-alias-interactive-bg-hover);
   --zr-ink: var(--dsw-alias-label-primary);
   --zr-ink-2: var(--dsw-alias-label-secondary);
   --zr-ink-3: var(--dsw-alias-label-tertiary);

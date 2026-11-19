@@ -216,7 +216,8 @@
   margin: 4px 0 12px;
   padding: 8px 12px;
   border-radius: 8px;
-  background: var(--dsw-alias-bg-layer-2);
+  /* 浅色主题里 bg-layer-2 和底色是同一个白，用悬停底色才看得出这是一块 */
+  background: var(--dsw-alias-interactive-bg-hover);
 }
 .zp-more > summary {
   color: var(--dsw-alias-label-secondary);
@@ -244,7 +245,8 @@
   padding: 0;
   border: 0;
   border-radius: 999px;
-  background: var(--dsw-alias-bg-layer-3);
+  /* 关着的轨道：按文字色调出一层灰（bg-layer-3 在浅色主题里是白的，白钮落在白轨上看不见） */
+  background: color-mix(in srgb, var(--dsw-alias-label-primary) 20%, transparent);
   transition: background-color 120ms ease;
 }
 .zp-switch::after {
