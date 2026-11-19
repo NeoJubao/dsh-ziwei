@@ -1,0 +1,15 @@
+{
+  "headAllCharts": ["全部命盘", "All charts"],
+  "headSettings": ["设置", "Settings"],
+  "headCrumb": ["位置", "Location"],
+  "headHome": ["星图", "Star map"],
+  "headUnnamed": ["未命名", "Untitled"],
+  "headTabs": ["视图", "View"],
+  "headTabReport": ["报告", "Report"],
+  "headAsk": ["问紫微师", "Ask the reader"],
+  "headMore": ["更多", "More"],
+  "headCopyChart": ["复制命盘文字", "Copy chart text"],
+  "headShowAdj": ["显示杂曜", "Show minor stars"],
+  "headEditBirth": ["改生辰", "Edit birth details"],
+  "headCopiedChart": ["命盘已复制", "Chart copied"]
+}

@@ -14,6 +14,9 @@
  *   fakeFetch(script)       假 fetch：按脚本返回 JSON / 文本 / SSE 流，记录每次请求
  *   streamFetch(opts)       可控的流式假 fetch：每次调用开一条管道，测试一块一块往里推 SSE
  *   settle(n)               等 n 轮宏任务，让 vm 里的 promise 链跑完
+ *   manualTimers()          手动定时器（setTimeout / clearTimeout / runAll / delays / pending）
+ *   makeRuntime()           极简 React 运行时：effect 会跑、setState 会重渲染、有假 DOM 和事件（说明见定义处）
+ *   bootRuntime(client, o)  装载 v6 bundle + 运行时 + 测试用的默认 store；视图的检查文件从这里起步
  */
 import vm from 'node:vm';
 
@@ -386,4 +389,438 @@ export function streamFetch({ reply = null } = {}) {
 /** 等 n 轮宏任务（setImmediate），让 vm 里排队的 promise 回调全部跑完。 */
 export async function settle(n = 4) {
   for (let i = 0; i < n; i++) await new Promise((resolve) => setImmediate(resolve));
+}
+
+/* ------------------------------------------------------------------ *
+ * 手动定时器：记下 setTimeout，测试自己决定什么时候跑
+ * ------------------------------------------------------------------ */
+export function manualTimers() {
+  let seq = 0;
+  const pending = new Map();
+  return {
+    pending,
+    setTimeout: (fn, ms) => { const id = ++seq; pending.set(id, { fn, ms }); return id; },
+    clearTimeout: (id) => { pending.delete(id); },
+    runAll() { const list = [...pending.values()]; pending.clear(); list.forEach((x) => x.fn()); return list.length; },
+    delays() { return [...pending.values()].map((x) => x.ms); }
+  };
+}
+
+export class FakeResizeObserver {
+  constructor(cb) { this.cb = cb; }
+  observe() {}
+  disconnect() {}
+}
+
+/* ------------------------------------------------------------------ *
+ * 极简 React 运行时（makeRuntime）：effect 会跑、setState 会重渲染
+ *
+ * 上面的假 React 不跑 effect、setState 是空操作，测不出订阅、焦点和"谁重渲染了"。这个运行时只有 v6 允许的
+ * 那几个 API：
+ *   - 函数组件和 class 组件，hooks：useState / useRef / useMemo / useEffect / useLayoutEffect
+ *   - setState → 标脏，flush() 时从上往下重渲染；父组件重渲染时子组件跟着渲染（没有 memo），
+ *     同一个元素对象原样传下来时跳过（和 React 一样）
+ *   - 先跑 layout effect，再跑 passive effect；mount(el, { passive: false }) 把 passive effect 扣住，
+ *     releasePassive() 再放行，用来模拟"渲染之后、订阅之前"的空档
+ *   - getDerivedStateFromError 的错误边界
+ *   - 假 DOM：每个宿主元素一个节点（parentNode / contains / focus / querySelectorAll / classList / hidden →
+ *     offsetParent / getBoundingClientRect 的宽度取 rt.width），document 的捕获监听；
+ *     事件按 React 的冒泡顺序调用 onX
+ * rt：{ React, mount(el, opts), unmount(), flush(), tree()（只含宿主元素的树，节点在不可枚举的 .node 上）,
+ *       fire(target, type, init) / click(target) / key(target, key, init), count(组件函数名) → 渲染次数,
+ *       renders, doc, container, width, errors }
+ * ------------------------------------------------------------------ */
+const TEXT = '#text';
+const FRAG = '#frag';
+const HANDLERS = { click: 'onClick', keydown: 'onKeyDown', pointerdown: 'onPointerDown', focusout: 'onBlur', mousedown: 'onMouseDown' };
+
+export function makeRuntime() {
+  const rt = { width: 0, renders: new Map(), deferPassive: false, errors: [] };
+  let current = null;
+  let hookIdx = 0;
+  const dirty = new Set();
+  const layoutQ = new Map();
+  const passiveQ = new Map();
+  let passiveCleanups = [];
+  const created = [];
+
+  /* ---------- 假 DOM ---------- */
+  const docListeners = [];
+  const doc = {
+    activeElement: null,
+    addEventListener(type, fn, opt) { docListeners.push({ type, fn, capture: opt === true || !!(opt && opt.capture) }); },
+    removeEventListener(type, fn, opt) {
+      const capture = opt === true || !!(opt && opt.capture);
+      const i = docListeners.findIndex((l) => l.type === type && l.fn === fn && l.capture === capture);
+      if (i >= 0) docListeners.splice(i, 1);
+    },
+    listenerCount: (type) => docListeners.filter((l) => l.type === type).length
+  };
+  const propsOf = (n) => (n && n.__inst && n.__inst.el && n.__inst.el.props) || {};
+  const attrOf = (n, name) => {
+    const p = propsOf(n);
+    if (name === 'tabindex') return p.tabIndex === undefined || p.tabIndex === null ? null : String(p.tabIndex);
+    if (name === 'disabled' || name === 'hidden') return p[name] ? '' : null;
+    if (name === 'class') return p.className === undefined ? null : p.className;
+    const v = p[name];
+    return v === undefined || v === null || v === false ? null : String(v);
+  };
+  const matchSimple = (n, sel) => {
+    let rest = sel.trim();
+    let neg = null;
+    const notM = rest.match(/:not\((.+)\)$/);
+    if (notM) { neg = notM[1]; rest = rest.slice(0, notM.index); }
+    const tagM = rest.match(/^[a-z][a-z0-9]*/i);
+    if (tagM) { if (n.tagName !== tagM[0].toUpperCase()) return false; rest = rest.slice(tagM[0].length); }
+    for (const m of rest.matchAll(/\[([\w-]+)(?:="([^"]*)")?\]|\.([\w-]+)/g)) {
+      if (m[3]) { if (!classesOf({ props: propsOf(n) }).includes(m[3])) return false; continue; }
+      const v = attrOf(n, m[1]);
+      if (m[2] === undefined ? v === null : v !== m[2]) return false;
+    }
+    if (neg && matchSimple(n, neg)) return false;
+    return true;
+  };
+  const matches = (n, sel) => sel.split(',').some((s) => matchSimple(n, s));
+  const walk = (n, fn) => { for (const c of n.childNodes) { fn(c); walk(c, fn); } };
+  const isFocusable = (n) => {
+    if (!n || !n.__inst) return false;
+    const p = propsOf(n);
+    if (['BUTTON', 'INPUT', 'SELECT', 'TEXTAREA'].includes(n.tagName)) return !p.disabled;
+    return p.href !== undefined || (p.tabIndex !== undefined && p.tabIndex !== null);
+  };
+  const makeNode = (tag, inst) => {
+    const classes = new Set();
+    return {
+      tagName: String(tag).toUpperCase(), __inst: inst, parentNode: null, childNodes: [], ownerDocument: doc,
+      get isConnected() { let n = this; while (n) { if (n === doc.body) return true; n = n.parentNode; } return false; },
+      get disabled() { return !!propsOf(this).disabled; },
+      get offsetParent() {
+        if (!this.isConnected) return null;
+        for (let n = this; n && n !== doc.body; n = n.parentNode) if (propsOf(n).hidden) return null;
+        return doc.body;
+      },
+      classList: { add: (c) => { classes.add(c); }, remove: (c) => { classes.delete(c); }, contains: (c) => classes.has(c) },
+      focus() { if (isFocusable(this) && this.offsetParent !== null) doc.activeElement = this; },
+      blur() { if (doc.activeElement === this) doc.activeElement = doc.body; },
+      contains(o) { for (let n = o; n; n = n.parentNode) if (n === this) return true; return false; },
+      querySelectorAll(sel) { const out = []; walk(this, (n) => { if (matches(n, sel)) out.push(n); }); return out; },
+      querySelector(sel) { return this.querySelectorAll(sel)[0] || null; },
+      getBoundingClientRect() { return { width: rt.width, height: 640, left: 0, top: 0, right: rt.width, bottom: 640, x: 0, y: 0 }; },
+      setAttribute() {},
+      removeAttribute() {}
+    };
+  };
+  doc.body = makeNode('body', null);
+  doc.activeElement = doc.body;
+  const container = makeNode('div', null);
+  container.parentNode = doc.body;
+  doc.body.childNodes = [container];
+
+  /* ---------- 实例树 ---------- */
+  const root = { kind: 'root', depth: 0, children: [] };
+  const isClass = (T) => !!(T && T.prototype && typeof T.prototype.render === 'function');
+  const propsWithChildren = (el) => {
+    const p = Object.assign({}, el.props || {});
+    if (el.children && el.children.length) p.children = el.children.length === 1 ? el.children[0] : el.children;
+    return p;
+  };
+  const markDirty = (inst) => { if (!inst || inst.dead) return; inst.dirty = true; dirty.add(inst); };
+
+  class Component {
+    constructor(props) { this.props = props || {}; this.state = {}; }
+    setState(patch) {
+      const next = typeof patch === 'function' ? patch(this.state, this.props) : patch;
+      this.state = Object.assign({}, this.state, next);
+      markDirty(this.__inst);
+    }
+    render() { return null; }
+  }
+
+  const hookSlot = (init) => {
+    if (!current) throw new Error('hook 在组件之外调用');
+    const i = hookIdx++;
+    if (!(i in current.hooks)) current.hooks[i] = init();
+    return current.hooks[i];
+  };
+  const depsChanged = (a, b) => !a || !b || a.length !== b.length || a.some((d, j) => !Object.is(d, b[j]));
+  const effect = (fn, deps, layout) => {
+    const inst = current;
+    const slot = hookSlot(() => ({ layout, deps: null, cleanup: null, mounted: false }));
+    if (!slot.mounted || deps === undefined || depsChanged(deps, slot.deps)) (layout ? layoutQ : passiveQ).set(slot, { inst, slot, fn, deps });
+  };
+  rt.React = {
+    Component,
+    createElement: (type, props, ...children) => ({ type, props: props || null, children }),
+    useState(init) {
+      const inst = current;
+      const slot = hookSlot(() => ({ value: typeof init === 'function' ? init() : init }));
+      if (!slot.set) {
+        slot.set = (v) => {
+          if (inst.dead) return;
+          const next = typeof v === 'function' ? v(slot.value) : v;
+          if (Object.is(next, slot.value)) return;
+          slot.value = next;
+          markDirty(inst);
+        };
+      }
+      return [slot.value, slot.set];
+    },
+    useRef: (init) => hookSlot(() => ({ current: init })),
+    useMemo(fn, deps) {
+      const slot = hookSlot(() => ({ deps: null, value: undefined, ready: false }));
+      if (!slot.ready || deps === undefined || depsChanged(deps, slot.deps)) { slot.value = fn(); slot.deps = deps; slot.ready = true; }
+      return slot.value;
+    },
+    useEffect: (fn, deps) => effect(fn, deps, false),
+    useLayoutEffect: (fn, deps) => effect(fn, deps, true)
+  };
+
+  const setRef = (ref, value) => {
+    if (!ref) return;
+    if (typeof ref === 'function') ref(value); else ref.current = value;
+  };
+  const nearestBoundary = (inst) => {
+    for (let p = inst; p && p.kind !== 'root'; p = p.parent) {
+      if (p.kind === 'component' && isClass(p.type) && typeof p.type.getDerivedStateFromError === 'function' && p.obj) return p;
+    }
+    return null;
+  };
+
+  function renderInst(inst) {
+    inst.dirty = false;
+    dirty.delete(inst);
+    const T = inst.type;
+    const name = T.name || '(anonymous)';
+    rt.renders.set(name, (rt.renders.get(name) || 0) + 1);
+    const props = propsWithChildren(inst.el);
+    if (isClass(T)) {
+      if (!inst.obj) { inst.obj = new T(props); inst.obj.__inst = inst; }
+      inst.obj.props = props;
+      if (typeof T.getDerivedStateFromError === 'function') {
+        const mark = created.length;
+        try {
+          reconcile(inst, [inst.obj.render()]);
+        } catch (err) {
+          recover(inst, err, mark);
+        }
+        return;
+      }
+      reconcile(inst, [inst.obj.render()]);
+      return;
+    }
+    const prev = current, prevIdx = hookIdx;
+    current = inst;
+    hookIdx = 0;
+    let out;
+    try { out = T(props); } finally { current = prev; hookIdx = prevIdx; }
+    reconcile(inst, [out]);
+  }
+  function recover(boundary, err, mark) {
+    rt.errors.push(err);
+    created.slice(mark).forEach((c) => { c.dead = true; });
+    for (const c of boundary.children) unmount(c);
+    boundary.children = [];
+    boundary.obj.state = Object.assign({}, boundary.obj.state, boundary.type.getDerivedStateFromError(err));
+    reconcile(boundary, [boundary.obj.render()]);
+  }
+
+  function reconcile(parent, kids) {
+    const old = new Map();
+    for (const c of parent.children || []) old.set(c.slot, c);
+    const next = [];
+    kids.forEach((k, i) => {
+      if (k === null || k === undefined || typeof k === 'boolean') return;
+      let kind, type, slot;
+      if (Array.isArray(k)) { kind = 'frag'; type = FRAG; slot = 'i' + i; }
+      else if (typeof k === 'string' || typeof k === 'number') { kind = 'text'; type = TEXT; slot = 'i' + i; }
+      else {
+        type = k.type;
+        kind = typeof type === 'function' ? 'component' : 'host';
+        const key = k.props && k.props.key;
+        slot = key !== undefined && key !== null ? 'k' + key : 'i' + i;
+      }
+      let inst = old.get(slot);
+      if (inst && inst.type === type) {
+        old.delete(slot);
+        const same = inst.el === k;
+        inst.el = k;
+        next.push(inst);
+        if (kind === 'text') inst.text = String(k);
+        else if (kind === 'frag') reconcile(inst, k);
+        else if (kind === 'host') { if (!same) reconcile(inst, k.children || []); }
+        else if (!same || inst.dirty) renderInst(inst);
+      } else {
+        inst = { kind, type, el: k, slot, parent, depth: (parent.depth || 0) + 1, children: [], hooks: [], dead: false, dirty: false };
+        created.push(inst);
+        next.push(inst);
+        if (kind === 'text') inst.text = String(k);
+        else if (kind === 'frag') reconcile(inst, k);
+        else if (kind === 'host') {
+          inst.node = makeNode(type, inst);
+          setRef(k.props && k.props.ref, inst.node);
+          reconcile(inst, k.children || []);
+        } else renderInst(inst);
+      }
+    });
+    for (const c of old.values()) unmount(c);
+    parent.children = next;
+  }
+
+  function unmount(inst) {
+    if (inst.dead && inst.unmounted) return;
+    inst.dead = true;
+    inst.unmounted = true;
+    inst.dirty = false;
+    dirty.delete(inst);
+    if (inst.kind === 'component') {
+      /* 和 React 一样：被删掉的组件，layout effect 的清理在宿主节点摘下之前跑，passive 的在之后 */
+      for (const s of inst.hooks) {
+        if (s && s.layout === true && s.cleanup) { const c = s.cleanup; s.cleanup = null; c(); }
+        if (s && s.layout === false && s.cleanup) { passiveCleanups.push(s.cleanup); s.cleanup = null; }
+      }
+    }
+    for (const c of inst.children || []) unmount(c);
+    if (inst.kind === 'host') {
+      setRef(inst.el.props && inst.el.props.ref, null);
+      inst.node.parentNode = null;
+    }
+  }
+
+  const hostKids = (inst) => {
+    const out = [];
+    for (const c of inst.children || []) {
+      if (c.kind === 'host') out.push(c.node);
+      else if (c.kind !== 'text') out.push(...hostKids(c));
+    }
+    return out;
+  };
+  const relinkInst = (inst, parentNode) => {
+    if (inst.kind === 'host') {
+      inst.node.parentNode = parentNode;
+      inst.node.childNodes = hostKids(inst);
+      for (const c of inst.children) relinkInst(c, inst.node);
+    } else {
+      for (const c of inst.children || []) relinkInst(c, parentNode);
+    }
+  };
+  function relink() {
+    container.childNodes = hostKids(root);
+    for (const c of root.children) relinkInst(c, container);
+    if (!doc.activeElement || !doc.activeElement.isConnected) doc.activeElement = doc.body;
+  }
+
+  function runEffect(e) {
+    if (e.inst.dead) return;
+    if (e.slot.cleanup) { const c = e.slot.cleanup; e.slot.cleanup = null; c(); }
+    const r = e.fn();
+    e.slot.cleanup = typeof r === 'function' ? r : null;
+    e.slot.deps = e.deps;
+    e.slot.mounted = true;
+  }
+  function runLayout() { const q = [...layoutQ.values()]; layoutQ.clear(); q.forEach(runEffect); }
+  function runPassive() {
+    const cl = passiveCleanups; passiveCleanups = [];
+    cl.forEach((c) => c());
+    const q = [...passiveQ.values()]; passiveQ.clear();
+    q.forEach(runEffect);
+  }
+  function renderDirty() {
+    const list = [...dirty].sort((a, b) => a.depth - b.depth);
+    for (const inst of list) {
+      if (!inst.dirty || inst.dead) continue;
+      const mark = created.length;
+      try {
+        if (inst.kind === 'component') renderInst(inst);
+      } catch (err) {
+        const b = nearestBoundary(inst.parent);
+        if (!b) throw err;
+        recover(b, err, mark);
+      }
+    }
+  }
+  function flush() {
+    for (let guard = 0; guard < 500; guard++) {
+      if (dirty.size) { renderDirty(); relink(); continue; }
+      if (layoutQ.size) { runLayout(); relink(); continue; }
+      if (!rt.deferPassive && (passiveQ.size || passiveCleanups.length)) { runPassive(); relink(); continue; }
+      return;
+    }
+    throw new Error('运行时没有稳定下来（可能是无限重渲染）');
+  }
+
+  rt.mount = (el, { passive = true } = {}) => {
+    rt.deferPassive = !passive;
+    reconcile(root, [el]);
+    relink();
+    flush();
+  };
+  rt.releasePassive = () => { rt.deferPassive = false; flush(); };
+  rt.unmount = () => { for (const c of root.children) unmount(c); root.children = []; relink(); rt.deferPassive = false; flush(); };
+  rt.flush = flush;
+  rt.count = (name) => rt.renders.get(name) || 0;
+  rt.doc = doc;
+  rt.container = container;
+  const out = (inst) => {
+    if (inst.kind === 'text') return inst.text;
+    if (inst.kind === 'host') {
+      const o = { type: inst.type, props: inst.el.props || {}, children: inst.children.map(out) };
+      Object.defineProperty(o, 'node', { value: inst.node, enumerable: false });
+      return o;
+    }
+    const kids = inst.children.map(out);
+    return kids.length === 1 ? kids[0] : kids;
+  };
+  rt.tree = () => root.children.map(out);
+  /* 事件：先 document 的捕获监听，再按 React 的冒泡顺序调用 onX，最后 document 的冒泡监听；之后 flush */
+  rt.fire = (target, type, init = {}) => {
+    const node = target && target.node ? target.node : target;
+    let stopped = false, prevented = false;
+    const native = Object.assign({ type, target: node, isComposing: false }, init, {
+      stopPropagation() { stopped = true; },
+      preventDefault() { prevented = true; }
+    });
+    for (const l of docListeners.filter((x) => x.type === type && x.capture)) { l.fn(native); if (stopped) break; }
+    for (let n = node; n && n !== container && !stopped; n = n.parentNode) {
+      const fn = propsOf(n)[HANDLERS[type]];
+      if (typeof fn !== 'function') continue;
+      fn(Object.assign({}, init, {
+        type, target: node, currentTarget: n, nativeEvent: native,
+        get defaultPrevented() { return prevented; },
+        preventDefault() { prevented = true; },
+        stopPropagation() { stopped = true; },
+        isPropagationStopped: () => stopped
+      }));
+    }
+    if (!stopped) for (const l of docListeners.filter((x) => x.type === type && !x.capture)) l.fn(native);
+    flush();
+    return { stopped, prevented };
+  };
+  rt.click = (el, init) => rt.fire(el, 'click', Object.assign({ detail: 1 }, init));
+  rt.key = (el, key, init) => rt.fire(el, 'keydown', Object.assign({ key }, init));
+  return rt;
+}
+
+/**
+ * 装载 v6 bundle + 运行时 + 默认 store（内存 storage、固定时钟、手动定时器、可控的流）。
+ * 返回 { rt, loaded, host, layout, store, P（ZWUi.parts）, timers, pipe（streamFetch）, Main（main 槽的组件）, h, win, error }。
+ * 默认 store 在这里用测试的 deps 建好（getStore 只认第一次的 deps），所以要在任何组件渲染之前调用。
+ */
+export function bootRuntime(client, { width = 1300, services = {}, now = Date.now(), storage = null } = {}) {
+  const rt = makeRuntime();
+  rt.width = width;
+  const loaded = loadBundle(client, { globals: { AbortController, ResizeObserver: FakeResizeObserver } });
+  if (loaded.error || !loaded.entry) return { error: loaded.error || new Error('没有入口') };
+  Object.assign(loaded.React, rt.React);
+  const timers = manualTimers();
+  loaded.win.setTimeout = timers.setTimeout;
+  loaded.win.clearTimeout = timers.clearTimeout;
+  const plugin = loaded.materialize();
+  const layout = { calls: [], selectPanel(id) { this.calls.push(id); } };
+  const host = makeCtx(Object.assign({ layout }, services));
+  plugin.apply(host.ctx);
+  const S = loaded.win.ZWStore;
+  const pipe = streamFetch();
+  const store = S.getStore({ storage: storage || memoryStorage(), now: () => now, fetch: pipe, setTimeout: timers.setTimeout, clearTimeout: timers.clearTimeout });
+  const P = (loaded.win.ZWUi && loaded.win.ZWUi.parts) || {};
+  return { rt, loaded, host, layout, store, P, timers, pipe, Main: host.main(), h: loaded.React.createElement, win: loaded.win, error: null };
 }
