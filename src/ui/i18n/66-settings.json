@@ -1,0 +1,22 @@
+{
+  "setAutoOpen": ["启动时自动打开工作台", "Open workbench on launch"],
+  "setAutoOpenHint": ["DSH 启动后直接切到紫微面板", "Switch to this panel when DSH starts"],
+  "setSky": ["首页 3D 星图", "3D star map on the home page"],
+  "setSkyHint": ["关掉后首页改用静态星图，其他功能不变", "When off, the home page shows a static star map; everything else works the same"],
+  "setLocal": ["本机数据", "Local data"],
+  "setLocalHint": ["命盘库、对话与报告只存在这个浏览器里。清除只删对话与报告，命盘库保留。", "Saved charts, conversations and reports live only in this browser. Clearing removes conversations and reports; saved charts stay."],
+  "setClear": ["清除对话与报告", "Clear conversations and reports"],
+  "setClearConfirm": ["确定清除？清除后不可恢复", "Clear now? This cannot be undone"],
+  "setClearBusy": ["正在生成，写完后再清除", "Generating; clear after it finishes"],
+  "setCleared": ["已清除对话与报告", "Conversations and reports cleared"],
+  "setVersion": ["版本 {version}", "Version {version}"],
+  "setUpdateHint": ["只在你点击时联网检查一次；更新要在终端里执行命令", "Checks online only when you click; updating is done with a command in a terminal"],
+  "setCheck": ["检查更新", "Check for updates"],
+  "setChecking": ["检查中…", "Checking…"],
+  "setUpToDate": ["已是最新（{version}）", "Up to date ({version})"],
+  "setUpdateAvailable": ["有新版本 {latest}，在终端执行：", "Version {latest} is available. Run in a terminal:"],
+  "setUpdateFailed": ["检查失败：{reason}", "Check failed: {reason}"],
+  "setAbout": ["排盘依据《紫微斗数全书》安星诀，与开源库 iztro 逐项核对过；填了出生城市就按经度和均时差校正真太阳时。仅供研究和参考。", "Chart placement follows the classic star-placement rules and is checked field by field against the open-source iztro library. With a birth city, true solar time is corrected for longitude and the equation of time. For research and reference only."],
+  "setSignature": ["紫微师 · 金聚｜道商意象紫微九诀", "紫微师 · 金聚｜道商意象紫微九诀"],
+  "setContact": ["微信：neo2025new", "WeChat: neo2025new"]
+}

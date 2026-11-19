@@ -263,6 +263,27 @@
 }
 .zp-switch[aria-pressed="true"] { background: var(--zp-zi) }
 .zp-switch[aria-pressed="true"]::after { transform: translateX(12px) }
+/* 检查更新的结果：一行说明（出错加 zp-err）；有新版本时下面是一行给终端用的命令 */
+.zp-update {
+  margin: 4px 0 0;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 12px;
+  line-height: 18px;
+}
+.zp-update.zp-err { color: var(--zp-mu-ji) }
+.zp-update-cmd {
+  display: block;
+  margin-top: 4px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: var(--dsw-alias-interactive-bg-hover);
+  font-size: 12px;
+  line-height: 18px;
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+.zp-setting + .zp-about { margin-top: 12px }
+.zp-about + .zp-about { margin-top: 4px }
 .zp-about {
   margin: 0;
   color: var(--dsw-alias-label-tertiary);

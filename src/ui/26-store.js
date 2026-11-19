@@ -49,6 +49,7 @@
  *   continueChat() / retryChat() / clearThread()（可撤销）/ startReport() / continueReport() / regenerateReport()
  *   stop(key?)        用户停止：保留已写的部分，可接着写
  *   handoff({ mode }?) → Promise<boolean>   在新会话里继续（v5 的 /ziwei/handoff），成功后交给 openSession
+ *   checkVersion() → Promise<{ ok, current, latest, updateAvailable, reason }>   点「检查更新」时请求一次 /ziwei/version
  *   configure({ openSession })
  *   flush()           pagehide 时调用：正在写的报告按"中断、可接着写"落盘，对话存下已有的部分；任务不停
  *   abortAll()        插件卸载时调用：静默中止全部任务，各自按中断落盘
@@ -858,6 +859,23 @@ function createStore(deps) {
       return false;
     });
   }
+  /* 检查更新：只在调用时请求一次 /ziwei/version，不缓存、不重试。总是 resolve：
+     { ok, current, latest, updateAvailable }，请求失败或返回的不是 JSON 时是 { ok: false, reason } */
+  function checkVersion() {
+    let p;
+    try {
+      p = Promise.resolve(fetchFn('/ziwei/version', { method: 'GET', headers: { accept: 'application/json' } }));
+    } catch (e) {
+      p = Promise.reject(e);
+    }
+    return p.then(function (resp) {
+      /* 回来的不是 JSON（路由不在、网关的错误页）：报 HTTP 状态，不把解析错误甩给用户 */
+      const http = { ok: false, reason: 'HTTP ' + resp.status };
+      return resp.json().then(function (j) { return j && typeof j === 'object' ? j : http; }, function () { return http; });
+    }, function (e) {
+      return { ok: false, reason: String((e && e.message) || e) };
+    });
+  }
   function configure(patch) {
     const p = patch || {};
     if (typeof p.openSession === 'function') openSessionFn = p.openSession;
@@ -936,6 +954,7 @@ function createStore(deps) {
     regenerateReport: startReport,
     stop: stop,
     handoff: handoff,
+    checkVersion: checkVersion,
     configure: configure,
     flush: flush,
     abortAll: abortAll

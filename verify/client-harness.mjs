@@ -805,10 +805,10 @@ export function makeRuntime() {
 
 /**
  * 装载 v6 bundle + 运行时 + 默认 store（内存 storage、固定时钟、手动定时器、可控的流）。
- * 返回 { rt, loaded, host, layout, store, P（ZWUi.parts）, timers, pipe（streamFetch）, Main（main 槽的组件）, h, win, error }。
+ * 返回 { rt, loaded, host, layout, store, storage, P（ZWUi.parts）, timers, pipe（streamFetch）, Main（main 槽的组件）, h, win, error }。
  * 默认 store 在这里用测试的 deps 建好（getStore 只认第一次的 deps），所以要在任何组件渲染之前调用。
  */
-export function bootRuntime(client, { width = 1300, services = {}, now = Date.now(), storage = null } = {}) {
+export function bootRuntime(client, { width = 1300, services = {}, now = Date.now(), storage = null, reply = null } = {}) {
   const rt = makeRuntime();
   rt.width = width;
   const loaded = loadBundle(client, { globals: { AbortController, ResizeObserver: FakeResizeObserver } });
@@ -822,8 +822,10 @@ export function bootRuntime(client, { width = 1300, services = {}, now = Date.no
   const host = makeCtx(Object.assign({ layout }, services));
   plugin.apply(host.ctx);
   const S = loaded.win.ZWStore;
-  const pipe = streamFetch();
-  const store = S.getStore({ storage: storage || memoryStorage(), now: () => now, fetch: pipe, setTimeout: timers.setTimeout, clearTimeout: timers.clearTimeout });
+  /* reply(url, init, n)：给不走 SSE 的路由（/ziwei/version、/ziwei/handoff）回固定的 JSON，见 streamFetch */
+  const pipe = streamFetch({ reply });
+  const mem = storage || memoryStorage();
+  const store = S.getStore({ storage: mem, now: () => now, fetch: pipe, setTimeout: timers.setTimeout, clearTimeout: timers.clearTimeout });
   const P = (loaded.win.ZWUi && loaded.win.ZWUi.parts) || {};
-  return { rt, loaded, host, layout, store, P, timers, pipe, Main: host.main(), h: loaded.React.createElement, win: loaded.win, error: null };
+  return { rt, loaded, host, layout, store, storage: mem, P, timers, pipe, Main: host.main(), h: loaded.React.createElement, win: loaded.win, error: null };
 }
