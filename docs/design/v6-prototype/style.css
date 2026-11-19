@@ -1,0 +1,428 @@
+/* Layout: one page inside the DSH main area. Home = a draggable 3D armillary (紫微 at the centre, charts as planets) with one conversation column
+   at the bottom centre; chart = left column of three cards (time scope / 格局 / 宫位) + the board, all on one screen; 紫微师 panel 360 at the right.
+   Colours, radii and fonts follow DSH tokens; purple is only for 紫微 content, gold for lines and time scopes. */
+:root {
+  --bg: #ffffff;
+  --l1: #ffffff;
+  --l2: #f5f6f8;
+  --l3: #eceef2;
+  --border: rgba(0, 0, 0, .1);
+  --border-soft: rgba(0, 0, 0, .06);
+  --text: #0f1115;
+  --text-2: #61666b;
+  --text-3: #81858c;
+  --text-4: #adb2b8;
+  --btn: #0f1115;
+  --btn-text: #ffffff;
+  --hover: rgba(38, 49, 72, .06);
+  --zi: #6b55d4;
+  --zi-soft: rgba(107, 85, 212, .1);
+  --gold: #a07a2c;
+  --gold-soft: rgba(160, 122, 44, .1);
+  --lu: #15803d; --quan: #b45309; --ke: #1d4ed8; --ji: #b91c1c;
+  --glass: rgba(255, 255, 255, .66);
+  --halo: rgba(255, 255, 255, .92);
+  --f-sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Segoe UI", sans-serif;
+  --f-serif: "Songti SC", "STSong", "SimSun", "Noto Serif SC", serif;
+  --r-sm: 8px; --r-md: 12px; --r-lg: 16px;
+  --panel: 360px;
+  --head-h: 60px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #151517; --l1: #232324; --l2: #2c2c2e; --l3: #353638;
+    --border: rgba(255, 255, 255, .12); --border-soft: rgba(255, 255, 255, .06);
+    --text: #f9fafb; --text-2: #cfd3d6; --text-3: #adb2b8; --text-4: #81858c;
+    --btn: #f9fafb; --btn-text: #232324; --hover: rgba(255, 255, 255, .08);
+    --zi: #b9a7fa; --zi-soft: rgba(185, 167, 250, .14); --gold: #dcb96f; --gold-soft: rgba(220, 185, 111, .14);
+    --lu: #4ade80; --quan: #fbbf24; --ke: #7aa2ff; --ji: #f87171;
+    --glass: rgba(24, 24, 30, .5); --halo: rgba(6, 6, 12, .85);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #151517; --l1: #232324; --l2: #2c2c2e; --l3: #353638;
+  --border: rgba(255, 255, 255, .12); --border-soft: rgba(255, 255, 255, .06);
+  --text: #f9fafb; --text-2: #cfd3d6; --text-3: #adb2b8; --text-4: #81858c;
+  --btn: #f9fafb; --btn-text: #232324; --hover: rgba(255, 255, 255, .08);
+  --zi: #b9a7fa; --zi-soft: rgba(185, 167, 250, .14); --gold: #dcb96f; --gold-soft: rgba(220, 185, 111, .14);
+  --lu: #4ade80; --quan: #fbbf24; --ke: #7aa2ff; --ji: #f87171;
+  --glass: rgba(24, 24, 30, .5); --halo: rgba(6, 6, 12, .85);
+}
+* { box-sizing: border-box }
+html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text); font: 14px/1.6 var(--f-sans); -webkit-font-smoothing: antialiased }
+button, input, textarea { font: inherit; color: inherit }
+button { cursor: pointer }
+:focus-visible { outline: 2px solid var(--zi); outline-offset: 2px; border-radius: 6px }
+
+#app { position: fixed; inset: 0; overflow: hidden; background: var(--bg) }
+.shell { position: absolute; inset: 0; display: grid; grid-template-columns: minmax(0, 1fr) 0; transition: grid-template-columns .35s ease }
+#app.panel-open .shell { grid-template-columns: minmax(0, 1fr) var(--panel) }
+.stage { grid-column: 1; grid-row: 1; position: relative; min-width: 0; overflow: hidden }
+.assistant { grid-column: 2; grid-row: 1 }
+#sky { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; transition: opacity .45s ease; outline: none }
+#sky.grabbing { cursor: grabbing }
+#sky.point { cursor: pointer }
+#app[data-view="chart"] #sky { opacity: 0; pointer-events: none }
+
+/* 顶栏：DSH 插件页的约定，第一个控件是「返回会话」 */
+.head { position: absolute; top: 0; left: 0; right: 0; z-index: 5; display: flex; align-items: center; gap: 10px; height: var(--head-h);
+  padding: 0 max(20px, env(safe-area-inset-right, 0px)) 0 max(20px, env(safe-area-inset-left, 0px)); pointer-events: none }
+.head > * { pointer-events: auto }
+#app[data-view="chart"] .head { border-bottom: 1px solid var(--border-soft); background: var(--bg) }
+.icon-btn { width: 32px; height: 32px; flex: none; display: grid; place-items: center; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--l1); color: var(--text-2) }
+.icon-btn:hover { background: var(--l2); color: var(--text) }
+#app[data-view="home"] .icon-btn { background: var(--glass); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px) }
+.crumb { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--text-3); min-width: 0 }
+.crumb button { border: 0; background: transparent; color: var(--text-3); padding: 4px 6px; border-radius: 6px; white-space: nowrap }
+.crumb button:hover { background: var(--hover); color: var(--text) }
+.crumb b { color: var(--text); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.crumb .sample { flex: none; font-size: 12px; color: var(--text-3); padding: 0 6px; border-radius: 4px; background: var(--hover) }
+/* 小星球：和首页那颗是同一颗，颜色取命宫主星 */
+.orb { flex: none; width: 14px; height: 14px; border-radius: 50%; background: radial-gradient(circle at 32% 30%, #fff 0, var(--c, #b4c3cb) 38%, color-mix(in srgb, var(--c, #b4c3cb) 40%, #0b0b14) 100%); box-shadow: 0 0 0 1px var(--border-soft) }
+.grow { flex: 1 }
+.seg { display: inline-flex; padding: 2px; border-radius: 10px; background: var(--hover) }
+.seg button { border: 0; background: transparent; color: var(--text-2); padding: 5px 12px; border-radius: var(--r-sm); font-size: 13px; line-height: 20px; white-space: nowrap }
+.seg button.on { background: var(--l1); color: var(--text); font-weight: 500; box-shadow: 0 0 0 1px var(--border-soft), 0 1px 2px rgba(0, 0, 0, .06) }
+.seg .sep { flex: none; width: 1px; margin: 7px 3px; background: var(--border) }
+.seg button.busy::after { content: ""; display: inline-block; width: 6px; height: 6px; margin-left: 5px; border-radius: 50%; background: var(--gold); vertical-align: 1px; animation: pulse 1.2s ease-in-out infinite }
+@keyframes pulse { 50% { opacity: .25 } }
+#app.panel-open #openTalk { display: none }
+.btn-primary { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 14px; border: 0; border-radius: var(--r-sm); background: var(--btn); color: var(--btn-text); font-size: 13px; font-weight: 500; white-space: nowrap }
+.btn-primary:hover { opacity: .88 }
+.btn { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--l1); color: var(--text); font-size: 13px; white-space: nowrap }
+.btn:hover { background: var(--hover) }
+.link { border: 0; background: transparent; padding: 2px 4px; border-radius: 6px; color: var(--text-3); font-size: 12px; white-space: nowrap }
+.link:hover { color: var(--text); background: var(--hover) }
+
+/* ---------- 首页 ---------- */
+.home { position: absolute; inset: 0; display: grid; place-items: end center; pointer-events: none;
+  padding: 0 max(20px, env(safe-area-inset-right, 0px)) max(5.5vh, 30px) max(20px, env(safe-area-inset-left, 0px)) }
+.home[hidden] { display: none }
+.col { width: min(600px, 100%); display: flex; flex-direction: column; gap: 14px; position: relative; z-index: 3; transition: opacity .5s ease, transform .5s ease }
+.col button, .col input, .col form { pointer-events: auto }
+/* 文字是焦平面：从它后面经过的星球被虚化成一团光，不和字抢 */
+.col::before { content: ""; position: absolute; z-index: -1; inset: -64px -150px -110px; pointer-events: none;
+  -webkit-backdrop-filter: blur(22px) saturate(125%); backdrop-filter: blur(22px) saturate(125%);
+  -webkit-mask-image: radial-gradient(ellipse closest-side, #000 50%, transparent 100%); mask-image: radial-gradient(ellipse closest-side, #000 50%, transparent 100%) }
+.date-line { margin: 0; color: var(--text-3); font-size: 13px; text-shadow: 0 0 10px var(--halo) }
+.date-line b { color: var(--gold); font-weight: 500 }
+.status { margin: 0; font: 400 clamp(21px, 2.25vw, 29px)/1.5 var(--f-serif); color: var(--text-2); text-wrap: balance; text-shadow: 0 0 14px var(--halo), 0 0 3px var(--halo) }
+.status strong { font-weight: 600; color: var(--text) }
+.status .st { color: var(--c, var(--text)); font-weight: 600 }
+.status .fade-in { display: block; animation: rise .45s ease both }
+@keyframes rise { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: none } }
+.receipts { display: flex; flex-wrap: wrap; gap: 6px }
+.receipts:empty { display: none }
+.receipt { display: inline-flex; gap: 6px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--border); background: var(--glass); color: var(--text-3); font-size: 12px;
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px) }
+.receipt b { color: var(--text); font-weight: 500 }
+.receipt:hover { border-color: var(--zi) }
+.ask { display: flex; align-items: center; gap: 10px; padding: 7px 7px 7px 16px; border-radius: var(--r-lg); border: 1px solid var(--border); background: var(--glass);
+  backdrop-filter: blur(20px) saturate(140%); -webkit-backdrop-filter: blur(20px) saturate(140%); box-shadow: 0 14px 40px -22px rgba(0, 0, 0, .5) }
+.ask:focus-within { border-color: var(--zi) }
+.ask input { flex: 1; min-width: 0; border: 0; background: transparent; outline: none; font-size: 15px; padding: 8px 0 }
+.ask input::placeholder { color: var(--text-3) }
+.send { width: 36px; height: 36px; flex: none; display: grid; place-items: center; border: 0; border-radius: 10px; background: var(--btn); color: var(--btn-text) }
+.send:disabled { opacity: .3; cursor: default }
+.chips { display: flex; flex-wrap: wrap; gap: 8px }
+.chip { padding: 5px 12px; border-radius: 999px; border: 1px solid var(--border); background: var(--glass); color: var(--text-2); font-size: 13px; line-height: 20px;
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px) }
+.chip:hover { color: var(--text); border-color: var(--text-4) }
+.chip.on { color: var(--text); border-color: var(--zi); background: var(--zi-soft) }
+.chip.primary { color: var(--btn-text); border-color: transparent; background: var(--btn) }
+.chip small { color: var(--text-4); margin-left: 4px }
+.hint { min-height: 18px; margin: -6px 0 -4px; font-size: 12px; color: var(--text-3) }
+.hint.err { color: var(--ji) }
+.gesture { position: absolute; right: max(20px, env(safe-area-inset-right, 0px)); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); margin: 0; z-index: 3;
+  font-size: 12px; color: var(--text-3); text-shadow: 0 0 8px var(--halo); transition: opacity .8s ease }
+.gesture.gone { opacity: 0 }
+
+/* 星球的名字：按钮跟着 3D 里的星球走，键盘和读屏也能用 */
+#planets { position: absolute; inset: 0; z-index: 2; overflow: hidden; transition: opacity .4s ease }
+.ptag { position: absolute; left: 0; top: 0; will-change: transform; pointer-events: none; transition: opacity .3s ease }
+.ptag-in { position: relative; display: flex; transform: translateX(-50%) }
+.ptag-main { pointer-events: auto; display: grid; justify-items: center; gap: 0; border: 0; background: transparent; padding: 2px 8px 4px; border-radius: 8px; text-align: center; white-space: nowrap;
+  text-shadow: 0 0 8px var(--halo), 0 0 2px var(--halo) }
+.ptag-main b { font: 600 15px/1.35 var(--f-serif); color: var(--text); letter-spacing: .04em }
+.ptag-main span { font-size: 12px; line-height: 1.4; color: var(--text-3); font-variant-numeric: tabular-nums }
+.ptag-main i { font-style: normal; font-size: 12px; line-height: 1.4; color: var(--gold); max-height: 0; opacity: 0; overflow: hidden; transition: max-height .25s ease, opacity .25s ease }
+.ptag.on .ptag-main i { max-height: 18px; opacity: 1 }
+.ptag-more { pointer-events: auto; position: absolute; left: 100%; top: 1px; margin-left: -6px; width: 22px; height: 22px; display: grid; place-items: center; border: 0; border-radius: 6px; background: transparent; color: var(--text-3);
+  opacity: 0; transition: opacity .2s ease }
+.ptag.on .ptag-more, .ptag-more:focus-visible { opacity: 1 }
+.ptag-more:hover { background: var(--hover); color: var(--text) }
+.ptag-menu { pointer-events: auto; position: absolute; top: 100%; left: 50%; margin-top: 4px; transform: translateX(-50%); z-index: 4; display: flex; align-items: center; gap: 6px; padding: 6px; border-radius: 10px;
+  border: 1px solid var(--border); background: var(--l1); box-shadow: 0 12px 30px -14px rgba(0, 0, 0, .45); white-space: nowrap; font-size: 13px }
+.ptag-menu[hidden] { display: none }
+.ptag-menu input { width: 116px; height: 28px; padding: 0 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--l1); outline: none; font-size: 13px }
+.ptag-menu input:focus { border-color: var(--zi) }
+.ptag-menu button { height: 28px; padding: 0 10px; border: 0; border-radius: 6px; background: transparent; color: var(--text-2); font-size: 13px }
+.ptag-menu button:hover { background: var(--hover); color: var(--text) }
+.ptag-menu button.danger { color: var(--ji) }
+.ptag-menu span { padding: 0 4px 0 6px; color: var(--text-2) }
+.reticle { position: absolute; left: 0; top: 0; z-index: 1; opacity: 0; pointer-events: none; transition: opacity .3s ease; will-change: transform }
+.reticle::before { content: ""; position: absolute; inset: 0; border-radius: 50%; border: 1px dashed var(--gold); animation: spin 40s linear infinite }
+@keyframes spin { to { transform: rotate(360deg) } }
+.reticle.on { opacity: .75 }
+/* 没有 WebGL 时：星球退成一排圆点 */
+#planets.flat { position: static; display: flex; flex-wrap: wrap; justify-content: center; gap: 18px; padding: 90px 20px 0; overflow: visible }
+#planets.flat .ptag { position: relative; transform: none !important; flex-direction: column; align-items: center }
+#planets.flat .ptag::before { content: ""; width: 44px; height: 44px; border-radius: 50%; background: radial-gradient(circle at 32% 30%, #fff 0, var(--c, #b4c3cb) 40%, #1b1b28 100%) }
+#planets.flat .ptag-in { transform: none; flex-direction: column; align-items: center }
+#app.busy .col, #app.busy #planets, #app.busy .gesture, #app.busy .proto, #app.busy .reticle { opacity: 0; pointer-events: none }
+#app.busy .col { transform: translateY(8px) }
+#app.busy .col *, #app.busy #planets * { pointer-events: none }
+
+/* ---------- 命盘页：一屏放完，不滚动 ---------- */
+.chart { position: absolute; top: var(--head-h); right: 0; bottom: 0; left: 0 }
+.chart[hidden] { display: none }
+.chart.enter > div { animation: rise .45s ease both }
+.body[hidden], .rbody[hidden] { display: none }
+.body { height: 100%; display: grid; grid-template-columns: clamp(244px, 25vw, 316px) minmax(0, 1fr); gap: 16px; min-height: 0;
+  padding: 14px max(20px, env(safe-area-inset-right, 0px)) 16px max(20px, env(safe-area-inset-left, 0px)) }
+.side { container: side / size; display: flex; flex-direction: column; gap: 10px; min-height: 0; overflow: hidden }
+.panes { display: none }
+.card { flex: none; display: flex; flex-direction: column; gap: 8px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--l1); padding: 12px 14px; min-height: 0 }
+.card > * { flex: none }
+.card-h { display: flex; align-items: center; gap: 8px; min-height: 24px }
+.card-h h3 { margin: 0; font-size: 14px; font-weight: 600; color: var(--text); white-space: nowrap }
+.card-h h3.serif { font: 600 17px/1.3 var(--f-serif); letter-spacing: .04em }
+.card-h h3 small { margin-left: 6px; font: 400 13px var(--f-serif); color: var(--text-3) }
+.card-h .cnt { font-size: 12px; color: var(--text-3) }
+.card-h .tag { font-size: 11px; line-height: 18px; padding: 0 6px; border-radius: 4px; color: var(--gold); background: var(--gold-soft); white-space: nowrap }
+.card-h .right { margin-left: auto; display: flex; align-items: center; gap: 2px }
+.step { width: 24px; height: 24px; display: grid; place-items: center; border: 0; border-radius: 6px; background: transparent; color: var(--text-3) }
+.step:hover { background: var(--hover); color: var(--text) }
+.when { margin: -4px 0 0; font-size: 12px; color: var(--text-3); font-variant-numeric: tabular-nums }
+.when b { color: var(--gold); font-weight: 500 }
+.line { margin: 0; font-size: 14px; line-height: 1.6; color: var(--text-2) }
+.line b { color: var(--text); font-weight: 600 }
+.mut { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px }
+.mut span { display: flex; align-items: center; justify-content: center; min-height: 26px; padding: 0 2px; border-radius: 6px; background: var(--l2); white-space: nowrap }
+.mut span:empty { visibility: hidden }
+.mut b { font: 600 13px var(--f-serif) }
+.mut .seal { margin-left: 3px; vertical-align: 0 }
+.card-f { display: flex; align-items: center; gap: 8px; flex-wrap: wrap }
+.pat-chips { display: flex; flex-wrap: wrap; gap: 6px }
+.pat { display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 8px; border: 1px solid var(--border); border-radius: 6px; background: transparent; color: var(--text-2); font: 500 13px var(--f-serif); white-space: nowrap }
+.pat:hover { background: var(--hover) }
+.pat.on { border-color: var(--text-3); color: var(--text); background: var(--l2) }
+.pat i { font: 400 11px/16px var(--f-sans); font-style: normal; padding: 0 4px; border-radius: 4px }
+.pat i.ji { color: var(--lu); background: color-mix(in srgb, var(--lu) 12%, transparent) }
+.pat i.zhong { color: var(--quan); background: color-mix(in srgb, var(--quan) 12%, transparent) }
+.pat i.xiong { color: var(--ji); background: color-mix(in srgb, var(--ji) 12%, transparent) }
+.pat-desc { margin: 0; font-size: 12.5px; line-height: 1.6; color: var(--text-3); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden }
+.card.detail { flex: 1 1 auto; overflow: hidden }
+.detail .stars { display: flex; flex-wrap: wrap; gap: 2px 10px }
+.detail .star { font-size: 16px }
+.detail .brief { margin: 0; color: var(--text-3); font-size: 12.5px; line-height: 1.65; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; margin: 0; font-size: 13px }
+.kv dt { color: var(--text-3); white-space: nowrap }
+.kv dd { margin: 0; color: var(--text); min-width: 0 }
+
+.board-wrap { container-type: size; min-width: 0; min-height: 0; display: grid; place-items: center }
+/* 盘面把高度用满；宽度跟着可用空间在 1.05–1.62 的宽高比之间伸缩 */
+.board { position: relative; width: min(100cqw, 100cqh * 1.62); height: min(100cqh, 100cqw / 1.05); container-type: inline-size; display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr); gap: 4px }
+.cell { position: relative; display: flex; flex-direction: column; gap: 1px; min-width: 0; min-height: 0; padding: clamp(4px, 1.1cqw, 9px) clamp(5px, 1.25cqw, 10px) clamp(3px, .8cqw, 7px); text-align: left;
+  border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--l1); transition: border-color .2s, background .2s, box-shadow .2s; overflow: hidden }
+.cell:hover { background: var(--l2) }
+.cell.sel { border-color: var(--zi); box-shadow: inset 0 0 0 1px var(--zi); background: var(--zi-soft) }
+.cell.rel { border-color: color-mix(in srgb, var(--gold) 55%, transparent); background: var(--gold-soft) }
+.cell.focus::after { content: ""; position: absolute; inset: 3px; border-radius: 6px; border: 1px dashed var(--gold); pointer-events: none }
+.cell-head { display: flex; justify-content: space-between; align-items: baseline; gap: 5px }
+.cell-head .pname, .cell-head .gz { flex: none; white-space: nowrap }
+.pname { font: 600 clamp(11.5px, 1.8cqw, 15px)/1.25 var(--f-serif); letter-spacing: .04em }
+.pname .mk { display: inline-block; margin-left: 3px; padding: 0 3px; border-radius: 4px; font: 500 10px/1.5 var(--f-sans); vertical-align: 1px; background: var(--zi); color: var(--bg) }
+.pname .mk.body { background: var(--gold) }
+.gz { font: clamp(10px, 1.45cqw, 12px)/1 var(--f-serif); color: var(--text-4); letter-spacing: .08em }
+.scope-tag { margin-left: auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; padding: 0 5px; border-radius: 4px; font: clamp(9.5px, 1.3cqw, 10.5px)/16px var(--f-sans); color: var(--gold); background: var(--gold-soft); white-space: nowrap }
+.majors { display: flex; flex-wrap: wrap; gap: 0 7px; margin-top: 2px }
+.star { font: 600 clamp(12px, 2.02cqw, 16.5px)/1.32 var(--f-serif); color: var(--c, var(--text)); white-space: nowrap }
+.star sup { font: 400 10px var(--f-sans); color: var(--text-4); margin-left: 1px; vertical-align: 5px }
+.seal { display: inline-block; margin-left: 3px; padding: 0 3px; border-radius: 3px; font: 500 10px/1.45 var(--f-sans); font-style: normal; vertical-align: 2px; color: #fff }
+.seal.lu { background: var(--lu) } .seal.quan { background: var(--quan) } .seal.ke { background: var(--ke) } .seal.ji { background: var(--ji) }
+.seal.scope { background: transparent; border: 1px solid currentColor }
+.seal.scope.lu { color: var(--lu) } .seal.scope.quan { color: var(--quan) } .seal.scope.ke { color: var(--ke) } .seal.scope.ji { color: var(--ji) }
+.minors { display: flex; flex-wrap: wrap; gap: 0 6px; font: 500 clamp(10px, 1.5cqw, 12.5px)/1.45 var(--f-serif); color: var(--text-2) }
+.minors .good { color: var(--lu) } .minors .bad { color: var(--ji) }
+.empty-p { font: clamp(10px, 1.5cqw, 12px) var(--f-serif); color: var(--text-4) }
+.cell-foot { margin-top: auto; display: flex; justify-content: space-between; gap: 6px; font-size: clamp(9.5px, 1.35cqw, 11px); line-height: 1.3; color: var(--text-4); white-space: nowrap }
+.cell-foot .dec { color: var(--gold); font-variant-numeric: tabular-nums }
+/* 中宫：这张盘是谁的、生辰、四柱和几个底数 */
+.center { grid-column: 2 / 4; grid-row: 2 / 4; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(3px, 1cqw, 9px); padding: 10px; border-radius: var(--r-md); text-align: center; min-height: 0; overflow: hidden;
+  border: 1px solid var(--border-soft); background: radial-gradient(80% 70% at 50% 30%, var(--zi-soft), transparent 70%), var(--l2) }
+.center > * { position: relative; z-index: 1; text-shadow: 0 0 4px var(--l2), 0 0 8px var(--l2) }
+.center .nm { display: flex; align-items: center; gap: 8px; font: 600 clamp(16px, 3.3cqw, 27px)/1.2 var(--f-serif) }
+.center .nm .orb { width: clamp(12px, 2.2cqw, 18px); height: clamp(12px, 2.2cqw, 18px) }
+.center .birth { font-size: clamp(10.5px, 1.6cqw, 12.5px); color: var(--text-2); line-height: 1.5 }
+.center .pillars { display: flex; gap: 6px }
+.center .pillars span { display: grid; gap: 1px; padding: clamp(2px, .6cqw, 5px) clamp(5px, 1cqw, 8px); border-radius: 6px; background: var(--l1); border: 1px solid var(--border-soft); font: 600 clamp(12px, 1.9cqw, 15px)/1.2 var(--f-serif); text-shadow: none }
+.center .pillars small { font: 400 10px var(--f-sans); color: var(--text-4) }
+.center .facts { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 14px; font-size: clamp(10.5px, 1.6cqw, 12.5px); color: var(--text-3) }
+.center .facts b { color: var(--text); font-weight: 500 }
+.lines { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible }
+.lines path { fill: none; stroke: var(--gold); stroke-width: 1.2; stroke-opacity: .75; stroke-dasharray: 1600; stroke-dashoffset: 1600; animation: draw .6s ease forwards }
+.lines path.dash { stroke-dasharray: 4 5; stroke-dashoffset: 0; animation: none; stroke-opacity: .6 }
+.lines.still path { animation: none; stroke-dashoffset: 0 }
+.lines circle { fill: var(--gold) }
+@keyframes draw { to { stroke-dashoffset: 0 } }
+@container (max-width: 560px) {
+  .center .facts span:nth-child(n+3) { display: none }
+  .cell-foot .gods { display: none }
+}
+@container (max-width: 440px) {
+  .minors, .gz, .star sup, .center .birth, .center .facts { display: none }
+  .board.scoped .cell-foot { display: none }
+  .scope-tag { position: absolute; bottom: 3px; left: 4px; margin: 0 }
+  .center .pillars { gap: 3px }
+}
+
+/* ---------- 完整报告：和命盘页同一副骨架。左边目录，右边阅读栏；整页不滚，只有阅读栏自己滚 ---------- */
+.rbody { height: 100%; display: grid; grid-template-columns: clamp(244px, 25vw, 316px) minmax(0, 1fr); gap: 16px; min-height: 0;
+  padding: 14px max(20px, env(safe-area-inset-right, 0px)) 16px max(20px, env(safe-area-inset-left, 0px)) }
+.rside { display: flex; flex-direction: column; min-height: 0 }
+.rtoc { flex: 0 1 auto; max-height: 100%; min-height: 0 }
+.rtoc .toc { flex: 0 1 auto; min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 1px; margin: 0 -6px; scrollbar-width: thin }
+.toc button { display: flex; align-items: baseline; gap: 10px; padding: 5px 8px; border: 0; border-radius: 6px; background: transparent; color: var(--text-2); font-size: 13.5px; line-height: 1.5; text-align: left }
+.toc button i { flex: none; width: 2.1em; font: 600 13px var(--f-serif); font-style: normal; color: var(--gold) }
+.toc button:hover, .toc button.on { background: var(--hover); color: var(--text) }
+.toc button.todo { color: var(--text-4); cursor: default; background: transparent }
+.toc button.todo i { color: var(--text-4) }
+.toc button.now { color: var(--text) }
+.toc button.now span::after { content: " · 正在写"; color: var(--gold); font-size: 12px }
+.link.armed { color: var(--ji) }
+.rmain { container-type: inline-size; position: relative; min-width: 0; min-height: 0; display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--l1); overflow: hidden }
+.rbar { flex: none; display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px 14px; border-bottom: 1px solid var(--border-soft); font-size: 13px; color: var(--text-2) }
+.rbar[hidden] { display: none }
+.rbar .note { color: var(--text-4); font-size: 12px }
+.rbar .btn { margin-left: auto; height: 28px }
+.rbar .btn + .link { margin-left: 0 }
+.rbar .pulse { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--gold); animation: pulse 1.2s ease-in-out infinite }
+.rscroll { flex: 1; min-height: 0; overflow: auto; padding: 34px clamp(18px, 6cqw, 64px) 72px; outline: none; scrollbar-width: thin }
+.rdoc { max-width: 700px; margin: 0 auto }
+.rtop { display: flex; align-items: center; gap: 22px; padding-bottom: 26px; margin-bottom: 32px; border-bottom: 1px solid var(--border) }
+.rtop .em { flex: none; width: 108px; height: 108px }
+.rtop .em svg, .rempty-em svg { display: block; width: 100%; height: 100% }
+.rtop h1 { margin: 0; font: 600 26px/1.3 var(--f-serif); letter-spacing: .04em; text-wrap: balance }
+.rtop p { margin: 4px 0 0; font-size: 13px; line-height: 1.5; color: var(--text-3); font-variant-numeric: tabular-nums }
+.rempty { margin: auto; padding: 24px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center }
+.rempty-em { width: min(240px, 60cqw); aspect-ratio: 1; margin-bottom: 6px }
+.rempty h2 { margin: 0; font: 600 24px/1.3 var(--f-serif); letter-spacing: .08em }
+.rempty p { margin: 0 0 8px; color: var(--text-3); font-size: 14px }
+.rpick { position: absolute; z-index: 3; height: 28px; padding: 0 10px; border: 0; border-radius: var(--r-sm); background: var(--btn); color: var(--btn-text); font-size: 12.5px; white-space: nowrap; box-shadow: 0 6px 18px -8px rgba(0, 0, 0, .5) }
+.rpick[hidden] { display: none }
+/* 报告正文的变量接到页面自己的配色上；星曜颜色由 report.js 按主题注入 */
+#app .zr-scope { --zr-paper: var(--l1); --zr-fill: var(--l2); --zr-ink: var(--text); --zr-ink-2: var(--text-2); --zr-ink-3: var(--text-3); --zr-rule: var(--border); --zr-gold: var(--gold); --zr-gold-soft: var(--gold-soft); --zr-zi: var(--zi);
+  --zr-lu: var(--lu); --zr-quan: var(--quan); --zr-ke: var(--ke); --zr-ji: var(--ji); --zr-serif: var(--f-serif); --zr-sans: var(--f-sans) }
+/* 下载文件的预览（只在原型里有） */
+.xprev { position: absolute; inset: 0; z-index: 20; display: flex; flex-direction: column; background: color-mix(in srgb, var(--bg) 70%, #000) }
+.xprev[hidden] { display: none }
+.xbar { flex: none; display: flex; align-items: center; gap: 12px; padding: 10px max(16px, env(safe-area-inset-right, 0px)) 10px max(16px, env(safe-area-inset-left, 0px)); background: var(--l1); border-bottom: 1px solid var(--border); font-size: 13px; color: var(--text-3) }
+.xbar b { color: var(--text); font-weight: 600; white-space: nowrap }
+.xbar span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.xbar .btn { margin-left: auto; flex: none }
+.xhost { flex: 1; min-height: 0; overflow: auto; width: min(1180px, 100%); margin: 0 auto }
+
+/* ---------- 紫微师 ---------- */
+.assistant { position: relative; min-width: 0; overflow: hidden; border-left: 1px solid var(--border-soft); background: var(--l1); display: flex; flex-direction: column }
+.as-head { display: flex; align-items: center; gap: 8px; padding: 14px 16px; min-height: 60px; border-bottom: 1px solid var(--border-soft); white-space: nowrap }
+.as-head b { font-size: 14px; font-weight: 600 }
+.as-head small { color: var(--text-3); font-size: 12px; overflow: hidden; text-overflow: ellipsis }
+.as-head .icon-btn { margin-left: auto; border-color: transparent; background: transparent }
+.msgs { flex: 1; overflow: auto; padding: 18px; display: flex; flex-direction: column; gap: 16px }
+.as-empty { margin: auto 0; padding-bottom: 8vh }
+.as-empty p { margin: 0 }
+.as-empty .l1 { font: 400 22px/1.5 var(--f-serif); color: var(--text) }
+.as-empty .l2 { margin-top: 6px; color: var(--text-3); font-size: 13px }
+.msg.me { align-self: flex-end; max-width: 86%; padding: 8px 12px; border-radius: 14px 14px 4px 14px; background: var(--l2); font-size: 14px }
+.msg.bot { font-size: 14px; line-height: 1.8 }
+.msg.bot h4 { margin: 10px 0 2px; font-size: 14px; font-weight: 600 }
+.msg.bot h4:first-child { margin-top: 0 }
+.msg.bot p { margin: 0 0 6px; color: var(--text-2) }
+.msg.bot .proto-note { display: inline-block; margin-top: 4px; font-size: 11px; color: var(--text-4); border: 1px dashed var(--border); border-radius: 6px; padding: 0 6px }
+.typing { color: var(--text-4); font-size: 12px }
+.suggest { padding: 4px 16px 8px; display: flex; flex-direction: column; align-items: flex-start }
+.suggest button { border: 0; background: transparent; color: var(--text-2); font-size: 13px; padding: 4px 0; text-align: left }
+.suggest button:hover { color: var(--text) }
+.quote { margin: 0 14px 6px; display: flex; align-items: center; gap: 6px; padding: 4px 6px 4px 10px; border-radius: var(--r-sm); background: var(--gold-soft); color: var(--text-2); font-size: 12.5px }
+.quote[hidden] { display: none }
+.quote span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.quote button { flex: none; width: 22px; height: 22px; border: 0; border-radius: 6px; background: transparent; color: var(--text-3) }
+.quote button:hover { background: var(--hover); color: var(--text) }
+.msg.me q { display: block; margin-bottom: 4px; padding-left: 8px; border-left: 2px solid var(--gold); color: var(--text-3); font-size: 12.5px; quotes: none }
+.as-form { margin: 0 14px 12px; display: flex; align-items: flex-end; gap: 8px; padding: 7px 7px 7px 14px; border-radius: var(--r-md); border: 1px solid var(--border); background: var(--l1) }
+.as-form:focus-within { border-color: var(--zi) }
+.as-form textarea { flex: 1; min-width: 0; border: 0; background: transparent; outline: none; resize: none; font-size: 14px; line-height: 1.5; max-height: 120px; padding: 6px 0 }
+.as-form textarea::placeholder { color: var(--text-4) }
+.as-foot { margin: -4px 16px calc(12px + env(safe-area-inset-bottom, 0px)); font-size: 11px; color: var(--text-4) }
+
+.proto { position: absolute; left: 50%; top: calc(14px + env(safe-area-inset-top, 0px)); transform: translateX(-50%); z-index: 6; display: flex; align-items: center; gap: 2px; padding: 3px; border-radius: 10px;
+  border: 1px dashed var(--border); background: var(--glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); font-size: 12px; color: var(--text-3); transition: opacity .4s ease }
+#app[data-view="chart"] .proto { display: none }
+.proto span { padding: 0 6px }
+.proto button { border: 0; background: transparent; color: var(--text-2); padding: 3px 8px; border-radius: 7px; font-size: 12px; white-space: nowrap }
+.proto button.on { background: var(--hover); color: var(--text) }
+.proto i { width: 1px; height: 14px; background: var(--border); margin: 0 4px }
+.toast { position: absolute; left: 50%; bottom: calc(26px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 9; padding: 8px 14px; border-radius: 10px; background: var(--btn); color: var(--btn-text); font-size: 13px; white-space: nowrap }
+.toast[hidden] { display: none }
+
+@media (max-width: 1180px) {
+  #app.panel-open .shell { grid-template-columns: minmax(0, 1fr) 0 }
+  .assistant { position: absolute; top: 0; right: 0; bottom: 0; width: min(var(--panel), 100vw); z-index: 8; transform: translateX(100%); transition: transform .35s ease; box-shadow: -24px 0 50px -30px rgba(0, 0, 0, .45) }
+  #app.panel-open .assistant { transform: none }
+}
+/* 左栏不够高时，先收说明文字，卡片本身不滚动 */
+@media (min-width: 721px) {
+  @container side (max-height: 590px) { .detail .brief { -webkit-line-clamp: 2 } }
+  @container side (max-height: 540px) { .pat-desc { -webkit-line-clamp: 1 } .card { padding: 10px 12px; gap: 6px } }
+  @container side (max-height: 470px) { .detail .brief, .pat-desc { display: none } }
+}
+/* 窄屏：盘在上，下面一张卡，用三个页签切换（时间层级 / 格局 / 宫位），照样一屏 */
+@media (max-width: 720px) {
+  :root { --head-h: 52px }
+  .head { gap: 8px; padding: 0 max(12px, env(safe-area-inset-right, 0px)) 0 max(12px, env(safe-area-inset-left, 0px)) }
+  .crumb .sample { display: none }
+  #app[data-view="chart"] { --head-h: 96px }
+  #app[data-view="chart"] .head { flex-wrap: wrap; align-content: center; row-gap: 8px }
+  .head .seg { order: 9; width: 100%; display: flex }
+  .head .seg button { flex: 1; padding: 5px 0 }
+  .head .btn-primary { padding: 0 10px }
+  .body { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; gap: 10px; padding: 10px max(12px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)) }
+  .board-wrap { order: 1 }
+  .side { order: 2; height: 226px; gap: 8px }
+  .board { width: min(100cqw, 100cqh * .92); height: min(100cqh, 100cqw / .74); gap: 3px }
+  .panes { display: flex; padding: 2px; border-radius: 10px; background: var(--hover); flex: none }
+  .panes button { flex: 1; border: 0; background: transparent; color: var(--text-2); padding: 4px 0; border-radius: var(--r-sm); font-size: 13px }
+  .panes button.on { background: var(--l1); color: var(--text); font-weight: 500; box-shadow: 0 0 0 1px var(--border-soft) }
+  .side .card { display: none; flex: 1 1 auto; overflow: hidden }
+  .side[data-pane="scope"] .card.scope, .side[data-pane="pats"] .card.pats, .side[data-pane="detail"] .card.detail { display: flex }
+  .head .seg .sep { margin: 7px 1px }
+  .rbody { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); gap: 8px; padding: 10px max(12px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)) }
+  .rtoc { padding: 8px 10px; gap: 6px }
+  .rtoc .toc { flex-direction: row; margin: 0; gap: 4px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none }
+  .toc button { flex: none; gap: 5px; padding: 2px 8px; border: 1px solid var(--border); white-space: nowrap; font-size: 13px }
+  .toc button i { width: auto }
+  .toc button.now span::after { content: "" }
+  .rscroll { padding: 20px 16px 56px }
+  .rtop { gap: 14px; padding-bottom: 18px; margin-bottom: 22px }
+  .rtop .em { width: 72px; height: 72px }
+  .rtop h1 { font-size: 21px }
+  .rbar .note { display: none }
+  .xbar span { display: none }
+  .status { font-size: clamp(19px, 5.4vw, 23px) }
+  .gesture { display: none }
+  .ptag-main b { font-size: 13.5px }
+  .ptag-main span { font-size: 11px }
+  .proto span { display: none }
+  .proto { top: calc(54px + env(safe-area-inset-top, 0px)) }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important }
+}
+/* 引导排盘时：星球留在天上，名字先收起来 */
+#app.onboarding #planets, #app.onboarding .reticle, #app.onboarding .gesture { opacity: 0; pointer-events: none }
+#app.onboarding #planets * { pointer-events: none }
+#app.onboarding #planets.flat { display: none }
+#app.no-gl #sky { display: none }
