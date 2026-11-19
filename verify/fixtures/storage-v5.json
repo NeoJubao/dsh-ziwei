@@ -1,0 +1,93 @@
+{
+  "_comment": "v5 形状的本机记录（verify/ui-v6-storage.mjs 用）。storage 里的对象值在装进内存版 localStorage 前 JSON.stringify，字符串原样存。只用黄金用例（1992-05-03 09:30 男 105.97）和 v5 DEFAULT_FORM 的生辰；称呼只用占位字。readings.v1 那条是旧版 9 段 key（黄金用例的生辰，不填经度）。form 是 v1.3.3 之前的旧默认（monthDivide normal，没有 city 字段，也没有 formV133）。",
+  "storage": {
+    "ziwei-pro.library": [
+      {
+        "id": "lib-1763000000000",
+        "name": "1990-06-15 申时 男",
+        "input": {
+          "name": "",
+          "calendar": "solar",
+          "year": 1990,
+          "month": 6,
+          "day": 15,
+          "isLeap": false,
+          "hour": 15,
+          "minute": 30,
+          "gender": "male",
+          "longitude": "",
+          "city": "",
+          "place": "",
+          "occupation": "",
+          "settings": { "yearDivide": "normal", "monthDivide": "exact", "dayDivide": "current", "fixLeap": true }
+        }
+      }
+    ],
+    "ziwei-pro.lastChart.v1": {
+      "name": "",
+      "calendar": "solar",
+      "year": 1992,
+      "month": 5,
+      "day": 3,
+      "isLeap": false,
+      "hour": 9,
+      "minute": 30,
+      "gender": "male",
+      "longitude": "105.97",
+      "place": "",
+      "occupation": "",
+      "settings": { "yearDivide": "normal", "monthDivide": "exact", "dayDivide": "current", "fixLeap": true }
+    },
+    "ziwei-pro.readings.v2": {
+      "solar|1992|5|3|0|9|30|male|105.97|normal,exact,current,1": {
+        "thread": [
+          { "role": "user", "content": "命宫怎么看" },
+          { "role": "assistant", "content": "命宫的示例回答。" }
+        ],
+        "report": { "status": "done", "text": "## 一、命宫\n\n示例报告正文。", "startedAt": 1763000150000, "finishedAt": 1763000190000, "error": "", "issue": null },
+        "studioTab": "report",
+        "name": "甲",
+        "updatedAt": 1763000200000
+      },
+      "solar|1990|6|15|0|15|30|male||normal,exact,current,1": {
+        "thread": [
+          { "role": "user", "content": "示例提问" }
+        ],
+        "report": { "status": "running", "text": "写了一半的报告", "startedAt": 1763000050000, "finishedAt": 0, "error": "", "issue": null },
+        "studioTab": "chat",
+        "name": "",
+        "updatedAt": 1763000100000
+      }
+    },
+    "ziwei-pro.readings.v1": {
+      "solar|1992|5|3|0|9|30|male|": {
+        "thread": [
+          { "role": "user", "content": "旧版提问" },
+          { "role": "assistant", "content": "旧版的完整报告正文。" }
+        ],
+        "hasReport": true,
+        "updatedAt": 1700000000000
+      }
+    },
+    "ziwei-pro.form": {
+      "name": "",
+      "calendar": "solar",
+      "year": 1990,
+      "month": 6,
+      "day": 15,
+      "isLeap": false,
+      "hour": 15,
+      "minute": 30,
+      "gender": "male",
+      "longitude": "",
+      "place": "",
+      "occupation": "",
+      "settings": { "yearDivide": "normal", "monthDivide": "normal", "dayDivide": "current", "fixLeap": true }
+    },
+    "ziwei-pro.autopen": "1",
+    "ziwei-pro.showadj": "1",
+    "ziwei-pro.studio": "1",
+    "ziwei-pro.rail": "0",
+    "ziwei-workbench.apikey": "legacy-placeholder"
+  }
+}
