@@ -12,6 +12,8 @@
  *   find / findByClass / text / diffTrees   在元素树里查找、取文字、比较两棵树
  *   memoryStorage()         内存版 localStorage
  *   fakeFetch(script)       假 fetch：按脚本返回 JSON / 文本 / SSE 流，记录每次请求
+ *   streamFetch(opts)       可控的流式假 fetch：每次调用开一条管道，测试一块一块往里推 SSE
+ *   settle(n)               等 n 轮宏任务，让 vm 里的 promise 链跑完
  */
 import vm from 'node:vm';
 
@@ -65,8 +67,9 @@ function makeDocument() {
 /**
  * 在一个裸 vm 上下文里求值 bundle。只提供 verify.mjs 同款的最小宿主：
  * window.React、window.__ModuleLoader__、add/removeEventListener、document.createElement / head。
+ * globals：额外放进沙箱的全局（例如 { AbortController }，让 vm 里的 SSE 客户端走浏览器那条中止路径）；默认不加。
  */
-export function loadBundle(text, { filename = 'client.v6.js' } = {}) {
+export function loadBundle(text, { filename = 'client.v6.js', globals = null } = {}) {
   const React = makeReact();
   const entries = [];
   const document = makeDocument();
@@ -76,7 +79,7 @@ export function loadBundle(text, { filename = 'client.v6.js' } = {}) {
     addEventListener: () => {},
     removeEventListener: () => {}
   };
-  const sandbox = { console, TextEncoder, TextDecoder, document };
+  const sandbox = Object.assign({ console, TextEncoder, TextDecoder, document }, globals || {});
   sandbox.window = win;
   sandbox.globalThis = sandbox;
   sandbox.self = sandbox;
@@ -313,4 +316,74 @@ export function fakeFetch(script) {
   };
   fetch.calls = calls;
   return fetch;
+}
+
+/**
+ * 可控的流式假 fetch（T3b）：每次调用都马上回一个 200 的 SSE 响应，正文由测试一块一块推进去。
+ * 返回的 fetch 带 .calls，每一项是一条管道：
+ *   { url, init, body, send(event, data), raw(text), end(), fail(message), cancelled }
+ *   send 推一个完整的 SSE 块；raw 原样推一段文字（可以把一个块拆在两次 raw 里）；end 正常关闭流；
+ *   fail 让下一次 read() 抛错。init.signal 被中止时，挂着的 read() 以 AbortError 结束；reader.cancel() 记下 cancelled。
+ * reply(url, init, n)：返回 fakeFetch 形状的回复时这次调用改用它（例如 { status: 503, json: {...} }）；返回空值走管道。
+ */
+export function streamFetch({ reply = null } = {}) {
+  const calls = [];
+  const enc = new TextEncoder();
+  const abortError = () => Object.assign(new Error('aborted'), { name: 'AbortError' });
+  const fetch = (url, init = {}) => {
+    const n = calls.length;
+    let body = init.body;
+    try { body = JSON.parse(init.body); } catch { /* 原文 */ }
+    const fixed = reply ? reply(String(url), init, n) : null;
+    if (fixed) {
+      calls.push({ url: String(url), init, body, fixed: true });
+      return fakeFetch(() => fixed)(url, init);
+    }
+    const queue = [];
+    let waiter = null;
+    let ended = false;
+    let failed = null;
+    const pump = () => {
+      if (!waiter) return;
+      const w = waiter;
+      if (queue.length) { waiter = null; w.resolve({ done: false, value: queue.shift() }); }
+      else if (failed) { waiter = null; w.reject(failed); }
+      else if (ended) { waiter = null; w.resolve({ done: true, value: undefined }); }
+    };
+    const signal = init.signal;
+    if (signal && typeof signal.addEventListener === 'function') {
+      signal.addEventListener('abort', () => { failed = abortError(); pump(); }, { once: true });
+    }
+    const call = {
+      url: String(url), init, body, cancelled: false,
+      send(ev, data) { queue.push(enc.encode(`event: ${ev}\ndata: ${typeof data === 'string' ? data : JSON.stringify(data)}\n\n`)); pump(); return call; },
+      raw(text) { queue.push(enc.encode(text)); pump(); return call; },
+      end() { ended = true; pump(); return call; },
+      fail(message) { failed = new Error(message || 'network error'); pump(); return call; }
+    };
+    calls.push(call);
+    const reader = {
+      read() {
+        if (signal && signal.aborted) return Promise.reject(abortError());
+        return new Promise((resolve, reject) => { waiter = { resolve, reject }; pump(); });
+      },
+      cancel() { call.cancelled = true; ended = true; queue.length = 0; pump(); return Promise.resolve(); },
+      releaseLock() {}
+    };
+    return Promise.resolve({
+      ok: true,
+      status: 200,
+      headers: { get: (k) => (/content-type/i.test(k) ? 'text/event-stream' : null) },
+      body: { getReader: () => reader },
+      text: () => Promise.resolve(''),
+      json: () => Promise.reject(new Error('not json'))
+    });
+  };
+  fetch.calls = calls;
+  return fetch;
+}
+
+/** 等 n 轮宏任务（setImmediate），让 vm 里排队的 promise 回调全部跑完。 */
+export async function settle(n = 4) {
+  for (let i = 0; i < n; i++) await new Promise((resolve) => setImmediate(resolve));
 }
