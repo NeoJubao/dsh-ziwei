@@ -22,7 +22,7 @@
 
 ```bash
 node build.mjs          # 由 src/ 生成 client.js（浏览器产物）与 engine-built.js（Node/host 产物）
-node verify/all.mjs     # 全量自检（8 组，聚合列表见 verify/all.mjs）
+node verify/all.mjs     # 全量自检（9 组，聚合列表见 verify/all.mjs）
 node verify/pack.mjs    # 只查打包完整性（npm pack --dry-run，确认运行时文件都进包）
 ```
 
@@ -57,10 +57,10 @@ node verify/diff-runner.mjs --write-fixture
    改 `src/` 后必须 `node build.mjs`，并**把重新生成的产物与源码一起提交**。
    `verify/verify.mjs` 会逐字节比较产物，手改或忘记重建都会红。
 2. **UI 改动必须亲眼看。** 这是本项目反复吃亏的地方（历史上多次出现「自检全绿但界面是坏的」）。
-   任何 `src/ui-pro.js` 的可视改动，PR 里必须附**浅色 + 深色**截图或一段短录屏，并写明检查过
+   任何 `src/ui/`（含 `css/`、`i18n/`）或 `src/sky.js` 的可视改动，PR 里必须附**浅色 + 深色**截图或一段短录屏，并写明检查过
    哪些状态：
    - 窄面板 / 中 / 宽三档（拖侧栏改变可用宽度）；
-   - 解读抽屉、设置弹层、流式中 / 停止 / 继续生成 / 错误条；
+   - 紫微师面板、设置弹层、流式中 / 停止 / 继续生成 / 错误条；
    - macOS 桌面端折叠侧栏后，面板左上角「返回会话」可用、不盖住窗口控件。
    没有实机截图时，请明确写「未做视觉复核」，不要用「应该没问题」代替。
 3. **不改仓库的本地身份。** `package.json` 的 `name=@local/ziwei-workbench` 与 `private=true`

@@ -34,7 +34,7 @@ Private vulnerability reporting 已在本仓库开启。如果 GitHub 入口暂�
   插件不额外向第三方上传数据，但**模型请求会经过你配置的 provider**，这是 DSH 会话本身的
   数据路径，不是本插件引入的。
 - **本地存储**：为支持「重新打开还能接着看」，浏览器 localStorage 会保存上次命盘
-  （`ziwei-pro.lastChart.v1`）和按命盘保存的解读对话/报告（`ziwei-pro.readings.v1`，
+  （`ziwei-pro.lastChart.v1`）和按命盘保存的解读对话/报告（`ziwei-pro.readings.v2`，
   最多 8 张盘 / 每张 24 条），其中包含生辰四要素与解读正文。这些数据只在本机浏览器里，
   不上传、不同步；删除 `ziwei-pro.*` 键即可清空。Host 端不落盘保存出生数据；
   `interpret-diag.log` 只记录模型、档位、输出预算、结束原因、耗时与 token 用量，

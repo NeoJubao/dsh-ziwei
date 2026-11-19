@@ -24,36 +24,29 @@ official DeepSeek product.
 
 ---
 
-## v5 dogfood：抽屉 + 报告产物（1.7.0-dogfood.3）
+## v6 dogfood：界面重做（2.0.0-dogfood.1）
 
-> 这一节只属于分支 `feat/v5-chart-studio` 与其上的 `feat/v5-ux-polish`，不是 main 的发布状态。
-> 用 `git switch feat/v5-chart-studio` 进入，`git switch main` 回到稳定版；
-> 切换后刷新 GUI 即可。v5 的解读记录写在 `ziwei-pro.readings.v2`，切回 main 不会读取。
+> 这一节只属于分支 `feature/v6-redesign`，不是 main 的发布状态。
+> 用 `git switch feature/v6-redesign` 进入，`git switch main` 回到稳定版，`git switch feat/v5-ux-polish` 回到 v5；
+> 切换后刷新 GUI 即可。v6 沿用 v5 的本机记录（键和结构不变，只新增 `ziwei-pro.sky`、`ziwei-pro.v6` 两个键）；
+> 解读记录写在 `ziwei-pro.readings.v2`，切回 main 不会读取。
 
-v5 只借自媒体工作台的**交互骨架**，不换视觉皮肤。dogfood.1 的宽屏并排试验已撤回；
-dogfood.2 保留右侧抽屉，并把完整报告做成抽屉内独立页签：
-阶段进度、完成阅读面、全屏阅读、选中改写；示例盘有明确标识；复制/保存/同步/删除都有真实反馈。
+v6 把面板整个重做（spec 见 [docs/specs/2026-11-19_v6-redesign.md](docs/specs/2026-11-19_v6-redesign.md)，
+设计稿在 [docs/design/v6-prototype/](docs/design/v6-prototype/)）：
 
-dogfood.3（体验打磨，spec 见 [docs/specs/2026-11-18_v5-ux-polish.md](docs/specs/2026-11-18_v5-ux-polish.md)）：
+- **首页**：3D 星图，最近打开的几张命盘是星图上的星，点一颗就进这张盘；没有 WebGL 或在设置里关掉时换成静态星图。
+- **新建命盘**：首页的引导问答一问一答地填生辰，也能打开表单直接填。
+- **命盘页**：一屏放完；顶栏切本命 / 大限 / 流年 / 流月 / 流日，左栏是时间卡、格局卡、宫位卡，右边是盘面。
+  点宫位只更新和这一宫有关的部分。
+- **紫微师**：侧边面板，宽档和盘面并排，中、窄档浮在上面；报告和回答在离开面板后继续写，写完照常保存。
+- **完整报告**：顶栏的「报告」页签，边写边能读；导出文件换了版式。
+- **设置**：「启动时自动打开工作台」现在在插件加载时生效（v5 里不起作用）。
 
-- **修复**：报告续写重复拼接、生成中换盘串盘、对话流式只显示最后一段、深色下入口卡标题不可见、窄屏底栏错位等。
-- **收束**：会话入口合并为抽屉里的「在新会话里继续」（去掉顶栏「写入会话」）；去掉「专注看盘」（并入左栏开关，旧偏好自动迁移）；
-  设置里不再重复「显示杂曜」；界面统一叫「完整报告」（导出 HTML 保留「人生鲲鹏计划」品牌）。
-- **简化**：经度改为「出生城市」（内置常用城市，也能直接填经度）；籍贯并入出生城市；职业和排盘口径收进「更多选项」；
-  命盘库不填名也能保存；抽屉空态给三个可直接点的示例问题。
-- **看盘**：选中宫位时盘内标出三方四正；盘面按窗口高度适配，四行宫格落在首屏；详情区运限改为键值行。
-
-下表截图仍是 dogfood.2，尚未按 dogfood.3 更新。
-
-| 抽屉 | 报告 |
-|---|---|
-| ![v5 右侧抽屉：对话](docs/assets/v5-drawer.jpg) | ![v5 抽屉内报告页签](docs/assets/v5-drawer-report.jpg) |
-| ![v5 窄屏抽屉](docs/assets/v5-drawer-narrow.jpg) | ![v5 全屏阅读](docs/assets/v5-reader.jpg) |
-
-规划与取舍见 **[docs/design/v5-chart-studio-plan.md](docs/design/v5-chart-studio-plan.md)**。
+v6 还没有在 DSH 里打开过，也还没有截图；下面「界面预览」和各节的截图都是 v6 之前的界面。
 
 ## 界面预览
 
+> **截图非最新版本**：以下是 2026-11-08 的 v3 界面，v6 的界面见上一节的说明。
 
 真实 DSH 宿主截图（macOS，浅色主题，1280×820 窗口 @2x）。
 
@@ -74,11 +67,11 @@ dogfood.3（体验打磨，spec 见 [docs/specs/2026-11-18_v5-ux-polish.md](docs
 
 ## 功能
 
-- **格局摘要**：左栏命主信息下方直接显示检测到的格局（名称/等级/一句话，最多 4 条），
-  「查看全部」进入完整格局分析页；窄屏仍走顶部入口。
+- **格局卡**：命盘页左栏列出引擎检出的全部格局（名称 + 吉 / 中 / 凶），点一条看说明；
+  窄档下和时间卡、宫位卡用页签切换。
 - **手动检查更新**：设置弹层显示当前版本与「检查更新」；只在点击时经 Host 路由请求 npm registry
   一次，不后台轮询、不记录生辰数据。
-- **四柱月柱默认按节气**（八字通行口径），可在「排盘设置 → 月柱」切回「农历月」；
+- **四柱月柱默认按节气**（八字通行口径），可在生辰表单「更多选项 → 月柱分界」切回「农历月」；
   命宫、星曜、四化与十二宫始终按农历月计算，不受该设置影响。
 - **排盘只有一个来源**：工作台引擎（`src/engine-core.js` → `engine-built.js`）是
   **独立实现**，结果与来源产品逐字段对齐验证（20 个跨世纪 / 立春 / 早晚子时 /
@@ -92,17 +85,17 @@ dogfood.3（体验打磨，spec 见 [docs/specs/2026-11-18_v5-ux-polish.md](docs
   SSE 通道与 Harness `llm` 服务，**不需要在浏览器里另配 API Key**。速览解读
   （800–1200 字）与鲲鹏报告（完整 14 部分 + 致命主书 + 十二字心法）两种模式。
 - **流式收尾有明确语义**：只有收到 `done` 才算写完；命中 `max-tokens`、整体超时、
-  连接中断都会保留已生成部分并给「继续生成」，不会再把半截正文当完整结果。
-- **界面 v2 / v2.1**：盘面优先的自适应布局（ResizeObserver 实测面板宽度分三档）、
-  宫格字号随盘宽缩放、盘面按窗口高度适配、出盘自动收起生辰表单；解读改为面板内右侧阅读抽屉，
-  设置改为面板内弹层，顶栏按钮分层。
+  连接中断都会保留已生成部分并给「接着写」，不会再把半截正文当完整结果。
+- **界面 v6**：按面板实测宽度分窄 / 中 / 宽三档（720 / 1180），命盘页一屏放完、宫格字号随盘面缩放；
+  紫微师是侧边面板（宽档并排，中、窄档浮层），完整报告是单独的页面，设置是面板内弹层。
+  区域与视觉规则见 [docs/ui-contract/](docs/ui-contract/README.md)。
 - **「在新会话里继续」**：一键用 Host `sessionController` 真开新会话，把命盘与已有解读
   灌成首条消息，长报告交给会话 / 子代理跑；同时写入 `ziwei_context` 可读的上下文。
 - **出生城市**：填城市名（内置约 90 个常用城市的近似经度）或直接填经度即可做真太阳时校正；
   不填就按钟表时间排盘，界面会写明当前按什么校正。
-- **解读记录按命盘保存**：同一生辰再次打开（含重启面板）会恢复上次的命盘与对话/报告；
+- **解读记录按命盘保存**：同一生辰再次打开（含重启面板）会恢复这张盘的对话/报告，重启后首页聚焦上次的盘；
   最多保留 8 张盘、每张 24 条消息。记录只存在浏览器 localStorage，不上传；
-  「新对话」会清空当前这张盘的记录。
+  「新对话」清空当前这张盘的对话（可撤销），报告不动。
 - **隐私**：生辰与命盘只在本地浏览器 / 本机 Host 路由 / 你配置的模型 provider 之间流转；
   浏览器 localStorage 存偏好、命盘库、上次命盘与按命盘保存的解读记录，**不存 API Key**
   （旧版遗留键会在启动时清理）。
@@ -154,7 +147,7 @@ Host 半 / Client 半 / 构建链 / 三条数据流 / 依赖边界 / 自检地�
 ```text
 index.js（Host：4 工具 + 系统提示词 + 4 条路由 + vm 沙箱加载引擎）
         ↕ 同源 fetch（SSE / JSON）
-client.js（浏览器：懒加载内核 + 排盘引擎 + 紫微师内核 + React 面板）
+client.js（浏览器：懒加载内核 + 排盘引擎 + 紫微师内核 + 3D 星图 + React 面板）
 ```
 
 关键约束：插件以 `link:` 装进 profile，运行时**不能 import `@deepseek-ai/*` 包**；
@@ -164,7 +157,7 @@ Host 半必需注入只有 `tools` / `systemPrompt`，`webServer` / `llm` 走 `c
 ## 验证
 
 ```bash
-# 全量自检：8 组（内核与 host / 导出 / 路由 / 工具 / 差分 / SSE / 打包 / 界面契约）
+# 全量自检：9 组（内核与 host / 导出 / 路由 / 工具 / 差分 / SSE / 打包 / 界面约定 / v6 界面）
 node build.mjs
 node verify/all.mjs
 
@@ -174,7 +167,7 @@ node verify/pack.mjs
 
 | 组 | 脚本 | 查什么 |
 | --- | --- | --- |
-| 1 | `verify/verify.mjs` | 引擎契约、黄金用例四断言、host 注册与执行、客户端 bundle 可求值、**构建产物新鲜度**、面板默认口径、darwin chrome 避让与「返回会话」出口 |
+| 1 | `verify/verify.mjs` | 引擎契约、黄金用例四断言、host 注册与执行、客户端 bundle 可求值、**构建产物新鲜度**（与 `build.mjs` 重拼结果逐字节一致）、面板默认口径、darwin chrome 避让与「返回会话」出口 |
 | 2 | `verify/exports.mjs` | 宿主入口导出契约（`name` / `inject` / `apply`）；确认 `webServer`/`llm` 走后 `ctx.inject` 而不是硬依赖 |
 | 3 | `verify/routes-auth.mjs` | 路由方法白名单、`requestRejection`、owner-only Peer、JSON Content-Type 守卫 |
 | 4 | `verify/verify-tools.mjs` | 用**真实** `dsh-tools` 运行时校验 4 个工具真的注册、schema 合法、缺参拒绝 |
@@ -182,6 +175,7 @@ node verify/pack.mjs
 | 6 | `verify/sse-hang.mjs` | SSE 对无视 abort 的挂起流必须超时解锁、`max-tokens` 不得伪装成 `done`、断连语义 |
 | 7 | `verify/pack.mjs` | `npm pack --dry-run` 打包完整性（`engine-built.js` / `src/ziwei-core.js` 等必需文件、日志不进包） |
 | 8 | `verify/ui-contract.mjs` | 界面契约的可机械化检查（区域 / token / 可访问性），包装 `scripts/audit-ui.mjs` |
+| 9 | `verify/ui-v6.mjs` | v6 界面：在内存里重拼 `client.js` 并核对与磁盘上的一致，再跑 `verify/ui-v6-*.mjs`（store、各视图、报告、存储、可访问性） |
 
 退出码约定：
 
@@ -249,7 +243,7 @@ node verify/pack.mjs
      async generator 用例专门盯这个）。
    - **客户端判定**：只有收到 `event: done` 才算写完；`done` 带全文，以它为准。读完流却
      没见过 `done`/`error` → 显示「连接中断，内容可能不完整」。截断 / 超时 / 断连 /
-     用户点「停止」都保留已生成部分，错误条上给「继续生成」按钮（把半截正文作为
+     用户点「停止」都保留已生成部分，错误条上给「接着写」按钮（把半截正文作为
      assistant 历史回传，追加「接着写、别重复」）。
    - **诊断**：每次解读往 `interpret-diag.log` 写一行（模型、档位、预算、结束原因、用时、
      token 用量），最多 512KB 后自动重写；`ZIWEI_DIAG=0` 关闭。复现「输出一半」时先看
@@ -259,13 +253,13 @@ node verify/pack.mjs
 8. **客户端必须 lazy-CJS**：官方 `ui-plugin` 契约要求 module-body 副作用在 materialization
    时发生。`client.js` 加载期只注册 `__ModuleLoader__` factory，引擎在 UI factory 首次
    物化时才求值；否则加载即执行 226KB 引擎、提前写 `window` 全局。
-9. **面板是主面板，不是弹窗**：浮层用面板内绝对定位（`.zp-root` 外壳 + 内部滚动层），
+9. **面板是主面板，不是弹窗**：浮层用面板内绝对定位（`.zp-root` 外壳，浮层在 `.zp-shell` 里），
    不按视口坐标算位置；`isolation: isolate` 把内部 z-index 收进自身，避免盖住 frame 的
    `shell.leading`（macOS 折叠侧栏后的退出控件）。darwin 还要按
    `--dsh-frame-top-clearance` / `--dsh-frame-leading-clearance` / `--dsh-frame-overlay-top`
    避让窗口 chrome。
 10. **别让「入口」自己开工**：v3.2 曾在每张盘首次打开解读抽屉时自动发起一次速览，
-    用户点开只想先看看盘，生成却已经跑起来（还消耗一次模型调用）。现在打开抽屉只把命盘
+    用户点开只想先看看盘，生成却已经跑起来（还消耗一次模型调用）。现在打开紫微师面板只把命盘
     带进空态，动手的是用户点的那颗按钮；凡是「点了就会花钱/等几十秒」的动作，都别挂在
     打开浮层、切换页签、启动自动打开这类入口上。
 
@@ -386,8 +380,9 @@ v3 做两次分离：
 - 「解读」「交给会话」会把**命盘文本（含出生四要素）**发给本机 Host 路由，再由 Host 交给
   你配置的模型 provider。插件不额外向第三方上传数据；模型请求的数据路径属 DSH 会话本身。
 - 浏览器 localStorage 存：`ziwei-pro.form`（表单）、`ziwei-pro.library`（命盘库）、
-  `ziwei-pro.lastChart.v1`（上次命盘）、`ziwei-pro.readings.v1`（按命盘保存的解读对话与报告，
-  最多 8 张盘 / 每张 24 条）、`ziwei-pro.focus`、`ziwei-pro.autopen`、`ziwei-pro.showadj`。
+  `ziwei-pro.lastChart.v1`（上次命盘）、`ziwei-pro.readings.v2`（按命盘保存的解读对话与报告，
+  最多 8 张盘 / 每张 24 条；旧版的 `ziwei-pro.readings.v1` 读到时迁过来）、`ziwei-pro.autopen`、
+  `ziwei-pro.showadj`、`ziwei-pro.sky`（首页 3D 星图开关）、`ziwei-pro.v6`（一次性导入的标记）。
   **不存 API Key**；旧版遗留的 `ziwei-workbench.apikey` 会在初始化时被自动清理。
 - 解读记录只在本机浏览器里，不上传；换设备 / 清浏览器数据后不会同步。
 - 诊断日志（`host-diag.log` / `interpret-diag.log`）只记录模型、档位、预算、结束原因、
@@ -414,6 +409,8 @@ v3 做两次分离：
   ISC 要求的版权声明与许可全文见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 - 排盘算法与 iztro（MIT）、lunar-lite（MIT）做过逐字段对照验证，但**未复制其代码**；
   说明与来源链接同样在 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+- 首页 3D 星图用 **Three.js r128（MIT）**：原样放在 `vendor/three-r128.min.js`（构建时核对 SHA-384），
+  拼进 `client.js`；许可全文同样在 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 - 未打包任何字体；图标为本项目自绘（来源确认 TODO 见 notices）。
 
 ## 联系作者
@@ -436,9 +433,9 @@ v3 做两次分离：
 ```text
 ziwei-workbench/
 ├── index.js              Host 半：4 工具 + 系统提示词 + 4 条路由（requestRejection + owner-only）
-├── client.js             构建产物：懒加载内核包装 + 引擎 + 紫微师内核 + 面板 UI
+├── client.js             构建产物：懒加载内核包装 + 引擎 + 紫微师内核 + 3D 星图 + 面板 UI
 ├── engine-built.js       构建产物：仅排盘引擎（Node/host 沙箱与测试用）
-├── build.mjs             构建脚本（注入 vendored 数据表，生成上面两个产物）
+├── build.mjs             构建脚本（注入 vendored 数据表、拼接 src/ui/ 与 3D 星图，生成上面两个产物）
 ├── cordis.patch.yml      bundle 层声明（name 必须等于包名）
 ├── package.json          DSH 插件清单（dsh.bundle / dsh.client / engines / exports / files）
 ├── icon.svg              插件图标
@@ -447,8 +444,10 @@ ziwei-workbench/
 │   ├── engine-core.js    排盘引擎（纯函数，数据表占位符由构建注入）
 │   ├── lunar-data.js     vendored 农历/节气数据表（ISC，见 THIRD_PARTY_NOTICES.md）
 │   ├── ziwei-core.js     紫微师内核（人设 / 归一化 / 黄金用例 / 请求组装）
-│   └── ui-pro.js         浏览器面板（盘面 + 解读抽屉）
-├── verify/               8 组自检（all.mjs 聚合）；fixtures/ 为差分期望值
+│   ├── sky.js            首页 3D 星图（用 Three.js）
+│   └── ui/               浏览器面板：NN-*.js 按文件名拼接，css/ 与 i18n/ 在构建时注入
+├── vendor/               three-r128.min.js（Three.js r128，MIT，原样）
+├── verify/               9 组自检（all.mjs 聚合）；fixtures/ 为差分、运限与本机存储用例的期望值
 ├── scripts/              release-pack.mjs（发布副本）、vendor-lunar-data.mjs（重生成数据表）
 ├── docs/                 INSTALL / PUBLISHING / ARCHITECTURE / ui-contract / design / assets
 ├── .github/              CI、release（默认不执行）、Issue / PR 模板

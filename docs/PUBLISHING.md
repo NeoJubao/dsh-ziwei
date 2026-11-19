@@ -15,7 +15,7 @@
 
 ## 0.5 发布前人工闸门（全过才可公开 / 发布）
 
-以下 7 项**不由脚本代替判断**。工程侧已完成项用 `[x]`，需要人确认的保持 `[ ]`：
+以下各项**不由脚本代替判断**。工程侧已完成项用 `[x]`，需要人确认的保持 `[ ]`：
 
 - [x] **README 真实截图**：2026-11-08 补入 `docs/assets/screenshot-light.png`（真实 DSH 宿主，
       浅色主题，本命盘工作台）；深色/窄屏截图待补。
@@ -37,6 +37,9 @@
 - [ ] **v1.6.0 界面真机走查**：解读抽屉「打开不自动解读 + 空态动作卡」只在无头 Chrome
       （源码 CSS + 等效标记的静态渲染）与自动断言里验过，**未在真实 DSH 宿主点过**。
       发布前需作者点一遍：亮/暗色、464 宽与窄屏满宽、键盘 Tab、两个动作真的发起请求。
+- [ ] **v6 界面真机走查（2.0.0-dogfood.1 起）**：`client.js` 已换成 v6 界面（含 Three.js 3D 星图），
+      只在 Node 的 vm / 假 DOM 自检里验过，**还没在真实 DSH 宿主打开过**。发布前需作者在 DSH 里看
+      浅色和深色、窄 / 中 / 宽三档、首页 3D 与无 WebGL 时的静态星图。
 - [x] **干净环境安装冒烟（配置层）**：2026-11-08 用 `DSH_HOME=/tmp/dsh-smoke-home` 新建 `smoke` profile，
       对发布 tarball 执行 `dsh plugin --profile smoke add <tgz>`，`dsh --profile smoke --dump-config`
       已出现 `# == dsh-ziwei` 与 bundle 行；**未做 GUI 启动/点击**。
@@ -262,7 +265,7 @@ DSH 没有官方插件市场，但 `plugin_market` / Plugins → Discover 支持
 - [ ] `cordis.patch.yml` 的 `name` 与发布包名一致（发布副本由脚本自动改，检查 `dist/` 里的内容）
 - [ ] `client.js` 的模块 `id` 与发布包名一致（同上）
 - [ ] `locale/en.json` + `locale/zh.json` 的 `meta.title/description` 齐全
-- [ ] `THIRD_PARTY_NOTICES.md` 含 solarlunar ISC 全文；`LICENSE` 年份/署名正确
+- [ ] `THIRD_PARTY_NOTICES.md` 含 solarlunar ISC 全文与 three.js r128 MIT 全文（`client.js` 里拼着 Three.js）；`LICENSE` 年份/署名正确
 - [ ] README 无本机路径、无内部产品名；截图/录屏是当前版本（暂缺时已明确标注「待补」）
 - [ ] `npm pack` 文件清单无日志、无 `.ref`、无私有目录（`verify/pack.mjs` 有断言）
 - [ ] 版本号已升、`v<version>` 标签已推送；npm Trusted Publisher / Environment / Variables 已配置

@@ -143,7 +143,7 @@ dsh plugin --profile <profile> remove @local/ziwei-workbench
 | 侧栏没有「紫微斗数 Pro」 | Host 半没生效 / bundle 层没加载 | 确认 `--dump-config` 有 `# == <包名>`；重启 DSH |
 | 面板出现但排盘报错 | `engine-built.js` / `src/ziwei-core.js` 缺失（历史打包事故） | 重新安装；运行 `node verify/pack.mjs` 检查包内容 |
 | 解读提示「未挂载 sessionController」 | profile 缺该服务 | 改用「读取工作台命盘上下文」：在会话里让 agent 调 `ziwei_context` |
-| 解读一直「思考中」后中断 | 模型 `max-tokens` / 超时被截断 | 面板会保留已生成部分并给「继续生成」；看 `interpret-diag.log` 的 `finish=` |
+| 解读一直「思考中」后中断 | 模型 `max-tokens` / 超时被截断 | 面板会保留已生成部分并给「接着写」；看 `interpret-diag.log` 的 `finish=` |
 | 装完没变化 | 只刷新了页面但改的是 Host 半 | 重启 DSH（Host 半在启动时装载） |
 | `link:` 安装后改 `src/` 无效 | 忘了构建 | `node build.mjs`，再重启/刷新 |
 

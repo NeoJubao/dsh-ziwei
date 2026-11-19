@@ -25,8 +25,9 @@
 │  client.js（Client 半，__ModuleLoader__ 懒加载 factory）               │
 │    ├─ 排盘引擎 ZWEngine（纯函数，无 DOM）                              │
 │    ├─ 紫微师内核 ZWCore（人设/提示词/请求组装/黄金用例）                │
+│    ├─ 3D 星图（Three.js r128 + src/sky.js，首页第一次可见时才执行）     │
 │    └─ 面板 UI（React，注册到 sidebar.panellist）                       │
-│         左侧生辰表单 · 盘面/十二宫/四化/大限 · 解读抽屉 · 设置弹层      │
+│         首页星图 · 引导问答 · 命盘页 · 紫微师面板 · 报告页 · 设置弹层   │
 └───────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -109,12 +110,15 @@
 懒加载内核包装（__ziweiBootstrapKernel，定义但不执行）
   + engine-built.js（排盘引擎，挂 window.ZWEngine）
   + src/ziwei-core.js（紫微师内核，挂 window.ZWCore）
-  + src/ui-pro.js（React 面板，window.__ModuleLoader__.load({ id, factory })）
+  + 3D 星图（__ziweiBootstrapSky，定义但不执行：vendor/three-r128.min.js + src/sky.js）
+  + src/ui/ 拼接（React 面板，window.__ModuleLoader__.load({ id, factory })）
 ```
 
 - **lazy-CJS 契约**：脚本加载期只调用 `__ModuleLoader__.load(...)` 注册 factory；
   引擎/内核在 factory 首次物化（materialization）时才求值。因此 `client.js` 加载时不写
   `window.ZWEngine`、不执行 226KB 引擎代码。`verify/verify.mjs` 有静态断言防回退。
+  Three.js（约 600KB）和 3D 场景更晚：首页第一次可见、且设置里开着「首页 3D 星图」时才执行，
+  用局部的 `module` / `exports` 接住 Three.js 的导出，不产生 `window.THREE`。
 - `id` 必须等于**解析后的包名**：DSH 用包名标识浏览器模块。发布改名时
   `scripts/release-pack.mjs` 会同步改写这个 id（以及 `cordis.patch.yml` 的 `name`）。
 - UI 只 `require('react')`（平台基线模块），不 `import` 任何 `@deepseek-ai/*` 客户端包。
@@ -127,8 +131,9 @@
   面板自身上下文，避免盖住 frame 的 `shell.leading` 退出控件。
 - **浏览器 localStorage 存偏好、命盘库与解读记录**：`ziwei-pro.form`（表单）、
   `ziwei-pro.library`（命盘库）、`ziwei-pro.lastChart.v1`（上次命盘）、
-  `ziwei-pro.readings.v1`（按命盘保存的对话/报告，最多 8 张盘）、`ziwei-pro.focus`、
-  `ziwei-pro.autopen`、`ziwei-pro.showadj`。均只在本机浏览器，不上传。
+  `ziwei-pro.readings.v2`（按命盘保存的对话/报告，最多 8 张盘；旧版 `ziwei-pro.readings.v1` 读到时迁过来）、
+  `ziwei-pro.autopen`、`ziwei-pro.showadj`、`ziwei-pro.sky`（首页 3D 星图）、`ziwei-pro.v6`（一次性导入的标记）。
+  均只在本机浏览器，不上传。键和记录结构沿用 v5，v6 只新增了 `sky` 和 `v6` 两个键。
   **不存 API Key**；旧版本遗留的 `ziwei-workbench.apikey` 会在初始化时被清理。
 
 ## 4. 构建链（`build.mjs`）
@@ -143,11 +148,16 @@ node build.mjs
 2. 校验两项都是 201 项，数量不符直接失败。
 3. 把数据表注入 `src/engine-core.js` 的两个占位符：
    `/*__LUNAR_INFO__*/`、`/*__LTERM_INFO__*/`。
-4. 产出：
+4. 3D 星图：核对 `vendor/three-r128.min.js` 的 SHA-384（和 cdnjs 公布的一致，文件被改过就失败），
+   与 `src/sky.js` 一起包进 `__ziweiBootstrapSky()`。
+5. 界面：`src/ui/NN-*.js` 按文件名顺序拼进同一个 factory；`src/ui/css/*.css` 注入 CSS 占位符，
+   `src/ui/i18n/*.json` 合成中英字典注入字典占位符，`package.json` 的版本号注入 `APP_VERSION`。
+   拼接时拒绝：`\r`、缺结尾换行、i18n 键重复、重名的顶层声明、过不了语法检查。
+6. 产出：
    - `engine-built.js`：只有引擎（Node/host 沙箱与测试用）；
-   - `client.js`：懒加载内核包装 + 引擎 + `src/ziwei-core.js` + `src/ui-pro.js`。
+   - `client.js`：懒加载内核包装 + 引擎 + `src/ziwei-core.js` + 3D 星图 + `src/ui/` 拼接结果。
 
-产物提交进仓库；`verify/verify.mjs` 会逐字节比较「当前产物」与「源码重新拼接的结果」，
+产物提交进仓库；`verify/verify.mjs`（和 `verify/ui-v6.mjs`）会逐字节比较「当前产物」与「源码重新拼接的结果」，
 所以**改了 `src/` 必须重新 `node build.mjs` 并一起提交**。`npm pack` 之前也要先构建，
 否则打进去的是旧产物。
 
@@ -156,9 +166,9 @@ node build.mjs
 ### 5.1 排盘（纯本地）
 
 ```text
-面板表单（日期/时间/性别/经度）
+首页引导问答或生辰表单（日期/时间/性别/出生城市或经度）
   → ZWEngine.computeChart（浏览器内，纯函数）
-  → UI 渲染十二宫 / 四化 / 大限 / 流年 / 格局
+  → UI 渲染十二宫 / 四化 / 大限 / 流年 / 流月 / 流日 / 格局
 ```
 
 排盘在浏览器内完成，不把生辰发到 Host；只有「解读」「交给会话」才把**命盘文本**
@@ -197,18 +207,19 @@ node build.mjs
 `client.js` 里 `__ModuleLoader__` 的 `id`。漏改任何一处都会出现「装上了但不生效」或
 「Host 层生效、面板不出现」。
 
-## 7. 自检地图（`verify/all.mjs`，8 组）
+## 7. 自检地图（`verify/all.mjs`，9 组）
 
 | 组 | 脚本 | 覆盖 |
 | --- | --- | --- |
-| 1 | `verify/verify.mjs` | 引擎契约、黄金用例、host 注册/路由、客户端 bundle 可求值、产物新鲜度、chrome 避让 |
+| 1 | `verify/verify.mjs` | 引擎契约、黄金用例、host 注册/路由、客户端 bundle 可求值、产物新鲜度（逐字节）、chrome 避让 |
 | 2 | `verify/exports.mjs` | 宿主导出契约（`name` / `inject` / `apply`）、路由依赖走 `ctx.inject` |
 | 3 | `verify/routes-auth.mjs` | 路由方法 / `requestRejection` / owner-only / JSON 守卫 |
 | 4 | `verify/verify-tools.mjs` | 真实 `dsh-tools` 契约；无 DSH 环境时按退出码 3 显式跳过 |
 | 5 | `verify/diff-runner.mjs` | 20 用例逐字段差分：有来源产品 runner 用 runner，无则用 `verify/fixtures/paipan-reference.json` |
 | 6 | `verify/sse-hang.mjs` | SSE 超时解锁、max-tokens 不算 done、断连语义 |
 | 7 | `verify/pack.mjs` | `npm pack --dry-run` 打包完整性（运行时文件齐全、日志不进包） |
-| 8 | `verify/ui-contract.mjs` | 界面契约的可机械化检查（区域 / token / a11y，`scripts/audit-ui.mjs` 的包装） |
+| 8 | `verify/ui-contract.mjs` | 界面契约的可机械化检查（区域 / token / a11y，`scripts/audit-ui.mjs` 的包装；约定在 `docs/ui-contract/`） |
+| 9 | `verify/ui-v6.mjs` | v6 界面：内存里重拼 `client.js` 并核对与磁盘一致，再跑 `verify/ui-v6-*.mjs`（公共的装载工具和假 React 在 `verify/client-harness.mjs`） |
 
 ## 8. 已知限制
 
