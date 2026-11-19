@@ -9,3 +9,6 @@
 *.gif binary
 *.webp binary
 *.svg text eol=lf
+
+# 第三方文件逐字节原样（自检核对 SHA-384），不做行尾转换
+vendor/** -text
