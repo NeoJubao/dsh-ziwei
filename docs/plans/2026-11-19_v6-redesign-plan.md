@@ -262,15 +262,24 @@
 
 前提：T1–T9 完成，主会话在预览壳里看过全部状态。
 
-- [ ] **一次原子提交**：`build.mjs` 改成出 v6（`ui = assembleUi(...).text`，`sky = assembleSky(root)`；最后一行日志仍是 `built: engine-built.js, client.js`）；重新生成的 `client.js`；`verify/verify.mjs` 第 3 节按附录 A 处理；体检脚本默认 profile 改成 v6；`git mv docs/ui-contract/v6/* docs/ui-contract/`。
-- [ ] 后续提交：删 `src/ui-pro.js` 和体检脚本的 v5 profile；`README.md` / `docs/ARCHITECTURE.md` / `CONTRIBUTING.md` / `REVIEW.md` 里"8 组自检"和 `src/ui-pro.js` 的说法；`CHANGELOG.md`、`package.json` 的 `version`（`2.0.0-dogfood.1`）、`locale/*.json` 的描述。
-- [ ] `node build.mjs && node verify/all.mjs` 全绿；`node verify/pack.mjs`；`node scripts/release-pack.mjs --dry`。
+- [x] **一次原子提交**：`build.mjs` 改成出 v6（`ui = assembleUi(...).text`，`sky = assembleSky(root)`；最后一行日志仍是 `built: engine-built.js, client.js`）；重新生成的 `client.js`；`verify/verify.mjs` 第 3 节按附录 A 处理；体检脚本默认 profile 改成 v6；`git mv docs/ui-contract/v6/* docs/ui-contract/`。
+- [x] 后续提交：删 `src/ui-pro.js` 和体检脚本的 v5 profile；`README.md` / `docs/ARCHITECTURE.md` / `CONTRIBUTING.md` / `REVIEW.md` 里"8 组自检"和 `src/ui-pro.js` 的说法；`CHANGELOG.md`、`package.json` 的 `version`（`2.0.0-dogfood.1`）、`locale/*.json` 的描述。
+- [x] `node build.mjs && node verify/all.mjs` 全绿；`node verify/pack.mjs`；`node scripts/release-pack.mjs --dry`。
+- 实际做出来和上面写的不同之处：切换是 `9983da4` 一个提交；版本号和 CHANGELOG 在它后面单独提交，再后面才删 `src/ui-pro.js`（这样每个提交各自都能过全量自检）。附录 A 里标"原样保留"的两条在 v6 上不成立，改写了：48px 那条只管外壳、顶栏和 darwin 规则（没有 WebGL 时首页星图区有一个 48px 的版面间距，不是窗口避让）；`data-dsh-automatic-focus` 在 v6 里是属性写法，不是 `setAttribute`。体检只在第 8 组跑一次，`verify/ui-v6-contract.mjs` 删了。v5 的 94 城对照改成读 fixture（`verify/fixtures/cities-v5.json`）。
 
 ### T11：复核（主会话）
 
-- [ ] 代码审查；预览壳截图：浅 / 深 × 窄 / 中 / 宽 × 首页、引导、命盘（五个层级）、紫微师、报告四种状态、设置、浮层。
-- [ ] 浏览器里做自检做不到的：点宫位时用 `MutationObserver` 确认只有属性变化和宫位卡、连线两处子树变化；一屏是否放得下；导出文件打印成 PDF 看分页；挂载卸载 30 次。
-- [ ] 汇报里列出没验证到的（真实 DSH）。
+- [x] 代码审查；预览壳截图：浅 / 深 × 窄 / 中 / 宽 × 首页、引导、命盘（五个层级）、紫微师、报告四种状态、设置、浮层。
+- [x] 浏览器里做自检做不到的：点宫位时用 `MutationObserver` 确认只有属性变化和宫位卡、连线两处子树变化；一屏是否放得下；导出文件打印成 PDF 看分页；挂载卸载 30 次。
+- [x] 汇报里列出没验证到的（真实 DSH）。
+
+**复核记录（2026-11-20，本机预览壳：宿主的 CSS 变量 + React 18.3.1，Chrome）**
+
+- 看过的：首页（浅 / 深，宽 / 窄，悬停、菜单、飞入、拉远、开场、`nogl=1` 的静态星图）；引导问答（每一步、拒收的日期、"不确定"、确认步的校正说明、新星诞生进命盘）；生辰表单和全部命盘（中档，浅色）；命盘页（宽档浅色的本命、流日、带紫微师的大限；中档深色的流年加杂曜；窄档浅色的流月）；紫微师（宽档空态、中档深色的对话、窄档浅色的错误条和流式）；报告页（还没写、正在写、中断、写完；窄档深色）；设置（中档浅色）；macOS 标题带（手工设了三个 `--dsh-frame-*` 变量）。
+- 量过的：点宫位时十二个宫格节点不换，变化只有宫格的状态属性、连线、宫位卡（`MutationObserver`）；三档下卡片、宫格、中宫都没有溢出；写报告途中卸载再挂载 30 次，画面一样、任务不停、写完落盘，控制台没有报错；首页卸载再挂载 30 次没有 WebGL 警告；导出文件打印成 A4 是 10 页。
+- 切换之后用磁盘上的 `client.js`（2.0.0-dogfood.1）在预览壳里又装了一遍：能跑，没有 `window.THREE`，控制台没有报错。
+- **没验证到的**：真实 DSH 里的任何东西（WebGL、主题切换、窗口标题带、「返回会话」、「在新会话里继续」的跳转、`/ziwei/version`、真实模型的流式）；触屏；Windows；读屏软件的实际朗读。预览壳里的流是模拟的。
+- **已知但没处理的**：中、窄档浮着的紫微师在面板重新挂载时会重放一次 180ms 的滑入；有模态层开着时，键盘到不了提示条上的「撤销 / 查看」；生辰表单里的二选一用的是页签语义（`role=tab`）而不是单选组；`package.json` 的 `files` 不带 `src/ui/`、`vendor/`（发布包里的自检跑不了，切换前就是这样）。
 
 ## 附录 A：`verify/verify.mjs` 第 3 节在切换时的去向
 
