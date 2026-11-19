@@ -271,6 +271,8 @@ export default async function store(t) {
       setTimeout: timers.setTimeout, clearTimeout: timers.clearTimeout,
       openSession: o.openSession || ((id) => { opened.push(id); return true; })
     });
+    /* 默认当作面板挂着（有一个订阅者）；mounted: false 是面板被宿主卸载的时候 */
+    if (o.mounted !== false) st.subscribe(() => {});
     return { st, storage, fetch, timers, opened };
   };
   const last = (f) => f.calls[f.calls.length - 1];
@@ -606,7 +608,7 @@ export default async function store(t) {
   section('v6 store：卸载安全（没有订阅者）');
   {
     const storage = memoryStorage();
-    const { st, fetch } = mk({ storage });
+    const { st, fetch } = mk({ storage, mounted: false });
     const a = st.addChart(GOLDEN, '甲');
     st.openChart(a.id);
     st.startReport();
@@ -635,7 +637,7 @@ export default async function store(t) {
   }
   {
     const storage = memoryStorage();
-    const { st, fetch } = mk({ storage });
+    const { st, fetch, timers: timers2 } = mk({ storage, mounted: false });
     const a = st.addChart(GOLDEN, '甲');
     st.openChart(a.id);
     st.startReport();
@@ -647,6 +649,87 @@ export default async function store(t) {
     const rec = readMap(storage)[KEY_A];
     eq('abortAll()：任务全停，半篇报告存成可接着写', [st.job(KEY_A), rec && rec.report.status, rec && rec.report.text, rec && rec.report.issue && rec.report.issue.canContinue, !!last(fetch).init.signal.aborted],
       [null, 'error', '半篇', true, true]);
+    st.subscribe(() => {});
+    st.showToast('还挂着的一句');
+    st.abortAll();
+    eq('abortAll() 连提示和它的定时器一起清掉', [st.getState().session.toast, timers2.pending.size], [null, 0]);
+  }
+
+  {
+    const { st, fetch, timers } = mk({ mounted: false });
+    const a = st.addChart(GOLDEN, '甲');
+    st.openChart(a.id);
+    st.startReport();
+    await settle();
+    last(fetch).send('done', { text: '写完了' });
+    await settle();
+    const tt = st.getState().session.toast;
+    eq('没人订阅时报告写完：提示留着，不开始计时', [tt && tt.text, tt && tt.action && tt.action.label, timers.pending.size], [ZH.reportReadyToast, ZH.view, 0]);
+    const un = st.subscribe(() => {});
+    eq('回到面板（有人订阅）才开始计时：8 秒', timers.delays(), [8000]);
+    timers.runAll();
+    eq('到点消失', st.getState().session.toast, null);
+    un();
+    st.showToast('没人看的一句');
+    st.showToast('后来的一句');
+    eq('没人订阅：两句都不计时', timers.pending.size, 0);
+    st.subscribe(() => {});
+    eq('等着的提示被新的顶掉：只给新的计时', [st.getState().session.toast.text, timers.delays()], ['后来的一句', [3200]]);
+    st.showToast('第三句');
+    st.dismissToast();
+    eq('dismissToast 之后没有定时器', [st.getState().session.toast, timers.pending.size], [null, 0]);
+  }
+  {
+    const { st, timers } = mk({ mounted: false });
+    st.showToast('等着的一句');
+    st.dismissToast();
+    st.subscribe(() => {});
+    eq('等着的提示被关掉之后，再订阅也不计时', [st.getState().session.toast, timers.pending.size], [null, 0]);
+  }
+
+  section('v6 store：不该变的不变（少惊动订阅者）');
+  {
+    const { st, fetch } = mk();
+    const a = st.addChart(GOLDEN, '甲');
+    st.openChart(a.id);
+    st.startReport();
+    await settle();
+    last(fetch).send('start', {});
+    await settle();
+    const jobs0 = st.getState().jobs;
+    const readings0 = st.getState().readings;
+    let calls = 0;
+    const un = st.subscribe(() => { calls++; });
+    last(fetch).send('delta', { text: '一' }).send('delta', { text: '二' });
+    await settle();
+    eq('报告的 delta：readings 换了，jobs 还是原来那个对象', [st.getState().readings !== readings0, st.getState().jobs === jobs0, st.reading().report.text, calls], [true, true, '一二', 2]);
+    last(fetch).send('thinking', { chars: 12 });
+    await settle();
+    eq('thinking 变了：jobs 才换', [st.getState().jobs !== jobs0, st.job().thinkChars], [true, 12]);
+    last(fetch).send('done', { text: '一二' });
+    await settle();
+    un();
+
+    st.ask('问');
+    await settle();
+    last(fetch).send('start', {});
+    await settle();
+    const jobs1 = st.getState().jobs;
+    last(fetch).send('delta', { text: '答' }).send('delta', { text: '案' });
+    await settle();
+    eq('对话的 delta：jobs 也不换', [st.getState().jobs === jobs1, st.reading().thread[st.reading().thread.length - 1].content], [true, '答案']);
+    last(fetch).send('done', { text: '答案' });
+    await settle();
+
+    let n = 0;
+    const un2 = st.subscribe(() => { n++; });
+    ok('setReadPos 第一次 → true', st.setReadPos({ part: 2, offset: 40 }) === true);
+    ok('同一个位置再设一次 → false', st.setReadPos({ part: 2, offset: 40 }) === false);
+    eq('位置没变不通知', n, 1);
+    ok('位置变了 → true', st.setReadPos({ part: 2, offset: 41 }) === true);
+    ok('数字位置也可以，没变 → false', st.setReadPos(300) === true && st.setReadPos(300) === false);
+    ok('清掉 → true，再清 → false', st.setReadPos(null) === true && st.setReadPos(null) === false);
+    un2();
   }
 
   section('v6 store：换盘不串');

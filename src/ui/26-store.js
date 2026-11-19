@@ -24,6 +24,9 @@
  *   jobs      { [命盘 key]: { kind: 'chat'|'report', thinkChars } }   没有任务的 key 不出现
  * 命盘 key = readingKeyOf(entry.input)。示例盘的 chartId 是 'sample'，不进命盘库。
  * subscribe(fn) → 退订函数。每次变化后同步调用 fn(state)；fn 里再改状态不会重入，排在这一轮之后再通知一轮。
+ * 流式增量每秒来很多次：它只换 readings（和那张盘的 reading），jobs 在 kind / thinkChars 没变时还是同一个对象，
+ * 所以只关心"有没有任务在跑"的订阅者不用跟着重画。
+ * 提示（toast）的自动消失从有人订阅时才开始计时：面板被卸载期间任务写完，提示会留到回来的时候。
  *
  * ---------------- 读 ----------------
  *   currentEntry() / currentChart() / horoscope() / todayOf() / keyOf(entry) / entryById(id) / chartOf(entry)
@@ -72,6 +75,14 @@ function storeYmd(ms) {
 function storeValidWhen(w) {
   return !!w && [w.y, w.m, w.d].every(function (n) { return typeof n === 'number' && Math.floor(n) === n; }) &&
     w.m >= 1 && w.m <= 12 && w.d >= 1 && w.d <= 31;
+}
+
+/* 阅读位置是数字或一层的小对象（{ part, offset }）；一样就不用通知 */
+function storeSamePos(a, b) {
+  if (a === b) return true;
+  if (!a || !b || typeof a !== 'object' || typeof b !== 'object') return false;
+  const ka = Object.keys(a), kb = Object.keys(b);
+  return ka.length === kb.length && ka.every(function (k) { return a[k] === b[k]; });
 }
 
 function storeWithKey(map, key, value) {
@@ -171,6 +182,7 @@ function createStore(deps) {
   const lastAsk = {};         /* 命盘 key → 最近一次提问 { baseLen, shown, question, scope }，给重试和续写用 */
   const timers = [];
   let toastTimer = null;
+  let toastWaiting = null;    /* 没人订阅（面板被卸载）时排的提示 { toast, ms }：等有人订阅了再开始计时 */
   let toastSeq = 0;
   let sampleMemo = null;
   let horoMemo = { k: '', h: null };
@@ -225,6 +237,11 @@ function createStore(deps) {
   function subscribe(fn) {
     if (typeof fn !== 'function') return function () {};
     listeners.push(fn);
+    if (toastWaiting) {
+      const w = toastWaiting;
+      toastWaiting = null;
+      if (state.session.toast === w.toast) armToast(w.toast, w.ms);
+    }
     return function () {
       const i = listeners.indexOf(fn);
       if (i >= 0) listeners.splice(i, 1);
@@ -307,10 +324,16 @@ function createStore(deps) {
   /* 一次提交里改一张盘的 reading 和 job；job 为 undefined 不动，null 删掉 */
   function updateKey(key, readingPatch, job) {
     const base = readingPatch ? readingRaw(key) : null;
-    const next = Object.assign({}, state);
-    if (readingPatch) next.readings = storeWithKey(state.readings, key, Object.assign({}, base, readingPatch));
-    if (job !== undefined) next.jobs = storeWithKey(state.jobs, key, job || undefined);
-    commit(next);
+    let readings = state.readings, jobs = state.jobs;
+    if (readingPatch) readings = storeWithKey(readings, key, Object.assign({}, base, readingPatch));
+    if (job !== undefined) {
+      /* kind / thinkChars 没变就留着原来的 job 对象（每个 delta 都会走到这里） */
+      const prev = jobs[key] || null;
+      const same = job ? (!!prev && prev.kind === job.kind && prev.thinkChars === job.thinkChars) : !prev;
+      if (!same) jobs = storeWithKey(jobs, key, job || undefined);
+    }
+    if (readings === state.readings && jobs === state.jobs) return;
+    commit(Object.assign({}, state, { readings: readings, jobs: jobs }));
   }
   function setThink(key, chars) {
     const j = state.jobs[key];
@@ -339,23 +362,31 @@ function createStore(deps) {
   }
 
   /* ---------------- 提示 ---------------- */
+  function armToast(toast, ms) {
+    toastTimer = later(function () {
+      toastTimer = null;
+      const cur = state.session.toast;
+      if (cur && cur.key === toast.key) patchSessionRaw({ toast: null });
+    }, ms);
+  }
   function showToastRaw(text, opts) {
     const o = opts || {};
     const action = o.action || (o.undo ? { label: t('undo'), run: o.undo } : null);
     const toast = { text: String(text || ''), error: !!o.error, action: action, key: ++toastSeq };
     if (toastTimer !== null) { cancelLater(toastTimer); toastTimer = null; }
+    toastWaiting = null;
     patchSessionRaw({ toast: toast });
     if (later) {
-      toastTimer = later(function () {
-        toastTimer = null;
-        const cur = state.session.toast;
-        if (cur && cur.key === toast.key) patchSessionRaw({ toast: null });
-      }, o.action ? STORE_TOAST_MS.action : (o.undo ? STORE_TOAST_MS.undo : STORE_TOAST_MS.plain));
+      const ms = o.action ? STORE_TOAST_MS.action : (o.undo ? STORE_TOAST_MS.undo : STORE_TOAST_MS.plain);
+      /* 没人订阅 = 面板被卸载，没人看得到：先留着，回到面板再开始计时 */
+      if (listeners.length) armToast(toast, ms);
+      else toastWaiting = { toast: toast, ms: ms };
     }
     return toast;
   }
   function dismissToast() {
     if (toastTimer !== null) { cancelLater(toastTimer); toastTimer = null; }
+    toastWaiting = null;
     patchSessionRaw({ toast: null });
   }
   /* 任务在用户看不到的地方结束时，排一条带"查看"的提示（v5 announceInBackground） */
@@ -564,6 +595,8 @@ function createStore(deps) {
   function setReadPos(pos, key) {
     const k = key || currentKey();
     if (!k) return false;
+    const cur = state.session.readPos[k];
+    if (pos == null ? cur === undefined : storeSamePos(cur, pos)) return false;
     return patchSessionRaw({ readPos: storeWithKey(state.session.readPos, k, pos == null ? undefined : pos) });
   }
   function patchSession(patch) {
@@ -850,7 +883,10 @@ function createStore(deps) {
       try { if (job.handle) job.handle.abort(false); } catch (e) { /* ignore */ }
     });
     if (toastTimer !== null) { cancelLater(toastTimer); toastTimer = null; }
+    toastWaiting = null;
     while (timers.length) cancelLater(timers.pop());
+    /* 定时器都停了：还挂着的提示不会再自己消失，一并清掉 */
+    if (state.session.toast) patchSessionRaw({ toast: null });
   }
 
   return {
