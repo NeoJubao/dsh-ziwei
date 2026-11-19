@@ -1,7 +1,7 @@
 /* ================================================================
  * 70-chart：命盘页。一屏放完，不滚动：左栏三张卡（时间卡 / 格局卡 / 宫位卡）+ 盘面
  *
- * 结构（70-chart.js 渲染）：
+ * 结构（section.zp-chart 是 90-app.js 的 ProApp 渲染的，zp-enter 也由它加；70-chart.js 的 ChartPage 从 div.zp-body 开始）：
  *   section.zp-chart                          进入时加 zp-enter（一次性的入场，240ms 后移除）
  *     div.zp-body                             盘面舞台；看报告时隐藏（hidden），不卸载
  *       div.zp-side[data-pane="scope|pats|detail"]
