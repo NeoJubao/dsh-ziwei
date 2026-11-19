@@ -1,0 +1,107 @@
+/* ================================================================
+ * 10-base：外壳、顶栏、图标按钮、首页占位、错误边界、减少动态效果
+ * ================================================================ */
+.zp-root *, .zp-root *::before, .zp-root *::after { box-sizing: border-box }
+/* 焦点框的颜色和粗细由宿主的 :focus-visible 给，这里只补样式和偏移 */
+.zp-root :focus-visible { outline-style: solid; outline-offset: 2px }
+
+/* 外壳：在文档流里、相对定位，所以根节点的 darwin padding-top 对它生效；浮层都在它里面绝对定位 */
+.zp-shell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ---------------- 顶栏 ---------------- */
+.zp-head {
+  position: relative;
+  z-index: 2;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 60px;
+  padding: 0 20px;
+}
+.zp-root[data-w="narrow"] .zp-head { padding: 0 12px }
+
+.zp-icon {
+  display: block;
+  flex: none;
+}
+.zp-icon-btn {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 8px;
+  background: var(--dsw-alias-bg-layer-1);
+  color: var(--dsw-alias-label-secondary);
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+.zp-icon-btn:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-primary);
+}
+.zp-icon-btn:disabled { opacity: 0.55; cursor: default }
+/* 「返回会话」：顶栏第一个控件，常驻 */
+.zp-exit { color: var(--dsw-alias-label-primary) }
+
+.zp-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 8px;
+  background: var(--dsw-alias-bg-layer-1);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+.zp-btn:hover { background: var(--dsw-alias-interactive-bg-hover) }
+
+/* ---------------- 首页（占位：星图在 HOME_SKY，底部一列在 HOME_TALK） ---------------- */
+.zp-home {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.zp-sky {
+  position: absolute;
+  inset: 0;
+}
+.zp-col {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+/* ---------------- 错误边界 ---------------- */
+.zp-crash { padding: 16px }
+.zp-crash-msg {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: var(--dsw-alias-label-primary);
+}
+.zp-crash-hint {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: var(--dsw-alias-label-secondary);
+}
+
+/* ---------------- 减少动态效果：界面过渡和动画全部关掉（3D 只画静止的一帧，由 sky.js 处理） ---------------- */
+@media (prefers-reduced-motion: reduce) {
+  .zp-root *, .zp-root *::before, .zp-root *::after { transition: none !important; animation: none !important }
+}

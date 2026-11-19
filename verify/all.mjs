@@ -12,6 +12,7 @@
  *   6. verify/sse-hang.mjs      SSE 对无视 abort 的挂起流必须超时解锁（19 项）
  *   7. verify/pack.mjs          打包完整性（npm pack 必需文件）
  *   8. verify/ui-contract.mjs   界面契约体检（包装 scripts/audit-ui.mjs；区域 / token / 可访问性）
+ *   9. verify/ui-v6.mjs         v6 界面：在内存里拼出 v6 的 client，跑 verify/ui-v6-*.mjs（含 --profile v6 体检）
  */
 /* 自检不写 interpret-diag.log（那是给真实面板排障用的） */
 process.env.ZIWEI_DIAG = '0';
@@ -29,7 +30,8 @@ const STEPS = [
   ['与独立版 run-paipan.js 逐字段差分', 'diff-runner.mjs'],
   ['SSE 挂起 / 超时解锁', 'sse-hang.mjs'],
   ['打包完整性（npm pack 必需文件）', 'pack.mjs'],
-  ['界面契约（ui-contract）', 'ui-contract.mjs']
+  ['界面契约（ui-contract）', 'ui-contract.mjs'],
+  ['v6 界面（ui-v6）', 'ui-v6.mjs']
 ];
 
 const results = [];

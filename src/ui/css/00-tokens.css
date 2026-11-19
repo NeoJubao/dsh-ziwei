@@ -1,0 +1,92 @@
+/* ================================================================
+ * 00-tokens：根节点、内容色、宿主约定（界面约定 v6，docs/ui-contract/v6/）
+ * - 系统色（底、描边、文字、主按钮、悬停、遮罩）只用宿主的 --dsw-alias-*，这里不定义。
+ * - 内容色 --zp-* 浅 / 深成对，值登记在 tokens.md；改值先改文档，体检脚本逐个核对。
+ * - 根节点按面板实测宽度分档（data-w = narrow / mid / wide），不用视口媒体查询。
+ * ================================================================ */
+.zp-root {
+  --zp-zi: #6b55d4;
+  --zp-gold: #a07a2c;
+  --zp-gold-text: #8a6a1f;
+  --zp-mu-lu: #15803d;
+  --zp-mu-quan: #1d4ed8;
+  --zp-mu-ke: #a16207;
+  --zp-mu-ji: #b91c1c;
+  --zp-s0: #8a5cc4;
+  --zp-s1: #2f84b8;
+  --zp-s2: #c96a24;
+  --zp-s3: #a07b1c;
+  --zp-s4: #c04d78;
+  --zp-s5: #b5402f;
+  --zp-s6: #93633a;
+  --zp-s7: #5b6cc0;
+  --zp-s8: #2f9363;
+  --zp-s9: #6d808a;
+  --zp-s10: #21917d;
+  --zp-s11: #7d6c56;
+  --zp-s12: #a3354a;
+  --zp-s13: #4560a6;
+  --zp-font-serif: "Songti SC", "STSong", "SimSun", "Noto Serif SC", serif;
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+  color: var(--dsw-alias-label-primary);
+  background: var(--dsw-alias-bg-base);
+  font-family: var(--dsh-font-family-text-default, -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", sans-serif);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  scrollbar-width: thin;
+  /* 把面板内部的 z-index 关进自己的层叠上下文：侧栏折叠后 frame 的 shell.leading 出口
+     （z-index 15）不能被面板里的浮层盖住或抢走点击。 */
+  isolation: isolate;
+}
+
+/* 深色主题：只给内容色换值，键集合和浅色完全相同 */
+body[data-ds-dark-theme] .zp-root {
+  --zp-zi: #b9a7fa;
+  --zp-gold: #dcb96f;
+  --zp-gold-text: #dcb96f;
+  --zp-mu-lu: #4ade80;
+  --zp-mu-quan: #7aa2ff;
+  --zp-mu-ke: #e3b341;
+  --zp-mu-ji: #f87171;
+  --zp-s0: #c7aaf5;
+  --zp-s1: #86c3e8;
+  --zp-s2: #f3ab70;
+  --zp-s3: #e2c06e;
+  --zp-s4: #ef97b5;
+  --zp-s5: #ec8a7b;
+  --zp-s6: #d6a982;
+  --zp-s7: #aab6f2;
+  --zp-s8: #86d6a9;
+  --zp-s9: #b4c3cb;
+  --zp-s10: #7bd6c3;
+  --zp-s11: #c9b9a2;
+  --zp-s12: #e48190;
+  --zp-s13: #93aaea;
+}
+
+/* ---------------- 宿主约定：macOS 窗口 chrome 避让 ----------------
+ * 契约见 @deepseek-ai/dsh-client-ui-layout README「Window-chrome seat」：
+ * - html[data-platform=darwin] 发布 --dsh-frame-top-clearance，内容压到窗口标题带之下；
+ *   外壳（.zp-shell）是根节点里在文档流中的相对定位盒子，所以吃得到这条 padding-top；
+ * - 侧栏完全隐藏时追加发布 --dsh-frame-leading-clearance，顶栏左缘让出 traffic lights 和 leading 控件；
+ * - 浮层用 --dsh-frame-overlay-top 作上内边距。
+ * 三个变量都带兜底值、选择器都限定 darwin：Web / Windows 不受影响。 */
+html[data-platform="darwin"] .zp-root {
+  padding-top: var(--dsh-frame-top-clearance, 0px);
+}
+html[data-platform="darwin"] [data-sidebar-collapsed] .zp-head {
+  padding-left: max(20px, var(--dsh-frame-leading-clearance, 0px));
+}
+html[data-platform="darwin"] .zp-root .zp-overlay-center {
+  padding-top: max(48px, var(--dsh-frame-overlay-top, 46px));
+}
+
+/* 宿主全局只给 button 重置了 font-family、没有 color：不写颜色的按钮在深色下会落回黑字。
+   :where() 权重为 0，不盖组件自己的颜色。 */
+:where(.zp-root) button { color: inherit }
+/* 浮层打开时程序聚焦的容器带宿主约定的 data-dsh-automatic-focus：容器本身不画焦点框 */
+.zp-root [data-dsh-automatic-focus]:focus { outline: none }

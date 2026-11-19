@@ -1,0 +1,7 @@
+{
+  "sidebarLabel": ["紫微斗数 Pro", "Zi Wei Dou Shu Pro"],
+  "backToConversation": ["返回会话", "Back to conversation"],
+  "crashMessage": ["界面渲染异常：{message}", "The panel failed to render: {message}"],
+  "crashHint": ["请把这行错误信息发给开发者。", "Please send this message to the developer."],
+  "retry": ["重试", "Retry"]
+}
