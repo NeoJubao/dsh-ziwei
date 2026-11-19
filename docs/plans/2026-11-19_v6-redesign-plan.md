@@ -202,16 +202,17 @@
 
 依赖 T1、T3b 的接口。文件：`50-parts.js`、`90-app.js`、`css/10-base.css`、`css/50-parts.css`、`i18n/00-common.json`、`i18n/90-app.json`、`verify/ui-v6-shell.mjs`（补充）。
 
-- [ ] `ProApp`：量面板宽度（`ResizeObserver`，放在 layout effect 里，避免首帧跳档）→ `data-w`；订阅 store；顶栏（返回会话、位置、六个页签、问紫微师、更多、全部命盘、设置）；按 `session.view` / `stage` 渲染首页、命盘页、报告页；宽档下紫微师并排。各视图组件由后面的任务填，这里先放占位。
-- [ ] 部件：按钮、图标按钮、分段、chip、提示条（带撤销 / 查看）、确认按钮、菜单、浮层容器（焦点陷阱、Esc、遮罩、`data-dsh-automatic-focus`）。
-- [ ] 深色主题、macOS 标题带、键盘焦点样式。
-- [ ] 检查：T1 的外壳检查继续通过；深渲染里顶栏有六个页签且恰好一个 `aria-selected`；每个 `role=dialog` 都有 `aria-modal` 和 `aria-label`；每个按钮有文字或 `aria-label`。
+- [x] `ProApp`：量面板宽度（`ResizeObserver`，放在 layout effect 里，避免首帧跳档）→ `data-w`；订阅 store；顶栏（返回会话、位置、六个页签、问紫微师、更多、全部命盘、设置）；按 `session.view` / `stage` 渲染首页、命盘页、报告页；宽档下紫微师并排。各视图组件由后面的任务填，这里先放占位。
+- [x] 部件：按钮、图标按钮、分段、chip、提示条（带撤销 / 查看）、确认按钮、菜单、浮层容器（焦点陷阱、Esc、遮罩、`data-dsh-automatic-focus`）。
+- [x] 深色主题、macOS 标题带、键盘焦点样式。
+- [x] 检查：T1 的外壳检查继续通过；深渲染里顶栏有六个页签且恰好一个 `aria-selected`；每个 `role=dialog` 都有 `aria-modal` 和 `aria-label`；每个按钮有文字或 `aria-label`。
+- 实际做出来和上面写的不同之处：默认 store 不在 `apply()` 里建，面板第一次渲染时才建（`appStore()`）；「自动打开面板」的偏好改在 `apply()` 里生效（v5 把它放在面板组件的挂载里，而宿主只在面板已经打开时才挂载这个组件，等于不起作用）；每个视图组件收到 `props.tier`；`section.zp-chart` 和它的入场类由 `ProApp` 管；"更多"菜单（复制命盘文字、显示杂曜、改生辰）在顶栏里，不属于 T5b。自检用的极简 React 运行时在 `verify/client-harness.mjs`（`makeRuntime` / `bootRuntime`）。
 
 ### T5b：命盘页
 
 依赖 T5a、T3c。文件：`70-chart.js`、`css/70-chart.css`、`i18n/70-chart.json`、`verify/ui-v6-chart.mjs`。原型对应 `app.js` 第 300–560 行、`style.css` 的命盘段。
 
-- [ ] 时间卡、格局卡、宫位卡、盘面（12 个宫格按钮 + 中宫 + 连线）、窄档页签、"更多"菜单（复制命盘文字、显示杂曜、改生辰）。
+- [ ] 时间卡、格局卡、宫位卡、盘面（12 个宫格按钮 + 中宫 + 连线）、窄档页签。（"更多"菜单已在 T5a 的顶栏里做完。）
 - [ ] 连线端点在 layout effect 里量；位置没变不重画；只有换了宫才播描线。
 - [ ] 检查（先写）：
   - 深渲染有 `SCOPE`、`PATTERNS`、`INSPECTOR`、`BOARD` 四个区域；12 个 `zp-cell` 按钮，`aria-label` 是"宫名 干支"；恰好一个 `aria-pressed=true` 且 `tabIndex` 为 0。
