@@ -432,7 +432,10 @@ export class FakeResizeObserver {
  * ------------------------------------------------------------------ */
 const TEXT = '#text';
 const FRAG = '#frag';
-const HANDLERS = { click: 'onClick', keydown: 'onKeyDown', pointerdown: 'onPointerDown', focusout: 'onBlur', mousedown: 'onMouseDown' };
+const HANDLERS = {
+  click: 'onClick', keydown: 'onKeyDown', pointerdown: 'onPointerDown', focusout: 'onBlur', mousedown: 'onMouseDown',
+  scroll: 'onScroll', change: 'onChange', submit: 'onSubmit', mouseenter: 'onMouseEnter', mouseleave: 'onMouseLeave', focusin: 'onFocus'
+};
 
 export function makeRuntime() {
   const rt = { width: 0, renders: new Map(), deferPassive: false, errors: [] };
