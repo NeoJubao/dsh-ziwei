@@ -1,1 +1,339 @@
-/* 60-home.css：首页（T8a） */
+/* ================================================================
+ * 60-home：首页。一座可以拖动的 3D 浑天仪（HOME_SKY）+ 底部居中的一列对话（HOME_TALK）
+ *
+ * 结构（60-home.js 渲染；画布由 sky.js 创建后放进 .zp-sky，React 不管它）：
+ *   section.zp-home[data-busy][data-onboarding][data-nogl]
+ *     div.zp-sky                         HOME_SKY
+ *       canvas.zp-sky-canvas             （sky.js 放进来的；拖动时加 zp-sky-grab，指到星球时加 zp-sky-point）
+ *       div.zp-reticle                   准星（sky.js 每帧摆位置，选中时加 zp-on）
+ *       div.zp-planets                   星球标签层（没有 3D 时加 zp-flat，退成一排圆点）
+ *         div.zp-ptag[data-pid]          一颗星球的标签（sky.js 每帧写 transform；悬停或聚焦时加 zp-on）
+ *           div.zp-ptag-in
+ *             button.zp-ptag-main > b（称呼）, span（生日）, i（X坐命 · 五行局）
+ *             button.zp-ptag-more        ⋯
+ *             div.zp-ptag-menu           改名 / 改生辰 / 删除
+ *       div.zp-emblem                    没有 3D 时的静态星图
+ *     div.zp-col                         HOME_TALK
+ *       p.zp-date-line, h1.zp-status, div.zp-receipts > button.zp-receipt,
+ *       form.zp-ask > input + button.zp-send, p.zp-hint, div.zp-chips > button.zp-chip
+ *     p.zp-gesture                       操作提示，动过一次之后加 zp-gone
+ *
+ * 标签节点不要设 style：位置由 sky.js 直接写。
+ * ================================================================ */
+.zp-home {
+  position: absolute;
+  inset: 0;
+  container-type: inline-size;
+  display: grid;
+  place-items: end center;
+  padding: 0 20px 32px;
+  pointer-events: none;
+}
+.zp-root[data-w="narrow"] .zp-home { padding: 0 12px 16px }
+/* 进了命盘：首页留在原地但不显示，回来时星图还在 */
+.zp-root[data-view="chart"] .zp-home { visibility: hidden }
+
+.zp-sky {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+}
+.zp-sky .zp-sky-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  outline: none;
+  cursor: grab;
+  touch-action: none;
+  transition: opacity 450ms ease;
+}
+.zp-sky .zp-sky-canvas.zp-sky-grab { cursor: grabbing }
+.zp-sky .zp-sky-canvas.zp-sky-point { cursor: pointer }
+/* macOS：星图可以铺到窗口标题带下面（可点的控件不行，它们在 .zp-shell 里） */
+html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-top-clearance, 0px)) }
+
+.zp-col {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: min(600px, 100%);
+  transition: opacity 240ms ease, transform 240ms ease;
+}
+.zp-col button, .zp-col input, .zp-col form { pointer-events: auto }
+/* 文字是焦平面：从它后面经过的星球被虚化成一团光，不和字抢 */
+.zp-col::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -64px -150px -110px;
+  pointer-events: none;
+  -webkit-backdrop-filter: blur(22px) saturate(125%);
+  backdrop-filter: blur(22px) saturate(125%);
+  -webkit-mask-image: radial-gradient(ellipse closest-side, var(--zp-orb-lo) 50%, transparent 100%);
+  mask-image: radial-gradient(ellipse closest-side, var(--zp-orb-lo) 50%, transparent 100%);
+}
+.zp-date-line {
+  margin: 0;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 13px;
+  text-shadow: 0 0 12px var(--dsw-alias-bg-base);
+}
+.zp-date-line b { color: var(--zp-gold-text); font-weight: 500 }
+.zp-status {
+  margin: 0;
+  color: var(--dsw-alias-label-secondary);
+  font-family: var(--zp-font-serif);
+  font-size: clamp(20px, 2.25cqw, 28px);
+  font-weight: 400;
+  line-height: 1.5;
+  text-wrap: balance;
+  text-shadow: 0 0 12px var(--dsw-alias-bg-base), 0 0 2px var(--dsw-alias-bg-base);
+}
+.zp-status strong { color: var(--dsw-alias-label-primary); font-weight: 600 }
+.zp-status .zp-st { color: var(--zp-c, var(--dsw-alias-label-primary)); font-weight: 600 }
+.zp-status > span { display: block; animation: zp-rise 240ms ease both }
+.zp-receipts { display: flex; flex-wrap: wrap; gap: 6px }
+.zp-receipts:empty { display: none }
+.zp-receipt {
+  display: inline-flex;
+  gap: 6px;
+  padding: 2px 8px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--dsw-alias-bg-base) 66%, transparent);
+  font-size: 12px;
+  line-height: 18px;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+.zp-root .zp-receipt { color: var(--dsw-alias-label-tertiary) }
+.zp-receipt b { color: var(--dsw-alias-label-primary); font-weight: 500 }
+.zp-receipt:hover { border-color: var(--zp-zi) }
+.zp-ask {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 48px;
+  margin: 0;
+  padding: 8px 8px 8px 16px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--dsw-alias-bg-base) 66%, transparent);
+  box-shadow: 0 14px 40px -22px rgba(0, 0, 0, .5);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  backdrop-filter: blur(20px) saturate(140%);
+}
+.zp-ask:focus-within { border-color: var(--zp-zi) }
+.zp-ask input {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: 14px;
+  outline: none;
+}
+.zp-ask input::placeholder { color: var(--dsw-alias-label-tertiary) }
+.zp-hint {
+  min-height: 18px;
+  margin: -4px 0;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+  line-height: 18px;
+}
+.zp-hint.zp-err { color: var(--zp-mu-ji) }
+.zp-chips { display: flex; flex-wrap: wrap; gap: 8px }
+.zp-gesture {
+  position: absolute;
+  right: 20px;
+  bottom: 16px;
+  z-index: 3;
+  margin: 0;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+  text-shadow: 0 0 8px var(--dsw-alias-bg-base);
+  transition: opacity 240ms ease;
+}
+.zp-gesture.zp-gone { opacity: 0 }
+.zp-root[data-w="narrow"] .zp-gesture { display: none }
+
+/* ---------------- 星球的名字：按钮跟着 3D 里的星球走，键盘和读屏也能用 ---------------- */
+.zp-planets {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+  pointer-events: none;
+  transition: opacity 240ms ease;
+}
+.zp-ptag {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  will-change: transform;
+  transition: opacity 240ms ease;
+}
+.zp-ptag-in { position: relative; display: flex; transform: translateX(-50%) }
+.zp-ptag-main {
+  display: grid;
+  justify-items: center;
+  padding: 2px 8px 4px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  text-align: center;
+  white-space: nowrap;
+  text-shadow: 0 0 8px var(--dsw-alias-bg-base), 0 0 2px var(--dsw-alias-bg-base);
+  pointer-events: auto;
+}
+.zp-ptag-main b {
+  color: var(--dsw-alias-label-primary);
+  font-family: var(--zp-font-serif);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: .04em;
+}
+.zp-ptag-main span {
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+}
+.zp-ptag-main i {
+  display: none;
+  color: var(--zp-gold-text);
+  font-size: 12px;
+  font-style: normal;
+  line-height: 1.4;
+}
+.zp-ptag.zp-on .zp-ptag-main i { display: block; animation: zp-rise 240ms ease both }
+.zp-ptag-more {
+  position: absolute;
+  left: 100%;
+  top: 0;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  margin-left: -6px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  opacity: 0;
+  pointer-events: auto;
+  transition: opacity 120ms ease;
+}
+.zp-root .zp-ptag-more { color: var(--dsw-alias-label-tertiary) }
+.zp-ptag.zp-on .zp-ptag-more, .zp-ptag-more:focus-visible { opacity: 1 }
+.zp-root .zp-ptag-more:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary) }
+.zp-ptag-menu {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  padding: 6px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 12px;
+  background: var(--dsw-alias-bg-layer-1);
+  box-shadow: 0 12px 32px -16px rgba(0, 0, 0, .45);
+  font-size: 13px;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  pointer-events: auto;
+}
+.zp-ptag-menu input {
+  width: 116px;
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 8px;
+  background: var(--dsw-alias-bg-base);
+  font-size: 13px;
+  outline: none;
+}
+.zp-ptag-menu input:focus { border-color: var(--zp-zi) }
+.zp-ptag-menu button {
+  height: 28px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font-size: 13px;
+}
+.zp-root .zp-ptag-menu button { color: var(--dsw-alias-label-secondary) }
+.zp-root .zp-ptag-menu button:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary) }
+.zp-root .zp-ptag-menu button.zp-danger { color: var(--zp-mu-ji) }
+.zp-ptag-menu span { padding: 0 4px 0 6px; color: var(--dsw-alias-label-secondary) }
+
+.zp-reticle {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1;
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform;
+  transition: opacity 240ms ease;
+}
+.zp-reticle::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px dashed var(--zp-gold);
+  border-radius: 999px;
+  animation: zp-spin 40s linear infinite;
+}
+@keyframes zp-spin { to { transform: rotate(360deg) } }
+.zp-reticle.zp-on { opacity: .75 }
+
+/* ---------------- 开场、飞入飞出时先收起界面；引导排盘时星球留在天上、名字先收起来 ---------------- */
+.zp-home[data-busy] .zp-col,
+.zp-home[data-busy] .zp-planets,
+.zp-home[data-busy] .zp-reticle,
+.zp-home[data-busy] .zp-gesture { opacity: 0 }
+.zp-home[data-busy] .zp-col { transform: translateY(8px) }
+.zp-home[data-busy] .zp-col *, .zp-home[data-busy] .zp-planets * { pointer-events: none }
+.zp-home[data-onboarding] .zp-planets,
+.zp-home[data-onboarding] .zp-reticle,
+.zp-home[data-onboarding] .zp-gesture { opacity: 0 }
+.zp-home[data-onboarding] .zp-planets * { pointer-events: none }
+
+/* ---------------- 没有 3D：静态星图 + 一排圆点 ---------------- */
+.zp-home[data-nogl] .zp-sky {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 48px 20px 0;
+}
+.zp-home .zp-emblem { flex: none; width: min(300px, 56%); aspect-ratio: 1; margin-top: 24px }
+.zp-planets.zp-flat {
+  position: static;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+  overflow: visible;
+}
+.zp-planets.zp-flat .zp-ptag { position: relative; display: flex; flex-direction: column; align-items: center }
+.zp-planets.zp-flat .zp-ptag::before {
+  content: "";
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 32% 30%, var(--zp-orb-hi) 0, var(--zp-c, var(--zp-gold)) 40%, color-mix(in srgb, var(--zp-c, var(--zp-gold)) 40%, var(--zp-orb-lo)) 100%);
+}
+.zp-planets.zp-flat .zp-ptag-in { transform: none }
+.zp-planets.zp-flat .zp-ptag-main i { display: block }
+.zp-home[data-onboarding][data-nogl] .zp-planets { display: none }

@@ -1,16 +1,43 @@
 /* ================================================================
- * 10-base：外壳、顶栏、图标按钮、首页占位、错误边界、减少动态效果
+ * 10-base：外壳、顶栏、通用控件（按钮、页签、chip、卡片）、减少动态效果
+ *
+ * 外壳的结构（90-app.js 的 ProApp 渲染）：
+ *   .zp-root[data-w="narrow|mid|wide"][data-view="home|chart"][data-stage="board|report"][data-panel="open|closed"]
+ *     .zp-shell
+ *       .zp-main
+ *         header.zp-head                HEAD
+ *         section.zp-home               首页（HOME_SKY + HOME_TALK），见 60-home.css
+ *         section.zp-chart              命盘页和报告页，见 70-chart.css、86-reportview.css
+ *       aside.zp-assistant              ASSISTANT，见 80-assistant.css
+ *       （浮层、提示条，见 50-parts.css）
+ *
+ * 状态类一律 zp- 开头（zp-on、zp-busy…）；能用 aria-selected / aria-pressed 表达的状态不另加类。
  * ================================================================ */
 .zp-root *, .zp-root *::before, .zp-root *::after { box-sizing: border-box }
 /* 焦点框的颜色和粗细由宿主的 :focus-visible 给，这里只补样式和偏移 */
 .zp-root :focus-visible { outline-style: solid; outline-offset: 2px }
+.zp-root button { font-family: inherit; cursor: pointer }
+.zp-root button:disabled { cursor: default }
+.zp-root input, .zp-root textarea, .zp-root select { font-family: inherit; color: inherit }
+.zp-root [hidden] { display: none !important }
 
-/* 外壳：在文档流里、相对定位，所以根节点的 darwin padding-top 对它生效；浮层都在它里面绝对定位 */
+/* 外壳：在文档流里、相对定位，所以根节点的 darwin padding-top 对它生效；浮层都在它里面绝对定位。
+   宽档下紫微师打开时是第二列；中、窄档下它浮在上面（80-assistant.css）。 */
 .zp-shell {
   position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 0;
+  height: 100%;
+  min-height: 0;
+}
+.zp-root[data-w="wide"][data-panel="open"] .zp-shell { grid-template-columns: minmax(0, 1fr) 360px }
+.zp-main {
+  position: relative;
+  grid-column: 1;
+  grid-row: 1;
   display: flex;
   flex-direction: column;
-  height: 100%;
+  min-width: 0;
   min-height: 0;
   overflow: hidden;
 }
@@ -26,8 +53,69 @@
   height: 60px;
   padding: 0 20px;
 }
-.zp-root[data-w="narrow"] .zp-head { padding: 0 12px }
+.zp-root[data-view="chart"] .zp-head {
+  border-bottom: 1px solid var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-bg-base);
+}
+.zp-root[data-w="narrow"] .zp-head { height: 52px; padding: 0 12px }
+/* 窄档的命盘页：顶栏两行，页签独占第二行 */
+.zp-root[data-w="narrow"][data-view="chart"] .zp-head {
+  height: auto;
+  flex-wrap: wrap;
+  row-gap: 8px;
+  padding: 8px 12px;
+}
+.zp-root[data-w="narrow"][data-view="chart"] .zp-head .zp-seg { order: 9; width: 100%; display: flex }
+.zp-root[data-w="narrow"][data-view="chart"] .zp-head .zp-seg button { flex: 1; padding: 4px 0 }
+.zp-grow { flex: 1 }
 
+.zp-crumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-size: 14px;
+  color: var(--dsw-alias-label-tertiary);
+}
+.zp-crumb-home {
+  padding: 4px 6px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 14px;
+  white-space: nowrap;
+}
+.zp-crumb-home:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary) }
+.zp-crumb-name {
+  overflow: hidden;
+  color: var(--dsw-alias-label-primary);
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.zp-badge {
+  flex: none;
+  padding: 0 6px;
+  border-radius: 4px;
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+  line-height: 18px;
+  white-space: nowrap;
+}
+.zp-root[data-w="narrow"] .zp-crumb .zp-badge { display: none }
+/* 小星球：和首页那颗是同一颗，颜色取命宫主星（--zp-c 由 JS 内联成 var(--zp-sN)） */
+.zp-orb {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 32% 30%, var(--zp-orb-hi) 0, var(--zp-c, var(--zp-gold)) 38%, color-mix(in srgb, var(--zp-c, var(--zp-gold)) 40%, var(--zp-orb-lo)) 100%);
+  box-shadow: 0 0 0 1px var(--dsw-alias-border-l2);
+}
+
+/* ---------------- 按钮 ---------------- */
 .zp-icon {
   display: block;
   flex: none;
@@ -52,6 +140,13 @@
   color: var(--dsw-alias-label-primary);
 }
 .zp-icon-btn:disabled { opacity: 0.55; cursor: default }
+/* 首页的图标按钮浮在星图上：半透明底 */
+.zp-root[data-view="home"] .zp-head .zp-icon-btn {
+  background: color-mix(in srgb, var(--dsw-alias-bg-base) 66%, transparent);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+.zp-icon-btn.zp-plain { border-color: transparent; background: transparent }
 /* 「返回会话」：顶栏第一个控件，常驻 */
 .zp-exit { color: var(--dsw-alias-label-primary) }
 
@@ -66,27 +161,222 @@
   background: var(--dsw-alias-bg-layer-1);
   font-family: inherit;
   font-size: 13px;
+  white-space: nowrap;
   cursor: pointer;
   transition: background-color 120ms ease;
 }
 .zp-btn:hover { background: var(--dsw-alias-interactive-bg-hover) }
+.zp-btn:disabled { opacity: 0.55 }
+.zp-btn.zp-sm { height: 28px }
+.zp-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--dsw-alias-button-primary-fill);
+  color: var(--dsw-alias-label-primary-inverted);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: opacity 120ms ease;
+}
+.zp-root .zp-btn-primary { color: var(--dsw-alias-label-primary-inverted) }
+.zp-btn-primary:hover { opacity: 0.88 }
+.zp-btn-primary:disabled { opacity: 0.55 }
+.zp-link {
+  padding: 2px 4px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.zp-root .zp-link { color: var(--dsw-alias-label-tertiary) }
+.zp-root .zp-link:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary) }
+.zp-root .zp-link.zp-armed, .zp-root .zp-danger { color: var(--zp-mu-ji) }
+.zp-send {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: var(--dsw-alias-button-primary-fill);
+}
+.zp-root .zp-send { color: var(--dsw-alias-label-primary-inverted) }
+.zp-send:disabled { opacity: 0.55 }
 
-/* ---------------- 首页（占位：星图在 HOME_SKY，底部一列在 HOME_TALK） ---------------- */
-.zp-home {
-  position: relative;
-  flex: 1 1 auto;
+/* ---------------- 分段页签（顶栏六个页签、窄档三张卡的页签） ---------------- */
+.zp-seg {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 8px;
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+.zp-seg button {
+  padding: 4px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font-size: 13px;
+  line-height: 20px;
+  white-space: nowrap;
+}
+.zp-root .zp-seg button { color: var(--dsw-alias-label-secondary) }
+.zp-root .zp-seg button[aria-selected="true"] {
+  background: var(--dsw-alias-bg-layer-1);
+  color: var(--dsw-alias-label-primary);
+  font-weight: 500;
+  box-shadow: 0 0 0 1px var(--dsw-alias-border-l2), 0 1px 2px rgba(0, 0, 0, .06);
+}
+.zp-seg-sep {
+  flex: none;
+  width: 1px;
+  margin: 6px 4px;
+  background: var(--dsw-alias-border-l1);
+}
+/* 加载指示：脉冲点。报告正在写时，放在顶栏「报告」页签的文字后面，以及报告页的状态栏里 */
+.zp-pulse {
+  flex: none;
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--zp-gold);
+  animation: zp-pulse 1.2s ease-in-out infinite;
+}
+.zp-seg .zp-pulse { margin-left: 4px; vertical-align: 1px }
+@keyframes zp-pulse { 50% { opacity: .25 } }
+
+/* ---------------- chip ---------------- */
+.zp-chip {
+  padding: 4px 12px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--dsw-alias-bg-base) 66%, transparent);
+  font-size: 13px;
+  line-height: 20px;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  transition: border-color 120ms ease, color 120ms ease;
+}
+.zp-root .zp-chip { color: var(--dsw-alias-label-secondary) }
+.zp-root .zp-chip:hover { border-color: var(--dsw-alias-label-caption); color: var(--dsw-alias-label-primary) }
+.zp-root .zp-chip.zp-on {
+  border-color: var(--zp-zi);
+  background: color-mix(in srgb, var(--zp-zi) 10%, var(--dsw-alias-bg-base));
+  color: var(--dsw-alias-label-primary);
+}
+.zp-root .zp-chip.zp-primary {
+  border-color: transparent;
+  background: var(--dsw-alias-button-primary-fill);
+  color: var(--dsw-alias-label-primary-inverted);
+}
+.zp-chip small { margin-left: 4px; color: var(--dsw-alias-label-caption); font-size: 11px }
+
+/* ---------------- 卡片（命盘页左栏、报告目录） ---------------- */
+.zp-card {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   min-height: 0;
+  padding: 12px 16px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 12px;
+  background: var(--dsw-alias-bg-layer-1);
 }
-.zp-sky {
-  position: absolute;
-  inset: 0;
+.zp-card > * { flex: none }
+.zp-card-h {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 24px;
 }
-.zp-col {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
+.zp-card-h h3 {
+  margin: 0;
+  color: var(--dsw-alias-label-primary);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
 }
+.zp-card-h h3.zp-serif {
+  font-family: var(--zp-font-serif);
+  font-size: 18px;
+  line-height: 1.3;
+  letter-spacing: .04em;
+}
+.zp-card-h h3 small {
+  margin-left: 6px;
+  color: var(--dsw-alias-label-tertiary);
+  font-family: var(--zp-font-serif);
+  font-size: 13px;
+  font-weight: 400;
+}
+.zp-cnt { color: var(--dsw-alias-label-tertiary); font-size: 12px }
+.zp-tag {
+  padding: 0 6px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--zp-gold) 12%, transparent);
+  color: var(--zp-gold-text);
+  font-size: 11px;
+  line-height: 18px;
+  white-space: nowrap;
+}
+.zp-card-right {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+}
+.zp-card-f {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.zp-step {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+}
+.zp-root .zp-step { color: var(--dsw-alias-label-tertiary) }
+.zp-root .zp-step:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary) }
+
+/* 四化印：禄权科忌。实心 = 生年四化；空心 = 运限四化 */
+.zp-seal {
+  display: inline-block;
+  margin-left: 2px;
+  padding: 0 2px;
+  border-radius: 4px;
+  color: var(--dsw-alias-label-primary-inverted);
+  font-family: var(--dsh-font-family-text-default, sans-serif);
+  font-size: 9.5px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 1.45;
+  vertical-align: 2px;
+}
+.zp-seal.zp-lu { background: var(--zp-mu-lu) }
+.zp-seal.zp-quan { background: var(--zp-mu-quan) }
+.zp-seal.zp-ke { background: var(--zp-mu-ke) }
+.zp-seal.zp-ji { background: var(--zp-mu-ji) }
+.zp-seal.zp-scoped { border: 1px solid currentColor; background: transparent }
+.zp-seal.zp-scoped.zp-lu { color: var(--zp-mu-lu) }
+.zp-seal.zp-scoped.zp-quan { color: var(--zp-mu-quan) }
+.zp-seal.zp-scoped.zp-ke { color: var(--zp-mu-ke) }
+.zp-seal.zp-scoped.zp-ji { color: var(--zp-mu-ji) }
 
 /* ---------------- 错误边界 ---------------- */
 .zp-crash { padding: 16px }

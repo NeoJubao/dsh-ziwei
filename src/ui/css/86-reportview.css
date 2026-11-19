@@ -1,1 +1,191 @@
-/* 86-reportview.css：报告页（T7） */
+/* ================================================================
+ * 86-reportview：报告页。和命盘页同一副骨架：左边目录，右边阅读栏；整页不滚，只有阅读栏自己滚
+ *
+ * 结构（85-reportview.js 渲染；正文版式在 85-prose.css，类名 zr-*）：
+ *   div.zp-rbody                              报告舞台；看盘面时隐藏（hidden），不卸载
+ *     aside.zp-rside
+ *       section.zp-card.zp-rtoc               REPORT_TOC
+ *         div.zp-card-h > h3, span.zp-cnt
+ *         nav.zp-toc > button（已写完 zp-done / 正在写 zp-now / 还没写 zp-todo；当前在读的加 aria-current）> i 编号 + span 标题
+ *         div.zp-card-f                       下载报告、复制全文、重新写
+ *     div.zp-rmain                            REPORT_DOC
+ *       div.zp-rbar                           状态栏：正在写第 N / 14 部分 + 停止；或者中断后的接着写 / 重新写
+ *       div.zp-rscroll[tabindex=0]
+ *         article.zr-prose.zp-rdoc
+ *           header.zp-rtop > div.zp-emblem + div > h1 + p + p
+ *           div.zp-rsecs > section.zr-sec …  每个部分一个节点，key 用序号；写的过程中只有最后一个在变
+ *       div.zp-rempty                         还没写：徽记 + 一句话 + 开始写
+ *       button.zp-rpick                       选中文字后出现的「问这段」
+ * ================================================================ */
+.zp-rbody {
+  display: grid;
+  grid-template-columns: clamp(244px, 25%, 316px) minmax(0, 1fr);
+  gap: 16px;
+  height: 100%;
+  min-height: 0;
+  padding: 12px 20px 16px;
+}
+.zp-rside { display: flex; flex-direction: column; min-height: 0 }
+.zp-rtoc { flex: 0 1 auto; max-height: 100% }
+.zp-toc {
+  flex: 0 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 0;
+  margin: 0 -6px;
+  overflow: auto;
+  scrollbar-width: thin;
+}
+.zp-rtoc > .zp-toc { flex: 0 1 auto }
+.zp-toc button {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: left;
+}
+.zp-root .zp-toc button { color: var(--dsw-alias-label-secondary) }
+.zp-toc button i {
+  flex: none;
+  width: 28px;
+  color: var(--zp-gold-text);
+  font-family: var(--zp-font-serif);
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 600;
+}
+.zp-root .zp-toc button:hover, .zp-root .zp-toc button[aria-current="true"] {
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-primary);
+}
+.zp-root .zp-toc button.zp-todo { background: transparent; color: var(--dsw-alias-label-caption) }
+.zp-toc button.zp-todo i { color: var(--dsw-alias-label-caption) }
+.zp-root .zp-toc button.zp-now { color: var(--dsw-alias-label-primary) }
+.zp-toc-now { margin-left: 4px; color: var(--zp-gold-text); font-size: 12px }
+
+.zp-rmain {
+  container-type: inline-size;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 12px;
+  background: var(--dsw-alias-bg-layer-1);
+}
+.zp-rbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--dsw-alias-border-l2);
+  color: var(--dsw-alias-label-secondary);
+  font-size: 13px;
+}
+.zp-rbar-text { flex: 1; min-width: 0 }
+.zp-rscroll {
+  flex: 1;
+  min-height: 0;
+  padding: 32px clamp(16px, 6cqw, 48px) 48px;
+  overflow: auto;
+  outline: none;
+  scrollbar-width: thin;
+}
+.zp-rdoc { max-width: 700px; margin: 0 auto }
+.zp-rtop {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--dsw-alias-border-l1);
+}
+.zp-rtop .zp-emblem { flex: none; width: 104px; height: 104px }
+.zp-rtop h1 {
+  margin: 0;
+  font-family: var(--zp-font-serif);
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: .04em;
+  text-wrap: balance;
+}
+.zp-rtop p {
+  margin: 4px 0 0;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 13px;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+}
+.zp-rempty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: auto;
+  padding: 24px;
+  text-align: center;
+}
+.zp-rempty .zp-emblem { width: min(240px, 60cqw); aspect-ratio: 1; margin-bottom: 8px }
+.zp-rempty h2 {
+  margin: 0;
+  font-family: var(--zp-font-serif);
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: .08em;
+}
+.zp-rempty p { margin: 0 0 8px; color: var(--dsw-alias-label-tertiary); font-size: 14px }
+.zp-rpick {
+  position: absolute;
+  z-index: 3;
+  height: 28px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--dsw-alias-button-primary-fill);
+  font-size: 12px;
+  white-space: nowrap;
+  box-shadow: 0 6px 18px -8px rgba(0, 0, 0, .5);
+}
+.zp-root .zp-rpick { color: var(--dsw-alias-label-primary-inverted) }
+
+/* ---------------- 窄档：目录变成横向的一条，阅读栏在下面 ---------------- */
+.zp-root[data-w="narrow"] .zp-rbody {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 8px;
+  padding: 8px 12px;
+}
+.zp-root[data-w="narrow"] .zp-rtoc { gap: 6px; padding: 8px 12px }
+.zp-root[data-w="narrow"] .zp-toc {
+  flex-direction: row;
+  gap: 4px;
+  margin: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+.zp-root[data-w="narrow"] .zp-toc button {
+  flex: none;
+  gap: 4px;
+  padding: 2px 8px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  white-space: nowrap;
+}
+.zp-root[data-w="narrow"] .zp-toc button i { width: auto }
+.zp-root[data-w="narrow"] .zp-toc-now { display: none }
+.zp-root[data-w="narrow"] .zp-rscroll { padding: 20px 16px 48px }
+.zp-root[data-w="narrow"] .zp-rtop { gap: 12px; margin-bottom: 20px; padding-bottom: 16px }
+.zp-root[data-w="narrow"] .zp-rtop .zp-emblem { width: 72px; height: 72px }
+.zp-root[data-w="narrow"] .zp-rtop h1 { font-size: 20px }

@@ -1,1 +1,294 @@
-/* 50-parts.css：按钮、分段、提示条、确认按钮、对话框（T5a） */
+/* ================================================================
+ * 50-parts：浮层（遮罩、侧滑表单、设置弹层）、菜单、提示条、表单控件、命盘列表、静态星图
+ *
+ * 结构（50-parts.js 提供容器，64-sheets / 66-settings 填内容）：
+ *   .zp-overlay                      盖住整个面板的一层，position: absolute（不用 fixed）
+ *     .zp-mask                       遮罩，点了关闭
+ *     aside.zp-sheet[role=dialog]    SHEET：从右侧滑入（生辰表单、全部命盘）
+ *   .zp-overlay.zp-overlay-center
+ *     .zp-mask
+ *     div.zp-modal[role=dialog]      MODAL：设置
+ *   .zp-menu                         顶栏「更多」、星球标签「⋯」弹出的小菜单
+ *   .zp-toast[role=status]           TOAST
+ * 同一时间只有一个模态浮层；Esc 关最上面的一层。
+ * ================================================================ */
+.zp-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: flex-end;
+}
+.zp-overlay-center {
+  align-items: flex-start;
+  justify-content: center;
+  padding: 48px 16px 16px;
+}
+.zp-mask {
+  position: absolute;
+  inset: 0;
+  background: var(--dsw-alias-bg-mask-1);
+  animation: zp-fade 160ms ease-out both;
+}
+@keyframes zp-fade { from { opacity: 0 } to { opacity: 1 } }
+@keyframes zp-slide-in { from { transform: translateX(24px); opacity: 0 } to { transform: none; opacity: 1 } }
+@keyframes zp-pop { from { transform: translateY(8px); opacity: 0 } to { transform: none; opacity: 1 } }
+@keyframes zp-rise { from { transform: translateY(6px); opacity: 0 } to { transform: none; opacity: 1 } }
+
+.zp-sheet {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(420px, 100%);
+  height: 100%;
+  border-left: 1px solid var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-bg-layer-1);
+  box-shadow: -24px 0 48px -32px rgba(0, 0, 0, .45);
+  animation: zp-slide-in 180ms cubic-bezier(.22, .61, .36, 1) both;
+}
+.zp-modal {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(520px, 100%);
+  max-height: 100%;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 16px;
+  background: var(--dsw-alias-bg-layer-1);
+  box-shadow: 0 24px 48px -24px rgba(0, 0, 0, .45);
+  animation: zp-pop 160ms cubic-bezier(.22, .61, .36, 1) both;
+}
+.zp-dialog-h {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 56px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--dsw-alias-border-l2);
+}
+.zp-dialog-h h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+}
+.zp-dialog-h .zp-icon-btn { margin-left: auto }
+.zp-dialog-b {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: 16px;
+  scrollbar-width: thin;
+}
+.zp-dialog-f {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--dsw-alias-border-l2);
+}
+
+/* ---------------- 菜单 ---------------- */
+.zp-menu-wrap { position: relative; flex: none }
+.zp-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  min-width: 168px;
+  margin-top: 4px;
+  padding: 4px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 12px;
+  background: var(--dsw-alias-bg-layer-1);
+  box-shadow: 0 12px 32px -16px rgba(0, 0, 0, .45);
+  animation: zp-pop 160ms cubic-bezier(.22, .61, .36, 1) both;
+}
+.zp-menu button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font-size: 13px;
+  text-align: left;
+  white-space: nowrap;
+}
+.zp-root .zp-menu button { color: var(--dsw-alias-label-primary) }
+.zp-root .zp-menu button:hover { background: var(--dsw-alias-interactive-bg-hover) }
+.zp-root .zp-menu button.zp-danger { color: var(--zp-mu-ji) }
+.zp-menu button[aria-pressed="true"]::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  margin-left: auto;
+  border-radius: 999px;
+  background: var(--zp-gold);
+}
+
+/* ---------------- 提示条 ---------------- */
+.zp-toast {
+  position: absolute;
+  left: 50%;
+  bottom: 24px;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: calc(100% - 32px);
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--dsw-alias-button-primary-fill);
+  color: var(--dsw-alias-label-primary-inverted);
+  font-size: 13px;
+  line-height: 20px;
+  transform: translateX(-50%);
+  box-shadow: 0 12px 32px -16px rgba(0, 0, 0, .5);
+}
+.zp-toast.zp-error { background: var(--zp-mu-ji) }
+.zp-toast button {
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: underline;
+}
+.zp-root .zp-toast button { color: var(--dsw-alias-label-primary-inverted) }
+
+/* ---------------- 表单控件（生辰表单、设置） ---------------- */
+.zp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+.zp-field > span, .zp-field > label {
+  color: var(--dsw-alias-label-secondary);
+  font-size: 12px;
+  line-height: 18px;
+}
+.zp-field-row { display: flex; gap: 8px }
+.zp-field-row > * { flex: 1; min-width: 0 }
+.zp-input {
+  width: 100%;
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 8px;
+  background: var(--dsw-alias-bg-base);
+  font-size: 13px;
+  outline: none;
+}
+.zp-input:focus { border-color: var(--zp-zi) }
+.zp-field-hint {
+  margin: 0;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+  line-height: 18px;
+}
+.zp-field-hint.zp-err { color: var(--zp-mu-ji) }
+.zp-more {
+  margin: 4px 0 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--dsw-alias-bg-layer-2);
+}
+.zp-more > summary {
+  color: var(--dsw-alias-label-secondary);
+  font-size: 13px;
+  cursor: pointer;
+}
+.zp-more[open] > summary { margin-bottom: 12px }
+/* 设置里的一行：左边说明，右边开关或按钮 */
+.zp-setting {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--dsw-alias-border-l2);
+}
+.zp-setting:last-child { border-bottom: 0 }
+.zp-setting-text { flex: 1; min-width: 0 }
+.zp-setting-text b { display: block; font-size: 13px; font-weight: 500; line-height: 20px }
+.zp-setting-text span { display: block; color: var(--dsw-alias-label-tertiary); font-size: 12px; line-height: 18px }
+.zp-switch {
+  position: relative;
+  flex: none;
+  width: 32px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--dsw-alias-bg-layer-3);
+  transition: background-color 120ms ease;
+}
+.zp-switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--dsw-alias-bg-layer-1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .3);
+  transition: transform 120ms ease;
+}
+.zp-switch[aria-pressed="true"] { background: var(--zp-zi) }
+.zp-switch[aria-pressed="true"]::after { transform: translateX(12px) }
+.zp-about {
+  margin: 0;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+/* ---------------- 全部命盘 ---------------- */
+.zp-list { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 0; list-style: none }
+.zp-list-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 4px 4px 8px;
+  border-radius: 8px;
+}
+.zp-list-item:hover { background: var(--dsw-alias-interactive-bg-hover) }
+.zp-list-open {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+}
+.zp-list-name {
+  overflow: hidden;
+  font-family: var(--zp-font-serif);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.zp-list-meta {
+  flex: none;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.zp-list-empty { margin: 24px 0; color: var(--dsw-alias-label-tertiary); font-size: 13px; text-align: center }
+
+/* ---------------- 静态星图：没有 3D 时首页用它；报告页也用它（由 ZWReport.emblemSvg 生成，颜色走 --zr-*） ---------------- */
+.zp-emblem svg { display: block; width: 100%; height: 100% }

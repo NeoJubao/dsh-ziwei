@@ -26,6 +26,8 @@
   --zp-s11: #7d6c56;
   --zp-s12: #a3354a;
   --zp-s13: #4560a6;
+  --zp-orb-hi: #ffffff;
+  --zp-orb-lo: #0b0b14;
   --zp-font-serif: "Songti SC", "STSong", "SimSun", "Noto Serif SC", serif;
   position: relative;
   height: 100%;
@@ -66,6 +68,8 @@ body[data-ds-dark-theme] .zp-root {
   --zp-s11: #c9b9a2;
   --zp-s12: #e48190;
   --zp-s13: #93aaea;
+  --zp-orb-hi: #ffffff;
+  --zp-orb-lo: #0b0b14;
 }
 
 /* ---------------- 宿主约定：macOS 窗口 chrome 避让 ----------------
