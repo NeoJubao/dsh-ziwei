@@ -1,1 +1,229 @@
-/* 85-prose.css：报告正文版式，同时注入面板 CSS 和 30-report 的导出文件（T4） */
+/* ================================================================
+ * 85-prose：报告正文的版式（界面约定 v6；类名用 design.md §6 登记的 zr-* 和 md-table）
+ * 两个去处，内容完全相同：
+ * - 面板 CSS 的一部分（受体检脚本检查：字号、间距、字重、类名都按 v6 的档位）；
+ * - 构建时注入 30-report.js 的 PROSE_CSS，导出文件压缩后原样使用。
+ * 所以这里只认 --zr-* 变量，不写字面色，也不依赖 .zp-root 之外的样式：
+ * - 导出文件在 :root 上定义 --zr-*（浅色、深色、打印三组，见 30-report.js）；
+ * - 面板里由文件末尾的 .zp-root .zr-prose 把 --zr-* 映射到宿主 token 和 --zp-*，深浅色跟着宿主走。
+ * 封面、命盘页、目录、落款、打印规则只属于导出文件，写在 30-report.js 里，不在这里。
+ * ================================================================ */
+.zr-prose {
+  color: var(--zr-ink);
+  font-family: var(--zr-sans);
+  font-size: 15px;
+  line-height: 1.9;
+  overflow-wrap: anywhere;
+  -webkit-font-smoothing: antialiased;
+}
+.zr-sec { padding-top: 40px }
+.zr-sec:first-child { padding-top: 0 }
+
+/* 分部标题：编号（一、二…）和名称分开排；没有编号的部分不出编号框 */
+.zr-h {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--zr-rule);
+  text-wrap: balance;
+}
+.zr-h i {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  box-sizing: border-box;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 6px;
+  border: 1px solid var(--zr-gold);
+  border-radius: 8px;
+  color: var(--zr-gold-text);
+  font-family: var(--zr-serif);
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 1;
+}
+.zr-h b {
+  font-family: var(--zr-serif);
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: .04em;
+}
+
+/* 正文：## 在分部标题里，### / #### 是小标题（mdToHtml 输出 h3 / h4） */
+.zr-prose h3,
+.zr-prose h4 {
+  margin: 24px 0 8px;
+  font-family: var(--zr-serif);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: .02em;
+}
+.zr-prose p { margin: 0 0 12px }
+.zr-prose strong { font-weight: 600 }
+.zr-prose ul,
+.zr-prose ol {
+  margin: 0 0 12px;
+  padding-left: 24px;
+}
+.zr-prose li {
+  margin: 4px 0;
+  padding-left: 2px;
+}
+.zr-prose li::marker {
+  color: var(--zr-gold);
+  font-family: var(--zr-serif);
+}
+.zr-prose blockquote {
+  margin: 16px 0;
+  padding: 2px 0 2px 16px;
+  border-left: 2px solid var(--zr-gold);
+  color: var(--zr-ink-2);
+  font-family: var(--zr-kai);
+  font-size: 16px;
+  line-height: 1.85;
+  break-inside: avoid;
+}
+.zr-prose code {
+  padding: 2px 4px;
+  border-radius: 4px;
+  background: var(--zr-fill);
+  font-family: inherit;
+  font-size: 14px;
+}
+
+/* 管道表格：外面包一层横向滚动（splitSections 加的 .zr-tw），窄屏不撑破版心 */
+.zr-tw {
+  margin: 12px 0 16px;
+  overflow-x: auto;
+}
+.zr-prose .md-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  line-height: 1.65;
+  font-variant-numeric: tabular-nums;
+}
+.zr-prose .md-table th {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--zr-ink);
+  color: var(--zr-ink-2);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+  white-space: nowrap;
+}
+.zr-prose .md-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--zr-rule);
+  vertical-align: top;
+}
+.zr-prose .md-table tr {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+/* 分隔线画成三个金点 */
+.zr-prose hr {
+  margin: 32px 0 0;
+  border: 0;
+  line-height: 1;
+  text-align: center;
+}
+.zr-prose hr::after {
+  content: "· · ·";
+  color: var(--zr-gold);
+  font-family: var(--zr-serif);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: .5em;
+}
+
+/* 没有标题的开头（盘前的一句提示）：浅底小字 */
+.zr-lead blockquote {
+  margin: 0;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--zr-fill);
+  color: var(--zr-ink-2);
+  font-family: var(--zr-sans);
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+
+/* 十二字心法：居中、大字、字距拉开 */
+.zr-motto {
+  text-align: center;
+  break-inside: avoid;
+}
+.zr-motto .zr-h {
+  justify-content: center;
+  margin-bottom: 6px;
+  border-bottom: 0;
+}
+.zr-motto .zr-h b {
+  color: var(--zr-ink-3);
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: .3em;
+}
+.zr-motto p {
+  margin: 0;
+  font-family: var(--zr-serif);
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.9;
+  letter-spacing: .3em;
+  text-indent: .3em;
+}
+
+/* 打印：标题不落在页尾 */
+.zr-prose h2,
+.zr-prose h3,
+.zr-prose h4 {
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+/* 面板里：--zr-* 映射到宿主 token 和 --zp-*（导出文件里没有 .zp-root，这两段不生效）。
+   字体：宋体栈只给分部标题、小标题、心法和编号；引用用楷体，其余跟宿主正文字体。 */
+.zp-root .zr-prose {
+  --zr-paper: var(--dsw-alias-bg-layer-1);
+  --zr-fill: var(--dsw-alias-bg-layer-2);
+  --zr-ink: var(--dsw-alias-label-primary);
+  --zr-ink-2: var(--dsw-alias-label-secondary);
+  --zr-ink-3: var(--dsw-alias-label-tertiary);
+  --zr-rule: var(--dsw-alias-border-l1);
+  --zr-gold: var(--zp-gold);
+  --zr-gold-text: var(--zp-gold-text);
+  --zr-zi: var(--zp-zi);
+  --zr-lu: var(--zp-mu-lu);
+  --zr-quan: var(--zp-mu-quan);
+  --zr-ke: var(--zp-mu-ke);
+  --zr-ji: var(--zp-mu-ji);
+  --zr-s0: var(--zp-s0);
+  --zr-s1: var(--zp-s1);
+  --zr-s2: var(--zp-s2);
+  --zr-s3: var(--zp-s3);
+  --zr-s4: var(--zp-s4);
+  --zr-s5: var(--zp-s5);
+  --zr-s6: var(--zp-s6);
+  --zr-s7: var(--zp-s7);
+  --zr-s8: var(--zp-s8);
+  --zr-s9: var(--zp-s9);
+  --zr-s10: var(--zp-s10);
+  --zr-s11: var(--zp-s11);
+  --zr-s12: var(--zp-s12);
+  --zr-s13: var(--zp-s13);
+  --zr-em-halo: .26;
+  --zr-serif: var(--zp-font-serif);
+  --zr-kai: "Kaiti SC", "STKaiti", "KaiTi", var(--zp-font-serif);
+  --zr-sans: var(--dsh-font-family-text-default, -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", sans-serif);
+}
+body[data-ds-dark-theme] .zp-root .zr-prose { --zr-em-halo: .5 }
