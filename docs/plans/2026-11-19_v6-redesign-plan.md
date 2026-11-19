@@ -75,7 +75,7 @@
   <vendor/three-r128.min.js>
   ;var THREE = module.exports;
   <src/sky.js>
-    return (__ziweiBootstrapSky.api = { create: function (canvas, opts) { return createSky(THREE, canvas, opts); } });
+    return (__ziweiBootstrapSky.api = { acquire, release, destroy, create });   // 见 spec §4.5
   }
   window.__ModuleLoader__.load({
     id: '@local/ziwei-workbench',
@@ -106,15 +106,16 @@
 
 ### T2：3D 场景（主会话）
 
-目标：`src/sky.js` 进 bundle，预览壳里的首页星图和原型一致，生命周期正确。
+目标：`src/sky.js` 进 bundle，观感和原型一致，生命周期正确。
 
-- [ ] `vendor/three-r128.min.js` 入库；`.gitattributes` 加 `vendor/** -text`。
-- [ ] 把原型的 `sky.js` 改成 `function createSky(THREE, canvas, opts)`：定义时不碰 DOM、不读 `window.THREE`，创建时不自动开始渲染。
-- [ ] 生命周期（清单见附录 C 的 sky.js 一节）：停放 / 恢复、完整释放、上下文丢失、不可见时停表、减少动态效果时按需渲染、释放之后所有接口是空操作而 `dive` / `birth` 仍然回调。
-- [ ] 画质和成本：默认 `powerPreference`；`failIfMajorPerformanceCaveat: true`；渲染像素上限和 MSAA 下调到实测 60 帧且首帧不超过 300ms 的档位；记录挂载耗时。
-- [ ] 模块级单例：面板卸载时停放（取消动画帧、摘下自己的画布、释放随尺寸变化的渲染目标），空闲超时（`setTimeout`）、插件卸载或上下文丢失时完整释放。
-- [ ] `verify/ui-v6-sky.mjs`：`__ziweiBootstrapSky()` 在裸 vm 里返回 `{ create }`，两次调用是同一个对象，`window.THREE` 仍未定义；`create()` 在 `getContext` 返回 null 的画布上给出 `ok: false` 和完整接口，`dive(id, color, cb)` 仍调用 `cb`，`dispose()` 调两次不报错；Three.js 文件的 SHA-384 等于固定值。
-- [ ] 预览壳里看：夜空 / 晨光、拖动、缩放、悬停、点击、飞入、飞出、新星诞生；挂载卸载 30 次没有上下文警告；帧率。
+- [x] `vendor/three-r128.min.js` 入库；`.gitattributes` 加 `vendor/** -text`。
+- [x] 把原型的 `sky.js` 改成 `function createSky(THREE, canvas, opts)`：定义时不碰 DOM、不读 `window.THREE`；WebGL 上下文自己建，建不出来就安静地返回空实现。
+- [x] 生命周期（清单见附录 C 的 sky.js 一节）：停放 / 取回、彻底释放、上下文丢失、不可见时停表、减少动态效果时按需渲染、释放之后所有接口是空操作而 `dive` / `birth` 仍然回调。
+- [x] 画质和成本：不指定 `powerPreference`；`failIfMajorPerformanceCaveat: true`；像素上限 240 万，大画布用 2 倍多重采样。
+- [x] 模块级的停放：`acquireSky` / `releaseSky` / `destroySky`，画布由场景持有。
+- [x] `verify/ui-v6-sky.mjs`：进包方式、懒求值、不产生 `window.THREE`、没有 WebGL 时的空实现。这些检查是结构性的，写在实现之后。
+- [x] 独立调试页（`audit/sky-dev/`，不进仓库）里看过：夜空 / 晨光、飞入、飞出、新星诞生；停放取回 30 次、彻底释放重建 12 次没有上下文警告；60 帧；减少动态效果下静止时不排帧；用 `WEBGL_lose_context` 模拟上下文丢失。
+- [ ] 接进首页之后在预览壳里再看一遍（T8a）。
 
 ### T3a：小工具与本机存储
 

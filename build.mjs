@@ -120,8 +120,9 @@ const SKY_MID = `
 ;var THREE = module.exports;
 `;
 const SKY_TAIL = `  return (__ziweiBootstrapSky.api = {
-    THREE: THREE,
-    createSky: createSky,
+    acquire: function (host, opts) { return acquireSky(THREE, host, opts); },
+    release: releaseSky,
+    destroy: destroySky,
     create: function (canvas, opts) { return createSky(THREE, canvas, opts); }
   });
 }
