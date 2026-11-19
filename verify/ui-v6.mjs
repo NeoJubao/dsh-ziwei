@@ -1,12 +1,13 @@
 /**
  * verify/ui-v6.mjs — v6 界面自检（verify/all.mjs 第 9 组）
  *
- *   node verify/ui-v6.mjs                  在内存里拼出 v6 的 client（build.mjs 的拼接函数），
- *                                          再按文件名顺序运行 verify/ui-v6-*.mjs
+ *   node verify/ui-v6.mjs                  在内存里拼出 v6 的 client（build.mjs 的拼接函数），核对它和磁盘上的
+ *                                          client.js 逐字节相同，再按文件名顺序运行 verify/ui-v6-*.mjs
  *   node verify/ui-v6.mjs --write-preview  另外把拼好的 client 写到 audit/preview-shell/client.v6.js
  *                                          （本机预览壳读它；audit/ 不进仓库）。除此之外不写任何文件。
  *
- * 切换之前 client.js 仍是 v5（node build.mjs 只出 v5），v6 只在这里检查。
+ * client.js 就是 node build.mjs 写出的 v6 产物；检查文件拿到的 t.client 是内存里的拼接结果，
+ * 上面那条逐字节核对保证它和发出去的 client.js 是同一份。
  *
  * 检查文件的写法：export default async function (t) { ... }。t 里有
  *   root / version          仓库根目录、package.json 的版本号
@@ -53,6 +54,11 @@ ok('assembleSky 不抛错（vendor/three-r128.min.js 或 src/sky.js 缺一个时
 const engine = await buildEngine(root);
 const zcore = readFileSync(join(root, 'src', 'ziwei-core.js'), 'utf8');
 const client = ui ? assembleClient({ engine, zcore, sky, ui: ui.text }) : null;
+let shipped = null;
+try { shipped = readFileSync(join(root, 'client.js'), 'utf8'); } catch { shipped = null; }
+ok('内存里拼出的 client 和磁盘上的 client.js 逐字节相同（改了 src/ 要先 node build.mjs）',
+  client !== null && shipped !== null && client === shipped,
+  shipped === null ? '读不到 client.js' : `内存 ${client ? client.length : '—'} 字符 / 磁盘 ${shipped.length} 字符`);
 
 if (WRITE_PREVIEW) {
   if (client) {

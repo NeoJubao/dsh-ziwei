@@ -4,15 +4,16 @@
  *   node verify/all.mjs
  *
  * 包含:
- *   1. verify/verify.mjs        内核 + host 插件 + 客户端 bundle（含窗口 chrome 避让与「返回会话」出口防回归）
+ *   1. verify/verify.mjs        内核 + host 插件 + 客户端 bundle（client.js 与 build.mjs 重拼结果逐字节一致；
+ *                               含窗口 chrome 避让与「返回会话」出口防回归）
  *   2. verify/exports.mjs       宿主入口导出契约（name / inject / apply）
  *   3. verify/routes-auth.mjs   路由方法 / 鉴权 / JSON Content-Type 守卫
  *   4. verify/verify-tools.mjs  真实 dsh-tools 契约校验（25 项）
  *   5. verify/diff-runner.mjs   与独立版 run-paipan.js 逐字段差分（20 用例）
  *   6. verify/sse-hang.mjs      SSE 对无视 abort 的挂起流必须超时解锁（19 项）
  *   7. verify/pack.mjs          打包完整性（npm pack 必需文件）
- *   8. verify/ui-contract.mjs   界面契约体检（包装 scripts/audit-ui.mjs；区域 / token / 可访问性）
- *   9. verify/ui-v6.mjs         v6 界面：在内存里拼出 v6 的 client，跑 verify/ui-v6-*.mjs（含 --profile v6 体检）
+ *   8. verify/ui-contract.mjs   界面约定体检（包装 scripts/audit-ui.mjs，约定在 docs/ui-contract/；体检只在这一组跑）
+ *   9. verify/ui-v6.mjs         v6 界面：在内存里拼出 client（核对与 client.js 逐字节相同），跑 verify/ui-v6-*.mjs
  */
 /* 自检不写 interpret-diag.log（那是给真实面板排障用的） */
 process.env.ZIWEI_DIAG = '0';

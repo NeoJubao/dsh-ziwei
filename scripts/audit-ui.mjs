@@ -3,7 +3,7 @@
  * scripts/audit-ui.mjs — 界面契约体检（ui-contract）
  *
  * 职责：**报告漂移，不修**。契约文档在 docs/ui-contract/，本脚本只做三件事：
- *   1. 按文档里的规则读源码（src/ui-pro.js）与构建产物（client.js）；
+ *   1. 按文档里的规则读源码（src/ui/ 拼接后的全文）与构建产物（client.js）；
  *   2. 逐项输出 PASS / WARN / FAIL；
  *   3. 用「棘轮」把历史欠账锁住：违规数超过基线才 FAIL，等于基线是 WARN，低于基线提示可下调。
  *
@@ -13,9 +13,9 @@
  *   node scripts/audit-ui.mjs --update-baseline 重算基线并写 docs/ui-contract/audit-baseline.json
  *   node scripts/audit-ui.mjs --strict         历史欠账（WARN）也算失败
  *   node scripts/audit-ui.mjs -v               打印全部样例（不只前 5 条）
- *   node scripts/audit-ui.mjs --profile v6     体检 v6 界面：src/ui/ 用 build.mjs 的 assembleUi 在内存里拼接，
- *                                              约定读 docs/ui-contract/v6/，基线全 0（不接受 --update-baseline）。
- *                                              样例位置报「源文件:行号」。默认 --profile v5（src/ui-pro.js）。
+ *   node scripts/audit-ui.mjs --profile v6     体检 v6 界面（默认就是 v6）：src/ui/ 用 build.mjs 的 assembleUi 在内存里拼接，
+ *                                              约定读 docs/ui-contract/，基线全 0（不接受 --update-baseline）。
+ *                                              样例位置报「源文件:行号」。v5 的约定已被 v6 取代，--profile v5 不再可用。
  *
  * 退出码：0 无 FAIL / 1 有 FAIL / 2 契约文档缺失或不可解析。
  *
@@ -31,9 +31,9 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = dirname(HERE);
 
-/** --profile v5|v6（也可写 --profile=v6）；默认 v5。 */
+/** --profile v6（也可写 --profile=v6）；默认 v6。v5 的约定文档已被 v6 取代，main() 里拒绝 v5。 */
 function readProfile(argv) {
-  let profile = 'v5';
+  let profile = 'v6';
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === '--profile') profile = argv[i + 1];
     else if (argv[i].startsWith('--profile=')) profile = argv[i].slice('--profile='.length);
@@ -42,7 +42,7 @@ function readProfile(argv) {
 }
 const PROFILE = readProfile(process.argv.slice(2));
 const V6 = PROFILE === 'v6';
-const CONTRACT_DIR = V6 ? join(ROOT, 'docs', 'ui-contract', 'v6') : join(ROOT, 'docs', 'ui-contract');
+const CONTRACT_DIR = join(ROOT, 'docs', 'ui-contract');
 
 const PATHS = {
   src: V6 ? join(ROOT, 'src', 'ui') : join(ROOT, 'src', 'ui-pro.js'),
@@ -749,7 +749,7 @@ function checkC16(ctx) {
 
 /* ------------------------------------------------------------------ *
  * v6（--profile v6）：约定解析与检查
- * 约定文档在 docs/ui-contract/v6/；源码由 build.mjs 的 assembleUi 拼出来（样例位置报「源文件:行号」）。
+ * 约定文档在 docs/ui-contract/；源码由 build.mjs 的 assembleUi 拼出来（样例位置报「源文件:行号」）。
  * ------------------------------------------------------------------ */
 
 const cellsOf = (row) => row.split('|').slice(1, -1).map((c) => c.trim());
@@ -1299,7 +1299,7 @@ function loadContext() {
   };
 }
 
-/** v6：用 build.mjs 的 assembleUi 在内存里拼 src/ui/；「构建」就是这份拼接结果（切换前 client.js 仍是 v5）。 */
+/** v6：用 build.mjs 的 assembleUi 在内存里拼 src/ui/ 当源码；「构建」读磁盘上的 client.js（node build.mjs 的产物）。 */
 async function loadContextV6() {
   const build = await import(pathToFileURL(join(ROOT, 'build.mjs')).href);
   let ui = null;
@@ -1313,7 +1313,7 @@ async function loadContextV6() {
   const designMd = read(PATHS.design);
   const tokensMd = read(PATHS.tokens);
   if (!layoutMd || !designMd || !tokensMd) {
-    failExit(`契约文档缺失：需 docs/ui-contract/v6/{layout,design,tokens}.md 三份齐全`);
+    failExit(`契约文档缺失：需 docs/ui-contract/{layout,design,tokens}.md 三份齐全`);
   }
   const css = extractCssTemplate(src);
   if (!css.text) failExit('拼好的 v6 源码里找不到 const CSS = `...` 模板（40-styles.js 变了？）');
@@ -1323,7 +1323,7 @@ async function loadContextV6() {
   const contentColors = parseContentColors(tokensMd);
   return {
     src,
-    built: src,
+    built: read(PATHS.built),
     css,
     cssParsed,
     cssRules: cssParsed.rules,
@@ -1400,8 +1400,8 @@ function printHuman(results, baseline, meta) {
   const icon = { PASS: 'PASS', WARN: 'WARN', FAIL: 'FAIL' };
   if (V6) {
     console.log('紫微斗数 · 界面约定 v6 体检（--profile v6）');
-    console.log(`契约：docs/ui-contract/v6/{layout,design,tokens}.md · 源码：src/ui/（拼接后 ${countLines(meta.src)} 行）· 构建：内存拼接（${meta.builtBytes} B；切换前 client.js 仍是 v5）`);
-    console.log(`基线：${baseline.from}${baseline.from === '内置' ? '' : ' docs/ui-contract/v6/audit-baseline.json'}`);
+    console.log(`契约：docs/ui-contract/{layout,design,tokens}.md · 源码：src/ui/（拼接后 ${countLines(meta.src)} 行）· 构建：client.js（${meta.builtBytes} B）`);
+    console.log(`基线：${baseline.from}${baseline.from === '内置' ? '' : ' docs/ui-contract/audit-baseline.json'}`);
   } else {
     console.log('紫微斗数 Pro · 界面契约体检（ui-contract）');
     console.log(`契约：docs/ui-contract/{layout,design,tokens}.md · 源码：src/ui-pro.js（${countLines(meta.src)} 行）· 构建：client.js（${meta.builtBytes} B）`);
@@ -1444,7 +1444,7 @@ function printJson(results, baseline, meta) {
     }
   }
   const exitCode = summary.fail > 0 ? 1 : 0;
-  const dir = V6 ? 'docs/ui-contract/v6' : 'docs/ui-contract';
+  const dir = 'docs/ui-contract';
   process.stdout.write(JSON.stringify({
     tool: 'ui-contract-audit',
     version: 1,
@@ -1486,7 +1486,8 @@ function updateBaseline(ctx, results, meta) {
 }
 
 async function main() {
-  if (PROFILE !== 'v5' && PROFILE !== 'v6') failExit(`--profile 只认 v5 或 v6（收到 ${PROFILE}）`);
+  if (PROFILE === 'v5') failExit('v5 的界面约定已被 v6 取代（docs/ui-contract/ 现在是 v6 的约定），--profile v5 不再可用。');
+  if (PROFILE !== 'v6') failExit(`--profile 只认 v6（收到 ${PROFILE}）`);
   if (V6 && FLAG.update) failExit('v6 的基线固定全 0，不接受 --update-baseline：有违规就改代码或改约定文档。');
   const ctx = await loadContext();
   const baseline = loadBaseline();

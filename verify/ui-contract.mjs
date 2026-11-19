@@ -1,14 +1,14 @@
 /**
  * verify/ui-contract.mjs — 界面契约体检接线（ui-contract）
  *
- * 只做包装：调用 scripts/audit-ui.mjs --json，把它的分级结果翻译成 verify/ 的输出风格。
- * 契约本身（layout.md / design.md / tokens.md）与检查逻辑都在 audit 里，本文件不改契约。
+ * 只做包装：调用 scripts/audit-ui.mjs --json（默认就是 v6 的约定），把每项检查翻译成一条断言。
+ * 契约本身（docs/ui-contract/ 的 layout.md / design.md / tokens.md）与检查逻辑都在 audit 里，本文件不改契约。
+ * 体检只在这里跑一次（verify/all.mjs 第 8 组）；第 9 组 verify/ui-v6.mjs 不再重复跑。
  *
- * 通过标准：audit 无 FAIL（exit 0）。历史欠账（WARN）单列，不计失败但不隐藏。
+ * 通过标准：audit 无 FAIL，也没有 WARN。v6 的基线全 0，没有可以锁住的历史欠账，
+ * 所以 WARN（检查被跳过，或 C15 的计数没超过一个被人上调过的基线）同样算失败，照实标出来。
  *
  * 运行: node verify/ui-contract.mjs
- * 接线: 由仓库维护者在 verify/all.mjs 的 STEPS 里加一行
- *       ['界面契约（ui-contract）', 'ui-contract.mjs']（本文件不自动改 all.mjs）
  */
 /* 自检不写 interpret-diag.log（那是给真实面板排障用的） */
 process.env.ZIWEI_DIAG = '0';
@@ -54,12 +54,10 @@ if (r.error) {
       if (c.status === 'PASS') {
         pass++;
         line('✅', `${c.id} ${c.title}`, detail);
-      } else if (c.status === 'WARN') {
-        warn++;
-        line('⚠️', `${c.id} ${c.title}`, detail);
       } else {
+        if (c.status === 'WARN') warn++;
         fail++;
-        line('❌', `${c.id} ${c.title}`, detail);
+        line('❌', `${c.id} ${c.title}${c.status === 'WARN' ? '（WARN）' : ''}`, detail);
         const samples = (c.samples || []).slice(0, 3);
         for (const s of samples) console.log(`       · ${s}`);
         if ((c.samples || []).length > samples.length) {
@@ -78,6 +76,6 @@ if (r.error) {
 }
 
 console.log(`\n${'='.repeat(52)}`);
-console.log(`界面契约自检: ${pass} 通过, ${fail} 失败${warn > 0 ? `（${warn} 项历史欠账警告，不计失败）` : ''}`);
+console.log(`界面契约自检: ${pass} 通过, ${fail} 失败${warn > 0 ? `（其中 ${warn} 项是 WARN，v6 基线全 0，照样算失败）` : ''}`);
 console.log('='.repeat(52));
 process.exit(fail === 0 ? 0 : 1);

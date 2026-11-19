@@ -8,8 +8,8 @@
 //   node build.mjs          直接运行：写 engine-built.js 和 client.js（不接受任何参数）。
 //   import '../build.mjs'   被自检 / 体检脚本导入：只导出拼接函数，不读写任何文件。
 //
-// v6 界面（src/ui/）在切换之前只在内存里拼（verify/ui-v6.mjs、scripts/audit-ui.mjs --profile v6），
-// 直接运行仍然只从 src/ui-pro.js 出 v5 的 client.js，逐字节不变。
+// client.js 的界面是 v6：src/ui/ 按文件名拼接（assembleUi），3D 星图是 vendor/three-r128.min.js + src/sky.js
+// （assembleSky）。自检（verify/verify.mjs、verify/ui-v6.mjs）用同一组函数在内存里重拼，逐字节比对产物。
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, readdirSync, realpathSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -407,18 +407,19 @@ export function assembleUi(root = ROOT, { version }) {
 }
 
 /* ------------------------------------------------------------------ *
- * 直接运行：出 v5 产物
+ * 直接运行：出 v6 产物
  * ------------------------------------------------------------------ */
 
 async function main() {
   const engine = await buildEngine(ROOT, { log: (s) => console.log(s) });
   const version = readPackageVersion(ROOT);
   const zcore = readFileSync(join(ROOT, 'src', 'ziwei-core.js'), 'utf8');
-  const ui = assembleUiV5(ROOT, { version });
+  const ui = assembleUi(ROOT, { version }).text;
+  const sky = assembleSky(ROOT);
 
   // 引擎单独文件(供 Node 测试与 host 沙箱): 带数据
   writeFileSync(join(ROOT, 'engine-built.js'), engine);
-  writeFileSync(join(ROOT, 'client.js'), assembleClient({ engine, zcore, sky: '', ui }));
+  writeFileSync(join(ROOT, 'client.js'), assembleClient({ engine, zcore, sky, ui }));
 
   console.log('built: engine-built.js, client.js');
 }

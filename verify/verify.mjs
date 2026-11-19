@@ -4,7 +4,9 @@
  * 覆盖:
  *  1. 引擎与 ziwei-core 契约 (黄金用例四断言 / 命盘文本 / 请求组装 / 参数归一化)
  *  2. host 插件 (index.js) 在假 ctx 下的工具注册与执行、SSE 路由、上下文路由
- *  3. 打包产物 (client.js / engine-built.js) 完整性
+ *  3. 打包产物 (client.js / engine-built.js) 完整性：与 build.mjs 重拼的结果逐字节一致、
+ *     可在 vm 里求值、宿主约定在位；再用 verify/client-harness.mjs 跑一遍面板的关键行为（薄版本，
+ *     完整用例在 verify/ui-v6-*.mjs）
  *
  * 运行: node verify/verify.mjs
  */
@@ -14,6 +16,8 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import vm from 'node:vm';
 import { EventEmitter } from 'node:events';
 import { resolveRunner, runnerMissingHint } from './runner-path.mjs';
+import { assembleClient, assembleSky, assembleUi, buildEngine, readPackageVersion } from '../build.mjs';
+import { fakeLocale, find, findByClass, loadBundle, makeCtx, manualTimers, memoryStorage, renderDeep, settle, streamFetch } from './client-harness.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -346,36 +350,32 @@ ok('client.js 不再直连 api.deepseek.com', !/api\.deepseek\.com/.test(client)
    /ziwei/context 路由仍在 host 上，但面板不再单独调用它 */
 ok('client.js 走 host 通道（interpret + handoff），不再有单独的「写入会话」',
   /\/ziwei\/interpret/.test(client) && /\/ziwei\/handoff/.test(client) && !/syncToSession/.test(client) && !/'\/ziwei\/context'/.test(client));
-ok('client.js 不再引用已删除的 interpretChart', !/interpretChart/.test(client));
-ok('client.js 含新 UI 文案与组件', /zp-chat-thread/.test(client) && /在新会话里继续/.test(client));
+/* 旧界面删掉的东西不许回来：已删除的接口、v3 退役的十二大限列表 / 流年输入条、v3.2 的模式条、
+   v3.3 撤回的「打开就自动解读」、批 C 去掉的「专注看盘」和设置里重复的「显示杂曜」。
+   （v5 的 zp-suggest 指模式条旁的建议按钮；v6 重新用这个类名做报告写完后的追问建议，所以不在此列。） */
+{
+  const RETIRED = [
+    ['interpretChart', /interpretChart/],
+    ['function DecadalPanel', /function DecadalPanel/],
+    ['function YearlyBar', /function YearlyBar/],
+    ["className: 'zp-stage-bar'", /className: 'zp-stage-bar'/],
+    ['modeBrief', /modeBrief/],
+    ['modeReport', /modeReport/],
+    ['zp-ai-mode', /zp-ai-mode/],
+    ['autoStartedRef', /autoStartedRef/],
+    ["runInterpretation('', 'brief')", /runInterpretation\('', 'brief'\)/],
+    ['toggleFocus', /toggleFocus/],
+    ['data-focus', /data-focus/],
+    ['focusOn', /focusOn/],
+    ["t('showAdjSet')", /t\('showAdjSet'\)/]
+  ];
+  const back = RETIRED.filter(([, re]) => re.test(client)).map(([name]) => name);
+  ok(`已删除的旧标识符都不在 client.js 里（${RETIRED.length} 个：interpretChart、旧时间组件、模式条、自动解读、专注看盘、重复的杂曜开关）`,
+    back.length === 0, 'found: ' + back.join(', '));
+}
 /* P0-2: 旧版浏览器明文 API Key 必须消失（只保留升级清理逻辑） */
 ok('client 不再持久化 API Key（已无消费方）',
   !/localStorage\.setItem\('ziwei-workbench\.apikey'/.test(client) && !/type: 'password'/.test(client) && /removeItem\('ziwei-workbench\.apikey'\)/.test(client));
-/* P1-1: 可见文案必须走官方 Client locale 服务（register + bind），不再读私有 tr.i18n */
-/* v1.3.3: 旧持久化表单的一次性月柱口径迁移 */
-ok('v1.3.3: localStorage 旧默认一次性迁移到节气',
-  /ziwei-pro\.formV133/.test(client) && /monthDivide === 'normal'/.test(client) &&
-  /JSON\.stringify\(init\)/.test(client));
-
-/* v1.5.2: order 重排只允许在 narrow 生效，不能覆盖宽/中/紧凑档的 DOM 顺序 */
-ok('v1.5.2: 左栏 order 规则已收窄到 narrow', /\[data-w="narrow"\] \.zp-input-card \{ order: 1 \}/.test(client) &&
-  /\[data-w="narrow"\] \.zp-patterns-card \{ order: 3 \}/.test(client) &&
-  !/(?:^|\n)\.zp-input-card \{ order: 1 \}/.test(client));
-
-/* v1.5.1: 左栏阅读顺序 = 命主信息 → 格局摘要 → 排盘输入 → 命盘库 */
-{
-  const iSummary = client.indexOf('h(Summary, { chart');
-  const iPatterns = client.indexOf('h(PatternsSummary,');
-  const iInput = client.indexOf('h(InputForm, {');
-  const iLib = client.indexOf('h(Library, {');
-  ok('v1.5.1: 左栏顺序 命主信息 → 格局摘要 → 排盘输入 → 命盘库',
-    iSummary > 0 && iSummary < iPatterns && iPatterns < iInput && iInput < iLib,
-    `${iSummary}/${iPatterns}/${iInput}/${iLib}`);
-}
-
-/* v1.5.0: 左栏格局摘要（命主信息下方）+ SIDE_PATTERNS 区域 */
-ok('v1.5.0: 左栏格局摘要接通 SIDE_PATTERNS', /data-region': 'SIDE_PATTERNS'/.test(client) &&
-  /function PatternsSummary/.test(client) && /h\(PatternsSummary/.test(client));
 
 /* v1.4.0: 手动检查更新（无轮询、无后台联网） */
 {
@@ -385,106 +385,31 @@ ok('v1.5.0: 左栏格局摘要接通 SIDE_PATTERNS', /data-region': 'SIDE_PATTER
     client.includes('检查更新') && !client.includes('__ZIWEI_VERSION__'));
   ok('v1.4.0: 版本检查无轮询定时器', !/setInterval\(/.test(client));
 }
-
-/* v3.1: 深色白字填充专用色（对比度 ≥4.5）与 mid 详情/窄屏头部微调 */
-ok('v3.1: 深色白字填充走 --zp-fill-accent*（不再拿亮 accent 配白字）',
-  /--zp-fill-accent: #7c5cf0/.test(client) && /--zp-fill-accent: #6a4fe0/.test(client) &&
-  /--zp-fill-accent-deep: #5840c0/.test(client) && /var\(--zp-fill-accent\)/.test(client));
-ok('v3.1: mid/窄档详情卡 max-width 760 居中 + 窄屏头部命主摘要',
-  /:not\(\[data-w="wide"\]\) \.zp-detail \{[^}]*max-width: 760px/.test(client) && /zp-head-mini/.test(client));
-/* v3.1: 侧栏展开时面板 ~908–1071，必须有 compact 两栏，不能掉进单列把中栏拉满 */
-ok('v3.1: 四档布局含 compact（908 起两栏，264+600），防止侧栏展开时中栏被拉成单列',
-  /panelW >= 908/.test(client) && /data-w="compact"/.test(client) &&
-  /data-w="compact"[^}]*grid-template-columns:\s*264px/.test(client) &&
-  /data-w="compact"[^}]*--zp-board-max:\s*600px/.test(client));
-/* v3 布局：时间维度导航、左栏收起、工具视图、窄屏底栏 —— 防回退成「列表堆在盘上」 */
-ok('v3: 时间维度导航常驻 TimeBar（模式分段 + 大限/流年步进 + 回到当前）',
-  /zp-timebar/.test(client) && /zp-time-nav/.test(client) && /backToCurrent/.test(client) && /thisYear/.test(client));
-ok('v3: 十二大限列表/流年输入不再压在盘面上方（旧组件已移除）',
-  !/function DecadalPanel/.test(client) && !/function YearlyBar/.test(client) && !/className: 'zp-stage-bar'/.test(client));
-ok('v3: 左栏可收起（rail toggle + data-rail），窄屏有底部行动条',
-  /'data-rail': railVisible/.test(client) && /zp-rail-toggle/.test(client) && /zp-bottombar/.test(client));
-ok('v3: 格局/词典移到 TimeBar 工具区，有返回盘面出口',
-  /openPatterns/.test(client) && /openDict/.test(client) && /backToBoard/.test(client));
-ok('v3: 有盘时排盘降级为次按钮（唯一主行动 = 紫微师解读）',
-  /className: 'zp-btn' \+ \(props\.hasChart \? '' : ' zp-btn-primary'\)/.test(client));
-/* v3.2：抽屉不再有「只改下一次请求」的模式条；空态/回答后都是直接发起动作 */
-ok('v3.2: 抽屉去掉速览/鲲鹏模式条（避免点了没反应）',
-  !/modeBrief/.test(client) && !/modeReport/.test(client) && !/zp-ai-mode/.test(client) && !/zp-suggest/.test(client));
-ok('v5: 工位空态两个动作 + 报告产物入口都存在',
-  /zp-studio-start/.test(client) && /aiStartBrief/.test(client) && /aiStartReport/.test(client) &&
-  /reportGenerate/.test(client) && /reportOpen/.test(client) && /ReportArtifact/.test(client));
-ok('v3.3: 点开解读抽屉不自动发起解读（只开空态，动作由用户点）',
-  !/autoStartedRef/.test(client) && !/runInterpretation\('', 'brief'\)/.test(client));
-ok('v3.3: 空态是一行一个的动作卡（图标 / 名称 / 说明 / 箭头），不再把按钮拉满整行',
-  /zp-ai-start-btn/.test(client) && /zp-ai-start-glyph/.test(client) &&
-  /zp-ai-start-desc/.test(client) && /zp-ai-start-arrow/.test(client) &&
-  !/zp-ai-start \.zp-btn/.test(client));
-ok('v1.7: 换盘按命盘 key 恢复该盘记录；没有记录才清空，且不自动生成',
-  /var adoptChart = function/.test(client) && /chartKeyRef\.current = key/.test(client) &&
-  /loadReadingRecord\(key\)/.test(client) && /setThread\(saved\.thread \|\| \[\]\)/.test(client) &&
-  /setThread\(\[\]\)/.test(client) && /setReport\(normalizeReport\(saved\.report\)\)/.test(client) &&
-  !/autoStartedRef/.test(client));
-ok('v1.7: 解读记录按命盘持久化（最多 8 张 / 每张 24 条）',
-  /ziwei-pro\.readings\.v1/.test(client) && /READINGS_MAX = 8/.test(client) &&
-  /slice\(-24\)/.test(client) && /saveReadingRecord/.test(client) && /clearReadingRecord/.test(client));
-ok('v1.7: 解读记录 key 含排盘设置（换月柱/晚子时口径不会套回旧解读）',
-  /function readingKeyOf/.test(client) && /settingsKey/.test(client) &&
-  /yearDivide/.test(client) && /monthDivide/.test(client) && /dayDivide/.test(client) &&
-  /settingsKey\]\.join/.test(client));
-ok('v1.7: 启动时恢复上一次命盘与它的解读记录',
-  /ziwei-pro\.lastChart\.v1/.test(client) && /loadLastChart/.test(client) && /restoredRef/.test(client));
-ok('v1.7: 流式空回答不再画空白气泡，改为思考提示点',
-  /m\.role !== 'user' && !String\(m\.content \|\| ''\)\.trim\(\)/.test(client) &&
-  /zp-typing-dots/.test(client) && !/aiThinking\) \+ '（'/.test(client));
-ok('client 大限默认停在当前段（不是第 0 段）且流年选择进 payload',
-  /function currentDecadeIndex|var currentDecadeIndex = function/.test(client) && /setSelDecadal\(currentDecadeIndex\(result\)\)/.test(client) && /yearlyFocus:/.test(client));
-ok('client 问答 payload 带完整上下文与当前年龄（大限定位）',
-  /var chartContextText = function/.test(client) && /chartText: chartContextText\(\)/.test(client) &&
-  /currentAge: pos\.currentAge/.test(client) && /decadalFocus: selectedDecade/.test(client));
-ok('client 走官方 locale 服务（register + bind，不再读 tr.i18n）',
-  /locale\.register\('ziwei'/.test(client) && /locale\.bind\('ziwei'\)/.test(client) && !/\.i18n\[0\]/.test(client));
-/* P2-8 / a11y 回归：流式区 aria-live、分段控件 aria-pressed、图标出口 aria-label、预览 iframe title+sandbox */
-ok('client 可访问性契约在位（aria-live / aria-pressed / dialog / 焦点陷阱）',
-  /role: 'log'/.test(client) && /'aria-live': 'polite'/.test(client) && /'aria-pressed':/.test(client) &&
-  /'aria-modal': 'true'/.test(client) && /trapTab/.test(client) && /t\(\'reportTitle\'\)/.test(client));
-ok('v5: 右侧抽屉 + 对话/报告页签 + 报告阅读器',
-  /StudioDrawer/.test(client) && /zp-drawer-overlay/.test(client) && /zp-drawer-tabs/.test(client) &&
-  /ReportArtifact/.test(client) && /ReportReader/.test(client) && /studioOpen/.test(client));
-ok('v5: 报告与聊天分离，导出/复制走 report.text',
-  /var runReport = function/.test(client) && /report\.status === 'running'/.test(client) &&
-  /buildReportHtml\(reportMeta\(\), report\.text\)/.test(client) && /setReport\(normalizeReport\(saved\.report\)\)/.test(client));
-ok('v5: 示例盘提示、诚实复制/保存/同步、本机数据清理',
-  /isSampleChart/.test(client) && /copyText/.test(client) && /clearAllReadings/.test(client) &&
-  /showToast/.test(client) && /aiRecordCleared/.test(client) && /reportNeeded/.test(client));
-ok('v5: 报告按部分展示进度（14 部分）',
-  /REPORT_SECTION_TITLES/.test(client) && /countReportSections/.test(client) && /zp-report-progress-card/.test(client));
 ok('engine-built.js 与内核解耦（不含 UI）', !/__ModuleLoader__/.test(readFileSync(join(root, 'engine-built.js'), 'utf8')));
 
 /* H2: 构建产物新鲜度 —— 改了 src 忘记 build、或产物被手改, 都必须报错。
-   产物形态 = 懒加载内核头 + engine-built + ziwei-core + 头尾闭合 + ui-pro（见 build.mjs）。 */
+   用 build.mjs 导出的同一组拼接函数在内存里重拼一遍，和磁盘上的产物逐字节比：
+   client.js = 懒加载内核包装 + engine + ziwei-core + 3D 星图（vendor/three-r128.min.js + src/sky.js）+ src/ui/ 拼接。 */
 {
   const eng = readFileSync(join(root, 'engine-built.js'), 'utf8');
   const zc = readFileSync(join(root, 'src', 'ziwei-core.js'), 'utf8');
-  const ui = readFileSync(join(root, 'src', 'ui-pro.js'), 'utf8');
-  const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
-  const uiBuilt = ui.replace("'__ZIWEI_VERSION__'", JSON.stringify(pkg.version));
-  const headEnd = client.indexOf(eng);
-  const tailStart = headEnd + eng.length + 1 + zc.length;
-  const fresh = headEnd > 0
-    && client.slice(0, headEnd).includes('function __ziweiBootstrapKernel()')
-    && client.slice(tailStart).startsWith('\n}\n')
-    && client.endsWith(uiBuilt);
-  ok('client.js = 懒加载内核包装 + engine-built + ziwei-core + ui-pro（产物未过期）', fresh);
+  let engineNow = null, expected = null, buildErr = null;
+  try {
+    engineNow = await buildEngine(root);
+    expected = assembleClient({ engine: engineNow, zcore: zc, sky: assembleSky(root), ui: assembleUi(root, { version: readPackageVersion(root) }).text });
+  } catch (e) { buildErr = e; }
+  let firstDiff = -1;
+  if (expected !== null && client !== expected) {
+    firstDiff = 0;
+    while (firstDiff < client.length && client[firstDiff] === expected[firstDiff]) firstDiff++;
+  }
+  ok('client.js = build.mjs 现在拼出来的结果（逐字节；产物未过期、没有手改）',
+    buildErr === null && expected !== null && client === expected,
+    buildErr ? buildErr.message : `磁盘 ${client.length} 字符 / 重拼 ${expected && expected.length} 字符，第一处不同在 ${firstDiff}`);
+  ok('engine-built.js = build.mjs 现在拼出来的引擎（逐字节）', engineNow !== null && eng === engineNow, buildErr && buildErr.message);
   ok('engine-built.js 已注入农历数据（无占位符残留）',
     !/\/\*__LUNAR_INFO__\*\//.test(eng) && !/\/\*__LTERM_INFO__\*\//.test(eng) && /lunarInfo|LUNAR_INFO/.test(eng));
 }
-
-/* H1: 面板默认口径必须进产物 —— 只改 src/ui-pro.js 而忘记 build 会静默漏掉 */
-ok('autoOpen 默认关闭（不劫持主面板；用户可在设置里开启）',
-  /localStorage\.getItem\('ziwei-pro\.autopen'\) === '1'/.test(client) && !/getItem\('ziwei-pro\.autopen'\) !== '0'/.test(client));
-ok('面板默认 dayDivide = current（与紫微师口径一致）',
-  /settings: \{ yearDivide: 'normal', monthDivide: 'exact', dayDivide: 'current', fixLeap: true \}/.test(client));
 
 /* 引擎默认口径必须进产物 */
 ok('引擎默认 dayDivide = current', /dayDivide: 'current'/.test(readFileSync(join(root, 'engine-built.js'), 'utf8')));
@@ -502,12 +427,22 @@ ok('面板避让 darwin 窗口 chrome（top / leading / overlay 三个 frame 变
   /html\[data-platform="darwin"\] \.zp-root \.zp-overlay-center \{[\s\S]{0,200}?var\(--dsh-frame-overlay-top, 46px\)/.test(client));
 ok('面板层叠收进自身上下文（内部 z-index 不再盖住 frame 的 shell.leading 出口）',
   /\.zp-root \{[\s\S]{0,2000}?isolation: isolate;/.test(client));
-ok('client 提供「返回会话」出口：官方 selectPanel(null) + title/aria-label（键盘可达）',
-  /selectPanel\(null\)/.test(client) &&
-  /className: 'zp-icon-btn zp-exit', type: 'button'/.test(client) &&
-  /title: t\('backToConversation'\), 'aria-label': t\('backToConversation'\)/.test(client));
-ok('chrome 避让不用魔法数字写死（顶部偏移只走 --dsh-frame-top-clearance）',
-  !/padding-top: ?48px/.test(client) && /--dsh-frame-top-clearance/.test(client));
+/* 按钮本身（zp-exit、title、aria-label）由下面「主面板顶栏渲染出唯一的返回会话按钮」在渲染级核对 */
+ok('client 提供「返回会话」出口：官方 selectPanel(null)', /selectPanel\(null\)/.test(client));
+/* 48px 是宿主窗口标题带的高度。顶部避让只能走 --dsh-frame-top-clearance：外壳（.zp-root / .zp-shell）、
+   顶栏（.zp-head）和 darwin 规则上都不许写死 padding-top: 48px。
+   v6 首页没有 WebGL 时星图区（.zp-sky）的 padding-top: 48px 是版面间距、所有平台都生效，不是避让，不在此列。 */
+{
+  const hits = [];
+  for (const m of client.matchAll(/padding-top: ?48px/g)) {
+    const open = client.lastIndexOf('{', m.index);
+    const selector = client.slice(client.lastIndexOf('}', open) + 1, open).replace(/\/\*[\s\S]*?\*\//g, '').trim();
+    const parts = selector.split(',').map((s) => s.trim());
+    if (parts.some((s) => /data-platform/.test(s) || /\.zp-(root|shell|head)$/.test(s))) hits.push(selector);
+  }
+  ok('chrome 避让不用魔法数字写死（外壳 / 顶栏 / darwin 规则不写 padding-top: 48px，顶部偏移只走 --dsh-frame-top-clearance）',
+    hits.length === 0 && /--dsh-frame-top-clearance/.test(client), hits.join(' | '));
+}
 
 /* 真正把 client.js 跑一遍: 假 ModuleLoader + 极简 React, 确保 factory/apply 不抛错 */
 {
@@ -620,8 +555,14 @@ ok('chrome 避让不用魔法数字写死（顶部偏移只走 --dsh-frame-top-c
   ok('精装报告壳含表格样式、<table> 与打印分页保护',
     /\.md-table\{/.test(htmlDoc) && /<table class="md-table">/.test(htmlDoc) &&
     /page-break-inside:avoid/.test(htmlDoc) && /<\/html>/.test(htmlDoc));
+  /* 报告按 14 部分算进度：标题行之前的「盘前须知」不算一部分 */
+  const progress = (md) => (reportApi && typeof reportApi.progress === 'function' ? JSON.stringify(reportApi.progress(md)) : '');
+  ok('报告按部分算进度（ZWReport.progress：共 14 部分，写到第几部分）',
+    progress('') === '{"done":0,"total":14,"current":1}' &&
+    progress('## 盘前须知\n\n甲\n\n## 一、命盘总览\n\n乙\n\n## 二、性格大略\n\n丙') === '{"done":1,"total":14,"current":2}',
+    progress('') + ' / ' + progress('## 盘前须知\n\n甲\n\n## 一、命盘总览\n\n乙\n\n## 二、性格大略\n\n丙'));
 
-  /* ---- 界面纯逻辑（window.ZWUi，v5 体验打磨 spec 2026-11-18_v5-ux-polish） ---- */
+  /* ---- 界面纯逻辑（window.ZWUi，v5 体验打磨 spec 2026-11-18_v5-ux-polish；v6 原样搬进 src/ui/20-util.js） ---- */
   const ui = win.ZWUi;
   ok('client 暴露界面纯逻辑（window.ZWUi）', !!ui && typeof ui.mergeReportText === 'function');
   if (ui && typeof ui.mergeReportText === 'function') {
@@ -659,16 +600,6 @@ ok('chrome 避让不用魔法数字写死（顶部偏移只走 --dsh-frame-top-c
     ok('三方四正索引：0 → 对宫 6、三合 4/8；10 → 对宫 4、三合 2/6',
       !!r0 && r0.opp === 6 && r0.tri[0] === 4 && r0.tri[1] === 8 &&
       !!r10 && r10.opp === 4 && r10.tri[0] === 2 && r10.tri[1] === 6, JSON.stringify([r0, r10]));
-    /* 选宫后详情滚入视野：只在详情几乎全在首屏以下时滚，且只滚到露出详情顶部 200px（不来回跳） */
-    const reveal = ui && typeof ui.revealDelta === 'function' ? ui.revealDelta : null;
-    ok('详情几乎不可见时滚动到露出 200px（compact 实测：详情顶 672、视口底 717）',
-      !!reveal && reveal({ viewBottom: 717, obstruct: 0, detailTop: 672 }) === 155, reveal && String(reveal({ viewBottom: 717, obstruct: 0, detailTop: 672 })));
-    ok('详情已露出足够多时不滚动', !!reveal && reveal({ viewBottom: 717, obstruct: 0, detailTop: 500 }) === 0);
-    ok('窄屏扣掉贴底底栏的遮挡', !!reveal && reveal({ viewBottom: 717, obstruct: 51, detailTop: 700 }) === 234);
-    ok('滚动不把刚点的宫位推到吸顶时间栏下面（上限 = 宫位顶 − 时间栏底）',
-      !!reveal && reveal({ viewBottom: 717, obstruct: 0, detailTop: 672, cellTop: 182, stickyBottom: 136 }) === 46);
-    ok('刚点的宫位已贴着时间栏时不滚动',
-      !!reveal && reveal({ viewBottom: 717, obstruct: 0, detailTop: 672, cellTop: 130, stickyBottom: 136 }) === 0);
   }
   {
     /* 表单与当前命盘的生辰是否一致：只比会改变命盘的字段；表单里是字符串，快照里是数字 */
@@ -680,25 +611,6 @@ ok('chrome 避让不用魔法数字写死（顶部偏移只走 --dsh-frame-top-c
     ok('生辰一致判断：改了出生时辰就不是同一张盘', !!same && same(Object.assign({}, formSame, { hour: '10' }), snap) === false);
     ok('生辰一致判断：改了晚子时口径就不是同一张盘',
       !!same && same(Object.assign({}, formSame, { settings: Object.assign({}, snap.settings, { dayDivide: 'forward' }) }), snap) === false);
-  }
-  {
-    /* 文案检查（批 C「去 AI 味」）：界面字典里不放装饰符号和口号，不出现方法论品牌词；
-       每个中文键都有引用；中英键一一对应 */
-    const zhBlock = (client.match(/'zh-CN': \{([\s\S]*?)\n      \},\n      'en-US': \{/) || [])[1] || '';
-    const enBlock = (client.match(/'en-US': \{([\s\S]*?)\n      \}\n    \};/) || [])[1] || '';
-    const keysOf = (blk) => [...blk.matchAll(/(?:^|[\s,{])(\w+): '/g)].map((m) => m[1]);
-    const zhKeys = keysOf(zhBlock), enKeys = keysOf(enBlock);
-    const zhValues = [...zhBlock.matchAll(/\w+: '((?:[^'\\]|\\.)*)'/g)].map((m) => m[1]);
-    const banned = ['✓', '⚠', '画布', '把这盘读懂', '智能解读', '鲲鹏'];
-    const hits = banned.filter((w) => zhValues.some((v) => v.includes(w)));
-    ok('界面文案不含装饰符号、口号和「鲲鹏」品牌词（品牌只留在导出报告）', zhKeys.length > 100 && hits.length === 0, 'hits: ' + hits.join(','));
-    const afterDict = client.slice(client.indexOf("'en-US': {") + enBlock.length);
-    const unusedKeys = zhKeys.filter((k) => !new RegExp("t\\('" + k + "'\\)|'" + k + "'").test(afterDict));
-    ok('界面字典没有无引用的键', unusedKeys.length === 0, unusedKeys.join(' '));
-    const zhSet = new Set(zhKeys), enSet = new Set(enKeys);
-    const onlyZh = zhKeys.filter((k) => !enSet.has(k)), onlyEn = enKeys.filter((k) => !zhSet.has(k));
-    ok('中英文案键一一对应', onlyZh.length === 0 && onlyEn.length === 0, 'zh only: ' + onlyZh.join(' ') + ' | en only: ' + onlyEn.join(' '));
-    ok('默认称呼不再是「命主」（和星曜术语「命主 禄存」撞名）', !/defaultName: '命主'/.test(zhBlock));
   }
   {
     /* 出生城市：城市名查内置表（城市中心近似经度，0.1°），也接受直接填经度 */
@@ -714,9 +626,7 @@ ok('chrome 避让不用魔法数字写死（顶部偏移只走 --dsh-frame-top-c
     ok('出生城市：越界数字不当经度', !!pb && P('400').kind === 'unknown');
   }
   {
-    /* 批 C 功能收束：一个任务只留一条路径 */
-    ok('不再有「专注看盘」（并入左栏开关）', !/toggleFocus/.test(client) && !/data-focus/.test(client) && !/focusOn/.test(client));
-    ok('设置里不再重复「显示杂曜」（时间栏开关是唯一入口）', !/t\('showAdjSet'\)/.test(client));
+    /* 批 C 功能收束：一个任务只留一条路径（「专注看盘」「显示杂曜」的旧入口见上面「已删除的旧标识符」） */
     const autoName = ui && typeof ui.autoChartName === 'function' ? ui.autoChartName : null;
     ok('命盘库不填名时自动命名：日期 + 时辰 + 性别',
       !!autoName && autoName({ name: '', year: 1990, month: 6, day: 15, gender: 'male' }, '申时') === '1990-06-15 申时 男',
@@ -737,14 +647,6 @@ ok('chrome 避让不用魔法数字写死（顶部偏移只走 --dsh-frame-top-c
     ok('引用空宫时写明空宫', emptyText === '迁移 庚辰 · 空宫', emptyText);
   }
   {
-    /* 图标表完整：源码里用到的图标名都必须在 ICON_PATHS 里有定义，否则渲染成空白 svg */
-    const table = (client.match(/const ICON_PATHS = \{([\s\S]*?)\n    \};/) || [])[1] || '';
-    const defined = new Set([...table.matchAll(/^      (\w+): \[/gm)].map((m) => m[1]));
-    const used = new Set([
-      ...[...client.matchAll(/h\(Icon, \{ name: '(\w+)'/g)].map((m) => m[1]),
-      ...[...client.matchAll(/h\(Icon, \{ name: [^,}]*\? '(\w+)' : '(\w+)'/g)].flatMap((m) => [m[1], m[2]]),
-      ...[...client.matchAll(/startBtn\('\w+', '(\w+)'/g)].map((m) => m[1])
-    ]);
     /* 报告选段按钮坐标：按钮绝对定位在可滚动的正文容器里，必须计入 scrollTop/scrollLeft */
     const pick = ui && typeof ui.pickPoint === 'function'
       ? ui.pickPoint({ left: 340, top: 260 }, { left: 100, top: 200 }, 900, 0) : null;
@@ -763,22 +665,22 @@ ok('chrome 避让不用魔法数字写死（顶部偏移只走 --dsh-frame-top-c
     const btnRule = cssRule('.zp-btn');
     ok('.zp-btn 是 inline-flex 且垂直居中（图标与文字同一行）',
       /display:\s*inline-flex/.test(btnRule) && /align-items:\s*center/.test(btnRule), btnRule.slice(0, 160));
-    const narrowScroll = cssRule('.zp-root[data-w="narrow"] .zp-scroll');
-    const narrowPadX = (narrowScroll.match(/padding:\s*\d+(?:px)? (\d+)px/) || [])[1];
-    const barRule = cssRule('.zp-root[data-w="narrow"][data-chart="1"] .zp-bottombar');
-    const barMarginX = (barRule.match(/margin:\s*\S+ -(\d+)px/) || [])[1];
-    ok('窄屏底栏的负边距等于窄档滚动区左右内边距（不溢出）',
-      !!narrowPadX && narrowPadX === barMarginX, `scroll=${narrowPadX} bar=${barMarginX}`);
-    const chartScroll = cssRule('.zp-root[data-w="narrow"][data-chart="1"] .zp-scroll');
-    ok('有盘窄档滚动区底部内边距为 0（sticky 底栏贴住面板底边）',
-      /padding-bottom:\s*0\b/.test(chartScroll) && /margin:\s*\S+ -\d+px 0\b/.test(barRule), chartScroll + ' | ' + barRule.slice(0, 120));
     ok('按钮颜色继承（:where 零权重重置，深色下不落回浏览器默认黑字）',
       /:where\(\.zp-root\) button \{[^}]*color:\s*inherit/.test(client));
+    /* v5 用 setAttribute 在挂载后补这个属性；v6 直接写在浮层容器的 props 里（50-parts 的 Modal / Sheet、80-assistant 的浮动面板） */
     ok('程序聚焦的浮层容器带宿主约定的 data-dsh-automatic-focus，且不画焦点框',
-      /setAttribute\('data-dsh-automatic-focus'/.test(client) &&
+      /'data-dsh-automatic-focus': ''/.test(client) &&
       /\.zp-root \[data-dsh-automatic-focus\]:focus \{[^}]*outline:\s*none/.test(client));
-    const missing = [...used].filter((n) => !defined.has(n));
-    ok('源码引用的图标都在 ICON_PATHS 里有定义', defined.size > 10 && missing.length === 0, 'missing: ' + missing.join(','));
+    /* 图标表完整：源码里用到的图标名都必须在 ZWUi.iconNames（= ICON_PATHS 的键）里，否则渲染成空白 svg */
+    const icons = new Set((ui && ui.iconNames) || []);
+    const usedIcons = new Set([
+      ...[...client.matchAll(/h\(Icon, \{ name: '(\w+)'/g)].map((m) => m[1]),
+      ...[...client.matchAll(/h\(Icon, \{ name: [^,}]*\? '(\w+)' : '(\w+)'/g)].flatMap((m) => [m[1], m[2]]),
+      ...[...client.matchAll(/h\(Icon, \{ name: [\w.]+ \|\| '(\w+)'/g)].map((m) => m[1]),
+      ...[...client.matchAll(/\bicon: '(\w+)'/g)].map((m) => m[1])
+    ]);
+    const missingIcons = [...usedIcons].filter((n) => !icons.has(n));
+    ok(`源码引用的图标都在 ZWUi.iconNames 里有定义（${usedIcons.size} 个）`, icons.size > 10 && usedIcons.size > 0 && missingIcons.length === 0, 'missing: ' + missingIcons.join(','));
   }
 
   /* H3 动态: 布局服务可用时, 主面板必须真的能通过官方 API 回到 Conversation。
@@ -864,6 +766,234 @@ ok('chrome 避让不用魔法数字写死（顶部偏移只走 --dsh-frame-top-c
     ok('layout 不可用时降级：不渲染返回会话按钮、面板仍可渲染',
       apply3Err === null && render3Err === null && exit3.length === 0,
       (apply3Err || render3Err || {}).message || ('exit=' + exit3.length));
+  }
+}
+
+/* ---- 产物的行为（v6）：用 verify/client-harness.mjs 在 vm 里装载磁盘上的 client.js ----
+ * 这里只留每条约定的一个薄版本，盯住「发出去的就是这样」；完整的用例在 verify/ui-v6-*.mjs（第 9 组）。
+ * 只用黄金用例（1992-05-03 09:30，男，经度 105.97）；第二张盘是同一生辰的女命。"今天"固定为 2026-11-19。 */
+{
+  const J = (v) => JSON.stringify(v);
+  const attr = (el, k) => (el && el.props ? el.props[k] : undefined);
+  const GOLDEN = {
+    name: '', calendar: 'solar', year: 1992, month: 5, day: 3, isLeap: false, hour: 9, minute: 30, gender: 'male',
+    longitude: '105.97', city: '', place: '', occupation: '',
+    settings: { yearDivide: 'normal', monthDivide: 'exact', dayDivide: 'current', fixLeap: true }
+  };
+  const GOLDEN_F = Object.assign({}, GOLDEN, { gender: 'female' });
+  const KEY_A = 'solar|1992|5|3|0|9|30|male|105.97|normal,exact,current,1';
+  const NOW = new Date(2026, 10, 19, 10, 0, 0).getTime();
+  const TODAY = { y: 2026, m: 11, d: 19 };
+  /** 装载 client.js → factory → apply()；返回 { b（loadBundle 的结果）, host（makeCtx 的结果）, err } */
+  const boot = (services = {}, beforeApply = null) => {
+    const b = loadBundle(client, { filename: 'client.js', globals: { AbortController } });
+    if (b.error || !b.entry) return { b, host: null, err: b.error || new Error('没有入口') };
+    const host = makeCtx(services);
+    try {
+      const plugin = b.materialize();
+      if (beforeApply) beforeApply(b);
+      plugin.apply(host.ctx);
+    } catch (e) { return { b, host, err: e }; }
+    return { b, host, err: null };
+  };
+
+  /* 字典与 locale：P1-1 可见文案走官方 Client locale 服务（register + bind），不读私有 tr.i18n */
+  const loc = fakeLocale('zh');
+  const withLocale = boot({ locale: loc });
+  ok("client 走官方 locale 服务：一次 register('ziwei', { zh, en })、一次 bind('ziwei')，不再读 tr.i18n",
+    !withLocale.err && loc.calls.register.length === 1 && loc.calls.register[0][0] === 'ziwei' &&
+    !!loc.calls.register[0][1].zh && !!loc.calls.register[0][1].en &&
+    loc.calls.bind.length === 1 && loc.calls.bind[0] === 'ziwei' && !/\.i18n\[0\]/.test(client),
+    withLocale.err ? withLocale.err.message : J({ register: loc.calls.register.length, bind: loc.calls.bind }));
+  {
+    /* 文案检查（批 C「去 AI 味」）：取 vm 里登记给 locale 的字典对象来比，不靠源码缩进 */
+    const dicts = loc.calls.register[0] ? loc.calls.register[0][1] : { zh: {}, en: {} };
+    const zhKeys = Object.keys(dicts.zh || {});
+    const enKeys = Object.keys(dicts.en || {});
+    const banned = ['✓', '⚠', '画布', '把这盘读懂', '智能解读', '鲲鹏'];
+    const hits = banned.filter((w) => zhKeys.some((k) => String(dicts.zh[k]).includes(w)));
+    ok('界面文案不含装饰符号、口号和「鲲鹏」品牌词（品牌只留在导出报告）', zhKeys.length > 100 && hits.length === 0, `keys ${zhKeys.length}; hits: ${hits.join(',')}`);
+    /* 构建把字典按 JSON.stringify(dict, null, 2) 注入；字典之后的源码里每个键都要以 '键' 出现过 */
+    const dictText = JSON.stringify({ 'zh-CN': dicts.zh, 'en-US': dicts.en }, null, 2);
+    const dictAt = client.indexOf(dictText);
+    const afterDict = dictAt >= 0 ? client.slice(dictAt + dictText.length) : '';
+    const unusedKeys = zhKeys.filter((k) => !afterDict.includes("'" + k + "'"));
+    ok('界面字典没有无引用的键', zhKeys.length > 0 && dictAt >= 0 && unusedKeys.length === 0, dictAt < 0 ? '在 client.js 里找不到字典原文' : unusedKeys.join(' '));
+    const onlyZh = zhKeys.filter((k) => !(k in dicts.en)), onlyEn = enKeys.filter((k) => !(k in dicts.zh));
+    ok('中英文案键一一对应', zhKeys.length > 0 && onlyZh.length === 0 && onlyEn.length === 0, 'zh only: ' + onlyZh.join(' ') + ' | en only: ' + onlyEn.join(' '));
+    ok('默认称呼不再是「命主」（和星曜术语「命主 禄存」撞名）：没填称呼的盘显示「未命名」', dicts.zh.headUnnamed === '未命名', String(dicts.zh.headUnnamed));
+    ok('紫微师面板的会话入口叫「在新会话里继续」', dicts.zh.asHandoff === '在新会话里继续', String(dicts.zh.asHandoff));
+  }
+
+  /* H1: 默认口径与默认偏好必须进产物 */
+  {
+    const runAutoOpen = (prefs) => {
+      const timers = manualTimers();
+      const layout = { calls: [], selectPanel(id) { this.calls.push(id); } };
+      const r = boot({ layout }, (b) => {
+        b.win.setTimeout = timers.setTimeout;
+        b.win.clearTimeout = timers.clearTimeout;
+        b.win.localStorage = memoryStorage(prefs);
+      });
+      timers.runAll();
+      return r.err ? 'err: ' + r.err.message : J(layout.calls);
+    };
+    const off = runAutoOpen({});
+    const on = runAutoOpen({ 'ziwei-pro.autopen': '1' });
+    ok('autoOpen 默认关闭：空 storage 时插件装上不切面板（设置里打开后才切到紫微面板）', off === '[]' && on === '["ziwei"]', `空 storage ${off}；autopen=1 ${on}`);
+  }
+  const { b: env, err: envErr } = boot();
+  const ZW = env && env.win.ZWUi;
+  const S = env && env.win.ZWStore;
+  const E = env && env.win.ZWEngine;
+  const C = env && env.win.ZWCore;
+  ok('client.js 在 client-harness 里装载、apply() 后有 ZWUi / ZWStore / ZWEngine / ZWCore', !envErr && !!ZW && !!S && !!E && !!C, envErr && envErr.message);
+  if (ZW && S && E && C) {
+    ok('面板默认 dayDivide = current（与紫微师口径一致）：DEFAULT_FORM.settings = normal / exact / current / true',
+      J(ZW.DEFAULT_FORM && ZW.DEFAULT_FORM.settings) === J({ yearDivide: 'normal', monthDivide: 'exact', dayDivide: 'current', fixLeap: true }),
+      J(ZW.DEFAULT_FORM && ZW.DEFAULT_FORM.settings));
+
+    /* v1.3.3: 旧持久化表单的一次性月柱口径迁移 */
+    {
+      const oldForm = { name: '', calendar: 'solar', year: 1990, month: 6, day: 15, isLeap: false, hour: 15, minute: 30, gender: 'male', longitude: '', place: '', occupation: '',
+        settings: { yearDivide: 'normal', monthDivide: 'normal', dayDivide: 'current', fixLeap: true } };
+      const s = memoryStorage({ 'ziwei-pro.form': J(oldForm) });
+      let detail = '';
+      let migrated = false, kept = false;
+      try {
+        const f = ZW.createStorageApi(s).form.load();
+        migrated = f.settings.monthDivide === 'exact' && JSON.parse(s.getItem('ziwei-pro.form')).settings.monthDivide === 'exact' && s.getItem('ziwei-pro.formV133') === '1';
+        ZW.createStorageApi(s).form.save(Object.assign({}, f, { settings: Object.assign({}, f.settings, { monthDivide: 'normal' }) }));
+        kept = ZW.createStorageApi(s).form.load().settings.monthDivide === 'normal';
+        detail = J(s.dump());
+      } catch (e) { detail = 'threw: ' + e.message; }
+      ok('v1.3.3: localStorage 旧默认一次性迁移到节气（迁移之后用户自己选的农历月保留）', migrated && kept, detail.slice(0, 200));
+    }
+
+    /* v1.7: 解读记录按命盘保存：最多 8 张盘、每张 24 条；key 含排盘口径 */
+    {
+      let t = 1763600000000;
+      const s = memoryStorage();
+      const api = ZW.createStorageApi(s, { now: () => t });
+      const keys = [];
+      for (let i = 0; i < 9; i++) {
+        t += 1000;
+        const k = `solar|1990|6|${i + 1}|0|15|30|male||normal,exact,current,1`;
+        keys.push(k);
+        api.readings.save(k, { thread: [{ role: 'user', content: '问' + i }] });
+      }
+      const left = Object.keys(JSON.parse(s.getItem('ziwei-pro.readings.v2') || '{}'));
+      t += 1000;
+      api.readings.save(keys[8], { thread: Array.from({ length: 30 }, (_, i) => ({ role: i % 2 ? 'assistant' : 'user', content: '第' + i + '条' })) });
+      const rec = JSON.parse(s.getItem('ziwei-pro.readings.v2'))[keys[8]];
+      ok('v1.7: 解读记录按命盘持久化（最多 8 张，挤掉最久没更新的；每张留最后 24 条）',
+        left.length === 8 && !left.includes(keys[0]) && rec.thread.length === 24 && rec.thread[0].content === '第6条',
+        `${left.length} 张；第一条 ${rec && rec.thread[0].content}，共 ${rec && rec.thread.length} 条`);
+      const k0 = ZW.readingKeyOf(GOLDEN);
+      const withSetting = (patch) => ZW.readingKeyOf(Object.assign({}, GOLDEN, { settings: Object.assign({}, GOLDEN.settings, patch) }));
+      const variants = [k0, withSetting({ yearDivide: 'exact' }), withSetting({ monthDivide: 'normal' }), withSetting({ dayDivide: 'forward' })];
+      ok('v1.7: 解读记录 key 含排盘设置（换年界 / 月柱 / 晚子时口径不会套回旧解读）',
+        k0 === KEY_A && new Set(variants).size === 4, J(variants));
+    }
+
+    /* 会话态（store）：换盘各自恢复、启动恢复、报告任务、请求体 */
+    const mk = (storage) => {
+      const fetch = streamFetch();
+      const timers = manualTimers();
+      const st = S.createStore({
+        storage, fetch, now: () => NOW, engine: E, core: C,
+        setTimeout: timers.setTimeout, clearTimeout: timers.clearTimeout, openSession: () => true
+      });
+      st.subscribe(() => {});
+      return { st, fetch };
+    };
+    const last = (f) => f.calls[f.calls.length - 1];
+    {
+      const storage = memoryStorage();
+      const { st, fetch } = mk(storage);
+      const a = st.addChart(GOLDEN, '甲');
+      const b = st.addChart(GOLDEN_F, '乙');
+      st.openChart(a.id);
+      st.setPanel(true);
+      st.ask('命宫怎么看');
+      await settle();
+      last(fetch).send('done', { text: '甲的回答' });
+      await settle();
+      const threadA = J(st.reading().thread);
+      const calls = fetch.calls.length;
+      st.openChart(b.id);
+      const threadB = J(st.reading().thread);
+      st.openChart(a.id);
+      const threadA2 = J(st.reading().thread);
+      ok('v1.7: 换盘按命盘 key 各自恢复记录；没有记录的盘是空的，换盘不自动发请求',
+        threadA === J([{ role: 'user', content: '命宫怎么看' }, { role: 'assistant', content: '甲的回答' }]) &&
+        threadB === '[]' && threadA2 === threadA && fetch.calls.length === calls,
+        `A ${threadA}；B ${threadB}；回到 A ${threadA2}；请求 ${calls} → ${fetch.calls.length}`);
+      const second = mk(storage);
+      const s2 = second.st.getState().session;
+      ok('v1.7: 启动时恢复上一次命盘与它的解读记录（首页聚焦上次的盘，记录按 key 读回）',
+        s2.view === 'home' && s2.focusId === a.id && J(second.st.reading(KEY_A).thread) === threadA,
+        J([s2.view, s2.focusId, second.st.reading(KEY_A).thread]));
+    }
+    {
+      const { st, fetch } = mk(memoryStorage());
+      const a = st.addChart(GOLDEN, '甲');
+      st.openChart(a.id);
+      st.setStage('report');
+      st.startReport();
+      await settle();
+      last(fetch).send('delta', { text: '## 一、' }).send('delta', { text: '命宫' }).end();
+      await settle();
+      const cut = st.reading().report;
+      const cutOk = cut.status === 'error' && cut.issue && cut.issue.canContinue === true && cut.text === '## 一、命宫';
+      st.continueReport();
+      await settle();
+      last(fetch).send('delta', { text: '续' }).send('done', { text: '续写' });
+      await settle();
+      const rp = st.reading().report;
+      ok('报告任务：断连保留正文可续写；续写在假流上以 done 结束，正文 = 原文 + 本轮全文；报告和对话分开',
+        cutOk && rp.status === 'done' && rp.text === '## 一、命宫续写' && J(st.reading().thread) === '[]',
+        J([cut.status, cut.text, rp.status, rp.text, st.reading().thread.length]));
+    }
+    {
+      const chart = E.computeChart({ calendar: 'solar', year: 1992, month: 5, day: 3, hour: 9, minute: 30, gender: 'male', longitude: 105.97 });
+      const B = (o) => S.buildInterpretBody(Object.assign({ chart, input: GOLDEN, now: NOW, core: C, tab: 'natal', when: TODAY, mode: 'brief', question: '事业', history: [] }, o));
+      const b0 = B({});
+      ok('问答请求体带完整命盘文字与当前虚岁（chartText = fullChartText(chart, { currentAge: 35, currentYear: 2026 })）',
+        J(Object.keys(b0)) === J(['chartText', 'mode', 'question', 'history', 'meta']) &&
+        b0.chartText === C.fullChartText(chart, { currentAge: 35, currentYear: 2026 }) && b0.meta.currentAge === 35 && b0.meta.currentYear === 2026,
+        J(Object.keys(b0)) + ' ' + J(b0.meta));
+      const bd = B({ tab: 'decadal', scope: true });
+      const by = B({ tab: 'yearly', scope: true });
+      ok('大限默认是当前这一段（不是第 0 段）、流年选择进请求体：decadalFocus [33, 42]、yearlyFocus 2026',
+        J(bd.meta.decadalFocus) === '[33,42]' && by.meta.yearlyFocus === 2026, J([bd.meta.decadalFocus, by.meta.yearlyFocus]));
+    }
+  }
+
+  /* P2-8 / a11y：深渲染（effect 不跑、面板宽度还没量到 = 窄档）打开紫微师面板的命盘页 */
+  {
+    const timers = manualTimers();
+    const layout = { calls: [], selectPanel(id) { this.calls.push(id); } };
+    const r = boot({ layout }, (b) => { b.win.setTimeout = timers.setTimeout; b.win.clearTimeout = timers.clearTimeout; });
+    let tree = null, renderErr = r.err;
+    if (!renderErr) {
+      try {
+        const store = r.b.win.ZWStore.getStore({ storage: memoryStorage(), now: () => NOW, fetch: streamFetch(), setTimeout: timers.setTimeout, clearTimeout: timers.clearTimeout });
+        const e = store.addChart(GOLDEN, '甲');
+        store.openChart(e.id);
+        store.setPanel(true);
+        tree = renderDeep(r.host.main()());
+      } catch (e) { renderErr = e; }
+    }
+    const thread = tree ? findByClass(tree, 'zp-chat-thread') : [];
+    ok('紫微师面板渲染出对话区：唯一的 div.zp-chat-thread[role=log][aria-live=polite]',
+      !renderErr && thread.length === 1 && thread[0].type === 'div' && attr(thread[0], 'role') === 'log' && attr(thread[0], 'aria-live') === 'polite',
+      renderErr ? renderErr.message : J(thread.map((n) => [n.type, attr(n, 'role'), attr(n, 'aria-live')])));
+    const dialogs = tree ? find(tree, (n) => attr(n, 'role') === 'dialog') : [];
+    const badDialogs = dialogs.filter((n) => !(attr(n, 'aria-modal') === 'true' && String(attr(n, 'aria-label') || '').trim()));
+    ok(`每个 role="dialog" 都有 aria-modal="true" 和 aria-label（${dialogs.length} 个）`,
+      !renderErr && dialogs.length >= 1 && badDialogs.length === 0,
+      renderErr ? renderErr.message : J(badDialogs.map((n) => [n.type, attr(n, 'className')])));
   }
 }
 
