@@ -13,27 +13,44 @@
  *   node scripts/audit-ui.mjs --update-baseline 重算基线并写 docs/ui-contract/audit-baseline.json
  *   node scripts/audit-ui.mjs --strict         历史欠账（WARN）也算失败
  *   node scripts/audit-ui.mjs -v               打印全部样例（不只前 5 条）
+ *   node scripts/audit-ui.mjs --profile v6     体检 v6 界面：src/ui/ 用 build.mjs 的 assembleUi 在内存里拼接，
+ *                                              约定读 docs/ui-contract/v6/，基线全 0（不接受 --update-baseline）。
+ *                                              样例位置报「源文件:行号」。默认 --profile v5（src/ui-pro.js）。
  *
  * 退出码：0 无 FAIL / 1 有 FAIL / 2 契约文档缺失或不可解析。
  *
- * 约束：不联网、不启动 GUI、不读第三方模块；只依赖 node:fs / node:path / node:url。
+ * 约束：不联网、不启动 GUI、不读第三方模块；v5 只依赖 node:fs / node:path / node:url；
+ * v6 另外 import 仓库里的 build.mjs（拼接逻辑只写一份）。
  * 行号随源码漂移，契约以选择器/类名为准；脚本不写死行号。
  */
 
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = dirname(HERE);
 
+/** --profile v5|v6（也可写 --profile=v6）；默认 v5。 */
+function readProfile(argv) {
+  let profile = 'v5';
+  for (let i = 0; i < argv.length; i++) {
+    if (argv[i] === '--profile') profile = argv[i + 1];
+    else if (argv[i].startsWith('--profile=')) profile = argv[i].slice('--profile='.length);
+  }
+  return profile;
+}
+const PROFILE = readProfile(process.argv.slice(2));
+const V6 = PROFILE === 'v6';
+const CONTRACT_DIR = V6 ? join(ROOT, 'docs', 'ui-contract', 'v6') : join(ROOT, 'docs', 'ui-contract');
+
 const PATHS = {
-  src: join(ROOT, 'src', 'ui-pro.js'),
+  src: V6 ? join(ROOT, 'src', 'ui') : join(ROOT, 'src', 'ui-pro.js'),
   built: join(ROOT, 'client.js'),
-  layout: join(ROOT, 'docs', 'ui-contract', 'layout.md'),
-  design: join(ROOT, 'docs', 'ui-contract', 'design.md'),
-  tokens: join(ROOT, 'docs', 'ui-contract', 'tokens.md'),
-  baseline: join(ROOT, 'docs', 'ui-contract', 'audit-baseline.json')
+  layout: join(CONTRACT_DIR, 'layout.md'),
+  design: join(CONTRACT_DIR, 'design.md'),
+  tokens: join(CONTRACT_DIR, 'tokens.md'),
+  baseline: join(CONTRACT_DIR, 'audit-baseline.json')
 };
 
 const ARGS = new Set(process.argv.slice(2));
@@ -52,7 +69,10 @@ const FLAG = {
  * 内置默认基线 = 2026-11-07 首次实测值。JSON 文件存在时以文件为准；
  * 文件缺失（如全新 clone 未跑过 --update-baseline）时用这份兜底。
  */
-const DEFAULT_BASELINE = {
+const DEFAULT_BASELINE = V6 ? {
+  /* v6：全部为 0。C1–C4、C16–C18 是硬规则（不看基线），C15 是基线为 0 的棘轮 */
+  C1: 0, C2: 0, C3: 0, C4: 0, C15: 0, C16: 0, C17: 0, C18: 0
+} : {
   C1: 13,  // 字面色白名单外 literal（#fff 9 + 遮罩 2 + 滚动条 2）
   C2: 42,  // 字阶越界声明（CSS 39 + JSX 3）
   C3: 103, // 间距网格外取值（104 − 88 豁免 1）
@@ -61,7 +81,11 @@ const DEFAULT_BASELINE = {
   C16: 49  // 已弃用私有品牌色引用数（accent 46 + accent-deep 3）
 };
 
-const DEFAULT_BASELINE_META = {
+const DEFAULT_BASELINE_META = V6 ? {
+  version: 1,
+  generatedAt: '2026-11-19T00:00:00.000Z',
+  source: {}
+} : {
   version: 1,
   generatedAt: '2026-11-07T12:00:00.000Z',
   source: { srcLines: 2501, srcBytes: 141034 }
@@ -310,7 +334,7 @@ function checkC1(ctx) {
     const allowed = (isVarDef && !varName ? false : isVarDef && ctx.tokenVars.has(varName)) || isShadow || isWhitelisted;
     if (!allowed) {
       count++;
-      samples.push(`${lineOf(ctx.src, ctx.css.startIndex + m.index)} · ${value} · ${decl.slice(0, 80)}`);
+      samples.push(`${ctx.where(ctx.css.startIndex + m.index)} · ${value} · ${decl.slice(0, 80)}`);
     }
   }
   return { count, samples };
@@ -326,14 +350,14 @@ function checkC2(ctx) {
     const bad = nums.filter((n) => !allowed.has(n));
     if (bad.length) {
       count++;
-      samples.push(`${lineOf(ctx.src, ctx.css.startIndex + m.index)} · ${m[1].trim()}（越界 ${[...new Set(bad)].join('/')}）`);
+      samples.push(`${ctx.where(ctx.css.startIndex + m.index)} · ${m[1].trim()}（越界 ${[...new Set(bad)].join('/')}）`);
     }
   }
   for (const m of ctx.jsx.matchAll(/fontSize\s*:\s*(\d+(?:\.\d+)?)/g)) {
     const n = Number(m[1]);
     if (!allowed.has(n)) {
       count++;
-      samples.push(`${lineOf(ctx.src, ctx.jsxIndex(m.index))} · fontSize: ${n}`);
+      samples.push(`${ctx.where(ctx.jsxIndex(m.index))} · fontSize: ${n}`);
     }
   }
   return { count, samples };
@@ -371,13 +395,13 @@ function checkC4(ctx) {
     if (!/^\d+$/.test(v)) continue;
     if (!allowed.has(Number(v))) {
       count++;
-      samples.push(`${lineOf(ctx.src, ctx.css.startIndex + m.index)} · ${v}`);
+      samples.push(`${ctx.where(ctx.css.startIndex + m.index)} · ${v}`);
     }
   }
   for (const m of ctx.jsx.matchAll(/fontWeight\s*:\s*(\d+)/g)) {
     if (!allowed.has(Number(m[1]))) {
       count++;
-      samples.push(`${lineOf(ctx.src, ctx.jsxIndex(m.index))} · fontWeight: ${m[1]}`);
+      samples.push(`${ctx.where(ctx.jsxIndex(m.index))} · fontWeight: ${m[1]}`);
     }
   }
   return { count, samples };
@@ -438,11 +462,11 @@ function checkC7(ctx) {
   let count = 0;
   for (const m of ctx.css.text.matchAll(/position\s*:\s*fixed/g)) {
     count++;
-    samples.push(`${lineOf(ctx.src, ctx.css.startIndex + m.index)} · CSS position:fixed（浮层只许面板内 absolute）`);
+    samples.push(`${ctx.where(ctx.css.startIndex + m.index)} · CSS position:fixed（浮层只许面板内 absolute）`);
   }
   for (const m of ctx.jsx.matchAll(/position\s*:\s*['"]fixed['"]/g)) {
     count++;
-    samples.push(`${lineOf(ctx.src, ctx.jsxIndex(m.index))} · JSX position:'fixed'`);
+    samples.push(`${ctx.where(ctx.jsxIndex(m.index))} · JSX position:'fixed'`);
   }
   return { count, samples };
 }
@@ -454,7 +478,7 @@ function checkC8(ctx) {
   let m;
   while ((m = re.exec(ctx.jsx))) {
     const props = propsEnclosingCall(ctx.jsx, m.index);
-    const line = lineOf(ctx.src, ctx.jsxIndex(m.index));
+    const line = ctx.where(ctx.jsxIndex(m.index));
     if (!/aria-modal/.test(props)) { count++; samples.push(`${line} · role=dialog 缺 aria-modal`); }
     if (!/aria-label/.test(props)) { count++; samples.push(`${line} · role=dialog 缺 aria-label`); }
     if (!/(trapTab|useModalLayer|onKeyDown)/.test(props)) { count++; samples.push(`${line} · role=dialog 缺焦点陷阱`); }
@@ -474,7 +498,7 @@ function checkC9(ctx) {
     return { count: 0, samples: ['无 iframe'] };
   }
   for (const f of frames) {
-    const line = lineOf(ctx.src, ctx.jsxIndex(f.index));
+    const line = ctx.where(ctx.jsxIndex(f.index));
     if (!/\btitle\s*:/.test(f.props)) { count++; samples.push(`${line} · iframe 缺 title`); }
     if (!/\bsandbox\s*:/.test(f.props)) { count++; samples.push(`${line} · iframe 缺 sandbox`); }
   }
@@ -489,7 +513,7 @@ function checkC10(ctx) {
   for (const tag of ['input', 'select', 'textarea']) {
     for (const el of collectElements(ctx.jsx, tag)) {
       total++;
-      const line = lineOf(ctx.src, ctx.jsxIndex(el.index));
+      const line = ctx.where(ctx.jsxIndex(el.index));
       const hasName = /(?:'aria-label'|aria-label|\bid\s*:)/.test(el.props);
       if (hasName) continue;
       // 包裹式 label：最近的 h('label' 出现在本控件之前、且晚于上一个控件
@@ -518,7 +542,7 @@ function checkC11(ctx) {
   if (!thread) {
     return { count: 1, samples: ['找不到 .zp-chat-thread 对话容器（class 改名？）'] };
   }
-  const line = lineOf(ctx.src, ctx.jsxIndex(thread.index));
+  const line = ctx.where(ctx.jsxIndex(thread.index));
   if (!/aria-live/.test(thread.props)) { count++; samples.push(`${line} · 对话流缺 aria-live（读屏静默）`); }
   if (!/role\s*:\s*['"]log['"]/.test(thread.props)) { count++; samples.push(`${line} · 对话流缺 role="log"`); }
   if (count === 0) samples.push('对话流 role=log + aria-live 齐备');
@@ -717,9 +741,476 @@ function checkC16(ctx) {
   let count = 0;
   for (const m of ctx.css.text.matchAll(/var\(\s*--zp-accent(?:-deep)?\b/g)) {
     count++;
-    if (samples.length < 5) samples.push(`${lineOf(ctx.src, ctx.css.startIndex + m.index)} · var(${/--zp-accent(?:-deep)?/.exec(m[0])[0]})`);
+    if (samples.length < 5) samples.push(`${ctx.where(ctx.css.startIndex + m.index)} · var(${/--zp-accent(?:-deep)?/.exec(m[0])[0]})`);
   }
   samples.push(`私有品牌色引用 ${count} 处（迁移目标：--dsw-alias-brand-primary / button-primary-hover）`);
+  return { count, samples };
+}
+
+/* ------------------------------------------------------------------ *
+ * v6（--profile v6）：约定解析与检查
+ * 约定文档在 docs/ui-contract/v6/；源码由 build.mjs 的 assembleUi 拼出来（样例位置报「源文件:行号」）。
+ * ------------------------------------------------------------------ */
+
+const cellsOf = (row) => row.split('|').slice(1, -1).map((c) => c.trim());
+const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/** v6 layout.md §2：Region → 「选择器」列登记的类名（不带点）。第一个是带 data-region 的元素的类名。 */
+function parseRegionSelectors(md) {
+  const out = {};
+  for (const row of tableRows(md, ['Region', '禁止放']) || []) {
+    const cells = cellsOf(row);
+    const m = /^`([A-Z][A-Z0-9_]*)`$/.exec(cells[0] || '');
+    if (m) out[m[1]] = [...(cells[2] || '').matchAll(/`\.([a-z][\w-]*)`/g)].map((x) => x[1]);
+  }
+  return out;
+}
+
+/** v6 tokens.md §2：{ '--zp-zi': { light: '#6b55d4', dark: '#b9a7fa' }, ... } */
+function parseContentColors(md) {
+  const out = {};
+  for (const row of tableRows(md, ['变量', '浅色', '深色']) || []) {
+    const cells = cellsOf(row);
+    const name = /^`(--zp-[a-z0-9-]+)`$/.exec(cells[0] || '');
+    const light = /`(#[0-9a-fA-F]{3,8})`/.exec(cells[1] || '');
+    const dark = /`(#[0-9a-fA-F]{3,8})`/.exec(cells[2] || '');
+    if (name && light && dark) out[name[1]] = { light: light[1].toLowerCase(), dark: dark[1].toLowerCase() };
+  }
+  return out;
+}
+
+/** v6 design.md §5.2：动效豁免类 → { infinite, long } */
+function parseMotionExempt(md) {
+  const out = {};
+  for (const row of tableRows(md, ['动效豁免类']) || []) {
+    const cells = cellsOf(row);
+    const m = /^`([a-z][\w-]*)`$/.exec(cells[0] || '');
+    if (m) out[m[1]] = { infinite: /infinite/.test(cells[1] || ''), long: />300ms/.test(cells[1] || '') };
+  }
+  return out;
+}
+
+/** v6 design.md §6：类名例外 → { prefixes: ['zr-'], names: ['md-table'] } */
+function parseClassExceptions(md) {
+  const prefixes = [];
+  const names = [];
+  for (const row of tableRows(md, ['类名例外']) || []) {
+    const m = /^\|\s*`([a-z][\w-]*?)(-\*)?`\s*\|/.exec(row);
+    if (!m) continue;
+    if (m[2]) prefixes.push(m[1] + '-');
+    else names.push(m[1]);
+  }
+  return { prefixes, names };
+}
+
+/** CSS → 规则列表 [{ selector, body, bodyStart, atRules }]。注释换成等长空白（位置不变），@keyframes 里的帧不算规则。 */
+function cssRules(css) {
+  const clean = css.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '));
+  const rules = [];
+  const stack = [];
+  let preludeStart = 0;
+  for (let i = 0; i < clean.length; i++) {
+    const ch = clean[i];
+    if (ch === '{') {
+      stack.push({ prelude: clean.slice(preludeStart, i).trim(), start: i + 1 });
+      preludeStart = i + 1;
+    } else if (ch === '}') {
+      const top = stack.pop();
+      if (top && !top.prelude.startsWith('@')) {
+        const atRules = stack.map((x) => x.prelude).filter((p) => p.startsWith('@'));
+        if (!atRules.some((p) => /^@(?:-webkit-)?keyframes\b/.test(p))) {
+          rules.push({ selector: top.prelude, body: clean.slice(top.start, i), bodyStart: top.start, atRules });
+        }
+      }
+      preludeStart = i + 1;
+    } else if (ch === ';') {
+      preludeStart = i + 1;
+    }
+  }
+  return { clean, rules };
+}
+
+/** 规则里的声明：[{ prop, value, index }]，index 是声明在 CSS 文本里的位置。 */
+function declsOf(rule) {
+  const out = [];
+  let offset = 0;
+  for (const part of rule.body.split(';')) {
+    const at = part.indexOf(':');
+    if (at > 0) {
+      const lead = part.length - part.trimStart().length;
+      out.push({ prop: part.slice(0, at).trim().toLowerCase(), value: part.slice(at + 1).trim(), index: rule.bodyStart + offset + lead });
+    }
+    offset += part.length + 1;
+  }
+  return out;
+}
+
+/** 选择器里的类名（去掉属性选择器和字符串，避免把 [data-x=".a"] 当类名）。 */
+const selectorClasses = (selector) =>
+  [...selector.replace(/\[[^\]]*\]/g, '').replace(/"[^"]*"|'[^']*'/g, '').matchAll(/\.(-?[_a-zA-Z][\w-]*)/g)].map((m) => m[1]);
+
+const forEachDecl = (ctx, fn) => {
+  for (const rule of ctx.cssRules) for (const d of declsOf(rule)) fn(d, rule);
+};
+const cssWhere = (ctx, index) => ctx.where(ctx.css.startIndex + index);
+
+/** 找包住 idx 的那个 h(...) 调用（只认 `h(` 前面不是标识符或点，避免把 match( 之类当成 h(）。 */
+function propsEnclosingH(src, idx) {
+  const re = /(?<![\w$.])h\(\s*['A-Za-z]/g;
+  let last = -1;
+  let m;
+  while ((m = re.exec(src)) && m.index < idx) last = m.index;
+  return last < 0 ? '' : propsAfter(src, last);
+}
+
+/** className: 表达式里的字符串字面量（到同层的 , 或闭括号为止），拆成类名。模板字符串的 ${} 两侧各算一段。 */
+function classNameTokens(jsx) {
+  const out = [];
+  const re = /\bclassName\s*:\s*/g;
+  let m;
+  while ((m = re.exec(jsx))) {
+    const lits = [];
+    let depth = 0;
+    let i = re.lastIndex;
+    while (i < jsx.length) {
+      const ch = jsx[i];
+      if (ch === "'" || ch === '"' || ch === '`') {
+        let j = i + 1;
+        let lit = '';
+        while (j < jsx.length && jsx[j] !== ch) {
+          if (jsx[j] === '\\') { lit += jsx[j + 1] || ''; j += 2; continue; }
+          if (ch === '`' && jsx[j] === '$' && jsx[j + 1] === '{') {
+            lits.push(lit);
+            lit = '';
+            let d = 1;
+            j += 2;
+            while (j < jsx.length && d > 0) { if (jsx[j] === '{') d++; else if (jsx[j] === '}') d--; j++; }
+            continue;
+          }
+          lit += jsx[j];
+          j++;
+        }
+        lits.push(lit);
+        i = j + 1;
+        continue;
+      }
+      if (ch === '(' || ch === '[' || ch === '{') depth++;
+      else if (ch === ')' || ch === ']' || ch === '}') { if (depth === 0) break; depth--; }
+      else if (ch === ',' && depth === 0) break;
+      i++;
+    }
+    for (const l of lits) for (const tok of l.split(/\s+/)) if (tok) out.push({ name: tok, index: m.index });
+  }
+  return out;
+}
+
+function classAllowed(ctx, name) {
+  return name.startsWith('zp-') || ctx.classExceptions.names.includes(name) || ctx.classExceptions.prefixes.some((p) => name.startsWith(p));
+}
+
+function checkC1v6(ctx) {
+  const samples = [];
+  let count = 0;
+  forEachDecl(ctx, (d, rule) => {
+    const isShadow = d.prop === 'box-shadow' || d.prop === 'text-shadow';
+    const registered = d.prop.startsWith('--') && !!ctx.contentColors[d.prop];
+    const hits = [
+      ...[...d.value.matchAll(/#[0-9a-fA-F]{3,8}\b|rgba?\([^)]*\)|hsla?\([^)]*\)/g)].map((m) => m[0]),
+      ...[...d.value.replace(/--[\w-]+/g, '').matchAll(/\b(?:white|black)\b/gi)].map((m) => m[0])
+    ];
+    for (const lit of hits) {
+      if (isShadow || registered || ctx.tokenWhitelist.has(lit.toLowerCase())) continue;
+      count++;
+      samples.push(`${cssWhere(ctx, d.index)} · ${lit} · ${rule.selector} { ${d.prop}: ${d.value.slice(0, 60)} }`);
+    }
+  });
+  if (count === 0) samples.push(`字面色只出现在已登记的 ${Object.keys(ctx.contentColors).length} 个 --zp-* 定义和阴影里`);
+  return { count, samples };
+}
+
+const V6_FONT_SIZES = new Set([9.5, 10.5, 11, 11.5, 12, 13, 13.5, 14, 15, 16, 18, 20, 24, 28]);
+const V6_SPACING = new Set([0, 2, 4, 6, 8, 12, 16, 20, 24, 32, 40, 48]);
+
+function checkC2v6(ctx) {
+  const samples = [];
+  let count = 0;
+  forEachDecl(ctx, (d, rule) => {
+    let nums = [];
+    if (d.prop === 'font-size') nums = extractPxNumbers(d.value);
+    else if (d.prop === 'font') nums = extractPxNumbers(d.value.split('/')[0]);
+    const bad = nums.filter((n) => !V6_FONT_SIZES.has(n));
+    if (bad.length) {
+      count++;
+      samples.push(`${cssWhere(ctx, d.index)} · ${rule.selector} { ${d.prop}: ${d.value} }（表外 ${[...new Set(bad)].join('/')}）`);
+    }
+  });
+  for (const m of ctx.jsx.matchAll(/fontSize\s*:\s*['"]?(\d+(?:\.\d+)?)/g)) {
+    const n = Number(m[1]);
+    if (!V6_FONT_SIZES.has(n)) {
+      count++;
+      samples.push(`${ctx.where(ctx.jsxIndex(m.index))} · fontSize: ${n}`);
+    }
+  }
+  return { count, samples };
+}
+
+function checkC3v6(ctx) {
+  const samples = [];
+  let count = 0;
+  const PROP = /^(?:padding|margin)(?:-(?:top|right|bottom|left|inline|block|inline-start|inline-end|block-start|block-end))?$|^(?:row-|column-)?gap$/;
+  forEachDecl(ctx, (d, rule) => {
+    if (!PROP.test(d.prop)) return;
+    /* 宿主变量的兜底值是宿主约定，不是面板间距（design.md §3） */
+    const value = d.value.replace(/var\(\s*--dsh-frame-[a-z-]+\s*,[^)]*\)/g, 'var()');
+    const bad = extractPxNumbers(value).filter((n) => !V6_SPACING.has(Math.abs(n)));
+    if (bad.length) {
+      count += bad.length;
+      samples.push(`${cssWhere(ctx, d.index)} · ${rule.selector} { ${d.prop}: ${d.value} }（表外 ${[...new Set(bad)].join('/')}）`);
+    }
+  });
+  return { count, samples };
+}
+
+function checkC4v6(ctx) {
+  const samples = [];
+  let count = 0;
+  const weightOf = (tok) => (/^\d{3}$/.test(tok) ? Number(tok) : tok === 'bold' ? 700 : tok === 'normal' ? 400 : tok === 'bolder' || tok === 'lighter' ? NaN : null);
+  forEachDecl(ctx, (d, rule) => {
+    let tokens = [];
+    if (d.prop === 'font-weight') tokens = [d.value.replace(/\s*!important$/, '').trim()];
+    else if (d.prop === 'font') tokens = d.value.split('/')[0].split(/\s+/).filter((x) => /^\d{3}$|^(?:bold|bolder|lighter)$/.test(x));
+    for (const tok of tokens) {
+      const w = weightOf(tok);
+      if (w === null) continue;
+      const board = /\.zp-board(?![\w-])/.test(rule.selector);
+      const ok = w === 400 || w === 500 || w === 600 || (board && (w === 650 || w === 700));
+      if (!ok) {
+        count++;
+        samples.push(`${cssWhere(ctx, d.index)} · ${rule.selector} { ${d.prop}: ${d.value} }${(w === 650 || w === 700) ? '（650 / 700 只给盘面主星，选择器要含 .zp-board）' : ''}`);
+      }
+    }
+  });
+  for (const m of ctx.jsx.matchAll(/fontWeight\s*:\s*['"]?(\d+|bold)/g)) {
+    const w = m[1] === 'bold' ? 700 : Number(m[1]);
+    if (w !== 400 && w !== 500 && w !== 600) {
+      count++;
+      samples.push(`${ctx.where(ctx.jsxIndex(m.index))} · fontWeight: ${m[1]}`);
+    }
+  }
+  return { count, samples };
+}
+
+function checkC11v6(ctx) {
+  const samples = [];
+  let count = 0;
+  const threads = [];
+  for (const m of ctx.jsx.matchAll(/(?<![\w$.])h\(\s*'(\w+)'/g)) {
+    const props = propsAfter(ctx.jsx, m.index);
+    if (/zp-chat-thread/.test(props)) threads.push({ index: m.index, props });
+  }
+  const wired = /'data-region'\s*:\s*'ASSISTANT'/.test(ctx.jsx);
+  if (!threads.length) {
+    if (wired) return { count: 1, samples: ['ASSISTANT 已接线，但找不到 .zp-chat-thread 对话流'] };
+    return { count: 0, samples: ['ASSISTANT 还没接线：对话流检查在它接线后生效'] };
+  }
+  for (const th of threads) {
+    const line = ctx.where(ctx.jsxIndex(th.index));
+    if (!/'aria-live'\s*:\s*'polite'/.test(th.props)) { count++; samples.push(`${line} · 对话流缺 aria-live="polite"`); }
+    if (!/role\s*:\s*['"]log['"]/.test(th.props)) { count++; samples.push(`${line} · 对话流缺 role="log"`); }
+  }
+  if (count === 0) samples.push(`对话流 ${threads.length} 处，role=log + aria-live=polite 齐备`);
+  return { count, samples };
+}
+
+function checkC12v6(ctx) {
+  const samples = [];
+  let count = 0;
+  const css = ctx.css.text;
+  const hasClass = (cls) => new RegExp('\\.' + escapeRe(cls) + '(?![\\w-])').test(css);
+  for (const cls of ['zp-root', 'zp-head', 'zp-exit']) {
+    if (!hasClass(cls)) { count++; samples.push(`CSS 缺结构类 .${cls}`); }
+  }
+  if (!/className\s*:\s*['"][^'"]*\bzp-exit\b/.test(ctx.jsx)) { count++; samples.push('源码里没有 className 含 zp-exit 的「返回会话」按钮'); }
+  const wired = new Map();
+  for (const m of ctx.jsx.matchAll(/'data-region'\s*:\s*'([A-Z][A-Z0-9_]*)'/g)) {
+    if (!wired.has(m[1])) wired.set(m[1], []);
+    wired.get(m[1]).push(m.index);
+  }
+  for (const [region, indexes] of wired) {
+    const classes = ctx.regionSelectors[region] || [];
+    if (!classes.length) continue; /* 未登记的区域由 C14 报 */
+    for (const cls of classes) {
+      if (!hasClass(cls)) { count++; samples.push(`${region} 已接线，CSS 缺 .${cls}`); }
+    }
+    for (const idx of indexes) {
+      const props = propsEnclosingH(ctx.jsx, idx);
+      const own = classNameTokens(props).map((x) => x.name);
+      if (!own.includes(classes[0])) {
+        count++;
+        samples.push(`${ctx.where(ctx.jsxIndex(idx))} · data-region=${region} 的元素没带 .${classes[0]}`);
+      }
+    }
+  }
+  if (count === 0) samples.push(`结构类齐备；已接线区域 ${[...wired.keys()].join('、') || '无'} 的类名都在`);
+  return { count, samples };
+}
+
+function checkC13v6(ctx) {
+  const samples = [];
+  let count = 0;
+  const P = ctx.params;
+  const KEYS = ['SIDE_MIN', 'SIDE_MAX', 'GUTTER', 'PAGE_PAD_X', 'PAD_NARROW', 'BOARD_MIN', 'BOARD_COMFORT', 'ASSISTANT_W', 'SHEET_W', 'MODAL_W', 'DOC_MAX', 'MID', 'WIDE'];
+  for (const key of KEYS) {
+    if (!(key in P)) { count++; samples.push(`layout.md §4.1 参数表缺 ${key}`); }
+  }
+  const MID = P.SIDE_MIN + P.GUTTER + P.BOARD_MIN + P.PAGE_PAD_X;
+  const WIDE = P.ASSISTANT_W + P.SIDE_MIN + P.GUTTER + P.BOARD_COMFORT + P.PAGE_PAD_X;
+  if (P.MID !== MID) { count++; samples.push(`layout.md MID=${P.MID} 与公式 ${MID} 不符`); }
+  if (P.WIDE !== WIDE) { count++; samples.push(`layout.md WIDE=${P.WIDE} 与公式 ${WIDE} 不符`); }
+  const ge = [...ctx.src.matchAll(/panelW\s*>=\s*(\d+)/g)].map((m) => Number(m[1]));
+  const others = [...ctx.src.matchAll(/panelW\s*(?:<=?|>(?!=))\s*(\d+)/g)].map((m) => Number(m[1])).filter((n) => n !== 0);
+  const want = [MID, WIDE].sort((a, b) => a - b).join();
+  if (ge.slice().sort((a, b) => a - b).join() !== want) {
+    count++;
+    samples.push(`源码里 panelW >= 的字面量 [${ge.join(', ')}] 应恰好是 [${want}]`);
+  }
+  if (others.some((n) => n !== MID && n !== WIDE)) {
+    count++;
+    samples.push(`源码里 panelW 还和 [${others.join(', ')}] 比较（只许 ${MID} / ${WIDE}，首帧兜底用 0）`);
+  }
+  if (count === 0) samples.push(`阈值 ${ge.join('/')} = 公式 MID ${MID} / WIDE ${WIDE}`);
+  return { count, samples };
+}
+
+/** 宿主底色（2026-11 实测，和 tokens.md §5 同一组） */
+const V6_BACKGROUNDS = { light: ['#ffffff', '#ffffff'], dark: ['#151517', '#232324'] };
+const V6_CONTRAST = [
+  ['--zp-gold-text', 4.5], ['--zp-mu-lu', 4.5], ['--zp-mu-quan', 4.5], ['--zp-mu-ke', 4.5], ['--zp-mu-ji', 4.5],
+  ['--zp-zi', 3], ['--zp-gold', 3],
+  ...Array.from({ length: 14 }, (_, i) => [`--zp-s${i}`, 3])
+];
+
+function checkC15v6(ctx) {
+  const samples = [];
+  let count = 0;
+  const css = ctx.css.text;
+  const isColor = (v) => /^#[0-9a-f]{3,8}$/i.test(v) || /^(?:rgb|hsl)a?\(/i.test(v);
+  const pick = (block) => Object.fromEntries(Object.entries(block || {}).filter(([, v]) => isColor(v)).map(([k, v]) => [k, v.toLowerCase()]));
+  const light = pick(readCustomProps(css, '.zp-root {'));
+  const dark = pick(readCustomProps(css, 'body[data-ds-dark-theme] .zp-root'));
+  for (const k of Object.keys(light)) if (!(k in dark)) { count++; samples.push(`深色缺内容色 ${k}`); }
+  for (const k of Object.keys(dark)) if (!(k in light)) { count++; samples.push(`深色多出未配对的 ${k}`); }
+  const reg = ctx.contentColors;
+  for (const k of new Set([...Object.keys(light), ...Object.keys(dark)])) {
+    if (!reg[k]) { count++; samples.push(`${k} 没在 tokens.md §2 登记`); }
+  }
+  for (const [k, v] of Object.entries(reg)) {
+    if (light[k] !== v.light) { count++; samples.push(`${k} 浅色是 ${light[k] || '缺失'}，tokens.md 登记 ${v.light}`); }
+    if (dark[k] !== v.dark) { count++; samples.push(`${k} 深色是 ${dark[k] || '缺失'}，tokens.md 登记 ${v.dark}`); }
+  }
+  let groups = 0;
+  for (const [name, bar] of V6_CONTRAST) {
+    for (const [theme, values] of [['浅色', light], ['深色', dark]]) {
+      const fg = values[name];
+      if (!fg || !/^#/.test(fg)) continue;
+      groups++;
+      const bgs = V6_BACKGROUNDS[theme === '浅色' ? 'light' : 'dark'];
+      const worst = Math.min(...bgs.map((bg) => contrastRatio(fg, bg)).filter((r) => r !== null));
+      if (worst < bar) {
+        count++;
+        samples.push(`${theme} ${name} ${fg}：最低 ${Math.round(worst * 100) / 100}:1 < ${bar}:1`);
+      }
+    }
+  }
+  if (count === 0) samples.push(`内容色浅 / 深 ${Object.keys(light).length}/${Object.keys(dark).length} 成对、和 tokens.md 一致；对比度 ${groups} 组都达标`);
+  return { count, samples };
+}
+
+function checkC16v6(ctx) {
+  const samples = [];
+  let count = 0;
+  const re = /--zp-(?:fill-)?accent(?:-deep)?(?![\w-])/g;
+  for (const m of ctx.css.text.matchAll(re)) { count++; samples.push(`${cssWhere(ctx, m.index)} · ${m[0]}`); }
+  for (const m of ctx.jsx.matchAll(re)) { count++; samples.push(`${ctx.where(ctx.jsxIndex(m.index))} · ${m[0]}`); }
+  if (count === 0) samples.push('--zp-accent*、--zp-fill-accent* 没有出现');
+  return { count, samples };
+}
+
+function checkC17(ctx) {
+  const samples = [];
+  let count = 0;
+  let motion = false;
+  const LAYOUT = /^(?:all|width|height|min-width|max-width|min-height|max-height|top|right|bottom|left|inset|flex|flex-basis|margin(?:-[a-z-]+)?|padding(?:-[a-z-]+)?|grid-template(?:-[a-z-]+)?)$/;
+  const TIMING = /^(?:ease|ease-in|ease-out|ease-in-out|linear|step-start|step-end|cubic-bezier\(.*|steps\(.*)$/;
+  const TIME = /^-?\d*\.?\d+m?s$/;
+  const toMs = (n, unit) => (unit === 's' ? Number(n) * 1000 : Number(n));
+  forEachDecl(ctx, (d, rule) => {
+    const isMotion = /^(?:transition|animation)(?:-|$)/.test(d.prop);
+    if (!isMotion && !d.prop.startsWith('--')) return;
+    if (isMotion && !/^none\b/.test(d.value)) motion = true;
+    const classes = selectorClasses(rule.selector);
+    const exemptLong = classes.some((c) => ctx.motionExempt[c] && ctx.motionExempt[c].long);
+    const exemptInf = classes.some((c) => ctx.motionExempt[c] && ctx.motionExempt[c].infinite);
+    const where = cssWhere(ctx, d.index);
+    const long = [...d.value.matchAll(/(?<![\w.-])(\d*\.?\d+)(ms|s)\b/g)].map((m) => toMs(m[1], m[2])).filter((ms) => ms > 300);
+    if (long.length && !exemptLong) { count++; samples.push(`${where} · ${rule.selector} { ${d.prop}: ${d.value} }（${long.join('/')}ms > 300ms）`); }
+    if (/\binfinite\b/.test(d.value) && !exemptInf) { count++; samples.push(`${where} · ${rule.selector} 用了 infinite（只许 design.md §5.2 登记的类）`); }
+    if (d.prop === 'transition' || d.prop === 'transition-property') {
+      const items = d.value.replace(/!important/, '').split(/,(?![^(]*\))/).map((x) => x.trim()).filter(Boolean);
+      for (const item of items) {
+        let prop;
+        if (d.prop === 'transition-property') prop = item;
+        else prop = item.split(/\s+/).find((tok) => !TIME.test(tok) && !TIMING.test(tok)) || 'all';
+        if (prop !== 'none' && LAYOUT.test(prop)) {
+          count++;
+          samples.push(`${where} · ${rule.selector} 过渡了布局属性 ${prop}`);
+        }
+      }
+    }
+  });
+  if (motion && !/@media\s*\(\s*prefers-reduced-motion\s*:\s*reduce\s*\)/.test(ctx.css.text)) {
+    count++;
+    samples.push('有过渡 / 动画，但没有 @media (prefers-reduced-motion: reduce) 段');
+  }
+  if (count === 0) samples.push('过渡和动画都不超过 300ms；infinite 只在登记的类上；不过渡布局属性');
+  return { count, samples };
+}
+
+function checkC18(ctx) {
+  const samples = [];
+  let count = 0;
+  const { clean } = ctx.cssParsed;
+  const UNIT = /(?<![\w.#-])-?\d*\.?\d+(?:[dsl]?v[wh]|vmin|vmax|v[ib])\b/g;
+  for (const m of clean.matchAll(UNIT)) { count++; samples.push(`${cssWhere(ctx, m.index)} · 视口单位 ${m[0]}`); }
+  for (const m of ctx.jsx.matchAll(/\b\d+(?:\.\d+)?(?:[dsl]?v[wh]|vmin|vmax)\b/g)) { count++; samples.push(`${ctx.where(ctx.jsxIndex(m.index))} · 视口单位 ${m[0]}`); }
+  for (const m of clean.matchAll(/@media([^{]*)\{/g)) {
+    if (/\b(?:min-|max-)?(?:device-)?(?:width|height|aspect-ratio|orientation)\b/.test(m[1])) {
+      count++;
+      samples.push(`${cssWhere(ctx, m.index)} · 按宽高的 @media${m[1].trimEnd()}（档位看 .zp-root[data-w]）`);
+    }
+  }
+  for (const m of clean.matchAll(/\benv\(/g)) { count++; samples.push(`${cssWhere(ctx, m.index)} · env(（标题带用 --dsh-frame-*）`); }
+  for (const m of ctx.jsx.matchAll(/\benv\(/g)) { count++; samples.push(`${ctx.where(ctx.jsxIndex(m.index))} · env(`); }
+  for (const rule of ctx.cssRules) {
+    const sel = rule.selector.replace(/\[[^\]]*\]/g, '').replace(/"[^"]*"|'[^']*'/g, '');
+    for (const m of sel.matchAll(/#[A-Za-z_-][\w-]*/g)) {
+      count++;
+      samples.push(`${cssWhere(ctx, rule.bodyStart)} · id 选择器 ${m[0]}（${rule.selector}）`);
+    }
+    for (const cls of selectorClasses(rule.selector)) {
+      if (!classAllowed(ctx, cls)) {
+        count++;
+        samples.push(`${cssWhere(ctx, rule.bodyStart)} · 类名 .${cls} 没有 zp- 前缀（${rule.selector}）`);
+      }
+    }
+  }
+  for (const tok of classNameTokens(ctx.jsx)) {
+    if (!classAllowed(ctx, tok.name)) {
+      count++;
+      samples.push(`${ctx.where(ctx.jsxIndex(tok.index))} · className 里的 ${tok.name} 没有 zp- 前缀`);
+    }
+  }
+  if (count === 0) samples.push('没有视口单位、按宽高的 @media、id 选择器、env(；类名都带 zp- 前缀（或在 design.md §6 登记）');
   return { count, samples };
 }
 
@@ -746,6 +1237,28 @@ const CHECKS = [
   { id: 'C16', title: '私有品牌色退役', kind: 'ratchet', run: checkC16 }
 ];
 
+/** v6：C1–C4、C16–C18 是硬规则（必须为 0）；C15 是基线为 0 的棘轮；C5–C10、C14 和 v5 相同。 */
+const CHECKS_V6 = [
+  { id: 'C1', title: '字面色只在 --zp-* 定义和阴影里', kind: 'hard', run: checkC1v6 },
+  { id: 'C2', title: '字号（14 个值）', kind: 'hard', run: checkC2v6 },
+  { id: 'C3', title: '间距档位', kind: 'hard', run: checkC3v6 },
+  { id: 'C4', title: '字重', kind: 'hard', run: checkC4v6 },
+  { id: 'C5', title: 'darwin 窗口 chrome 避让', kind: 'hard', run: checkC5 },
+  { id: 'C6', title: '层叠隔离 isolation', kind: 'hard', run: checkC6 },
+  { id: 'C7', title: '无 position:fixed', kind: 'hard', run: checkC7 },
+  { id: 'C8', title: '弹层语义（dialog）', kind: 'hard', run: checkC8 },
+  { id: 'C9', title: 'iframe title/sandbox', kind: 'hard', run: checkC9 },
+  { id: 'C10', title: '表单控件可访问名称', kind: 'hard', run: checkC10 },
+  { id: 'C11', title: '对话流 aria-live', kind: 'hard', run: checkC11v6 },
+  { id: 'C12', title: '结构类 + 区域接线', kind: 'hard', run: checkC12v6 },
+  { id: 'C13', title: '阈值公式对账', kind: 'hard', run: checkC13v6 },
+  { id: 'C14', title: 'RegionId 白名单', kind: 'hard', run: checkC14 },
+  { id: 'C15', title: '深色成对 + 对比度', kind: 'ratchet', run: checkC15v6 },
+  { id: 'C16', title: '退役的品牌色', kind: 'hard', run: checkC16v6 },
+  { id: 'C17', title: '动效时长与循环', kind: 'hard', run: checkC17 },
+  { id: 'C18', title: '单位、选择器、类名前缀', kind: 'hard', run: checkC18 }
+];
+
 /* ------------------------------------------------------------------ *
  * 主流程
  * ------------------------------------------------------------------ */
@@ -756,6 +1269,7 @@ function failExit(msg) {
 }
 
 function loadContext() {
+  if (V6) return loadContextV6();
   const src = read(PATHS.src);
   if (!src) failExit(`读不到源码 ${relative(ROOT, PATHS.src)}（工作目录应是 ziwei-workbench/）`);
   const layoutMd = read(PATHS.layout);
@@ -780,13 +1294,62 @@ function loadContext() {
     params: parseLayoutParams(layoutMd),
     regions: parseLayoutRegions(layoutMd),
     tokenWhitelist: parseTokenWhitelist(tokensMd),
-    tokenVars: parseTokenVarNames(tokensMd)
+    tokenVars: parseTokenVarNames(tokensMd),
+    where: (idx) => lineOf(src, idx)
+  };
+}
+
+/** v6：用 build.mjs 的 assembleUi 在内存里拼 src/ui/；「构建」就是这份拼接结果（切换前 client.js 仍是 v5）。 */
+async function loadContextV6() {
+  const build = await import(pathToFileURL(join(ROOT, 'build.mjs')).href);
+  let ui = null;
+  try {
+    ui = build.assembleUi(ROOT, { version: '0' });
+  } catch (err) {
+    failExit(`v6 界面拼不起来（src/ui/）：${err.message}`);
+  }
+  const src = ui.text;
+  const layoutMd = read(PATHS.layout);
+  const designMd = read(PATHS.design);
+  const tokensMd = read(PATHS.tokens);
+  if (!layoutMd || !designMd || !tokensMd) {
+    failExit(`契约文档缺失：需 docs/ui-contract/v6/{layout,design,tokens}.md 三份齐全`);
+  }
+  const css = extractCssTemplate(src);
+  if (!css.text) failExit('拼好的 v6 源码里找不到 const CSS = `...` 模板（40-styles.js 变了？）');
+  const jsx = src.slice(0, css.startIndex) + src.slice(css.endIndex);
+  const cssLenBefore = css.startIndex;
+  const cssParsed = cssRules(css.text);
+  const contentColors = parseContentColors(tokensMd);
+  return {
+    src,
+    built: src,
+    css,
+    cssParsed,
+    cssRules: cssParsed.rules,
+    jsx,
+    jsxIndex: (idx) => (idx < cssLenBefore ? idx : idx + (css.endIndex - css.startIndex)),
+    layoutMd,
+    designMd,
+    tokensMd,
+    params: parseLayoutParams(layoutMd),
+    regions: parseLayoutRegions(layoutMd),
+    regionSelectors: parseRegionSelectors(layoutMd),
+    tokenWhitelist: parseTokenWhitelist(tokensMd),
+    tokenVars: new Set(Object.keys(contentColors)),
+    contentColors,
+    motionExempt: parseMotionExempt(designMd),
+    classExceptions: parseClassExceptions(designMd),
+    where: (idx) => {
+      const at = build.locate(ui.map, src, idx);
+      return `${at.file}:${at.line}`;
+    }
   };
 }
 
 function evaluate(ctx, baseline) {
   const results = [];
-  for (const check of CHECKS) {
+  for (const check of V6 ? CHECKS_V6 : CHECKS) {
     let r;
     try {
       r = check.run(ctx) || { count: 0, samples: [] };
@@ -835,9 +1398,15 @@ function statusDetail(check, r, base) {
 
 function printHuman(results, baseline, meta) {
   const icon = { PASS: 'PASS', WARN: 'WARN', FAIL: 'FAIL' };
-  console.log('紫微斗数 Pro · 界面契约体检（ui-contract）');
-  console.log(`契约：docs/ui-contract/{layout,design,tokens}.md · 源码：src/ui-pro.js（${countLines(meta.src)} 行）· 构建：client.js（${meta.builtBytes} B）`);
-  console.log(`基线：${baseline.from}${baseline.from === '内置' ? '' : ' docs/ui-contract/audit-baseline.json'}`);
+  if (V6) {
+    console.log('紫微斗数 · 界面约定 v6 体检（--profile v6）');
+    console.log(`契约：docs/ui-contract/v6/{layout,design,tokens}.md · 源码：src/ui/（拼接后 ${countLines(meta.src)} 行）· 构建：内存拼接（${meta.builtBytes} B；切换前 client.js 仍是 v5）`);
+    console.log(`基线：${baseline.from}${baseline.from === '内置' ? '' : ' docs/ui-contract/v6/audit-baseline.json'}`);
+  } else {
+    console.log('紫微斗数 Pro · 界面契约体检（ui-contract）');
+    console.log(`契约：docs/ui-contract/{layout,design,tokens}.md · 源码：src/ui-pro.js（${countLines(meta.src)} 行）· 构建：client.js（${meta.builtBytes} B）`);
+    console.log(`基线：${baseline.from}${baseline.from === '内置' ? '' : ' docs/ui-contract/audit-baseline.json'}`);
+  }
   console.log('');
   let pass = 0; let warn = 0; let fail = 0; let debt = 0; let debtBaseline = 0;
   for (const r of results) {
@@ -875,18 +1444,20 @@ function printJson(results, baseline, meta) {
     }
   }
   const exitCode = summary.fail > 0 ? 1 : 0;
+  const dir = V6 ? 'docs/ui-contract/v6' : 'docs/ui-contract';
   process.stdout.write(JSON.stringify({
     tool: 'ui-contract-audit',
     version: 1,
+    ...(V6 ? { profile: 'v6' } : {}),
     ok: exitCode === 0,
     exitCode,
     contract: {
-      layout: 'docs/ui-contract/layout.md',
-      design: 'docs/ui-contract/design.md',
-      tokens: 'docs/ui-contract/tokens.md',
+      layout: `${dir}/layout.md`,
+      design: `${dir}/design.md`,
+      tokens: `${dir}/tokens.md`,
       baselineSource: baseline.from
     },
-    source: { file: 'src/ui-pro.js', lines: meta.srcLines, bytes: meta.srcBytes, builtBytes: meta.builtBytes },
+    source: { file: V6 ? 'src/ui/' : 'src/ui-pro.js', lines: meta.srcLines, bytes: meta.srcBytes, builtBytes: meta.builtBytes },
     checks: results.map((r) => ({ ...r })),
     summary
   }, null, 2) + '\n');
@@ -914,8 +1485,10 @@ function updateBaseline(ctx, results, meta) {
   }
 }
 
-function main() {
-  const ctx = loadContext();
+async function main() {
+  if (PROFILE !== 'v5' && PROFILE !== 'v6') failExit(`--profile 只认 v5 或 v6（收到 ${PROFILE}）`);
+  if (V6 && FLAG.update) failExit('v6 的基线固定全 0，不接受 --update-baseline：有违规就改代码或改约定文档。');
+  const ctx = await loadContext();
   const baseline = loadBaseline();
   const meta = {
     src: ctx.src,
@@ -943,4 +1516,4 @@ function main() {
   return summary.fail > 0 ? 1 : 0;
 }
 
-process.exitCode = main();
+process.exitCode = await main();
