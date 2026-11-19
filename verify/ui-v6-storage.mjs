@@ -11,7 +11,7 @@
  *   - 默认实例 ZWUi.localStore 懒绑定 window.localStorage，拿不到时不抛错
  * 期望值都是字面量或来自 verify/fixtures/storage-v5.json，不用被测代码重算。
  */
-import { existsSync, readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { loadBundle, makeCtx, memoryStorage } from './client-harness.mjs';
 
@@ -150,12 +150,9 @@ export default async function storageChecks(t) {
     check('出生城市：越界数字不当经度', () => P('400').kind === 'unknown');
     check('出生城市：表的两端（喀什 76.0、台北 121.6、拉萨 91.1）',
       () => [P('喀什').lon === 76 && P('台北').lon === 121.6 && P('拉萨').lon === 91.1, json([P('喀什'), P('台北'), P('拉萨')])]);
-    /* v5 源文件还在（切换之前）时逐城对照：94 个城市一个不少、经度一致 */
-    const v5Path = join(t.root, 'src', 'ui-pro.js');
-    if (existsSync(v5Path)) {
-      const v5 = readFileSync(v5Path, 'utf8');
-      const table = (v5.match(/var CITY_LON = \{([\s\S]*?)\};/) || [])[1] || '';
-      const cities = [...table.matchAll(/'([^']+)': ([0-9.]+)/g)].map((m) => [m[1], +m[2]]);
+    /* 和 v5 的城市表逐城对照：94 个城市一个不少、经度一致（v5 的表在删掉 src/ui-pro.js 之前导出成了 fixture） */
+    {
+      const cities = JSON.parse(readFileSync(join(t.root, 'verify', 'fixtures', 'cities-v5.json'), 'utf8')).cities;
       check('出生城市：v5 城市表 94 城逐城一致（城市名 → 同一经度）', () => {
         const bad = cities.filter(([name, lon]) => { const r = P(name); return r.kind !== 'city' || r.city !== name || r.lon !== lon; });
         return [cities.length === 94 && bad.length === 0, `v5 表 ${cities.length} 城；不一致：${bad.map((c) => c[0]).join(',')}`];

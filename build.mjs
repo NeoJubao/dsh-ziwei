@@ -97,12 +97,6 @@ export function assembleClient({ engine, zcore, sky = '', ui }) {
   return KERNEL_HEAD + engine + '\n' + zcore + KERNEL_TAIL + sky + ui;
 }
 
-/** v5 界面：src/ui-pro.js 原样，只把版本占位符换成 package.json 的版本号。 */
-export function assembleUiV5(root = ROOT, { version }) {
-  return readFileSync(join(root, 'src', 'ui-pro.js'), 'utf8')
-    .replace("'__ZIWEI_VERSION__'", () => JSON.stringify(version));
-}
-
 /* ------------------------------------------------------------------ *
  * v6：3D 星图（Three.js r128 + src/sky.js）
  * ------------------------------------------------------------------ */

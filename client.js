@@ -3400,7 +3400,7 @@ function t(key, vars) {
 /* 20-util：小工具。ZWUI 收纯函数，后面的文件往上挂；27-zwui 把它暴露成 window.ZWUi 供自检用。 */
 const ZWUI = {};
 
-/* 档位按面板实测宽度（docs/ui-contract/v6/layout.md「档位」）：
+/* 档位按面板实测宽度（docs/ui-contract/layout.md「档位」）：
  *   MID  = SIDE_MIN + GUTTER + BOARD_MIN + PAGE_PAD_X                  = 244 + 16 + 420 + 40       = 720
  *   WIDE = ASSISTANT_W + SIDE_MIN + GUTTER + BOARD_COMFORT + PAGE_PAD_X = 360 + 244 + 16 + 520 + 40 = 1180
  * 首帧还没量到宽度（<= 0）按窄档。体检脚本核对这里的两个字面量等于公式。 */
@@ -6559,7 +6559,7 @@ body[data-ds-dark-theme] .zp-root .zr-prose { --zr-em-halo: .5 }
  * apply() 在 ctx.effect 里把它放进一个 <style>，插件卸载时移除。 */
 const CSS = `/* ---- src/ui/css/00-tokens.css ---- */
 /* ================================================================
- * 00-tokens：根节点、内容色、宿主约定（界面约定 v6，docs/ui-contract/v6/）
+ * 00-tokens：根节点、内容色、宿主约定（界面约定 v6，docs/ui-contract/）
  * - 系统色（底、描边、文字、主按钮、悬停、遮罩）只用宿主的 --dsw-alias-*，这里不定义。
  * - 内容色 --zp-* 浅 / 深成对，值登记在 tokens.md；改值先改文档，体检脚本逐个核对。
  * - 根节点按面板实测宽度分档（data-w = narrow / mid / wide），不用视口媒体查询。
