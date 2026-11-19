@@ -12,3 +12,10 @@ function tierOf(panelW) {
   return 'narrow';
 }
 ZWUI.tierOf = tierOf;
+
+/* 三方四正：对宫 = +6，三合 = +4 / +8（宫位序号 mod 12）。和 v5 同一个函数。 */
+function relatedPalaces(index) {
+  const i = +index;
+  return { opp: (i + 6) % 12, tri: [(i + 4) % 12, (i + 8) % 12] };
+}
+ZWUI.relatedPalaces = relatedPalaces;
