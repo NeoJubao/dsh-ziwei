@@ -1,0 +1,19 @@
+{
+  "birthDateUnreadable": ["没读懂这个日期。试试「1990年6月15日」或「农历1990年五月廿三」", "Couldn't read that date. Try \"1990-6-15\", or a lunar date like \"农历1990年五月廿三\"."],
+  "birthDateYearRange": ["年份要在 1900 到 2100 之间", "The year must be between 1900 and 2100."],
+  "birthDateMonthRange": ["月份要在 1 到 12 之间", "The month must be between 1 and 12."],
+  "birthDateNoSuchDay": ["{y}年{m}月没有{d}日", "{y}-{m} has no day {d}."],
+  "birthDateNoLeap": ["{y} 年没有{month}", "Lunar year {y} has no {month}."],
+  "birthDateLunarDays": ["农历{y}年{month}只有 {days} 天", "In lunar {y}, {month} has only {days} days."],
+  "birthDateShowSolar": ["{y}年{m}月{d}日", "{y}-{m}-{d}"],
+  "birthDateShowLunar": ["农历{y}年{month}{day}", "Lunar {y}, {month}, {day}"],
+  "birthLunarMonth": ["{name}月", "month {m}"],
+  "birthLunarLeapMonth": ["闰{name}月", "leap month {m}"],
+  "birthLunarDay": ["{name}", "day {d}"],
+  "birthTimeUnsure": ["时辰决定命宫，请选一个最可能的时辰", "The birth hour decides the life palace. Please pick the most likely one."],
+  "birthTimeUnreadable": ["没读懂这个时间。试试「15:30」「下午三点半」，或点一个时辰", "Couldn't read that time. Try \"15:30\", or pick a two-hour period."],
+  "birthTimeOutOfRange": ["时间超出范围了", "That time is out of range."],
+  "birthTimeShow": ["{time}（{shichen}）", "{time} ({shichen})"],
+  "birthTimeShort": ["{time} {shichen}", "{time}, {shichen}"],
+  "birthTimeShowShichen": ["{name}", "{name} ({range})"]
+}
