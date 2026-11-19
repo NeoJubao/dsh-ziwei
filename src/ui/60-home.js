@@ -18,7 +18,9 @@
  *
  * 进出命盘：点标签、点星球、发问题、点快捷项都走 homeOpen —— 先让场景飞向那颗星（dive），回调里才
  * store.openChart；场景没回调（没有这颗星、被停放）也有保险，到时间照常进去。回到首页时从那颗星拉远（rise）。
- * 引导问答排出新盘：OnboardingTalk 调 props.onDone(entry)，这里放新星诞生（birth），再打开这张盘。
+ * 引导问答（62-onboarding.js 的 OnboardingTalk）：session.onboarding 有值、或者命盘库是空的时候，对话栏里日期行以下
+ * 整个交给它（它自己带输入框）。空库时不用先"开始"：它把还没有状态当成第一问，所以新用户第一帧看到的就是引导。
+ * 它排出新盘后调 props.onDone(entry)，这里放新星诞生（birth），再打开这张盘。
  * ================================================================ */
 
 const HOME_MAX = 8;
@@ -133,12 +135,6 @@ function homeRich(template, parts) {
   }
   if (last < template.length) out.push(template.slice(last));
   return out;
-}
-
-function homeStartOnboarding() {
-  const store = appStore();
-  if (store.getState().session.onboarding) return;
-  store.patchSession({ onboarding: { step: 0, data: {}, calMode: 'solar' } });
 }
 
 /* ---------------- 状态句、日期行、标签第三行 ---------------- */
@@ -297,6 +293,8 @@ function HomeView(props) {
   const want = m.skyPref && skyBundled && seen;
   const mode = !m.skyPref || !skyBundled ? 'none' : glState;
   const flat = mode === 'none';
+  /* 在引导问答里：用户点了「排一张新盘」，或者一张盘都没有 */
+  const onboarding = m.onboarding || !m.library.length;
 
   /* 聚焦的那张：session.focusId 指的盘；没有（或已经删了）就是最近的一张 */
   const focusRow = useMemo(function () {
@@ -311,7 +309,7 @@ function HomeView(props) {
   /* ---------- 动作 ---------- */
   const preview = function (id, fromSky) {
     if (hoverOff.current) { hoverOff.current(); hoverOff.current = null; }
-    if (menuId || m.onboarding || m.view !== 'home') return;
+    if (menuId || onboarding || m.view !== 'home') return;
     const apply = function () {
       hoverOff.current = null;
       setHoverId(id);
@@ -367,11 +365,6 @@ function HomeView(props) {
     setBirthId(entry.id);
   };
   live.current = { preview: preview, open: homeOpen, gestured: gestured };
-
-  /* ---------- 没有盘：画出来之前就进入引导问答 ---------- */
-  useLayoutEffect(function () {
-    if (m.view === 'home' && !m.library.length && !m.onboarding) homeStartOnboarding();
-  }, [m.view, m.library, m.onboarding]);
 
   /* ---------- 场景：要来、交回 ---------- */
   useEffect(function () {
@@ -495,7 +488,7 @@ function HomeView(props) {
   }, [mode]);
 
   /* ---------- 操作提示：动过一次或者 14 秒后收起，这次 DSH 运行里不再出现 ---------- */
-  const showGesture = mode === 'ok' && !m.onboarding && (!m.gestureSeen || gestureGone);
+  const showGesture = mode === 'ok' && !onboarding && (!m.gestureSeen || gestureGone);
   useEffect(function () {
     if (!showGesture || gestureGone) return undefined;
     setCoarse(homeMedia('(pointer: coarse)'));
@@ -525,8 +518,8 @@ function HomeView(props) {
   });
 
   let talk = null;
-  if (m.onboarding) {
-    talk = typeof OnboardingTalk === 'function' ? h(OnboardingTalk, { key: 'onboarding', tier: props.tier, onDone: onBorn }) : null;
+  if (onboarding) {
+    talk = h(OnboardingTalk, { key: 'onboarding', tier: props.tier, onDone: onBorn });
   } else if (focusRow) {
     const submit = function (ev) {
       if (ev && typeof ev.preventDefault === 'function') ev.preventDefault();
@@ -551,7 +544,7 @@ function HomeView(props) {
           className: 'zp-chip', type: 'button',
           onClick: function () { homeOpen(focusRow.id, { tab: 'decadal', panel: true, ask: t('homeChipDecade'), scope: true }); }
         }, t('homeChipDecade')),
-        h('button', { className: 'zp-chip', type: 'button', onClick: homeStartOnboarding }, t('homeChipNew')))
+        h('button', { className: 'zp-chip', type: 'button', onClick: function () { obStart(); } }, t('homeChipNew')))
     ];
   }
 
@@ -563,7 +556,7 @@ function HomeView(props) {
 
   return h('section', {
     className: 'zp-home', ref: sectionRef,
-    'data-busy': busy ? '' : undefined, 'data-onboarding': m.onboarding ? '' : undefined, 'data-nogl': flat ? '' : undefined
+    'data-busy': busy ? '' : undefined, 'data-onboarding': onboarding ? '' : undefined, 'data-nogl': flat ? '' : undefined
   },
   h('div', { className: 'zp-sky', 'data-region': 'HOME_SKY' },
     /* 画布的家：sky.js 把 canvas 放进来，React 不管它里面的东西 */

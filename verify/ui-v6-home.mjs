@@ -128,8 +128,10 @@ export default async function homeChecks(t) {
     env.rt.mount(env.h(env.Main), { passive: false });
     const tree = env.tree();
     eq('没有盘：没有标签', findByClass(tree, 'zp-ptag').length, 0);
-    ok('没有盘：画出来之前就进入引导问答（session.onboarding 有值，section 带 data-onboarding）', !!env.store.getState().session.onboarding && has(env.home(), 'data-onboarding'));
-    ok('没有盘时不显示平常的快捷项（引导问答接手）', findByClass(tree, 'zp-chip').every((n) => !['看今天', '这十年要注意什么'].includes(text(n))));
+    eq('没有盘：第一帧就是引导问答的第一问（section 带 data-onboarding；还没回答，session.onboarding 不用先写）',
+      [has(env.home(), 'data-onboarding'), text(findByClass(tree, 'zp-status')[0]), env.store.getState().session.onboarding], [true, '我是紫微师。先说说，怎么称呼你？', null]);
+    eq('没有盘时的快捷项是引导问答的：跳过、直接填表、看示例盘（没有"取消"）', findByClass(tree, 'zp-chip').map(text), ['跳过', '直接填表', '看示例盘']);
+    ok('日期行还在（没有盘时用示例盘取当天干支）', text(findByClass(tree, 'zp-date-line')[0]) === '11月19日 · 农历十月十一 · 丁酉日');
     env.rt.unmount();
   }
 
@@ -262,8 +264,45 @@ export default async function homeChecks(t) {
     store.goHome(); rt.flush(); timers.runAll(); rt.flush();
 
     rt.click(env.byText('排一张新盘'));
-    ok('排一张新盘：进入引导问答（session.onboarding 有值，section 带 data-onboarding）', !!store.getState().session.onboarding && has(env.home(), 'data-onboarding'));
+    eq('排一张新盘：进入引导问答（第 0 步，section 带 data-onboarding），有"取消"', [store.getState().session.onboarding && store.getState().session.onboarding.step, has(env.home(), 'data-onboarding'), !!env.byText('取消')], [0, true, true]);
     ok('引导问答时平常的快捷项收起', !env.byText('看今天'));
+    rt.click(env.byText('取消'));
+    eq('取消：回到平常的首页', [store.getState().session.onboarding, has(env.home(), 'data-onboarding'), !!env.byText('看今天')], [null, false, true]);
+    rt.unmount();
+  }
+
+  /* ================================================================ */
+  section('v6 首页：引导问答排出新盘');
+  {
+    const sky = fakeSky({ hold: ['birth'] });
+    const env = fresh({ sky });
+    const { store, rt, timers } = env;
+    env.mount(); timers.runAll(); rt.flush();
+    const say = (v) => { const r = env.loaded.win.ZWUi.onboarding.submit(v); rt.flush(); return r; };
+    say('小林'); say('1992年5月3日'); say('09:30'); say('男'); say('105.97');
+    eq('答完五项到确认步，确认句里说明校正后时辰变了', [store.getState().session.onboarding.step, /校正后是 08:37，落在辰时（钟表时间 09:30 是巳时）/.test(text(findByClass(env.home(), 'zp-status')[0]))], [5, true]);
+    const planetsBefore = sky.count('setPlanets');
+    rt.click(env.byText('排盘'));
+    const lib = store.getState().library;
+    eq('点排盘：命盘进库、引导结束、聚焦新盘；还在首页，界面收着', [lib.length, lib[0] && lib[0].name, store.getState().session.onboarding, store.getState().session.focusId === (lib[0] && lib[0].id), store.getState().session.view, has(env.home(), 'data-busy')],
+      [1, '小林', null, true, 'home', true]);
+    eq('先把新星加进场景，再放诞生动画', [sky.count('setPlanets') > planetsBefore, sky.last('setPlanets')[1].map((p) => p.id), sky.last('birth')[1], sky.names().lastIndexOf('setPlanets') < sky.names().lastIndexOf('birth')],
+      [true, [lib[0].id], lib[0].id, true]);
+    sky.cb.birth(); rt.flush();
+    const s = store.getState().session;
+    eq('动画放完：进入这张盘的本命，紫微师打开；没有发任何请求', [s.view, s.chartId, s.tab, s.panelOpen, env.pipe.calls.length], ['chart', lib[0].id, 'natal', true, 0]);
+    rt.unmount();
+  }
+  {
+    /* 没有 3D：排盘之后直接进命盘 */
+    const sky = fakeSky({ ok: false });
+    const env = fresh({ sky });
+    const { store, rt, timers } = env;
+    env.mount(); timers.runAll(); rt.flush();
+    const say = (v) => { env.loaded.win.ZWUi.onboarding.submit(v); rt.flush(); };
+    say('小林'); say('1992年5月3日'); say('09:30'); say('男'); say('跳过');
+    rt.click(env.byText('排盘'));
+    eq('没有 3D：排盘之后直接进入本命、紫微师打开', [store.getState().session.view, store.getState().session.tab, store.getState().session.panelOpen, sky.count('birth')], ['chart', 'natal', true, 0]);
     rt.unmount();
   }
 
@@ -306,9 +345,9 @@ export default async function homeChecks(t) {
     rt.click(item('删除')); rt.click(item('删除'));
     const toast = store.getState().session.toast;
     eq('确认删除：命盘库里没了，提示可以撤销', [store.getState().library.length, toast && toast.action && toast.action.label], [0, '撤销']);
-    ok('最后一张盘删掉之后，首页自动进入引导问答', !!store.getState().session.onboarding && has(env.home(), 'data-onboarding') && env.tags().length === 0);
+    eq('最后一张盘删掉之后，首页就是引导问答的第一问', [has(env.home(), 'data-onboarding'), env.tags().length, text(findByClass(env.home(), 'zp-status')[0])], [true, 0, '我是紫微师。先说说，怎么称呼你？']);
     toast.action.run(); rt.flush();
-    eq('撤销：盘回来了，标签也回来了', [store.getState().library.length, env.tags().length], [1, 1]);
+    eq('撤销：盘回来了，标签回来了，首页也回到平常的样子', [store.getState().library.length, env.tags().length, has(env.home(), 'data-onboarding'), !!env.byText('看今天')], [1, 1, false, true]);
     rt.unmount();
   }
 

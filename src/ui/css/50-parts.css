@@ -10,6 +10,11 @@
  *     div.zp-modal[role=dialog]      MODAL：设置
  *   .zp-menu                         顶栏「更多」、星球标签「⋯」弹出的小菜单
  *   .zp-toast[role=status]           TOAST
+ * 生辰表单（64-sheets）：form > div.zp-field > span（标签）+ 控件（input.zp-input / div.zp-seg / div.zp-field-row）
+ *   + p.zp-field-hint；闰月是 label.zp-check > input[type=checkbox] + span；口径在 details.zp-more > summary 里；
+ *   出错说明是页脚里的 p.zp-field-hint.zp-err。
+ * 全部命盘（64-sheets）：ul.zp-list > li.zp-list-item > button.zp-list-open（span.zp-list-name + span.zp-list-meta × 2）
+ *   + div.zp-menu-wrap；改名时 li > input.zp-input + button.zp-btn.zp-sm × 2；删除前 li > span.zp-list-ask + 两个按钮。
  * 同一时间只有一个模态浮层；Esc 关最上面的一层。
  * ================================================================ */
 .zp-overlay {
@@ -196,6 +201,17 @@
   line-height: 18px;
 }
 .zp-field-hint.zp-err { color: var(--zp-mu-ji) }
+/* 页脚里的出错说明（生辰表单）：占住按钮左边的空间 */
+.zp-dialog-f > .zp-field-hint { flex: 1; min-width: 0 }
+/* 勾选框 + 文字（生辰表单的闰月）：label.zp-check > input[type=checkbox] + span */
+.zp-check {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 12px;
+  white-space: nowrap;
+}
 .zp-more {
   margin: 4px 0 12px;
   padding: 8px 12px;
@@ -289,6 +305,9 @@
   white-space: nowrap;
 }
 .zp-list-empty { margin: 24px 0; color: var(--dsw-alias-label-tertiary); font-size: 13px; text-align: center }
+/* 一行就地改名（li > input.zp-input + 两个 button.zp-btn.zp-sm）、删除前问一句（li > span.zp-list-ask + 两个按钮） */
+.zp-list-item .zp-input { flex: 1; min-width: 0 }
+.zp-list-ask { flex: 1; min-width: 0; font-size: 13px }
 
 /* ---------------- 静态星图：没有 3D 时首页用它；报告页也用它（由 ZWReport.emblemSvg 生成，颜色走 --zr-*） ---------------- */
 .zp-emblem svg { display: block; width: 100%; height: 100% }
