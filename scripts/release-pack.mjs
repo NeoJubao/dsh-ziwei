@@ -122,7 +122,7 @@ function walkDir(relDir) {
       else out.push(rel);
     }
   };
-  walk(join(ROOT, relDir), '');
+  walk(join(ROOT, relDir), relDir);
   return out;
 }
 
