@@ -799,6 +799,21 @@ export default async function store(t) {
     eq('HTTP 500 → 错误提示', [st.getState().session.toast && st.getState().session.toast.text, st.getState().session.toast && st.getState().session.toast.error], [ZH.handoffFailed500, true]);
   }
 
+  section('v6 store：引导问答不赖在首页');
+  {
+    const { st } = mk();
+    const a = st.addChart(GOLDEN, '甲');
+    const ob = { step: 2, data: {}, calMode: 'solar', error: '' };
+    st.patchSession({ onboarding: ob });
+    st.openSample();
+    eq('引导做到一半去看示例盘：引导的进度留着', st.getState().session.onboarding, ob);
+    st.goHome();
+    st.openChart(a.id);
+    eq('引导做到一半打开了命盘库里的盘：引导到此为止', st.getState().session.onboarding, null);
+    st.goHome();
+    eq('回到首页不再停在引导问答里', [st.getState().session.view, st.getState().session.onboarding], ['home', null]);
+  }
+
   section('v6 store：模型选择');
   {
     eq('请求体：没选模型时不带 model 字段（旧 Host 和默认模型都不受影响）', 'model' in B({}), false);

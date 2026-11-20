@@ -525,6 +525,9 @@ function createStore(deps) {
     const patch = {
       view: 'chart', chartId: entry.id, tab: tab, stage: 'board', when: when, sel: selFor(chart, tab, h),
       pat: 0, pane: 'scope', focusId: entry.sample ? cur.focusId : entry.id, quote: null,
+      /* 引导问答做到一半去看了命盘库里的盘：引导到此为止，回首页时看到的是平时的首页。
+         看示例盘不算（空库时引导本来就常在，回来接着答） */
+      onboarding: entry.sample ? cur.onboarding : null,
       /* 换盘时带动作的提示（撤销、查看）作废，和 v5 一样 */
       toast: cur.toast && cur.toast.action ? null : cur.toast
     };
