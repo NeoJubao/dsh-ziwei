@@ -168,4 +168,34 @@ export default async function modelChecks(t) {
     eq('别的错误（长度上限）：只有「接着写」或「重试」，没有「换个模型」', btns().includes('换个模型'), false);
   }
   rt.unmount();
+
+  /* ================================================================ */
+  section('v6 模型选择：中档里从浮着的紫微师点开');
+  {
+    modelsReply = { status: 200, json: LIST };
+    const env2 = bootRuntime(t.client, { now: NOW, width: 900, reply: (url) => (url.indexOf('/ziwei/models') >= 0 ? modelsReply : null) });
+    if (env2.error) { ok('v6 bundle 装载（中档）', false, env2.error.message); return; }
+    const b = env2.store.addChart(GOLDEN, '乙');
+    env2.rt.mount(env2.h(env2.Main));
+    env2.timers.runAll(); env2.rt.flush();
+    env2.store.openChart(b.id, { panel: true });
+    env2.rt.flush();
+    const tr = () => env2.rt.tree();
+    const as = () => findByClass(tr(), 'zp-assistant')[0] || null;
+    eq('中档：紫微师是浮层（role=dialog）', [attr(findByClass(tr(), 'zp-root')[0], 'data-w'), attr(as(), 'role')], ['mid', 'dialog']);
+    env2.rt.click(findByClass(as(), 'zp-model')[0]);
+    env2.rt.flush();
+    eq('点模型按钮：同一时间只有一个模态层——紫微师先收起，模型弹层打开', [!!as(), !!findByClass(tr(), 'zp-modal')[0], env2.store.getState().session.panelOpen], [false, true, false]);
+    await settle(); env2.rt.flush();
+    env2.rt.click(findByClass(findByClass(tr(), 'zp-modal')[0], 'zp-opt')[1]);
+    env2.rt.flush();
+    eq('选完：弹层关掉，紫微师自己回来（不用再点一次「问紫微师」），模型按钮上是新选的',
+      [!!findByClass(tr(), 'zp-modal')[0], !!as(), env2.store.getState().session.panelOpen, text(findByClass(as(), 'zp-model')[0])], [false, true, true, 'deepseek-flash']);
+    env2.P.openModal('settings');
+    env2.rt.flush();
+    env2.P.closeLayers();
+    env2.rt.flush();
+    eq('别的弹层（设置）关掉之后不替人重开紫微师', [!!as(), env2.store.getState().session.panelOpen], [false, false]);
+    env2.rt.unmount();
+  }
 }

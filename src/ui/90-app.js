@@ -183,9 +183,21 @@ function ProApp(props) {
     return function () { cancel(); el.classList.remove('zp-enter'); };
   }, [app.view, app.chartId]);
 
-  /* 同一时间一个模态层：中、窄档里浮层打开时，浮着的紫微师先关上 */
+  /* 同一时间一个模态层：中、窄档里浮层打开时，浮着的紫微师先关上。
+     是从紫微师里点开模型选择的话，选完（或关掉）之后把紫微师再打开：人是来接着问的，不该回头再点一次 */
+  const reopenPanel = useRef(false);
   useLayoutEffect(function () {
-    if ((app.sheet || app.modal) && app.panel && tier !== 'wide') appStore().setPanel(false);
+    const store = appStore();
+    const layer = app.sheet || app.modal;
+    if (layer && app.panel && tier !== 'wide') {
+      reopenPanel.current = app.modal === 'model';
+      store.setPanel(false);
+      return;
+    }
+    if (!layer && reopenPanel.current) {
+      reopenPanel.current = false;
+      if (store.getState().session.view === 'chart') store.setPanel(true);
+    }
   }, [app.sheet, app.modal, app.panel, tier]);
 
   /* Esc：菜单和浮层自己先处理并停止传播；到这里时关掉还开着的浮层，再不然关中、窄档浮着的紫微师 */

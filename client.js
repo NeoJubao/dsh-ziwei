@@ -8908,7 +8908,7 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
  *       div.zp-msg.zp-bot > div.zp-md         回答（zp-md-h* / zp-md-p / zp-md-li / zp-md-quote / zp-md-table / zp-md-gap）
  *       div.zp-typing > span.zp-pulse + 文字  正在思考 / 正在写
  *     div.zp-as-error > span + button         出错：接着写 / 重试
- *     div.zp-suggest[role=group] > button     引导问题，常驻（一行，放不下横着滚）
+ *     div.zp-suggest[role=group] > button     引导问题，常驻（放不下就换行，不藏在横向滚动里）
  *     div.zp-quote > span + button            引用条
  *     form.zp-as-form > textarea + div.zp-as-tools > button.zp-model（模型）+ span.zp-grow + button.zp-send（生成中换成停止，加 zp-stop）
  *     div.zp-as-foot                          免责声明
@@ -9089,13 +9089,9 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
 .zp-suggest {
   flex: none;
   display: flex;
+  flex-wrap: wrap;
   gap: 6px;
   padding: 0 12px 8px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  /* 右边淡出：还有没露出来的问题时看得出可以横着滚 */
-  -webkit-mask-image: linear-gradient(90deg, var(--zp-orb-lo) calc(100% - 24px), transparent);
-  mask-image: linear-gradient(90deg, var(--zp-orb-lo) calc(100% - 24px), transparent);
 }
 .zp-suggest button {
   flex: none;
@@ -9108,7 +9104,6 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   white-space: nowrap;
   transition: background-color 120ms ease, color 120ms ease;
 }
-.zp-suggest button:last-child { margin-right: 16px }
 .zp-root .zp-suggest button { color: var(--zp-ink-2) }
 .zp-root .zp-suggest button:hover { background: var(--zp-hover); color: var(--zp-ink) }
 .zp-suggest button:disabled { opacity: 0.55 }
@@ -13680,9 +13675,21 @@ function ProApp(props) {
     return function () { cancel(); el.classList.remove('zp-enter'); };
   }, [app.view, app.chartId]);
 
-  /* 同一时间一个模态层：中、窄档里浮层打开时，浮着的紫微师先关上 */
+  /* 同一时间一个模态层：中、窄档里浮层打开时，浮着的紫微师先关上。
+     是从紫微师里点开模型选择的话，选完（或关掉）之后把紫微师再打开：人是来接着问的，不该回头再点一次 */
+  const reopenPanel = useRef(false);
   useLayoutEffect(function () {
-    if ((app.sheet || app.modal) && app.panel && tier !== 'wide') appStore().setPanel(false);
+    const store = appStore();
+    const layer = app.sheet || app.modal;
+    if (layer && app.panel && tier !== 'wide') {
+      reopenPanel.current = app.modal === 'model';
+      store.setPanel(false);
+      return;
+    }
+    if (!layer && reopenPanel.current) {
+      reopenPanel.current = false;
+      if (store.getState().session.view === 'chart') store.setPanel(true);
+    }
   }, [app.sheet, app.modal, app.panel, tier]);
 
   /* Esc：菜单和浮层自己先处理并停止传播；到这里时关掉还开着的浮层，再不然关中、窄档浮着的紫微师 */
