@@ -27,7 +27,7 @@ Private vulnerability reporting 已在本仓库开启。如果 GitHub 入口暂�
   注册 HTTP 路由、调用 `llm` / `tools` / `systemPrompt` / `webServer` 服务。
   DSH 本身是 developer preview，并明确会有破坏性变更；插件的权限上限 = 用户运行 DSH 的权限上限。
 - **路由是本机 Web 服务的一部分**（`/ziwei/interpret`、`/ziwei/context`、`/ziwei/handoff`、
-  `/ziwei/workspace`），只做方法/Content-Type/来源等本地守卫，**不是面向公网的服务**；
+  `/ziwei/models`、`/ziwei/version`、`/ziwei/workspace`），只做方法/Content-Type/来源等本地守卫，**不是面向公网的服务**；
   不要把这些路由反向代理到公网。
 - **排盘数据包含个人敏感信息**：出生日期、钟表时间、出生地经度。数据流向：
   浏览器面板 → 本机 Host 路由 → 会话上下文 / 用户已配置的模型提供方。

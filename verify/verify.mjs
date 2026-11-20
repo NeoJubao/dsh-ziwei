@@ -114,6 +114,12 @@ ok('buildRequest(brief): 历史 + 追问都进 messages',
   reqBrief.messages.length === 4 && reqBrief.messages[0].role === 'user' && reqBrief.messages[1].role === 'user' && reqBrief.messages[3].content === '重点讲事业');
 ok('buildRequest(brief): 有具体问题时走定向问答，不再套固定五段式',
   /定向问答/.test(reqBrief.system) && /直接回答用户这一次的问题/.test(reqBrief.system) && !/一、命格总纲/.test(reqBrief.system));
+/* 2026-11-20 真机：一句「你好」换来 0 字正文。定向问答的规则要说清寒暄怎么回、每次都要写出正文、篇幅跟着问题走 */
+ok('定向问答的规则：寒暄用一两句回应、不套结构；每次都要写出正文；篇幅跟着问题走，展开分析才写 800–1200 字',
+  /寒暄、道谢或闲聊/.test(reqBrief.system) && /一两句话自然回应/.test(reqBrief.system) && /不能只思考不作答/.test(reqBrief.system) &&
+  /篇幅跟着问题走/.test(reqBrief.system) && /800–1200 字/.test(reqBrief.system) && !/全文 800–1200 字/.test(reqBrief.system));
+ok('速览和报告的提示词没有被这次改动带到（寒暄规则只在定向问答里）',
+  !/寒暄/.test(core.buildRequest({ chartText: "X", mode: "brief" }).system) && !/寒暄/.test(core.buildRequest({ chartText: "X", mode: "report" }).system));
 /* “这 10 年大运”类问题：必须给全 12 段大限 + 当前定位，并进入聚焦回答 */
 {
   const ch2 = core.paipan({ calendar: 'lunar', date: '1990-05-23', time: '15:30', gender: 'male' }).chart;

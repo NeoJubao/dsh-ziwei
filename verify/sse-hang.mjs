@@ -280,6 +280,92 @@ const withBudget = (ms) => ({ overallMs: ms });
   ok('思考之后正常收尾仍是 done', /event: done/.test(res.body));
 }
 
+/* ---- 场景 9–12: 模型只思考、不作答（2026-11-20 真机：deepseek-flash 对一句「你好」思考 408 字、正文 0 字） ----
+   正常结束但正文为空时，Host 在同一个请求里自动再问一次（最多一次）：末尾加一句「请直接给出回答」，
+   模型有思考档位时用最低一档。第二次还是空才报 kind: 'empty'。 */
+const scripted = (runs, info) => {
+  const calls = [];
+  const llm = {
+    stream(opts) {
+      const chunks = runs[Math.min(calls.length, runs.length - 1)];
+      calls.push(opts);
+      let i = 0;
+      return { [Symbol.asyncIterator]() { return { next: () => Promise.resolve(i < chunks.length ? { done: false, value: chunks[i++] } : { done: true }) }; } };
+    }
+  };
+  if (info !== undefined) llm.resolveModelInfo = async () => info;
+  const ctx = {
+    get(name) {
+      if (name === 'llm') return llm;
+      if (name === 'agentDefaultModel') return { currentSelection: () => ({ provider: 'p', model: 'm' }) };
+      return undefined;
+    }
+  };
+  return { ctx, calls };
+};
+const THINK_ONLY = [{ type: 'reasoning-delta', index: 0, text: '用户只是打招呼' }, { type: 'finish', reason: { kind: 'stop' } }];
+const ANSWER = [{ type: 'text-delta', index: 0, text: '你好，想看哪方面？' }, { type: 'finish', reason: { kind: 'stop' } }];
+const lastText = (opts) => { const m = opts.messages[opts.messages.length - 1]; return m && m.content && m.content[0] ? m.content[0].text : ''; };
+{
+  const { ctx, calls } = scripted([THINK_ONLY, ANSWER], { defaultMaxTokens: 4096, reasoning: { efforts: [{ id: 'low', name: 'Low' }, { id: 'high', name: 'High' }] } });
+  const res = makeRes();
+  await withTimeout(handleInterpret(ctx, core, makeReq({ chartText: '命盘X', mode: 'brief', question: '你好' }), res, withBudget(5000)), 8000, '空答重试');
+  ok('只思考不作答: 自动再问一次（共 2 次模型调用）', calls.length === 2, 'calls=' + calls.length);
+  ok('只思考不作答: 第二次的回答以 done 收尾，没有 error 帧', /event: done/.test(res.body) && /你好，想看哪方面/.test(res.body) && !/event: error/.test(res.body), res.body.slice(-300));
+  ok('只思考不作答: 两次之间发一个 retry 帧（旧面板不认识会跳过）', /event: retry/.test(res.body) && res.body.indexOf('event: retry') < res.body.indexOf('event: delta'));
+  ok('第一次不带思考档位，第二次用最低一档', calls[0].reasoningEffort === undefined && calls[1] && calls[1].reasoningEffort === 'low', JSON.stringify([calls[0].reasoningEffort, calls[1] && calls[1].reasoningEffort]));
+  ok('第二次在末尾加一句「请直接给出回答」，前面的消息原样保留',
+    !!calls[1] && calls[1].messages.length === calls[0].messages.length + 1 && /请直接给出回答/.test(lastText(calls[1])) &&
+    JSON.stringify(calls[1].messages.slice(0, -1)) === JSON.stringify(calls[0].messages), calls[1] ? lastText(calls[1]) : '');
+  ok('done 帧里的正文只有第二次的回答', /"text":"你好，想看哪方面？"/.test(res.body));
+}
+{
+  const { ctx, calls } = scripted([THINK_ONLY, ANSWER]);   /* 没有 resolveModelInfo：不知道档位 */
+  const res = makeRes();
+  await withTimeout(handleInterpret(ctx, core, makeReq({ chartText: '命盘X', mode: 'brief', question: '你好' }), res, withBudget(5000)), 8000, '空答重试（无档位）');
+  ok('模型没有档位信息: 照样重试，第二次不带 reasoningEffort', calls.length === 2 && !('reasoningEffort' in calls[1]) && /event: done/.test(res.body), JSON.stringify(Object.keys(calls[1] || {})));
+}
+{
+  const { ctx, calls } = scripted([THINK_ONLY, THINK_ONLY, ANSWER]);
+  const res = makeRes();
+  await withTimeout(handleInterpret(ctx, core, makeReq({ chartText: '命盘X', mode: 'brief', question: '你好' }), res, withBudget(5000)), 8000, '两次都空');
+  ok('两次都空: 只重试一次（不问第三次）', calls.length === 2, 'calls=' + calls.length);
+  ok('两次都空: 报 kind: empty，说明模型只做了思考', /event: error/.test(res.body) && /"kind":"empty"/.test(res.body) && /只做了思考/.test(res.body) && !/event: done/.test(res.body), res.body.slice(-300));
+  ok('两次都空: 带上重试过的次数', /"attempts":2/.test(res.body));
+}
+{
+  const NOTHING = [{ type: 'finish', reason: { kind: 'stop' } }];
+  const { ctx, calls } = scripted([NOTHING, NOTHING]);
+  const res = makeRes();
+  await withTimeout(handleInterpret(ctx, core, makeReq(BODY), res, withBudget(5000)), 8000, '什么都没返回');
+  ok('连思考都没有的空答: 也重试一次，仍然空就报「模型返回为空」', calls.length === 2 && /"kind":"empty"/.test(res.body) && /模型返回为空/.test(res.body), res.body.slice(-200));
+}
+{
+  /* 写了一半就撞上长度上限、流意外结束：不是空答，不重试 */
+  const CAPPED_EMPTY = [{ type: 'reasoning-delta', index: 0, text: '想了很久' }, { type: 'finish', reason: { kind: 'max-tokens' } }];
+  const { ctx, calls } = scripted([CAPPED_EMPTY, ANSWER]);
+  const res = makeRes();
+  await withTimeout(handleInterpret(ctx, core, makeReq(BODY), res, withBudget(5000)), 8000, '上限不重试');
+  ok('思考把长度用完（max-tokens）: 不重试，照旧报长度上限', calls.length === 1 && /长度上限/.test(res.body), 'calls=' + calls.length);
+}
+
+/* ---- 场景 13: 请求体可以指定模型（面板的模型选择） ---- */
+{
+  const run = async (model) => {
+    const { ctx, calls } = scripted([ANSWER]);
+    const res = makeRes();
+    await withTimeout(handleInterpret(ctx, core, makeReq(Object.assign({ chartText: '命盘X', mode: 'brief' }, model === undefined ? {} : { model })), res, withBudget(5000)), 8000, '指定模型');
+    return { used: calls[0] ? calls[0].provider + '/' + calls[0].model : '', body: res.body };
+  };
+  const a = await run({ provider: 'px', model: 'mx' });
+  ok('请求体带 model: { provider, model } → 用它调用模型，start 帧里也是它', a.used === 'px/mx' && /"provider":"px","model":"mx"/.test(a.body), a.used + ' ' + a.body.slice(0, 120));
+  ok('不带 model → 用 DSH 的默认模型', (await run(undefined)).used === 'p/m');
+  const bad = [{ provider: 'px' }, { model: 'mx' }, { provider: 1, model: 2 }, { provider: '', model: 'mx' }, 'px/mx', null, { provider: 'x'.repeat(201), model: 'mx' }];
+  const got = [];
+  for (const b of bad) got.push((await run(b)).used);
+  ok('只给一半、不是字符串、空串、超过 200 字：忽略，用默认模型', got.every((u) => u === 'p/m'), JSON.stringify(got));
+}
+
 console.log(`\n${'='.repeat(52)}`);
 console.log(`SSE 挂起自检: ${pass} 通过, ${fail} 失败`);
 console.log('='.repeat(52));

@@ -2,7 +2,7 @@
  * verify/routes-auth.mjs — 路由方法 / 鉴权 / JSON Content-Type 守卫 (A3)
  *
  * 覆盖:
- *  - 5 条路由注册齐全；
+ *  - 6 条路由注册齐全（含 2026-11-20 加的 /ziwei/models）；
  *  - 有 connection 服务: connection.admit 拒绝 → 401/403；GET 写路由 → 405；非 JSON POST → 415；
  *  - 无 connection（非 Web 组合）: Host / Origin / sec-fetch-site fallback fence + 只 warn 一次；
  *  - 合法请求进入 handler 且**不触发 LLM**（/ziwei/interpret 用空命盘，在 llm.stream 之前 400）。
@@ -72,6 +72,12 @@ function makeCtx({ connection = null, omit = [] } = {}) {
         stream: () => {
           llmCalls.count++;
           return (async function* () { yield { type: 'finish', reason: { kind: 'stop' } }; })();
+        },
+        listProviders: () => [{ id: 'deepseek-official', name: 'DeepSeek' }, { id: 'empty-one', name: 'Empty' }, { id: 'broken', name: 'Broken' }],
+        listModels: async (id) => {
+          if (id === 'broken') throw new Error('provider down');
+          if (id === 'empty-one') return [];
+          return [{ provider: id, id: 'deepseek-flash', name: 'DeepSeek Flash' }, { provider: id, id: 'deepseek-pro', name: '' }];
         }
       };
       if (name === 'agentDefaultModel') return { currentSelection: () => ({ provider: 'test', model: 'test' }) };
@@ -88,7 +94,7 @@ function makeCtx({ connection = null, omit = [] } = {}) {
   plugin.apply(ctx);
   return { routes, logs, llmCalls, injections, stats };
 }
-const ROUTES = ['/ziwei/interpret', '/ziwei/context', '/ziwei/handoff', '/ziwei/workspace', '/ziwei/version'];
+const ROUTES = ['/ziwei/interpret', '/ziwei/context', '/ziwei/handoff', '/ziwei/workspace', '/ziwei/version', '/ziwei/models'];
 
 /* ================================================================== *
  * 1. 启动健康日志
@@ -129,7 +135,7 @@ const connection = {
   }
 };
 const { routes, llmCalls } = makeCtx({ connection });
-ok('注册 5 条 ziwei 路由', ROUTES.every((p) => routes.has(p)), [...routes.keys()].join(','));
+ok('注册 6 条 ziwei 路由（含模型列表）', ROUTES.every((p) => routes.has(p)), [...routes.keys()].join(','));
 
 let r = await call(routes, '/ziwei/interpret', { method: 'POST', headers: { 'content-type': 'application/json' } });
 ok('无 cookie POST /ziwei/interpret → 401', r.statusCode === 401 && /未授权/.test(r.body), `${r.statusCode} ${r.body}`);
@@ -219,6 +225,22 @@ r = await call(fbRoutes, '/ziwei/context', {
   body: '{}'
 });
 ok('同源 Origin + loopback Host 放行进入 handler（空盘 → 400）', r.statusCode === 400 && /命盘内容为空/.test(r.body), `${r.statusCode} ${r.body}`);
+
+/* 模型列表（面板的模型选择用）：GET，只读；列不出模型的提供方不出现 */
+r = await call(fbRoutes, '/ziwei/models', { method: 'GET', headers: { host: '127.0.0.1:50922' }, body: '' });
+{
+  let j = null;
+  try { j = JSON.parse(r.body); } catch (e) { j = null; }
+  ok('GET /ziwei/models → 200，{ ok, providers, default }', r.statusCode === 200 && !!j && j.ok === true && Array.isArray(j.providers), `${r.statusCode} ${r.body}`);
+  ok('只列出有模型的提供方；模型没有名字时用 id；出错的提供方跳过，不影响别的',
+    !!j && JSON.stringify(j.providers) === JSON.stringify([{ id: 'deepseek-official', name: 'DeepSeek', models: [{ id: 'deepseek-flash', name: 'DeepSeek Flash' }, { id: 'deepseek-pro', name: 'deepseek-pro' }] }]),
+    j ? JSON.stringify(j.providers) : r.body);
+  ok('default 是 DSH 当前的默认模型', !!j && JSON.stringify(j.default) === JSON.stringify({ provider: 'test', model: 'test' }), j ? JSON.stringify(j.default) : '');
+}
+r = await call(fbRoutes, '/ziwei/models', { method: 'POST', headers: { host: '127.0.0.1:50922', 'content-type': 'application/json' }, body: '{}' });
+ok('POST /ziwei/models → 405', r.statusCode === 405, `${r.statusCode} ${r.body}`);
+r = await call(fbRoutes, '/ziwei/models', { method: 'GET', headers: { host: 'evil.example:8080' }, body: '' });
+ok('非 loopback Host 读模型列表 → 403', r.statusCode === 403, `${r.statusCode} ${r.body}`);
 
 const fallbackWarns = fbLogs.filter((l) => l.level === 'warn' && /connection/.test(l.msg));
 ok('fallback 警告只 warn 一次', fallbackWarns.length === 1, `warn=${fallbackWarns.length} ${JSON.stringify(fallbackWarns)}`);

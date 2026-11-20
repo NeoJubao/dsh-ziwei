@@ -220,7 +220,7 @@ function makeGuard(ctx) {
  * 插件本体
  * ------------------------------------------------------------------ */
 /* 供 verify/sse-hang.mjs 直接驱动 SSE 核心（含可注入超时预算） */
-export { handleInterpret };
+export { handleInterpret, listModelChoices, pickModelOverride };
 
 export function apply(ctx) {
   diag('=== apply start ===');
@@ -564,6 +564,27 @@ export function apply(ctx) {
       }
     }));
 
+    /* 面板的模型选择：已接入的提供方、它们的模型、DSH 当前的默认模型。只读，不发模型请求 */
+    disposers.push(ws.register({
+      kind: 'exact',
+      path: '/ziwei/models',
+      handler: async (req, res) => {
+        if (!guard(req, res, { methods: ['GET'] })) return;
+        const json = (status, payload) => {
+          try {
+            res.statusCode = status;
+            res.setHeader('Content-Type', 'application/json; charset=utf-8');
+            res.end(JSON.stringify(payload));
+          } catch (e) { /* 已发送 */ }
+        };
+        try {
+          json(200, await listModelChoices(routeCtx));
+        } catch (e) {
+          json(500, { ok: false, providers: [], default: null, reason: String((e && e.message) || e) });
+        }
+      }
+    }));
+
     /* 自检/排查用：当前工作区目标 */
     disposers.push(ws.register({
       kind: 'exact',
@@ -728,6 +749,55 @@ async function readBody(req, limitBytes = 300000) {
   return Buffer.concat(chunks).toString('utf8');
 }
 
+/* 空答重试时加在消息末尾的那句话（给模型看的，固定用中文） */
+const EMPTY_RETRY_NUDGE = '（上一次你只做了思考，没有写出回答。请直接给出回答正文。）';
+
+/** 请求体里的模型选择：{ provider, model } 两个都是 1–200 字的字符串才算数，否则返回 null。 */
+function pickModelOverride(v) {
+  if (!v || typeof v !== 'object') return null;
+  const pick = (x) => (typeof x === 'string' && x.trim() && x.length <= 200 ? x.trim() : '');
+  const provider = pick(v.provider);
+  const model = pick(v.model);
+  return provider && model ? { provider, model } : null;
+}
+
+/** 模型公布的最低思考档位的 id；没有档位信息时是 undefined（请求里就不带这个字段）。 */
+function lowestReasoningEffort(info) {
+  const efforts = info && info.reasoning && Array.isArray(info.reasoning.efforts) ? info.reasoning.efforts : [];
+  const first = efforts[0];
+  return first && first.id !== undefined && first.id !== null && first.id !== '' ? first.id : undefined;
+}
+
+/**
+ * 面板的模型选择器要的列表：DSH 里已接入的提供方和它们公布的模型，加上 DSH 当前的默认模型。
+ * 列不出模型（空、出错、4 秒没回）的提供方不出现；llm 服务不可用时是空列表。
+ */
+async function listModelChoices(ctx) {
+  let llm = null;
+  try { llm = ctx.get('llm'); } catch (e) { llm = null; }
+  let providers = [];
+  if (llm && typeof llm.listProviders === 'function' && typeof llm.listModels === 'function') {
+    const list = await Promise.resolve(llm.listProviders());
+    const slow = (ms) => new Promise((_, reject) => { const t = setTimeout(() => reject(new Error('timeout')), ms); if (typeof t.unref === 'function') t.unref(); });
+    const settled = await Promise.allSettled((Array.isArray(list) ? list : []).map(async (p) => {
+      const models = await Promise.race([Promise.resolve(llm.listModels(p.id)), slow(4000)]);
+      return {
+        id: String(p.id),
+        name: String(p.name || p.id),
+        models: (Array.isArray(models) ? models : []).filter((m) => m && m.id).map((m) => ({ id: String(m.id), name: String(m.name || m.id) }))
+      };
+    }));
+    providers = settled.filter((r) => r.status === 'fulfilled').map((r) => r.value).filter((p) => p.models.length);
+  }
+  let def = null;
+  try {
+    const sel = ctx.get('agentDefaultModel');
+    const cur = sel && typeof sel.currentSelection === 'function' ? sel.currentSelection() : null;
+    if (cur && cur.provider && cur.model) def = { provider: String(cur.provider), model: String(cur.model) };
+  } catch (e) { def = null; }
+  return { ok: true, providers, default: def };
+}
+
 /**
  * @param {object} [budget] 可注入的超时预算（毫秒），仅用于测试；省略时按模式取默认值。
  */
@@ -768,6 +838,9 @@ async function handleInterpret(ctx, core, req, res, budget) {
     if (cur && cur.provider) provider = cur.provider;
     if (cur && cur.model) model = cur.model;
   } catch (e) { /* 用默认值 */ }
+  /* 面板的模型选择：请求体带 model: { provider, model } 就用它；只给一半、不是字符串、超长都忽略 */
+  const override = pickModelOverride(payload.model);
+  if (override) { provider = override.provider; model = override.model; }
 
   const mode = payload.mode === 'report' ? 'report' : 'brief';
   const built = core.buildRequest({
@@ -825,6 +898,7 @@ async function handleInterpret(ctx, core, req, res, budget) {
   const plan = BUDGETS[mode] || BUDGETS.brief;
   let maxTokens = plan.maxTokens;
   const overallMs = (budget && budget.overallMs) || plan.overallMs;
+  let modelInfo = null;
   try {
     if (typeof llm.resolveModelInfo === 'function') {
       /* 目录查询只用来封顶；它若挂住不能让整个请求没有响应头，2.5s 内查不到就按档位预算走 */
@@ -835,6 +909,7 @@ async function handleInterpret(ctx, core, req, res, budget) {
           if (typeof t.unref === 'function') t.unref();
         })
       ]);
+      modelInfo = info && typeof info === 'object' ? info : null;
       if (info && typeof info.defaultMaxTokens === 'number' && info.defaultMaxTokens > 0) {
         maxTokens = Math.min(maxTokens, info.defaultMaxTokens);
       }
@@ -869,8 +944,18 @@ async function handleInterpret(ctx, core, req, res, budget) {
   /* 没有 await 它的地方也要吞掉 rejection，避免 unhandledRejection */
   abortRacer.catch(() => {});
 
-  try {
-    let stream = llm.stream({
+  let attempts = 0;
+  /* 问一次模型，把增量流给面板。结束时 finishKind / truncated / usage 已经更新；
+     出错（含上游报 error、被中断）直接抛出，由外面的 catch 统一收尾。 */
+  const runAttempt = async (extra) => {
+    attempts += 1;
+    finishKind = '';
+    /* 上一次的迭代器先放掉（不 await，理由见 finally 里的说明） */
+    if (iterator && typeof iterator.return === 'function') {
+      try { Promise.resolve(iterator.return()).catch(() => {}); } catch (e) { /* ignore */ }
+    }
+    iterator = null;
+    let stream = llm.stream(Object.assign({
       provider,
       model,
       messages,
@@ -878,7 +963,7 @@ async function handleInterpret(ctx, core, req, res, budget) {
       temperature: mode === 'report' ? 0.7 : 0.6,
       maxTokens,
       signal: controller.signal
-    });
+    }, extra || null));
     /* 真实 dsh-llm 是同步返回 AsyncIterable；若某层中间件返回 Promise，这里兜一下 */
     if (stream && typeof stream.then === 'function') stream = await stream;
     iterator = stream && typeof stream[Symbol.asyncIterator] === 'function' ? stream[Symbol.asyncIterator]() : null;
@@ -919,9 +1004,26 @@ async function handleInterpret(ctx, core, req, res, budget) {
         break;
       }
     }
+  };
+
+  try {
+    await runAttempt(null);
+
+    /* 模型正常结束却没有正文（2026-11-20 真机：deepseek-flash 对一句「你好」思考 408 字、正文 0 字）。
+       在同一个请求里再问一次，最多一次：末尾加一句「请直接给出回答」，模型有思考档位时用最低一档。
+       撞上长度上限、超时、被停止、流意外结束都不算空答，走各自原来的分支。 */
+    if (!out.trim() && finishKind && finishKind !== 'max-tokens' && !truncated && !timedOut && !controller.signal.aborted) {
+      const extra = {
+        messages: messages.concat([toMessage({ role: 'user', content: EMPTY_RETRY_NUDGE })])
+      };
+      const effort = lowestReasoningEffort(modelInfo);
+      if (effort !== undefined) extra.reasoningEffort = effort;
+      sseSend('retry', { reason: 'empty', attempt: 2, thinkingChars: thinkChars });
+      await runAttempt(extra);
+    }
 
     const elapsedMs = Date.now() - startedAt;
-    const stats = { chars: out.length, thinkingChars: thinkChars, elapsedMs, usage: usage || null };
+    const stats = { chars: out.length, thinkingChars: thinkChars, elapsedMs, usage: usage || null, attempts };
     diagInterpret(`interpret mode=${mode} model=${provider}/${model} maxTokens=${maxTokens} finish=${finishKind || '(none)'} timedOut=${timedOut} ${JSON.stringify(stats)}`);
 
     if (timedOut) {
@@ -938,7 +1040,9 @@ async function handleInterpret(ctx, core, req, res, budget) {
         : '模型返回为空';
       sseSend('error', Object.assign({ reason, kind: 'stream-closed', canContinue: !!out.trim() }, stats));
     } else if (!out.trim()) {
-      sseSend('error', Object.assign({ reason: '模型返回为空', kind: 'empty' }, stats));
+      /* 重试过一次还是空。只思考不作答和什么都没返回分开说，面板据 kind 给「重试 / 换个模型」 */
+      const reason = thinkChars > 0 ? '模型只做了思考，没有给出回答' : '模型返回为空';
+      sseSend('error', Object.assign({ reason, kind: 'empty' }, stats));
     } else {
       sseSend('done', Object.assign({ text: out, provider, model, mode, finish: finishKind }, stats));
     }

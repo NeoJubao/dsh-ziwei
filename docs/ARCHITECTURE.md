@@ -16,6 +16,8 @@
 │    ├─ /ziwei/interpret   SSE 解读     ┐                               │
 │    ├─ /ziwei/context     存盘上下文   ├─ ctx.inject(['webServer','llm'])│
 │    ├─ /ziwei/handoff     开会话       │  按需注册（可选服务）           │
+│    ├─ /ziwei/models      模型列表     │                               │
+│    ├─ /ziwei/version     检查更新     │                               │
 │    └─ /ziwei/workspace   诊断         ┘                               │
 │         │                                                             │
 │         └─ node:vm 沙箱加载 engine-built.js + src/ziwei-core.js        │
@@ -82,7 +84,9 @@
 
 | 路径 | 方法 | 作用 | 依赖 |
 | --- | --- | --- | --- |
-| `/ziwei/interpret` | POST（SSE） | 面板内解读：拼请求 → `llm` 服务流式输出 → `start/delta/thinking/done/error` 事件 | `webServer`, `llm` |
+| `/ziwei/interpret` | POST（SSE） | 面板内解读：拼请求 → `llm` 服务流式输出 → `start/delta/thinking/done/error` 事件。请求体可以带 `model: { provider, model }` 指定模型，不带就用 DSH 的默认模型。模型正常结束但正文为空时在同一个请求里自动再问一次（发一个 `retry` 事件，最多一次） | `webServer`, `llm` |
+| `/ziwei/models` | GET | 面板的模型选择：已接入的提供方、它们公布的模型、DSH 当前的默认模型。只读，不发模型请求 | `webServer`, `llm` |
+| `/ziwei/version` | GET | 手动检查更新：只在用户点击时请求一次 npm registry | `webServer` |
 | `/ziwei/context` | POST (JSON) | 把命盘文本存进进程内 `lastContext`，供 `ziwei_context` 取用 | `webServer` |
 | `/ziwei/handoff` | POST (JSON) | 存上下文 + 用 `sessionController.create/prompt` 真开新会话并灌入命盘 | `webServer`, `sessionController`（可选） |
 | `/ziwei/workspace` | GET | 排查用：返回当前工作区目标 | `webServer` |
