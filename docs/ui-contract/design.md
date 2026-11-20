@@ -28,7 +28,10 @@
 - 星名、四化用 `var(--zp-…)` 引用，不在 JS 里写颜色值；换主题不需要重新渲染。
 - 首页的毛玻璃底和文字光晕用 `color-mix()` 从 `--zp-bg` 派生。
 - 颜色不是唯一的信息载体：四化有字（禄权科忌），格局吉凶有字。
-- 焦点框的颜色和粗细由宿主的 `:focus-visible` 给，面板只补 `outline-style` 和 `outline-offset`。
+- 焦点只有一处高亮：
+  - 键盘走到按钮、页签、宫格时画 `2px solid var(--zp-zi)`、偏移 2px 的焦点框。鼠标点击时宿主把非输入控件的 `outline-color` 设成透明（`html[data-input-modality="pointer"]` 那条规则权重更高），面板不覆盖它。
+  - 文字输入框（`input`、`textarea`、`select`）不画 `outline`：由它自己（`.zp-input`）或它外面的圆角容器（`.zp-ask`、`.zp-as-form`，用 `:focus-within`）把描边换成 `--zp-zi`，再加一圈 3px 的淡光晕。
+  - 通用焦点框要写全 `outline`，不要只补 `outline-style`：只补样式时，输入框自己的 `outline: none` 会把宽度和颜色重置成 `medium` / `currentColor`，聚焦时在容器里面再画一圈方框（2026-11-20 真机上的两层框）。
 
 ---
 

@@ -46,8 +46,6 @@
   --zp-orb-hi: #ffffff;
   --zp-orb-lo: #0b0b14;
   --zp-font-serif: "Songti SC", "STSong", "SimSun", "Noto Serif SC", serif;
-  /* 焦点框：宿主在鼠标点击时把非输入控件的 --dsw-focus-ring-color 设成透明，所以先读它 */
-  --zp-ring: var(--dsw-focus-ring-color, var(--zp-zi));
   position: relative;
   height: 100%;
   overflow: hidden;

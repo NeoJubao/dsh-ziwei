@@ -17,7 +17,7 @@ v6 的底色、文字色、描边、主按钮、遮罩都读宿主的 `--dsw-ali
 
 - 根节点带 `data-theme="dark" | "light"`。浅色值写在 `.zp-root`，深色值写在 `.zp-root[data-theme="dark"]`。
 - 偏好 `ziwei-pro.theme`：`dark`（默认）、`light`、`auto`。`auto` 时由脚本读 `body[data-ds-dark-theme]` 解析成前两者之一，并监听它的变化。
-- 样式表里不再出现 `--dsw-alias-*`，也不再用 `body[data-ds-dark-theme]` 选择器。宿主变量只保留字体族（`--dsh-font-family-text-default`）、窗口避让（`--dsh-frame-*`）和焦点框颜色（`--dsw-focus-ring-color`）。
+- 样式表里不再出现 `--dsw-alias-*`，也不再用 `body[data-ds-dark-theme]` 选择器。宿主变量只保留字体族（`--dsh-font-family-text-default`）和窗口避让（`--dsh-frame-*`）。
 - 深色是带一点靛色的夜空底，和首页 3D 场景的夜空接得上；浅色是浅灰底加白卡片。
 
 ## 后果

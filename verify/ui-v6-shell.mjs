@@ -196,6 +196,16 @@ export default async function shell(t) {
   ok('.zp-root 有 isolation: isolate', /\.zp-root \{[\s\S]{0,2000}?isolation: isolate;/.test(client));
   ok(':where(.zp-root) button { color: inherit }', /:where\(\.zp-root\) button \{[^}]*color:\s*inherit/.test(client));
   ok('data-dsh-automatic-focus 的容器不画焦点框', /\.zp-root \[data-dsh-automatic-focus\]:focus \{[^}]*outline:\s*none/.test(client));
+  /* 2026-11-20 真机上的两层框：通用焦点框的权重（0,2,0）高过各输入框自己的 outline: none（0,1,1），
+     输入框在圆角容器的描边里面又画了一圈方框。现在通用规则写全 outline，输入框另有一条权重更高的规则 */
+  ok('通用焦点框：2px 紫微色、偏移 2px（写全 outline，不只补 outline-style）',
+    /\.zp-root :focus-visible \{ outline: 2px solid var\(--zp-zi\); outline-offset: 2px \}/.test(client) && !/\.zp-root :focus-visible \{ outline-style/.test(client));
+  ok('文字输入框不画 outline（input / textarea / select 各一条，权重高过通用焦点框）',
+    /\.zp-root input:focus-visible, \.zp-root textarea:focus-visible, \.zp-root select:focus-visible \{ outline: none \}/.test(client));
+  ok('圆角输入区和输入框用描边变色加光晕表示聚焦（首页提问、紫微师输入、表单输入框）',
+    /\.zp-ask:focus-within \{[^}]*border-color: var\(--zp-zi\)[^}]*box-shadow:/.test(client) &&
+    /\.zp-as-form:focus-within \{[^}]*border-color: var\(--zp-zi\)[^}]*box-shadow:/.test(client) &&
+    /\.zp-input:focus \{[^}]*border-color: var\(--zp-zi\)[^}]*box-shadow:/.test(client));
   ok('不出现 setInterval(', !!client && !/setInterval\(/.test(client));
   ok('不出现 position: fixed', !!client && !/position\s*:\s*fixed/.test(client));
   ok('不出现 api.deepseek.com', !!client && !/api\.deepseek\.com/.test(client));

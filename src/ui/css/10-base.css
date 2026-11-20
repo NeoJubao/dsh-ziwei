@@ -14,8 +14,13 @@
  * 状态类一律 zp- 开头（zp-on、zp-busy…）；能用 aria-selected / aria-pressed 表达的状态不另加类。
  * ================================================================ */
 .zp-root *, .zp-root *::before, .zp-root *::after { box-sizing: border-box }
-/* 焦点框的颜色和粗细由宿主的 :focus-visible 给，这里只补样式和偏移 */
-.zp-root :focus-visible { outline-style: solid; outline-offset: 2px }
+/* 焦点只有一处高亮：
+   - 键盘走到按钮、页签、宫格：2px 的紫微色焦点框。鼠标点击时宿主把非输入控件的 outline-color 设成透明
+     （html[data-input-modality="pointer"] 那条规则权重更高），所以点按钮不会留一圈框，这里不用管。
+   - 文字输入框不画 outline：由它自己（.zp-input）或它外面的圆角容器（.zp-ask、.zp-as-form，:focus-within）
+     用描边变色加一圈淡光晕表示。少了下面这一条，输入框会在容器的描边里面再画一圈方框（2026-11-20 真机上的两层框）。 */
+.zp-root :focus-visible { outline: 2px solid var(--zp-zi); outline-offset: 2px }
+.zp-root input:focus-visible, .zp-root textarea:focus-visible, .zp-root select:focus-visible { outline: none }
 .zp-root button { font-family: inherit; cursor: pointer }
 .zp-root button:disabled { cursor: default }
 .zp-root input, .zp-root textarea, .zp-root select { font-family: inherit; color: inherit }

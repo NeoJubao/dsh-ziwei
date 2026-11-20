@@ -12,13 +12,12 @@
 
 - 根节点带 `data-theme="dark" | "light"`，由 `ProApp` 按偏好 `ziwei-pro.theme` 写：`dark`（默认）、`light`、`auto`（跟随 DSH：脚本读 `body[data-ds-dark-theme]`，解析成前两者之一，并监听它的变化）。
 - 浅色值写在 `.zp-root`，深色值写在 `.zp-root[data-theme="dark"]`，两边的键集合完全相同。两个块里还各写一条 `color-scheme`，让系统画的控件（下拉列表、滚动条）跟着走。
-- 样式表里不出现 `--dsw-alias-*`，也不用 `body[data-ds-dark-theme]` 选择器。还在用的宿主变量只有三类：
+- 样式表里不出现 `--dsw-alias-*`，也不用 `body[data-ds-dark-theme]` 选择器。还在用的宿主变量只有两类（焦点框的颜色也是面板自己的 `--zp-zi`，规则见 design.md §1）：
 
 | 宿主变量 | 用途 |
 |---|---|
 | `--dsh-font-family-text-default` | 正文字体族 |
 | `--dsh-frame-top-clearance`、`--dsh-frame-leading-clearance`、`--dsh-frame-overlay-top` | macOS 窗口标题带的避让（design.md §7） |
-| `--dsw-focus-ring-color` | 焦点框颜色。宿主在鼠标点击时把非输入控件的这个变量设成透明；面板用 `--zp-ring: var(--dsw-focus-ring-color, var(--zp-zi))` 接住 |
 
 原型和 v6 第一版里的名字按这张表对应：
 
@@ -89,7 +88,6 @@
 |---|---|---|
 | `--zp-font-serif` | `"Songti SC", "STSong", "SimSun", "Noto Serif SC", serif` | 宋体栈：状态句、宫名、星名、四柱、报告标题 |
 | `--zp-c` | 没有默认值，由 JS 内联成 `var(--zp-sN)` | 星曜色的管道：星名、小星球、星球标签用它取色，换主题不用重新渲染 |
-| `--zp-ring` | `var(--dsw-focus-ring-color, var(--zp-zi))` | 焦点框的颜色（design.md §8） |
 
 ---
 

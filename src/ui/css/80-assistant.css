@@ -246,11 +246,12 @@
   gap: 8px;
   margin: 0 12px 12px;
   padding: 6px 6px 6px 12px;
-  border: 1px solid var(--zp-line);
+  border: 1px solid var(--zp-line-2);
   border-radius: 12px;
   background: var(--zp-surface);
+  transition: border-color 120ms ease, box-shadow 120ms ease;
 }
-.zp-as-form:focus-within { border-color: var(--zp-zi) }
+.zp-as-form:focus-within { border-color: var(--zp-zi); box-shadow: 0 0 0 3px color-mix(in srgb, var(--zp-zi) 22%, transparent) }
 .zp-as-form textarea {
   flex: 1;
   min-width: 0;

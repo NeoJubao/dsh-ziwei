@@ -6637,8 +6637,6 @@ const CSS = `/* ---- src/ui/css/00-tokens.css ---- */
   --zp-orb-hi: #ffffff;
   --zp-orb-lo: #0b0b14;
   --zp-font-serif: "Songti SC", "STSong", "SimSun", "Noto Serif SC", serif;
-  /* 焦点框：宿主在鼠标点击时把非输入控件的 --dsw-focus-ring-color 设成透明，所以先读它 */
-  --zp-ring: var(--dsw-focus-ring-color, var(--zp-zi));
   position: relative;
   height: 100%;
   overflow: hidden;
@@ -6736,8 +6734,13 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
  * 状态类一律 zp- 开头（zp-on、zp-busy…）；能用 aria-selected / aria-pressed 表达的状态不另加类。
  * ================================================================ */
 .zp-root *, .zp-root *::before, .zp-root *::after { box-sizing: border-box }
-/* 焦点框的颜色和粗细由宿主的 :focus-visible 给，这里只补样式和偏移 */
-.zp-root :focus-visible { outline-style: solid; outline-offset: 2px }
+/* 焦点只有一处高亮：
+   - 键盘走到按钮、页签、宫格：2px 的紫微色焦点框。鼠标点击时宿主把非输入控件的 outline-color 设成透明
+     （html[data-input-modality="pointer"] 那条规则权重更高），所以点按钮不会留一圈框，这里不用管。
+   - 文字输入框不画 outline：由它自己（.zp-input）或它外面的圆角容器（.zp-ask、.zp-as-form，:focus-within）
+     用描边变色加一圈淡光晕表示。少了下面这一条，输入框会在容器的描边里面再画一圈方框（2026-11-20 真机上的两层框）。 */
+.zp-root :focus-visible { outline: 2px solid var(--zp-zi); outline-offset: 2px }
+.zp-root input:focus-visible, .zp-root textarea:focus-visible, .zp-root select:focus-visible { outline: none }
 .zp-root button { font-family: inherit; cursor: pointer }
 .zp-root button:disabled { cursor: default }
 .zp-root input, .zp-root textarea, .zp-root select { font-family: inherit; color: inherit }
@@ -7307,13 +7310,14 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   width: 100%;
   height: 32px;
   padding: 0 8px;
-  border: 1px solid var(--zp-line);
+  border: 1px solid var(--zp-line-2);
   border-radius: 8px;
   background: var(--zp-bg);
   font-size: 13px;
   outline: none;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
 }
-.zp-input:focus { border-color: var(--zp-zi) }
+.zp-input:focus { border-color: var(--zp-zi); box-shadow: 0 0 0 3px color-mix(in srgb, var(--zp-zi) 22%, transparent) }
 .zp-field-hint {
   margin: 0;
   color: var(--zp-ink-3);
@@ -7588,14 +7592,18 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   height: 48px;
   margin: 0;
   padding: 8px 8px 8px 16px;
-  border: 1px solid var(--zp-line);
+  border: 1px solid var(--zp-line-2);
   border-radius: 16px;
   background: color-mix(in srgb, var(--zp-bg) 66%, transparent);
   box-shadow: 0 14px 40px -22px rgba(0, 0, 0, .5);
   -webkit-backdrop-filter: blur(20px) saturate(140%);
   backdrop-filter: blur(20px) saturate(140%);
+  transition: border-color 120ms ease, box-shadow 120ms ease;
 }
-.zp-ask:focus-within { border-color: var(--zp-zi) }
+.zp-ask:focus-within {
+  border-color: var(--zp-zi);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--zp-zi) 22%, transparent), 0 14px 40px -22px rgba(0, 0, 0, .5);
+}
 .zp-ask input {
   flex: 1;
   min-width: 0;
@@ -7730,7 +7738,7 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   font-size: 13px;
   outline: none;
 }
-.zp-ptag-menu input:focus { border-color: var(--zp-zi) }
+.zp-ptag-menu input:focus { border-color: var(--zp-zi); box-shadow: 0 0 0 3px color-mix(in srgb, var(--zp-zi) 22%, transparent) }
 .zp-ptag-menu button {
   height: 28px;
   padding: 0 8px;
@@ -8559,11 +8567,12 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   gap: 8px;
   margin: 0 12px 12px;
   padding: 6px 6px 6px 12px;
-  border: 1px solid var(--zp-line);
+  border: 1px solid var(--zp-line-2);
   border-radius: 12px;
   background: var(--zp-surface);
+  transition: border-color 120ms ease, box-shadow 120ms ease;
 }
-.zp-as-form:focus-within { border-color: var(--zp-zi) }
+.zp-as-form:focus-within { border-color: var(--zp-zi); box-shadow: 0 0 0 3px color-mix(in srgb, var(--zp-zi) 22%, transparent) }
 .zp-as-form textarea {
   flex: 1;
   min-width: 0;

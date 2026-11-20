@@ -83,7 +83,7 @@ v6 没有历史欠账：`audit-baseline.json` 全部为 0。C15 是唯一的棘�
 | `@deepseek-ai/dsh-client-ui-layout` 的 window-chrome seat（`--dsh-frame-top-clearance` 等） | layout.md §5 + audit C5；这是宿主契约，不许绕开 |
 | `@deepseek-ai/dsh-client-ui-primitives`（`useModalLayer`、`SegmentedControl`、Button 几何） | layout.md §3 浮层规则、design.md §4 控件几何、audit C8 |
 
-**颜色自己管，其余跟宿主**：2026-11-20 起面板自带深浅两套配色（[ADR-0005](../adr/0005-own-palette-and-theme.md)），不再读宿主的颜色变量；字体族、窗口避让、焦点框颜色仍然读宿主的变量（tokens.md §1），不抄它们的值。
+**颜色自己管，其余跟宿主**：2026-11-20 起面板自带深浅两套配色（[ADR-0005](../adr/0005-own-palette-and-theme.md)），不再读宿主的颜色变量；字体族和窗口避让仍然读宿主的变量（tokens.md §1），不抄它们的值。
 
 ---
 
