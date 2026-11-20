@@ -6,8 +6,8 @@
  *                                            data-theme 是 dark / light（偏好 prefs.theme，auto 时跟宿主）
  *     div.zp-shell
  *       div.zp-main
- *         header.zp-head[data-region=HEAD]   第一个控件是「返回会话」（ProApp 自己渲染，不在任何错误边界里），
- *                                            后面是 HeadHome / HeadChart（各自包在错误边界里）
+ *         header.zp-head[data-region=HEAD]   HeadHome / HeadChart（各自包在错误边界里）。顶栏不放「返回会话」：
+ *                                            出口在设置的最后一行和最外层的错误页（canReturnToConversation 为真时）
  *         HomeView        一直挂着（进了命盘也不卸载，CSS 把它藏起来），自己渲染 section.zp-home
  *         section.zp-chart（只在命盘页）     ProApp 的；进入命盘时由 layout effect 加一次性的 zp-enter（240ms 后移除；
  *                                            面板卸载再挂载回到同一张盘时不重放，记在 session.chartEntered）
@@ -19,7 +19,7 @@
  *       Toast
  * 视图组件由后面的任务写：ProApp 用 typeof 判断它存在才渲染，所以那些任务不用改这个文件。
  * 每个视图都收到 props { tier: 'narrow' | 'mid' | 'wide', theme: 'dark' | 'light' }（都不在 store 里），各包一层错误边界：
- * 一个视图出错只把它自己换成错误提示，「返回会话」和其余视图照常。
+ * 一个视图出错只把它自己换成错误提示，其余视图照常。
  *
  * ProApp 只订阅 view / stage / panelOpen / chartId / sheet / modal；顶栏的命盘部分（HeadChart）另外订阅
  * 盘名、命宫主星、tab、报告任务是否在跑、showAdj。选宫、流式增量都不会让这两个组件重渲染。
@@ -97,8 +97,9 @@ function HeadChart() {
   });
   return [
     h('nav', { key: 'crumb', className: 'zp-crumb', 'aria-label': t('headCrumb') },
-      h('button', { className: 'zp-crumb-home', type: 'button', onClick: function () { store.goHome(); } }, t('headHome')),
-      h('span', { 'aria-hidden': true }, '/'),
+      /* 顶栏第一个控件：回首页的星图 */
+      h('button', { className: 'zp-crumb-home', type: 'button', onClick: function () { store.goHome(); } },
+        h(Icon, { name: 'chevronLeft', size: 14 }), t('headHome')),
       h('i', { className: 'zp-orb', 'aria-hidden': true, style: color ? { '--zp-c': color } : undefined }),
       h('span', { className: 'zp-crumb-name' }, m.name || t('headUnnamed'))),
     h('div', { key: 'grow', className: 'zp-grow' }),
@@ -203,13 +204,8 @@ function ProApp(props) {
   },
   h('div', { className: 'zp-shell' },
     h('div', { className: 'zp-main' },
+      /* 顶栏不放「返回会话」（2026-11-20 起）：出口在设置的最后一行和最外层的错误页，见 layout.md §5 */
       h('header', { className: 'zp-head', 'data-region': 'HEAD' },
-        /* 显式出口：返回会话。顶栏第一个控件，由 ProApp 自己渲染、不在错误边界里；layout 服务不可用时不渲染 */
-        actions.canReturnToConversation ? h('button', {
-          className: 'zp-icon-btn zp-exit', type: 'button',
-          title: t('backToConversation'), 'aria-label': t('backToConversation'),
-          onClick: function () { actions.returnToConversation(); }
-        }, h(Icon, { name: 'exit' })) : null,
         h(Boundary, { key: inChart ? 'head-chart' : 'head-home' }, inChart ? h(HeadChart) : h(HeadHome))),
       typeof HomeView === 'function' ? h(Boundary, { key: 'home' }, h(HomeView, viewProps)) : null,
       inChart ? h('section', { key: 'chart', className: 'zp-chart', ref: chartRef },
@@ -217,12 +213,13 @@ function ProApp(props) {
         typeof ReportStage === 'function' ? h(Boundary, { key: 'report' }, h(ReportStage, viewProps)) : null) : null),
     inChart && typeof AssistantPanel === 'function' ? h(Boundary, { key: 'assistant' }, h(AssistantPanel, viewProps)) : null,
     app.sheet && typeof SheetHost === 'function' ? h(Boundary, { key: 'sheet' }, h(SheetHost, viewProps)) : null,
-    app.modal === 'settings' && typeof SettingsModal === 'function' ? h(Boundary, { key: 'modal' }, h(SettingsModal, viewProps)) : null,
+    app.modal === 'settings' && typeof SettingsModal === 'function'
+      ? h(Boundary, { key: 'modal' }, h(SettingsModal, { tier: tier, theme: theme, actions: actions })) : null,
     h(Boundary, { key: 'toast' }, h(Toast))));
 }
 
 /* ---------------- 错误边界 ----------------
- * props.root：面板最外层那个（出错时自己就是 .zp-root，并带上「返回会话」，用户不会被困住）；
+ * props.root：面板最外层那个（出错时自己就是 .zp-root，并带上「重试」和「返回会话」，用户不会被困住）；
  * 其余的包在单个视图外面，出错时只替换那个视图。 */
 class Boundary extends React.Component {
   constructor(props) {
@@ -242,14 +239,15 @@ class Boundary extends React.Component {
       className: this.props.root ? 'zp-root zp-crash' : 'zp-crash', role: 'alert',
       'data-theme': this.props.root ? resolveTheme(crashThemePref(), true) : undefined
     },
-      actions && actions.canReturnToConversation ? h('button', {
-        className: 'zp-icon-btn zp-exit', type: 'button',
-        title: t('backToConversation'), 'aria-label': t('backToConversation'),
-        onClick: function () { actions.returnToConversation(); }
-      }, h(Icon, { name: 'exit' })) : null,
       h('p', { className: 'zp-crash-msg' }, t('crashMessage', { message: String((err && err.message) || err) })),
       h('p', { className: 'zp-crash-hint' }, t('crashHint')),
-      h('button', { className: 'zp-btn', type: 'button', onClick: function () { self.setState({ error: null }); } }, t('retry')));
+      h('div', { className: 'zp-crash-acts' },
+        h('button', { className: 'zp-btn', type: 'button', onClick: function () { self.setState({ error: null }); } }, t('retry')),
+        /* 面板整个坏了的时候留一个出口：回到 DSH 的对话（layout 服务不可用时不渲染） */
+        actions && actions.canReturnToConversation ? h('button', {
+          className: 'zp-btn zp-exit', type: 'button',
+          onClick: function () { actions.returnToConversation(); }
+        }, t('backToConversation')) : null));
   }
 }
 

@@ -693,7 +693,7 @@ function checkC12v6(ctx) {
   for (const cls of ['zp-root', 'zp-head', 'zp-exit']) {
     if (!hasClass(cls)) { count++; samples.push(`CSS 缺结构类 .${cls}`); }
   }
-  if (!/className\s*:\s*['"][^'"]*\bzp-exit\b/.test(ctx.jsx)) { count++; samples.push('源码里没有 className 含 zp-exit 的「返回会话」按钮'); }
+  if (!/className\s*:\s*['"][^'"]*\bzp-exit\b/.test(ctx.jsx)) { count++; samples.push('源码里没有 className 含 zp-exit 的「返回会话」出口（设置最后一行、最外层错误页）'); }
   const wired = new Map();
   for (const m of ctx.jsx.matchAll(/'data-region'\s*:\s*'([A-Z][A-Z0-9_]*)'/g)) {
     if (!wired.has(m[1])) wired.set(m[1], []);

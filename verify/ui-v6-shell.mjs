@@ -5,7 +5,7 @@
  *   - src/ui/ 的文件齐全、每个文件单独过语法检查；build.mjs 的拼接守卫真的会拦（重名声明、\r、反引号…）
  *   - 加载只注册 factory（ZWEngine / ZWCore / THREE 都不存在）；factory 返回 inject + apply
  *   - apply 注册侧栏入口和 main（key=ziwei），样式随 ctx.effect 注入、卸载时移除
- *   - 「返回会话」由 ProApp 自己渲染、是顶栏第一个控件、调用 layout.selectPanel(null)；layout 不可用时不渲染
+ *   - 顶栏没有「返回会话」；出口在最外层的错误页（和设置里），调用 layout.selectPanel(null)；layout 不可用时不渲染
  *   - 宿主约定的 CSS、产物里不该出现的字符串、字典、图标表、档位
  *   - （T5a）顶栏：首页 / 命盘页两种内容、六个页签、报告页签的脉冲点、「更多」菜单、问紫微师；根节点属性跟着 store；
  *     每个 role=dialog 有 aria-modal 和名字；每个按钮有文字或 aria-label；选宫前后顶栏一个字不差；提示条；
@@ -147,20 +147,33 @@ export default async function shell(t) {
   ok('main 渲染 Boundary > ProApp，actions 暴露返回会话出口',
     renderErr === null && !!actions && actions.canReturnToConversation === true && typeof actions.returnToConversation === 'function',
     renderErr ? renderErr.message : '');
-  const exits = tree ? exitButtons(tree) : [];
-  const exitBtn = exits.length === 1 ? exits[0] : null;
-  ok('ProApp 自己的渲染里恰好一个 zp-exit 按钮（type=button，title / aria-label 都是「返回会话」）',
-    !!exitBtn && exitBtn.type === 'button' && exitBtn.props.type === 'button' &&
-    exitBtn.props.title === '返回会话' && exitBtn.props['aria-label'] === '返回会话',
-    exitBtn ? JSON.stringify({ title: exitBtn.props.title, aria: exitBtn.props['aria-label'] }) : `找到 ${exits.length} 个`);
-  const head = tree ? find(tree, (n) => n.props && n.props['data-region'] === 'HEAD')[0] : null;
-  const firstControl = head ? (head.children || []).flat(Infinity).find((c) => c && typeof c === 'object') : null;
-  ok('「返回会话」是顶栏（HEAD）的第一个控件', !!head && !!exitBtn && firstControl === exitBtn);
-  if (exitBtn && typeof exitBtn.props.onClick === 'function') { try { exitBtn.props.onClick(); } catch { /* 记在下面 */ } }
-  ok('点击调用 layout.selectPanel(null)', fakeLayout.calls.length === 1 && fakeLayout.calls[0] === null, JSON.stringify(fakeLayout.calls));
-  let deepErr = null;
-  try { renderDeep(boundaryEl); } catch (e) { deepErr = e; }
+  /* 2026-11-20 起顶栏不放「返回会话」（Neo 真机反馈）。出口留在两处：设置的最后一行（见 ui-v6-settings.mjs）
+     和最外层的错误页（下面）。侧栏折叠时宿主放在左上角的出口不被盖住，由 isolation 和 leading 避让保证（verify.mjs H3） */
+  let deepTree = null, deepErr = null;
+  try { deepTree = renderDeep(boundaryEl); } catch (e) { deepErr = e; }
   ok('整棵面板能深渲染（layout 可用）', !!boundaryEl && deepErr === null, deepErr && deepErr.message);
+  const head = deepTree ? find(deepTree, (n) => n.props && n.props['data-region'] === 'HEAD')[0] : null;
+  ok('顶栏和平时的面板里都没有「返回会话」按钮', !!head && exitButtons(deepTree).length === 0 &&
+    find(deepTree, (n) => n.type === 'button' && (n.props.title === '返回会话' || n.props['aria-label'] === '返回会话')).length === 0);
+  let exitRet = null;
+  try { exitRet = actions.returnToConversation(); } catch { exitRet = null; }
+  ok('actions.returnToConversation() 调用 layout.selectPanel(null)', exitRet === true && fakeLayout.calls.length === 1 && fakeLayout.calls[0] === null, JSON.stringify(fakeLayout.calls));
+  /* 最外层的错误页：面板整个坏了也有出口 */
+  const crashOf = (acts) => {
+    const b = new boundaryEl.type({ root: true, actions: acts });
+    b.state = { error: new Error('测试：面板坏了') };
+    return b.render();
+  };
+  const crashEl = crashOf(actions);
+  const crashExit = exitButtons(crashEl)[0] || null;
+  ok('最外层出错：错误页自己是 .zp-root（带 data-theme），有「重试」和「返回会话」两个文字按钮',
+    classesOf(crashEl).includes("zp-root") && classesOf(crashEl).includes("zp-crash") && ["dark", "light"].includes(crashEl.props["data-theme"]) &&
+    find(crashEl, (n) => n.type === "button").map((n) => (n.children || []).join("")).join("|") === "重试|返回会话" &&
+    !!crashExit && crashExit.props.type === 'button');
+  fakeLayout.calls.length = 0;
+  if (crashExit) { try { crashExit.props.onClick(); } catch { /* 记在下面 */ } }
+  ok('错误页的「返回会话」调用 layout.selectPanel(null)', fakeLayout.calls.length === 1 && fakeLayout.calls[0] === null, JSON.stringify(fakeLayout.calls));
+  ok('layout 不可用时错误页不渲染「返回会话」', exitButtons(crashOf({ canReturnToConversation: false, returnToConversation() { return false; } })).length === 0);
 
   const noLayout = makeCtx({});
   let tree3 = null, err3 = null;
@@ -170,7 +183,7 @@ export default async function shell(t) {
     tree3 = renderShallow(b3.children[0]);
     renderDeep(b3);
   } catch (e) { err3 = e; }
-  ok('layout 不可用时：不渲染返回会话按钮，面板仍能渲染', err3 === null && !!tree3 && exitButtons(tree3).length === 0 &&
+  ok('layout 不可用时：面板仍能渲染', err3 === null && !!tree3 && exitButtons(tree3).length === 0 &&
     find(tree3, (n) => n.props && n.props['data-region'] === 'HEAD').length === 1,
     err3 ? err3.message : '');
   noLayout.disposeAll();
@@ -220,22 +233,22 @@ export default async function shell(t) {
   let enTitle = null;
   try {
     plugin.apply(withLocale.ctx);
-    const exit = exitButtons(renderShallow(withLocale.main()().children[0]))[0];
-    enTitle = exit && exit.props.title;
+    const gear = find(renderDeep(withLocale.main()()), (n) => n.type === 'button' && classesOf(n).includes('zp-icon-btn')).pop();
+    enTitle = gear && gear.props.title;
   } catch { enTitle = null; }
   ok("locale 服务：一次 register('ziwei', { zh, en }) 和一次 bind('ziwei')",
     loc.calls.register.length === 1 && loc.calls.register[0][0] === 'ziwei' && !!loc.calls.register[0][1].zh && !!loc.calls.register[0][1].en &&
     loc.calls.bind.length === 1 && loc.calls.bind[0] === 'ziwei', JSON.stringify({ register: loc.calls.register.length, bind: loc.calls.bind }));
-  ok('界面文字随 locale 切换（英文下「返回会话」是 Back to conversation）', enTitle === 'Back to conversation', String(enTitle));
+  ok('界面文字随 locale 切换（英文下顶栏的「设置」是 Settings）', enTitle === 'Settings', String(enTitle));
   withLocale.disposeAll();
   let zhAgain = null;
   try {
     const again = makeCtx({ layout: fakeLayout });
     plugin.apply(again.ctx);
-    zhAgain = exitButtons(renderShallow(again.main()().children[0]))[0].props.title;
+    zhAgain = find(renderDeep(again.main()()), (n) => n.type === 'button' && classesOf(n).includes('zp-icon-btn')).pop().props.title;
     again.disposeAll();
   } catch { zhAgain = null; }
-  ok('locale 服务缺失时退回内置中文', zhAgain === '返回会话', String(zhAgain));
+  ok('locale 服务缺失时退回内置中文', zhAgain === '设置', String(zhAgain));
 
   const dicts = loc.calls.register[0] ? loc.calls.register[0][1] : { zh: {}, en: {} };
   const zhKeys = Object.keys(dicts.zh || {});
@@ -321,7 +334,7 @@ async function shellViews(t) {
   states.push(['首页', tree]);
   eq('首页：根节点 data-view="home"、data-stage="board"、data-panel="closed"',
     [attr(rootOf(tree), 'data-view'), attr(rootOf(tree), 'data-stage'), attr(rootOf(tree), 'data-panel')], ['home', 'board', 'closed']);
-  eq('首页顶栏：返回会话、空白、全部命盘、设置', headControls(tree).map(label), ['返回会话', 'grow', '全部命盘', '设置']);
+  eq('首页顶栏：空白、全部命盘、设置（没有「返回会话」）', headControls(tree).map(label), ['grow', '全部命盘', '设置']);
   const homeBtn = (name) => find(head(render()), (n) => n.type === 'button' && attr(n, 'aria-label') === name)[0];
   ok('首页顶栏的图标按钮有 title、type=button', ['全部命盘', '设置'].every((n) => { const x = homeBtn(n); return x && attr(x, 'title') === n && attr(x, 'type') === 'button' && classesOf(x).includes('zp-icon-btn'); }));
   homeBtn('全部命盘').props.onClick();
@@ -339,8 +352,8 @@ async function shellViews(t) {
   states.push(['命盘页', tree]);
   eq('命盘页：根节点 data-view="chart"、data-stage="board"、data-panel="closed"',
     [attr(rootOf(tree), 'data-view'), attr(rootOf(tree), 'data-stage'), attr(rootOf(tree), 'data-panel')], ['chart', 'board', 'closed']);
-  eq('命盘页顶栏：返回会话、位置、空白、页签、问紫微师、更多、设置',
-    headControls(tree).map(label), ['返回会话', 'nav', 'grow', 'tablist', '问紫微师', 'menu', '设置']);
+  eq('命盘页顶栏：位置（第一个控件是回首页的「星图」）、空白、页签、问紫微师、更多、设置',
+    headControls(tree).map(label), ['nav', 'grow', 'tablist', '问紫微师', 'menu', '设置']);
   const crumb = find(head(tree), (n) => n.type === 'nav')[0];
   const orb = findByClass(crumb, 'zp-orb')[0];
   eq('位置：nav.zp-crumb（aria-label 位置）> button.zp-crumb-home「星图」、小星球（命宫主星太阳的颜色）、盘名；没有角标',
@@ -497,9 +510,8 @@ async function shellViews(t) {
     (n.children || []).forEach(walkOut);
   };
   walkOut(shallow);
-  ok('ProApp 自己的渲染里，顶栏的命盘部分、各视图、提示条都包在错误边界（Boundary）里；边界之外只有「返回会话」和图标',
-    boundaries.length >= 2 && outside.every((name) => name === 'Icon') && find(shallow, (n) => classesOf(n).includes('zp-exit')).length === 1 &&
-    boundaries.every((n) => find(n, (x) => classesOf(x).includes('zp-exit')).length === 0), 'outside: ' + outside.join(','));
+  ok('ProApp 自己的渲染里，顶栏、各视图、提示条都包在错误边界（Boundary）里；边界之外没有别的组件',
+    boundaries.length >= 2 && outside.length === 0 && find(shallow, (n) => classesOf(n).includes('zp-exit')).length === 0, 'outside: ' + outside.join(','));
 
   /* 浮层部件和全局的可访问性约束 */
   const h = b.React.createElement;

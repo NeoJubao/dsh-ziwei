@@ -3,7 +3,7 @@
  * （遮罩、焦点陷阱、Esc、焦点归还）。结构见 css/50-parts.css 的"表单控件"一段：
  *   div.zp-setting > div.zp-setting-text（b 标题 + span 说明）+ 右边的开关或按钮
  * 六块：外观（prefs.theme：深色 / 浅色 / 跟随 DSH，默认深色）、启动时自动打开工作台（prefs.autoOpen）、首页 3D 星图（prefs.sky）、本机数据（清除对话与报告，要点两次；
- * 有任务在跑时不能清）、版本和检查更新、关于。
+ * 有任务在跑时不能清）、版本和检查更新、回到 DSH 对话（props.actions.canReturnToConversation 为真时）、关于。
  * 检查更新只在点击时请求一次 /ziwei/version（store.checkVersion）；没有轮询、没有定时器。
  * 更新命令是给终端用的原文，不翻译。
  * ================================================================ */
@@ -28,8 +28,9 @@ function setSwitch(label, on, onToggle) {
   });
 }
 
-function SettingsModal() {
+function SettingsModal(props) {
   const m = useStore(setShellOf);
+  const actions = (props && props.actions) || null;
   const store = appStore();
   /* 检查更新的结果只在这次打开里有用：null | { checking } | { result } */
   const [update, setUpdate] = useState(null);
@@ -83,6 +84,12 @@ function SettingsModal() {
       h('button', { className: 'zp-btn zp-sm', type: 'button', disabled: checking ? true : undefined, onClick: check },
         checking ? t('setChecking') : t('setCheck')),
       h('div', { key: 'verdict', 'aria-live': 'polite' }, verdict)),
+    /* 顶栏不再有「返回会话」，出口留在这里（layout 服务不可用时不渲染） */
+    actions && actions.canReturnToConversation ? setRow('exit', t('setExit'), t('setExitHint'),
+      h('button', {
+        className: 'zp-btn zp-sm zp-exit', type: 'button',
+        onClick: function () { closeLayers(); actions.returnToConversation(); }
+      }, t('backToConversation'))) : null,
     h('p', { key: 'about', className: 'zp-about' }, t('setAbout')),
     h('p', { key: 'sign', className: 'zp-about' }, t('setSignature'), h('br'), t('setContact')));
 }

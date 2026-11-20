@@ -280,7 +280,7 @@ export default async function partsChecks(t) {
     rt.unmount();
   });
 
-  safe('视图出错时返回会话还在', () => {
+  safe('视图出错时面板其余部分照常', () => {
     store.openChart(entry.id);
     rt.mount(h(env.Main));
     const realChartOf = store.chartOf;
@@ -289,10 +289,10 @@ export default async function partsChecks(t) {
     rt.flush();
     const tree = rt.tree();
     const head = find(tree, (n) => attr(n, 'data-region') === 'HEAD')[0];
-    const firstControl = head ? head.children.flat(Infinity).find((c) => c && typeof c === 'object') : null;
     ok('顶栏的命盘部分渲染出错：错误边界接住，面板其余部分照常',
       !!head && findByClass(head, 'zp-crash').length === 1 && findByClass(tree, 'zp-shell').length === 1 && text(findByClass(head, 'zp-crash')[0]).includes('测试：顶栏取盘失败'));
-    ok('出错之后「返回会话」仍是顶栏第一个控件', !!firstControl && classesOf(firstControl).includes('zp-exit'));
+    ok('视图里的错误提示只有「重试」，不带「返回会话」（那是最外层错误页的事）',
+      find(head, (n) => n.type === 'button').map(text).join('|') === '重试' && findByClass(tree, 'zp-exit').length === 0);
     store.chartOf = realChartOf;
     const retry = find(head, (n) => n.type === 'button' && text(n) === '重试')[0];
     rt.click(retry);

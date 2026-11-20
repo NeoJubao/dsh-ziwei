@@ -2841,6 +2841,8 @@ const DICT = {
     "setUpToDate": "已是最新（{version}）",
     "setUpdateAvailable": "有新版本 {latest}，在终端执行：",
     "setUpdateFailed": "检查失败：{reason}",
+    "setExit": "回到 DSH 对话",
+    "setExitHint": "离开紫微面板，回到 DeepSeek Harness 的对话界面；也可以直接点侧栏里的会话",
     "setAbout": "排盘依据《紫微斗数全书》安星诀，与开源库 iztro 逐项核对过；填了出生城市就按经度和均时差校正真太阳时。仅供研究和参考。",
     "setSignature": "紫微师 · 金聚｜道商意象紫微九诀",
     "setContact": "微信：neo2025new",
@@ -3245,6 +3247,8 @@ const DICT = {
     "setUpToDate": "Up to date ({version})",
     "setUpdateAvailable": "Version {latest} is available. Run in a terminal:",
     "setUpdateFailed": "Check failed: {reason}",
+    "setExit": "Back to the DSH conversation",
+    "setExitHint": "Leave this panel and return to the DeepSeek Harness conversation; clicking a session in the sidebar works too",
     "setAbout": "Chart placement follows the classic star-placement rules and is checked field by field against the open-source iztro library. With a birth city, true solar time is corrected for longitude and the equation of time. For research and reference only.",
     "setSignature": "紫微师 · 金聚｜道商意象紫微九诀",
     "setContact": "WeChat: neo2025new",
@@ -6802,16 +6806,23 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   font-size: 14px;
   color: var(--zp-ink-3);
 }
+/* 回首页：命盘页顶栏的第一个控件（箭头 + 星图） */
 .zp-crumb-home {
-  padding: 4px 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 32px;
+  margin-right: 6px;
+  padding: 0 8px 0 4px;
   border: 0;
-  border-radius: 4px;
+  border-radius: 8px;
   background: transparent;
   color: var(--zp-ink-3);
   font-size: 14px;
   white-space: nowrap;
 }
-.zp-crumb-home:hover { background: var(--zp-hover); color: var(--zp-ink) }
+.zp-root .zp-crumb-home { color: var(--zp-ink-3) }
+.zp-root .zp-crumb-home:hover { background: var(--zp-hover); color: var(--zp-ink) }
 .zp-crumb-name {
   overflow: hidden;
   color: var(--zp-ink);
@@ -6872,8 +6883,8 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   backdrop-filter: blur(12px);
 }
 .zp-icon-btn.zp-plain { border-color: transparent; background: transparent }
-/* 「返回会话」：顶栏第一个控件，常驻 */
-.zp-exit { color: var(--zp-ink) }
+/* 「返回会话」：不在顶栏里了，只出现在设置的最后一行和最外层的错误页（layout.md §5） */
+.zp-root .zp-exit { color: var(--zp-ink-2) }
 
 .zp-btn {
   display: inline-flex;
@@ -7115,6 +7126,7 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   font-size: 13px;
   color: var(--zp-ink-2);
 }
+.zp-crash-acts { display: flex; flex-wrap: wrap; gap: 8px }
 
 /* ---------------- 减少动态效果：界面过渡和动画全部关掉（3D 只画静止的一帧，由 sky.js 处理） ---------------- */
 @media (prefers-reduced-motion: reduce) {
@@ -7485,6 +7497,9 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
 .zp-home {
   position: absolute;
   inset: 0;
+  /* 自己成一个层叠上下文，排在顶栏（z-index: 2）下面：首页里再高的 z-index（没有 3D 时盖住对话栏的星图区、
+     标签的菜单）也盖不到顶栏的按钮上。少了这一行，关掉 3D 后右上角的按钮点不动（2026-11-20 真机） */
+  z-index: 0;
   container-type: inline-size;
   display: grid;
   place-items: end center;
@@ -10145,7 +10160,6 @@ function HomeView(props) {
           onChange: function (ev) { setAsk(ev.target.value); }
         }),
         h('button', { className: 'zp-send', type: 'submit', title: t('homeSend'), 'aria-label': t('homeSend') }, h(Icon, { name: 'send' }))),
-      h('p', { key: 'hint', className: 'zp-hint' }),
       h('div', { key: 'chips', className: 'zp-chips' },
         h('button', { className: 'zp-chip', type: 'button', onClick: function () { homeOpen(focusRow.id, { tab: 'daily' }); } }, t('homeChipToday')),
         h('button', {
@@ -10974,7 +10988,7 @@ ZWUI.sheets = { SheetHost: SheetHost, BirthFormSheet: BirthFormSheet, ChartListS
  * （遮罩、焦点陷阱、Esc、焦点归还）。结构见 css/50-parts.css 的"表单控件"一段：
  *   div.zp-setting > div.zp-setting-text（b 标题 + span 说明）+ 右边的开关或按钮
  * 六块：外观（prefs.theme：深色 / 浅色 / 跟随 DSH，默认深色）、启动时自动打开工作台（prefs.autoOpen）、首页 3D 星图（prefs.sky）、本机数据（清除对话与报告，要点两次；
- * 有任务在跑时不能清）、版本和检查更新、关于。
+ * 有任务在跑时不能清）、版本和检查更新、回到 DSH 对话（props.actions.canReturnToConversation 为真时）、关于。
  * 检查更新只在点击时请求一次 /ziwei/version（store.checkVersion）；没有轮询、没有定时器。
  * 更新命令是给终端用的原文，不翻译。
  * ================================================================ */
@@ -10999,8 +11013,9 @@ function setSwitch(label, on, onToggle) {
   });
 }
 
-function SettingsModal() {
+function SettingsModal(props) {
   const m = useStore(setShellOf);
+  const actions = (props && props.actions) || null;
   const store = appStore();
   /* 检查更新的结果只在这次打开里有用：null | { checking } | { result } */
   const [update, setUpdate] = useState(null);
@@ -11054,6 +11069,12 @@ function SettingsModal() {
       h('button', { className: 'zp-btn zp-sm', type: 'button', disabled: checking ? true : undefined, onClick: check },
         checking ? t('setChecking') : t('setCheck')),
       h('div', { key: 'verdict', 'aria-live': 'polite' }, verdict)),
+    /* 顶栏不再有「返回会话」，出口留在这里（layout 服务不可用时不渲染） */
+    actions && actions.canReturnToConversation ? setRow('exit', t('setExit'), t('setExitHint'),
+      h('button', {
+        className: 'zp-btn zp-sm zp-exit', type: 'button',
+        onClick: function () { closeLayers(); actions.returnToConversation(); }
+      }, t('backToConversation'))) : null,
     h('p', { key: 'about', className: 'zp-about' }, t('setAbout')),
     h('p', { key: 'sign', className: 'zp-about' }, t('setSignature'), h('br'), t('setContact')));
 }
@@ -12699,8 +12720,8 @@ ZWUI.rvPickPlace = rvPickPlace;
  *                                            data-theme 是 dark / light（偏好 prefs.theme，auto 时跟宿主）
  *     div.zp-shell
  *       div.zp-main
- *         header.zp-head[data-region=HEAD]   第一个控件是「返回会话」（ProApp 自己渲染，不在任何错误边界里），
- *                                            后面是 HeadHome / HeadChart（各自包在错误边界里）
+ *         header.zp-head[data-region=HEAD]   HeadHome / HeadChart（各自包在错误边界里）。顶栏不放「返回会话」：
+ *                                            出口在设置的最后一行和最外层的错误页（canReturnToConversation 为真时）
  *         HomeView        一直挂着（进了命盘也不卸载，CSS 把它藏起来），自己渲染 section.zp-home
  *         section.zp-chart（只在命盘页）     ProApp 的；进入命盘时由 layout effect 加一次性的 zp-enter（240ms 后移除；
  *                                            面板卸载再挂载回到同一张盘时不重放，记在 session.chartEntered）
@@ -12712,7 +12733,7 @@ ZWUI.rvPickPlace = rvPickPlace;
  *       Toast
  * 视图组件由后面的任务写：ProApp 用 typeof 判断它存在才渲染，所以那些任务不用改这个文件。
  * 每个视图都收到 props { tier: 'narrow' | 'mid' | 'wide', theme: 'dark' | 'light' }（都不在 store 里），各包一层错误边界：
- * 一个视图出错只把它自己换成错误提示，「返回会话」和其余视图照常。
+ * 一个视图出错只把它自己换成错误提示，其余视图照常。
  *
  * ProApp 只订阅 view / stage / panelOpen / chartId / sheet / modal；顶栏的命盘部分（HeadChart）另外订阅
  * 盘名、命宫主星、tab、报告任务是否在跑、showAdj。选宫、流式增量都不会让这两个组件重渲染。
@@ -12790,8 +12811,9 @@ function HeadChart() {
   });
   return [
     h('nav', { key: 'crumb', className: 'zp-crumb', 'aria-label': t('headCrumb') },
-      h('button', { className: 'zp-crumb-home', type: 'button', onClick: function () { store.goHome(); } }, t('headHome')),
-      h('span', { 'aria-hidden': true }, '/'),
+      /* 顶栏第一个控件：回首页的星图 */
+      h('button', { className: 'zp-crumb-home', type: 'button', onClick: function () { store.goHome(); } },
+        h(Icon, { name: 'chevronLeft', size: 14 }), t('headHome')),
       h('i', { className: 'zp-orb', 'aria-hidden': true, style: color ? { '--zp-c': color } : undefined }),
       h('span', { className: 'zp-crumb-name' }, m.name || t('headUnnamed'))),
     h('div', { key: 'grow', className: 'zp-grow' }),
@@ -12896,13 +12918,8 @@ function ProApp(props) {
   },
   h('div', { className: 'zp-shell' },
     h('div', { className: 'zp-main' },
+      /* 顶栏不放「返回会话」（2026-11-20 起）：出口在设置的最后一行和最外层的错误页，见 layout.md §5 */
       h('header', { className: 'zp-head', 'data-region': 'HEAD' },
-        /* 显式出口：返回会话。顶栏第一个控件，由 ProApp 自己渲染、不在错误边界里；layout 服务不可用时不渲染 */
-        actions.canReturnToConversation ? h('button', {
-          className: 'zp-icon-btn zp-exit', type: 'button',
-          title: t('backToConversation'), 'aria-label': t('backToConversation'),
-          onClick: function () { actions.returnToConversation(); }
-        }, h(Icon, { name: 'exit' })) : null,
         h(Boundary, { key: inChart ? 'head-chart' : 'head-home' }, inChart ? h(HeadChart) : h(HeadHome))),
       typeof HomeView === 'function' ? h(Boundary, { key: 'home' }, h(HomeView, viewProps)) : null,
       inChart ? h('section', { key: 'chart', className: 'zp-chart', ref: chartRef },
@@ -12910,12 +12927,13 @@ function ProApp(props) {
         typeof ReportStage === 'function' ? h(Boundary, { key: 'report' }, h(ReportStage, viewProps)) : null) : null),
     inChart && typeof AssistantPanel === 'function' ? h(Boundary, { key: 'assistant' }, h(AssistantPanel, viewProps)) : null,
     app.sheet && typeof SheetHost === 'function' ? h(Boundary, { key: 'sheet' }, h(SheetHost, viewProps)) : null,
-    app.modal === 'settings' && typeof SettingsModal === 'function' ? h(Boundary, { key: 'modal' }, h(SettingsModal, viewProps)) : null,
+    app.modal === 'settings' && typeof SettingsModal === 'function'
+      ? h(Boundary, { key: 'modal' }, h(SettingsModal, { tier: tier, theme: theme, actions: actions })) : null,
     h(Boundary, { key: 'toast' }, h(Toast))));
 }
 
 /* ---------------- 错误边界 ----------------
- * props.root：面板最外层那个（出错时自己就是 .zp-root，并带上「返回会话」，用户不会被困住）；
+ * props.root：面板最外层那个（出错时自己就是 .zp-root，并带上「重试」和「返回会话」，用户不会被困住）；
  * 其余的包在单个视图外面，出错时只替换那个视图。 */
 class Boundary extends React.Component {
   constructor(props) {
@@ -12935,14 +12953,15 @@ class Boundary extends React.Component {
       className: this.props.root ? 'zp-root zp-crash' : 'zp-crash', role: 'alert',
       'data-theme': this.props.root ? resolveTheme(crashThemePref(), true) : undefined
     },
-      actions && actions.canReturnToConversation ? h('button', {
-        className: 'zp-icon-btn zp-exit', type: 'button',
-        title: t('backToConversation'), 'aria-label': t('backToConversation'),
-        onClick: function () { actions.returnToConversation(); }
-      }, h(Icon, { name: 'exit' })) : null,
       h('p', { className: 'zp-crash-msg' }, t('crashMessage', { message: String((err && err.message) || err) })),
       h('p', { className: 'zp-crash-hint' }, t('crashHint')),
-      h('button', { className: 'zp-btn', type: 'button', onClick: function () { self.setState({ error: null }); } }, t('retry')));
+      h('div', { className: 'zp-crash-acts' },
+        h('button', { className: 'zp-btn', type: 'button', onClick: function () { self.setState({ error: null }); } }, t('retry')),
+        /* 面板整个坏了的时候留一个出口：回到 DSH 的对话（layout 服务不可用时不渲染） */
+        actions && actions.canReturnToConversation ? h('button', {
+          className: 'zp-btn zp-exit', type: 'button',
+          onClick: function () { actions.returnToConversation(); }
+        }, t('backToConversation')) : null));
   }
 }
 

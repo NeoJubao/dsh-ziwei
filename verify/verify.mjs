@@ -420,14 +420,16 @@ ok('引擎默认 dayDivide = current', /dayDivide: 'current'/.test(readFileSync(
  *     同时发布 --dsh-frame-leading-clearance; html 上另有 --dsh-frame-top-clearance,
  *     浮层用 --dsh-frame-overlay-top;
  *   - 本面板的 sticky 头 z-index:20 曾直接盖住 z-index:15 的 shell.leading,
- *     且面板没有返回会话的出口 → 用户被困。三条断言一起防回归。 */
+ *     且面板没有返回会话的出口 → 用户被困。三条断言一起防回归。
+ *   - 2026-11-20：Neo 在真机里要求去掉顶栏的「返回会话」按钮。宿主的出口不被盖住由前两条保证；
+ *     面板自己的出口留在设置的最后一行和最外层的错误页（selectPanel(null) 仍在产物里）。 */
 ok('面板避让 darwin 窗口 chrome（top / leading / overlay 三个 frame 变量都带 0px 兜底）',
   /html\[data-platform="darwin"\] \.zp-root \{\s*padding-top: var\(--dsh-frame-top-clearance, 0px\)/.test(client) &&
   /html\[data-platform="darwin"\] \[data-sidebar-collapsed\] \.zp-head \{[\s\S]{0,200}?var\(--dsh-frame-leading-clearance, 0px\)/.test(client) &&
   /html\[data-platform="darwin"\] \.zp-root \.zp-overlay-center \{[\s\S]{0,200}?var\(--dsh-frame-overlay-top, 46px\)/.test(client));
 ok('面板层叠收进自身上下文（内部 z-index 不再盖住 frame 的 shell.leading 出口）',
   /\.zp-root \{[\s\S]{0,2000}?isolation: isolate;/.test(client));
-/* 按钮本身（zp-exit、title、aria-label）由下面「主面板顶栏渲染出唯一的返回会话按钮」在渲染级核对 */
+/* 按钮本身（zp-exit）由下面「最外层错误页渲染出唯一的返回会话文字按钮」和 ui-v6-settings.mjs 在渲染级核对 */
 ok('client 提供「返回会话」出口：官方 selectPanel(null)', /selectPanel\(null\)/.test(client));
 /* 48px 是宿主窗口标题带的高度。顶部避让只能走 --dsh-frame-top-clearance：外壳（.zp-root / .zp-shell）、
    顶栏（.zp-head）和 darwin 规则上都不许写死 padding-top: 48px。
@@ -714,7 +716,8 @@ ok('client 提供「返回会话」出口：官方 selectPanel(null)', /selectPa
     ok('出口调用官方 layout.selectPanel(null)（选中 Conversation, 不换 Session）',
       exitOk && fakeLayout.calls.length === 1 && fakeLayout.calls[0] === null, JSON.stringify(fakeLayout.calls));
 
-    /* 渲染级: 主面板顶栏真的渲染出「返回会话」按钮（图标 + title + aria-label） */
+    /* 渲染级（2026-11-20 起）: 顶栏不再放「返回会话」；面板整个出错时的错误页带着它，用户不会被困住。
+       设置里的那一个出口在 verify/ui-v6-settings.mjs 里核对。 */
     const collectExitButtons = (node, hits = []) => {
       if (!node || typeof node !== 'object') return hits;
       if (node.props && typeof node.props.className === 'string' &&
@@ -722,17 +725,23 @@ ok('client 提供「返回会话」出口：官方 selectPanel(null)', /selectPa
       for (const child of node.children || []) collectExitButtons(child, hits);
       return hits;
     };
-    let exitBtn = null, render2Err = null;
+    let headExits = -1, exitBtn = null, render2Err = null;
     try {
       const boundaryEl = main[1]();
       const proAppEl = boundaryEl.children[0];
-      const hits = collectExitButtons(proAppEl.type(proAppEl.props));
+      headExits = collectExitButtons(proAppEl.type(proAppEl.props)).length;
+      const crashed = new boundaryEl.type({ root: true, actions: actions2 });
+      crashed.state = { error: new Error('测试：面板坏了') };
+      const hits = collectExitButtons(crashed.render());
       if (hits.length === 1) exitBtn = hits[0];
     } catch (e) { render2Err = e; }
-    ok('主面板顶栏渲染出唯一的「返回会话」按钮（图标 + title + aria-label）',
-      render2Err === null && !!exitBtn && exitBtn.props.type === 'button' &&
-      exitBtn.props.title === '返回会话' && exitBtn.props['aria-label'] === '返回会话',
-      render2Err ? render2Err.message : JSON.stringify(exitBtn && exitBtn.props));
+    ok('主面板顶栏不渲染「返回会话」；最外层错误页渲染出唯一的「返回会话」文字按钮',
+      render2Err === null && headExits === 0 && !!exitBtn && exitBtn.props.type === 'button' &&
+      (exitBtn.children || []).join('') === '返回会话',
+      render2Err ? render2Err.message : JSON.stringify({ headExits, exit: exitBtn && exitBtn.props }));
+    fakeLayout.calls.length = 0;
+    try { exitBtn.props.onClick(); } catch (e) { /* 记在下面 */ }
+    ok('错误页的「返回会话」调用 layout.selectPanel(null)', fakeLayout.calls.length === 1 && fakeLayout.calls[0] === null, JSON.stringify(fakeLayout.calls));
   }
 
   /* H3 动态（降级）: layout 不可用时按钮不渲染, 面板其余渲染不受影响 */
@@ -763,7 +772,7 @@ ok('client 提供「返回会话」出口：官方 selectPanel(null)', /selectPa
       };
       exit3 = collect(proAppEl3.type(proAppEl3.props));
     } catch (e) { render3Err = e; }
-    ok('layout 不可用时降级：不渲染返回会话按钮、面板仍可渲染',
+    ok('layout 不可用时降级：面板仍可渲染（顶栏本来就没有返回会话按钮）',
       apply3Err === null && render3Err === null && exit3.length === 0,
       (apply3Err || render3Err || {}).message || ('exit=' + exit3.length));
   }

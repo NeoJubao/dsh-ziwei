@@ -530,7 +530,6 @@ function HomeView(props) {
           onChange: function (ev) { setAsk(ev.target.value); }
         }),
         h('button', { className: 'zp-send', type: 'submit', title: t('homeSend'), 'aria-label': t('homeSend') }, h(Icon, { name: 'send' }))),
-      h('p', { key: 'hint', className: 'zp-hint' }),
       h('div', { key: 'chips', className: 'zp-chips' },
         h('button', { className: 'zp-chip', type: 'button', onClick: function () { homeOpen(focusRow.id, { tab: 'daily' }); } }, t('homeChipToday')),
         h('button', {

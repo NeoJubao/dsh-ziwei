@@ -82,16 +82,23 @@
   font-size: 14px;
   color: var(--zp-ink-3);
 }
+/* 回首页：命盘页顶栏的第一个控件（箭头 + 星图） */
 .zp-crumb-home {
-  padding: 4px 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 32px;
+  margin-right: 6px;
+  padding: 0 8px 0 4px;
   border: 0;
-  border-radius: 4px;
+  border-radius: 8px;
   background: transparent;
   color: var(--zp-ink-3);
   font-size: 14px;
   white-space: nowrap;
 }
-.zp-crumb-home:hover { background: var(--zp-hover); color: var(--zp-ink) }
+.zp-root .zp-crumb-home { color: var(--zp-ink-3) }
+.zp-root .zp-crumb-home:hover { background: var(--zp-hover); color: var(--zp-ink) }
 .zp-crumb-name {
   overflow: hidden;
   color: var(--zp-ink);
@@ -152,8 +159,8 @@
   backdrop-filter: blur(12px);
 }
 .zp-icon-btn.zp-plain { border-color: transparent; background: transparent }
-/* 「返回会话」：顶栏第一个控件，常驻 */
-.zp-exit { color: var(--zp-ink) }
+/* 「返回会话」：不在顶栏里了，只出现在设置的最后一行和最外层的错误页（layout.md §5） */
+.zp-root .zp-exit { color: var(--zp-ink-2) }
 
 .zp-btn {
   display: inline-flex;
@@ -395,6 +402,7 @@
   font-size: 13px;
   color: var(--zp-ink-2);
 }
+.zp-crash-acts { display: flex; flex-wrap: wrap; gap: 8px }
 
 /* ---------------- 减少动态效果：界面过渡和动画全部关掉（3D 只画静止的一帧，由 sky.js 处理） ---------------- */
 @media (prefers-reduced-motion: reduce) {

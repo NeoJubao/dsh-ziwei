@@ -21,6 +21,8 @@
   "setUpToDate": ["已是最新（{version}）", "Up to date ({version})"],
   "setUpdateAvailable": ["有新版本 {latest}，在终端执行：", "Version {latest} is available. Run in a terminal:"],
   "setUpdateFailed": ["检查失败：{reason}", "Check failed: {reason}"],
+  "setExit": ["回到 DSH 对话", "Back to the DSH conversation"],
+  "setExitHint": ["离开紫微面板，回到 DeepSeek Harness 的对话界面；也可以直接点侧栏里的会话", "Leave this panel and return to the DeepSeek Harness conversation; clicking a session in the sidebar works too"],
   "setAbout": ["排盘依据《紫微斗数全书》安星诀，与开源库 iztro 逐项核对过；填了出生城市就按经度和均时差校正真太阳时。仅供研究和参考。", "Chart placement follows the classic star-placement rules and is checked field by field against the open-source iztro library. With a birth city, true solar time is corrected for longitude and the equation of time. For research and reference only."],
   "setSignature": ["紫微师 · 金聚｜道商意象紫微九诀", "紫微师 · 金聚｜道商意象紫微九诀"],
   "setContact": ["微信：neo2025new", "WeChat: neo2025new"]

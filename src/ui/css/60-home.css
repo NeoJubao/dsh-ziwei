@@ -23,6 +23,9 @@
 .zp-home {
   position: absolute;
   inset: 0;
+  /* 自己成一个层叠上下文，排在顶栏（z-index: 2）下面：首页里再高的 z-index（没有 3D 时盖住对话栏的星图区、
+     标签的菜单）也盖不到顶栏的按钮上。少了这一行，关掉 3D 后右上角的按钮点不动（2026-11-20 真机） */
+  z-index: 0;
   container-type: inline-size;
   display: grid;
   place-items: end center;

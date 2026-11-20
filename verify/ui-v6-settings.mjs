@@ -40,8 +40,8 @@ export default async function settingsChecks(t) {
   gear().node.focus();
   rt.click(gear());
   eq('点顶栏的设置：div.zp-modal[role=dialog]，有名字、aria-modal、MODAL 区域', [!!modal(), attr(modal(), 'role'), attr(modal(), 'aria-modal'), attr(modal(), 'aria-label'), attr(modal(), 'data-region')], [true, 'dialog', 'true', '设置', 'MODAL']);
-  eq('六块：外观、自动打开、首页 3D 星图、本机数据、版本、关于', [findByClass(modal(), 'zp-setting').map((r) => text(find(r, (n) => n.type === 'b')[0])), findByClass(modal(), 'zp-about').length >= 1],
-    [['外观', '启动时自动打开工作台', '首页 3D 星图', '本机数据', '版本 ' + t.version], true]);
+  eq('七块：外观、自动打开、首页 3D 星图、本机数据、版本、回到 DSH 对话、关于', [findByClass(modal(), 'zp-setting').map((r) => text(find(r, (n) => n.type === 'b')[0])), findByClass(modal(), 'zp-about').length >= 1],
+    [['外观', '启动时自动打开工作台', '首页 3D 星图', '本机数据', '版本 ' + t.version, '回到 DSH 对话'], true]);
   ok('弹层里每个按钮都有文字或名字', find(modal(), (n) => n.type === 'button').every((n) => text(n).trim() || attr(n, 'aria-label')));
   ok('焦点进了弹层', modal().node.contains(rt.doc.activeElement));
   rt.key(modal(), 'Escape');
@@ -139,5 +139,28 @@ export default async function settingsChecks(t) {
   eq('四次点击一共四次请求（没有轮询、没有自动重试）', versionCalls().length, 4);
   timers.runAll(); rt.flush(); await step();
   eq('放着不动不会再请求', versionCalls().length, 4);
+
+  section('v6 设置：回到 DSH 对话（顶栏不再有「返回会话」，出口在这里）');
+  {
+    const exitBtn = () => button(rowOf('回到 DSH 对话'), '返回会话');
+    eq('最后一行有「返回会话」按钮（type=button，带 zp-exit）', [!!exitBtn(), attr(exitBtn(), 'type'), classesOf(exitBtn()).includes('zp-exit')], [true, 'button', true]);
+    env.layout.calls.length = 0;
+    rt.click(exitBtn());
+    eq('点了：关掉设置，调用 layout.selectPanel(null)', [!!modal(), env.layout.calls], [false, [null]]);
+  }
   rt.unmount();
+
+  /* layout 服务不可用：没有这一行，其余照常 */
+  {
+    const env2 = bootRuntime(t.client, { now: NOW, services: { layout: undefined } });
+    if (env2.error) { ok('v6 bundle 装载（没有 layout）', false, env2.error.message); return; }
+    env2.rt.mount(env2.h(env2.Main));
+    env2.P.openModal('settings');
+    env2.rt.flush();
+    const m2 = findByClass(env2.rt.tree(), 'zp-modal')[0];
+    eq('layout 服务不可用时：设置里没有「回到 DSH 对话」这一行，别的行都在',
+      [!!m2, findByClass(m2, 'zp-setting').map((r) => text(find(r, (n) => n.type === 'b')[0])).includes('回到 DSH 对话'), findByClass(m2, 'zp-setting').length, findByClass(env2.rt.tree(), 'zp-exit').length],
+      [true, false, 5, 0]);
+    env2.rt.unmount();
+  }
 }
