@@ -181,6 +181,8 @@
   font-size: 12px;
   line-height: 18px;
 }
+/* 表单里的分段选项按内容宽度排，不拉满一行 */
+.zp-field > .zp-seg { align-self: flex-start }
 .zp-field-row { display: flex; gap: 8px }
 .zp-field-row > * { flex: 1; min-width: 0 }
 .zp-input {

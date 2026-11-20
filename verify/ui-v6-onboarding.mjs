@@ -35,7 +35,8 @@ const byText = (tree, type, label) => find(tree, (n) => n.type === type && (attr
 const btn = (tree, label) => byText(tree, 'button', label);
 const inputByLabel = (tree, label) => find(tree, (n) => n.type === 'input' && attr(n, 'aria-label') === label)[0] || null;
 const fieldOf = (tree, label) => find(tree, (n) => n.type === 'div' && classesOf(n).includes('zp-field') && find(n, (m) => attr(m, 'aria-label') === label).length > 0)[0] || null;
-const tablist = (tree, label) => find(tree, (n) => attr(n, 'role') === 'tablist' && attr(n, 'aria-label') === label)[0] || null;
+/* 表单里的选项是单选组（radiogroup > radio[aria-checked]），不是切换视图的页签 */
+const tablist = (tree, label) => find(tree, (n) => attr(n, 'role') === 'radiogroup' && attr(n, 'aria-label') === label)[0] || null;
 const unnamedButtons = (tree) => find(tree, (n) => n.type === 'button' && !attr(n, 'aria-label') && !text(n).trim()).length;
 const unnamedControls = (tree) => find(tree, (n) => ['input', 'select', 'textarea'].includes(n.type) && !attr(n, 'aria-label') && !attr(n, 'aria-labelledby')).length;
 
@@ -459,14 +460,14 @@ export default async function onboardingChecks(t) {
       [s && s.type, attr(s, 'role'), attr(s, 'aria-modal'), attr(s, 'aria-label'), attr(s, 'data-region')], ['aside', 'dialog', 'true', '新建命盘', 'SHEET']);
     eq('没有草稿：按 DEFAULT_FORM 预填', [val('称呼'), val('年'), val('月'), val('日'), val('时'), val('分')], ['', 1990, 6, 15, 15, 30]);
     for (const label of ['称呼', '年', '月', '日', '时', '分', '出生城市（选填）', '职业 / 想问的方向']) ok(`表单有「${label}」输入框`, !!inputByLabel(s, label));
-    for (const label of ['历法', '性别', '年柱分界', '月柱分界', '晚子时（23–24 点出生）', '闰月出生']) ok(`表单有「${label}」选项（tablist）`, !!tablist(s, label));
+    for (const label of ['历法', '性别', '年柱分界', '月柱分界', '晚子时（23–24 点出生）', '闰月出生']) ok(`表单有「${label}」选项（单选组 radiogroup）`, !!tablist(s, label));
     const more = find(s, (n) => n.type === 'details')[0];
     eq('四项口径和职业在「更多选项」里', [classesOf(more), text(find(more, (n) => n.type === 'summary')[0]),
       !!inputByLabel(more, '职业 / 想问的方向'), !!tablist(more, '年柱分界'), !!tablist(more, '闰月出生')], [['zp-more'], '更多选项', true, true, true]);
     const hints = findByClass(more, 'zp-field-hint').map(text);
     eq('四项口径各带一行说明（v5 的文字）', hints, ['新的一年从哪天算起，只影响四柱的年柱', '只影响四柱的月柱，不影响命宫和星曜',
       '晚上 11 点到 12 点之间出生，算当天还是第二天', '只在农历闰月出生时有影响']);
-    eq('口径的选项文字', ['年柱分界', '月柱分界', '晚子时（23–24 点出生）', '闰月出生'].map((l) => find(tablist(s, l), (n) => attr(n, 'role') === 'tab').map(text)),
+    eq('口径的选项文字', ['年柱分界', '月柱分界', '晚子时（23–24 点出生）', '闰月出生'].map((l) => find(tablist(s, l), (n) => attr(n, 'role') === 'radio').map(text)),
       [['正月初一', '立春'], ['农历月', '节气'], ['算第二天', '算当天'], ['下半月算下个月', '整月算本月']]);
     eq('每个输入控件有名字', unnamedControls(s), 0);
     eq('每个按钮有文字或 aria-label', unnamedButtons(s), 0);

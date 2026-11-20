@@ -132,7 +132,7 @@ function BirthFormFields(props) {
   };
   const choice = function (key, labelKey, hintKey, value, items) {
     return sheetField(key, t(labelKey), h(Seg, {
-      label: t(labelKey), value: value, items: items, onChange: function (v) { setSetting(key, v); }
+      radio: true, label: t(labelKey), value: value, items: items, onChange: function (v) { setSetting(key, v); }
     }), t(hintKey));
   };
   return h('form', {
@@ -144,7 +144,7 @@ function BirthFormFields(props) {
     'aria-label': t('sheetName'), onChange: function (ev) { set({ name: ev.target.value }); }
   })),
   sheetField('calendar', t('sheetCalendar'), h(Seg, {
-    label: t('sheetCalendar'), value: lunar ? 'lunar' : 'solar',
+    radio: true, label: t('sheetCalendar'), value: lunar ? 'lunar' : 'solar',
     items: [{ id: 'solar', label: t('obSolar') }, { id: 'lunar', label: t('obLunar') }],
     onChange: function (v) { set({ calendar: v, isLeap: false }); }
   })),
@@ -162,7 +162,7 @@ function BirthFormFields(props) {
     sheetNumber('h', t('sheetHour'), f.hour, 0, 23, function (v) { set({ hour: v }); }),
     sheetNumber('mi', t('sheetMinute'), f.minute, 0, 59, function (v) { set({ minute: v }); }))),
   sheetField('gender', t('sheetGender'), h(Seg, {
-    label: t('sheetGender'), value: f.gender === 'female' ? 'female' : 'male',
+    radio: true, label: t('sheetGender'), value: f.gender === 'female' ? 'female' : 'male',
     items: [{ id: 'male', label: t('obMale') }, { id: 'female', label: t('obFemale') }],
     onChange: function (v) { set({ gender: v }); }
   })),

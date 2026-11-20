@@ -49,6 +49,8 @@ function auditTree(tree) {
     if (n.type === 'button' && !text(n).trim() && !named) problems.push('没有名字的按钮 <' + (attr(n, 'className') || '') + '>');
     if (role === 'tab' && !chain.some((a) => attr(a, 'role') === 'tablist')) problems.push('页签不在 tablist 里：' + text(n));
     if (role === 'tablist' && !named) problems.push('tablist 没有名字');
+    if (role === 'radio' && !chain.some((a) => attr(a, 'role') === 'radiogroup')) problems.push('单选项不在 radiogroup 里：' + text(n));
+    if (role === 'radiogroup' && !named) problems.push('radiogroup 没有名字');
     if ((n.type === 'input' || n.type === 'select' || n.type === 'textarea') && attr(n, 'type') !== 'hidden' && !named) {
       problems.push('输入控件没有名字 <' + n.type + ' ' + (attr(n, 'placeholder') || attr(n, 'className') || '') + '>');
     }
@@ -146,6 +148,8 @@ export default async function sweepChecks(t) {
     check('改生辰');
     P.openModal('settings');
     check('设置');
+    P.openModal('model');
+    check('模型选择');
     P.closeLayers();
 
     store.openChart(a.id);
@@ -203,5 +207,5 @@ export default async function sweepChecks(t) {
   await run(1300, '宽档');
   await run(900, '中档');
   await run(400, '窄档');
-  ok(`三档各走一遍主要状态（共 ${visited} 个画面）：按钮、页签、输入控件、模态层都合规`, visited >= 80 && failures.length === 0, failures.slice(0, 6).join(' | ') + (failures.length > 6 ? ` …共 ${failures.length} 处` : ''));
+  ok(`三档各走一遍主要状态（共 ${visited} 个画面）：按钮、页签、单选组、输入控件、模态层都合规`, visited >= 87 && failures.length === 0, failures.slice(0, 6).join(' | ') + (failures.length > 6 ? ` …共 ${failures.length} 处` : ''));
 }
