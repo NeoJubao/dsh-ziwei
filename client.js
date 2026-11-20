@@ -2672,6 +2672,20 @@ const DICT = {
     "scopeQuickDecade": "现在走{palace}大限（{from}–{to} 岁），重心在{theme}。",
     "scopeQuickChildhood": "现在是童限（{age} 岁），看{palace}，重心在{theme}。",
     "scopeQuickToday": "流日命宫在{palace}，{lu}化禄、{ji}化忌；重心在{theme}。",
+    "scopeStripNow": "此刻",
+    "scopeNowDecadal": "{from}–{to} 岁 · {palace}",
+    "scopeNowChildhood": "童限 {age} 岁 · {palace}",
+    "scopeNowYearly": "{year} {gz} · {palace}",
+    "scopeNowMonthly": "{unit} {gz} · {palace}",
+    "scopeNowDaily": "{m}月{d}日 {gz} · {palace}",
+    "scopeStripDecades": "十二个大限",
+    "scopeStripDecadeTitle": "{from}–{to} 岁，{gz}，走{palace}",
+    "scopeStripYears": "{from}–{to} 岁这十年",
+    "scopeStripYearsChildhood": "起运前这几年",
+    "scopeStripYearTitle": "{year} {gz}年，虚岁 {age}",
+    "scopeStripMonths": "农历 {year} {gz}年",
+    "scopeStripDays": "{year}年{m}月",
+    "scopeStripWeekdays": "一|二|三|四|五|六|日",
     "aiFailed": "解读失败",
     "aiNoStream": "浏览器不支持流式响应",
     "aiStopped": "已停止，内容可能不完整，可以接着写",
@@ -2889,12 +2903,14 @@ const DICT = {
     "chartEmptyBrief": "这一宫没有主星，看对宫来借星。",
     "chartKvMinor": "辅星",
     "chartKvAdj": "杂曜",
-    "chartKvTrio": "三方四正",
+    "chartKvOpp": "对宫",
+    "chartKvTri": "三合",
+    "chartKvFly": "{stem}干四化",
+    "chartPalaceTheme": "看{theme}",
     "chartKvDecade": "大限",
     "chartDecadeAges": "{from}–{to} 岁",
     "chartNone": "—",
     "chartListSep": "、",
-    "chartTrioSep": " · ",
     "chartScopeTag": "{prefix}·{palace}",
     "chartPrefixDecadal": "限",
     "chartPrefixYearly": "年",
@@ -3096,6 +3112,20 @@ const DICT = {
     "scopeQuickDecade": "You are in the {palace} decade (ages {from}–{to}); the focus is {theme}.",
     "scopeQuickChildhood": "This is the childhood period (age {age}), read from {palace}; the focus is {theme}.",
     "scopeQuickToday": "Today's day palace is {palace}: {lu} 禄, {ji} 忌; the focus is {theme}.",
+    "scopeStripNow": "Right now",
+    "scopeNowDecadal": "Ages {from}–{to} · {palace}",
+    "scopeNowChildhood": "Childhood, age {age} · {palace}",
+    "scopeNowYearly": "{year} {gz} · {palace}",
+    "scopeNowMonthly": "{unit} {gz} · {palace}",
+    "scopeNowDaily": "{m}/{d} {gz} · {palace}",
+    "scopeStripDecades": "The twelve decades",
+    "scopeStripDecadeTitle": "Ages {from}–{to}, {gz}, on {palace}",
+    "scopeStripYears": "The ten years of ages {from}–{to}",
+    "scopeStripYearsChildhood": "The years before the first decade",
+    "scopeStripYearTitle": "{year} ({gz}), nominal age {age}",
+    "scopeStripMonths": "Lunar year {year} ({gz})",
+    "scopeStripDays": "{year}-{m}",
+    "scopeStripWeekdays": "M|T|W|T|F|S|S",
     "aiFailed": "The reading failed",
     "aiNoStream": "This browser cannot read a streamed response",
     "aiStopped": "Stopped; the answer may be incomplete. You can continue it",
@@ -3313,12 +3343,14 @@ const DICT = {
     "chartEmptyBrief": "No major star here; read the stars of the opposite palace.",
     "chartKvMinor": "Minor stars",
     "chartKvAdj": "Other stars",
-    "chartKvTrio": "Trines and opposite",
+    "chartKvOpp": "Opposite",
+    "chartKvTri": "Trines",
+    "chartKvFly": "From stem {stem}",
+    "chartPalaceTheme": "about {theme}",
     "chartKvDecade": "Decade",
     "chartDecadeAges": "ages {from}–{to}",
     "chartNone": "—",
     "chartListSep": ", ",
-    "chartTrioSep": " · ",
     "chartScopeTag": "{prefix}·{palace}",
     "chartPrefixDecadal": "Dec",
     "chartPrefixYearly": "Yr",
@@ -4905,6 +4937,182 @@ function quickLook(chart, today) {
   return { soul: soul, patterns: patterns, decade: decade, today: todayInfo };
 }
 ZWUI.quickLook = quickLook;
+
+/* ---------- 时间条（spec 2026-11-20 §3.8）----------
+ * 时间卡下面那一排可以直接点的格子：不用一下一下翻，直接跳到某个大限、某一年、某个月、某一天。
+ * scopeStrip(chart, tab, when, today) → { kind, cols, head, title, items } 或 null（排不出运限时）。
+ *   natal    kind 'now'：此刻的大限 / 流年 / 流月 / 流日各一行，items: [{ key: tab, label, text, target: today }]
+ *   decadal  十二个大限，4 列：label '32–41'，sub 这个大限落在本命哪一宫
+ *   yearly   when 所在大限的十年（童限是出生到起运前那几年），5 列：label 公历年，sub 干支
+ *   monthly  when 所在农历年的十二个流月单位，6 列：label 正月…腊月
+ *   daily    when 所在公历月的月历，7 列、6 行（前后补上相邻月的日子，点了就翻到那个月）；head 是周一到周日
+ * 每一项：{ key, label, sub?, title?, on（现在看的这一格）, now（今天所在的那一格）, dim?（月历里相邻月的日子）,
+ *           far?（月历里离选中那周超过一周的格子，左栏不够高时收起来）,
+ *           target: { y, m, d } | null（点了跳到哪天；null = 不可点：出生以前、超出最后一个大限或 2100 年） }
+ * 跳转的落点和前后翻（stepScope）同一个规则：流年、大限落在同一个农历月日（日子按那个月的天数截），
+ * 翻进出生那一年时停在出生日。 */
+const SCOPE_GAN = '甲乙丙丁戊己庚辛壬癸';
+const SCOPE_ZHI = '子丑寅卯辰巳午未申酉戌亥';
+
+/* 农历年的干支（1984 是甲子年） */
+function scopeYearGanzhi(year) {
+  const n = ((year - 1984) % 60 + 60) % 60;
+  return SCOPE_GAN.charAt(n % 10) + SCOPE_ZHI.charAt(n % 12);
+}
+
+/* 这一天排得出运限吗：不早于出生、虚岁不超过最后一个大限、在农历数据范围内（不调引擎） */
+function scopeInRange(chart, w) {
+  if (!scopeValidDate(w)) return false;
+  const birth = scopeBirthDate(chart);
+  if (scopeDayNum(w) < scopeDayNum(birth)) return false;
+  const l = scopeLunar(w);
+  return !!l && l.year - scopeBirthLunarYear(chart) + 1 <= scopeMaxAge(chart);
+}
+
+/* 农历 ty 年里和 l 同一个月日的那天（日子按那个月的天数截，闰月按本月）；早于出生就停在出生日；排不出来是 null */
+function scopeSameLunarDay(chart, l, ty) {
+  const by = scopeBirthLunarYear(chart);
+  if (ty < by) return null;
+  const days = E.lunarMonthDays(ty, l.month, false);
+  const s = days ? E.lunar2solar(ty, l.month, Math.min(l.day, days), false) : null;
+  if (!s) return null;
+  let w = { y: s.y, m: s.m, d: s.d };
+  const birth = scopeBirthDate(chart);
+  if (scopeDayNum(w) < scopeDayNum(birth)) w = ty === by ? birth : null;
+  return w && scopeInRange(chart, w) ? w : null;
+}
+
+function scopeStrip(chart, tab, when, today) {
+  if (!chart || SCOPE_TABS.indexOf(tab) < 0) return null;
+  const hasToday = scopeValidDate(today);
+  if (tab === 'natal') {
+    const h = hasToday ? horoscopeAt(chart, today) : null;
+    if (!h) return null;
+    const pal = function (sc) { return chart.palaces[sc.index].name; };
+    const info = decadalInfo(chart, h);
+    const l = scopeLunar(today), u = lunarUnit(today);
+    const items = [];
+    if (info) {
+      items.push({
+        key: 'decadal', label: scopeTabName('decadal'), target: today,
+        text: info.childhood ? t('scopeNowChildhood', { age: info.age, palace: pal(h.decadal) })
+          : t('scopeNowDecadal', { from: info.range[0], to: info.range[1], palace: pal(h.decadal) })
+      });
+    }
+    items.push({ key: 'yearly', label: scopeTabName('yearly'), target: today, text: t('scopeNowYearly', { year: l.year, gz: h.yearly.stem + h.yearly.branch, palace: pal(h.yearly) }) });
+    items.push({ key: 'monthly', label: scopeTabName('monthly'), target: today, text: t('scopeNowMonthly', { unit: u.label, gz: h.monthly.stem + h.monthly.branch, palace: pal(h.monthly) }) });
+    items.push({ key: 'daily', label: scopeTabName('daily'), target: today, text: t('scopeNowDaily', { m: today.m, d: today.d, gz: h.daily.stem + h.daily.branch, palace: pal(h.daily) }) });
+    return { kind: 'now', cols: 1, head: null, title: t('scopeStripNow'), items: items };
+  }
+  if (!scopeValidDate(when)) return null;
+  const h = horoscopeAt(chart, when);
+  const l = scopeLunar(when);
+  if (!h || !l) return null;
+  const by = scopeBirthLunarYear(chart);
+  const tl = hasToday ? scopeLunar(today) : null;
+  const info = decadalInfo(chart, h);
+
+  if (tab === 'decadal') {
+    const todayInfo = hasToday ? decadalInfo(chart, horoscopeAt(chart, today)) : null;
+    /* 现在是这个大限的第几年（0–9），跳到别的大限时落在同一年 */
+    const offset = info && !info.childhood ? Math.max(0, Math.min(9, l.year - (by + info.range[0] - 1))) : 0;
+    const items = E.decadalList(chart).map(function (dc) {
+      const from = dc.ageRange[0], to = dc.ageRange[1];
+      return {
+        key: 'd' + from, label: from + '–' + to, sub: dc.palaceName,
+        title: t('scopeStripDecadeTitle', { from: from, to: to, palace: dc.palaceName, gz: dc.stem + dc.branch }),
+        on: !!info && !info.childhood && info.range[0] === from,
+        now: !!todayInfo && !todayInfo.childhood && todayInfo.range[0] === from,
+        target: scopeSameLunarDay(chart, l, by + from - 1 + offset)
+      };
+    });
+    return { kind: 'decadal', cols: 4, head: null, title: t('scopeStripDecades'), items: items };
+  }
+
+  if (tab === 'yearly') {
+    if (!info) return null;
+    const items = [];
+    for (let age = info.range[0]; age <= info.range[1]; age++) {
+      const year = by + age - 1, gz = scopeYearGanzhi(year);
+      items.push({
+        key: 'y' + year, label: String(year), sub: gz, title: t('scopeStripYearTitle', { year: year, gz: gz, age: age }),
+        on: l.year === year, now: !!tl && tl.year === year,
+        target: scopeSameLunarDay(chart, l, year)
+      });
+    }
+    const title = info.childhood ? t('scopeStripYearsChildhood') : t('scopeStripYears', { from: info.range[0], to: info.range[1] });
+    return { kind: 'yearly', cols: 5, head: null, title: title, items: items };
+  }
+
+  if (tab === 'monthly') {
+    const u = lunarUnit(when), tu = hasToday ? lunarUnit(today) : null;
+    const birth = scopeBirthDate(chart), bu = lunarUnit(birth);
+    const items = [];
+    for (let m = 1; m <= 12; m++) {
+      const s = E.lunar2solar(u.year, m, 1, false);
+      let target = s ? { y: s.y, m: s.m, d: s.d } : null;
+      /* 出生那个月：落在出生日 */
+      if (target && bu && bu.key === u.year + '-' + m && scopeDayNum(target) < scopeDayNum(birth)) target = birth;
+      if (target && !scopeInRange(chart, target)) target = null;
+      items.push({
+        key: 'm' + m, label: birthLunarMonthText(m, false), on: u.month === m, now: !!tu && tu.key === u.year + '-' + m, target: target
+      });
+    }
+    return { kind: 'monthly', cols: 6, head: null, title: t('scopeStripMonths', { year: u.year, gz: scopeYearGanzhi(u.year) }), items: items };
+  }
+
+  /* daily：when 所在公历月的月历，周一开头，固定 6 行 */
+  const first = scopeDayNum({ y: when.y, m: when.m, d: 1 });
+  /* 1970-01-01（日序号 0）是周四：周一 = 0 的星期序号 */
+  const lead = ((first + 3) % 7 + 7) % 7;
+  const todayNum = hasToday ? scopeDayNum(today) : NaN, whenNum = scopeDayNum(when);
+  /* 左栏不够高时月历只留三周：选中那天所在的一周和它前后各一周（在头尾时往里收），其余的格子标 far */
+  const selWeek = Math.floor((whenNum - (first - lead)) / 7);
+  const nearFrom = Math.max(0, Math.min(3, selWeek - 1));
+  const items = [];
+  for (let i = 0; i < 42; i++) {
+    const n = first - lead + i, w = scopeFromDayNum(n), week = Math.floor(i / 7);
+    items.push({
+      key: 'x' + n, label: String(w.d), on: n === whenNum, now: n === todayNum, dim: w.m !== when.m,
+      far: week < nearFrom || week > nearFrom + 2,
+      target: scopeInRange(chart, w) ? w : null
+    });
+  }
+  return {
+    kind: 'daily', cols: 7, head: t('scopeStripWeekdays').split('|'), title: t('scopeStripDays', { year: when.y, m: when.m }), items: items
+  };
+}
+ZWUI.scopeStrip = scopeStrip;
+
+/* ---------- 宫位卡的补充信息 ----------
+ * palaceFacts(chart, index) → { theme, trio, fly }
+ *   theme  这一宫管什么（palaceTheme）
+ *   trio   三方四正：[{ index, name, rel: 'opp' | 'tri', stars: [主星名…]（空宫是 []） }]，对宫在前
+ *   fly    宫干四化：这一宫的天干让哪四颗星化禄 / 权 / 科 / 忌，各落在本命哪一宫
+ *          [{ mu: '禄', star, index（-1 = 盘上没有这颗星）, palace }]。四化表取引擎的（大限天干就是宫干） */
+function palaceFacts(chart, index) {
+  const p = chart && chart.palaces ? chart.palaces[index] : null;
+  if (!p) return null;
+  const rel = relatedPalaces(index);
+  const trio = [[rel.opp, 'opp'], [rel.tri[0], 'tri'], [rel.tri[1], 'tri']].map(function (x) {
+    const q = chart.palaces[x[0]];
+    return { index: x[0], name: q.name, rel: x[1], stars: q.major.map(function (s) { return s.name; }) };
+  });
+  let names = [];
+  try {
+    const hit = (E.decadalList(chart) || []).filter(function (dc) { return dc.index === index; })[0];
+    names = hit && Array.isArray(hit.mutagen) ? hit.mutagen : [];
+  } catch (e) { names = []; }
+  const fly = names.map(function (star, k) {
+    let at = -1;
+    chart.palaces.forEach(function (q, i) {
+      if (q.major.concat(q.minor).some(function (s) { return s.name === star; })) at = i;
+    });
+    return { mu: SCOPE_MU[k], star: star, index: at, palace: at >= 0 ? chart.palaces[at].name : '' };
+  });
+  return { theme: palaceTheme(p.name), stem: p.stem, trio: trio, fly: fly };
+}
+ZWUI.palaceFacts = palaceFacts;
 /* ---- src/ui/25-board.js ---- */
 /* 25-board：盘面几何——三方四正、连线端点、方向键（T3c）
  * 三方四正用 20-util 的 relatedPalaces（对宫 +6，三合 +4 / +8）。 */
@@ -5000,6 +5208,7 @@ ZWUI.linePoints = linePoints;
  * ---------------- 导航（都不发请求） ----------------
  *   openChart(id, { tab, when, panel }?) → boolean   goHome()   setTab(tab)（'report' 等于 setStage('report')）
  *   setStage(stage)   selectPalace(i)   stepScope(dir)（到头时状态不变、给提示）   backToNow()
+ *   setWhen({ y, m, d }, tab?) → boolean   时间条：直接跳到某一天（tab 给了就同时切页签）；排不出运限的日子不动
  *   setPane(pane)   setPat(i)   setPanel(open)   setQuote(q|null)（截到 600 字）   setDraft(text, key?)   setReadPos(pos, key?)
  *   patchSession(patch)   UI 自己的字段（onboarding、focusId、introPlayed …）；导航字段、toast、草稿不能从这里改
  *   showToast(text, { error, action, undo })   dismissToast()
@@ -5549,6 +5758,22 @@ function createStore(deps) {
     if (cur.tab !== 'natal' && h && h[cur.tab]) patch.sel = h[cur.tab].index;
     return patchSessionRaw(patch);
   }
+  /* 时间条：直接跳到某一天。tab 给了就同时切到那个页签（本命卡的「此刻」四行）。
+     排不出运限的日子（出生以前、超出范围）不动，返回 false。选中宫跟到这一层的运限命宫，和前后翻一样 */
+  function setWhen(when, tab) {
+    const cur = state.session;
+    const entry = currentEntry();
+    const nextTab = tab === undefined ? cur.tab : tab;
+    if (!entry || nextTab === 'natal' || SCOPE_TABS.indexOf(nextTab) < 0 || !storeValidWhen(when)) return false;
+    const same = cur.when.y === when.y && cur.when.m === when.m && cur.when.d === when.d;
+    const w = same ? cur.when : { y: when.y, m: when.m, d: when.d };
+    const h = horoscopeFor(entry, w);
+    if (!h || !h[nextTab]) return false;
+    const patch = { when: w, sel: h[nextTab].index };
+    if (cur.tab !== nextTab) { patch.tab = nextTab; patch.pane = 'scope'; }
+    if (cur.stage !== 'board') patch.stage = 'board';
+    return patchSessionRaw(patch);
+  }
   function setPane(pane) {
     if (STORE_PANES.indexOf(pane) < 0) return false;
     return patchSessionRaw({ pane: pane });
@@ -5966,6 +6191,7 @@ function createStore(deps) {
     selectPalace: selectPalace,
     stepScope: stepScopeAction,
     backToNow: backToNow,
+    setWhen: setWhen,
     setPane: setPane,
     setPat: setPat,
     setPanel: setPanel,
@@ -8046,7 +8272,9 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
  *         div.zp-panes.zp-seg[role=tablist]   PANES（只在窄档显示）
  *         section.zp-card.zp-scope            SCOPE
  *           div.zp-card-h > h3, div.zp-card-right > button.zp-step × 2
- *           p.zp-when, p.zp-line, div.zp-mut > span > b + i.zp-seal, div.zp-card-f
+ *           p.zp-when, p.zp-line, div.zp-mut > span > b + i.zp-seal,
+ *           div.zp-strip[data-kind]（时间条：div.zp-strip-h + div.zp-strip-grid[data-cols] > button.zp-strip-cell[aria-pressed]；
+ *             本命下是 button.zp-now-row × 4）, div.zp-card-f
  *         section.zp-card.zp-pats             PATTERNS
  *           div.zp-card-h > h3, span.zp-cnt
  *           div.zp-pat-chips > button.zp-pat[aria-pressed] > 名称 + i.zp-lv.zp-lv-ji|zhong|xiong
@@ -8054,7 +8282,7 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
  *         section.zp-card.zp-detail           INSPECTOR
  *           div.zp-card-h > h3.zp-serif > 宫名 + small 干支, span.zp-tag, div.zp-card-right > button.zp-link
  *           div.zp-stars > button.zp-star[aria-pressed]（点星名换解释）
- *           p.zp-brief, dl.zp-kv > dt + dd（dd 里的宫名是 button.zp-kv-link）
+ *           p.zp-brief, dl.zp-kv > dt + dd（dd 里的宫名是 button.zp-kv-link；宫干四化那一行是 dd.zp-fly）
  *       div.zp-board-wrap
  *         div.zp-board                        BOARD；运限层级下加 zp-scoped
  *           button.zp-cell[data-i][aria-pressed] × 12   三方四正加 zp-rel，运限命宫加 zp-scope-focus
@@ -8063,7 +8291,8 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
  *             div.zp-minors > span.zp-good | span.zp-bad
  *             div.zp-adj                      杂曜（开关打开时）
  *             div.zp-cell-foot > span.zp-dec, span.zp-gods
- *           div.zp-center > div.zp-nm（i.zp-orb + 称呼）, div.zp-birth, div.zp-pillars > span（+ small）, div.zp-facts > span, p.zp-warn
+ *           div.zp-center > div.zp-plate > div.zp-nm（i.zp-orb + 称呼）, div.zp-birth, div.zp-pillars > span（+ small）,
+ *             div.zp-facts > span, p.zp-warn, div.zp-cpats（中宫里的格局：div.zp-pat-chips + p.zp-pat-desc）
  *           svg.zp-lines                      三方四正连线；位置没变不重画，没换宫不描线（加 zp-still）
  *     div.zp-rbody                            报告舞台，见 86-reportview.css
  *
@@ -8076,6 +8305,8 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
 }
 .zp-chart.zp-enter > div { animation: zp-rise 240ms ease both }
 .zp-body {
+  /* 格局显示在中宫还是左栏，看这一块有多宽（见「格局」一段的 @container zp-body） */
+  container: zp-body / inline-size;
   display: grid;
   grid-template-columns: clamp(244px, 25%, 316px) minmax(0, 1fr);
   gap: 16px;
@@ -8133,6 +8364,81 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
 }
 .zp-mut .zp-seal { vertical-align: 0 }
 
+/* ---------------- 时间条：直接跳到某个大限 / 年 / 月 / 日 ---------------- */
+.zp-strip { display: flex; flex-direction: column; gap: 4px; min-height: 0 }
+.zp-strip-h { color: var(--zp-ink-4); font-size: 11px; line-height: 16px }
+.zp-strip-grid { display: grid; gap: 2px }
+.zp-strip-grid[data-cols="4"] { grid-template-columns: repeat(4, minmax(0, 1fr)) }
+.zp-strip-grid[data-cols="5"] { grid-template-columns: repeat(5, minmax(0, 1fr)) }
+.zp-strip-grid[data-cols="6"] { grid-template-columns: repeat(6, minmax(0, 1fr)) }
+.zp-strip-grid[data-cols="7"] { grid-template-columns: repeat(7, minmax(0, 1fr)) }
+/* 月历的星期行 */
+.zp-strip-grid > i {
+  color: var(--zp-ink-4);
+  font-size: 10.5px;
+  font-style: normal;
+  line-height: 16px;
+  text-align: center;
+}
+.zp-strip-cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 24px;
+  padding: 2px 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  font-size: 12px;
+  line-height: 16px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+.zp-root .zp-strip-cell { color: var(--zp-ink-2) }
+.zp-root .zp-strip-cell:hover { background: var(--zp-hover); color: var(--zp-ink) }
+.zp-root .zp-strip-cell.zp-dim { color: var(--zp-ink-4) }
+.zp-root .zp-strip-cell[aria-pressed="true"] { background: var(--zp-primary); color: var(--zp-on-primary) }
+.zp-strip-cell:disabled { opacity: .35 }
+.zp-strip-cell small { color: var(--zp-ink-4); font-family: var(--zp-font-serif); font-size: 10.5px; line-height: 14px }
+.zp-strip-cell[aria-pressed="true"] small { color: inherit; opacity: .7 }
+/* 今天所在的那一格：右上角一个金点 */
+.zp-strip-cell.zp-now::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--zp-gold);
+}
+/* 本命下的「此刻」：大限 / 流年 / 流月 / 流日各一行，点了切到那个页签 */
+.zp-strip[data-kind="now"] { gap: 0 }
+.zp-now-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+  margin: 0 -4px;
+  padding: 0 4px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  font-size: 12px;
+  text-align: left;
+  white-space: nowrap;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+.zp-root .zp-now-row { color: var(--zp-ink-2) }
+.zp-root .zp-now-row:hover { background: var(--zp-hover); color: var(--zp-ink) }
+.zp-now-row b { flex: none; min-width: 28px; color: var(--zp-ink-3); font-weight: 400 }
+.zp-now-row span { flex: 1; min-width: 0; overflow: hidden; font-variant-numeric: tabular-nums; text-overflow: ellipsis }
+.zp-now-row .zp-icon { color: var(--zp-ink-4) }
+
 /* ---------------- 格局卡 ---------------- */
 .zp-pat-chips {
   display: flex;
@@ -8186,8 +8492,28 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   -webkit-line-clamp: 2;
 }
 
+/* 中宫里的格局：盘面够宽时格局在这里，左栏的格局卡收起来；窄的时候反过来。两处是同一份状态，同一时间只显示一处 */
+.zp-cpats {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  min-width: 0;
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px solid var(--zp-line-2);
+}
+.zp-cpats .zp-pat-chips { justify-content: center; max-height: 56px }
+.zp-cpats .zp-pat-desc { max-width: 100%; text-align: center }
+@container zp-body (min-width: 980px) {
+  .zp-side .zp-pats { display: none }
+  .zp-cpats { display: flex }
+}
+
 /* ---------------- 宫位卡 ---------------- */
-.zp-card.zp-detail { flex: 1 1 auto; overflow: hidden }
+/* 宫位卡拿左栏剩下的高度（不看自己的内容），所以它是一个尺寸容器：下面按它实际有多高来收内容，不会出现最后一行被裁掉一半 */
+.zp-card.zp-detail { flex: 1 1 0; container: zp-detail / size; overflow: hidden }
 .zp-stars { display: flex; flex-wrap: wrap; gap: 2px 8px }
 .zp-detail .zp-star {
   padding: 0;
@@ -8226,6 +8552,26 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
 .zp-kv-link { padding: 0; border: 0; background: transparent; font-size: 13px }
 .zp-root .zp-kv-link { color: var(--zp-ink) }
 .zp-kv-link:hover { text-decoration: underline }
+/* 这一宫管什么：跟在宫名和干支后面 */
+.zp-theme {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--zp-ink-3);
+  font-size: 12px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+/* 三方四正：一宫一组（宫名 + 主星），三合的两组在同一行，放不下自己换行 */
+.zp-kv-trio { display: flex; flex-wrap: wrap; gap: 0 12px }
+.zp-kv-pal { display: inline-flex; align-items: baseline; gap: 6px; white-space: nowrap }
+.zp-kv-stars { color: var(--zp-ink-3) }
+/* 宫干四化：星名、四化印、落在哪一宫 */
+.zp-fly { display: flex; flex-wrap: wrap; gap: 2px 12px }
+.zp-fly span { display: inline-flex; align-items: center; gap: 2px; white-space: nowrap }
+.zp-fly b { color: var(--zp-c, var(--zp-ink)); font-family: var(--zp-font-serif); font-weight: 600 }
+.zp-fly .zp-seal { margin: 0; vertical-align: 0 }
+.zp-root .zp-fly .zp-kv-link { color: var(--zp-ink-3) }
+.zp-fly .zp-kv-link::before { content: "→"; margin: 0 2px; color: var(--zp-ink-4) }
 
 /* ---------------- 盘面：把高度用满；宽度跟着可用空间在 1.05–1.62 的宽高比之间伸缩 ---------------- */
 .zp-board-wrap {
@@ -8397,10 +8743,25 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   background: radial-gradient(80% 70% at 50% 30%, color-mix(in srgb, var(--zp-zi) 10%, transparent), transparent 70%), var(--zp-raised);
   text-align: center;
 }
-.zp-center > * {
+/* 字都在这块牌子上：它盖在连线（z-index: 0）上面，线从牌子下面穿过，不压在字上 */
+.zp-plate {
   position: relative;
   z-index: 1;
-  text-shadow: 0 0 4px var(--zp-raised), 0 0 8px var(--zp-raised);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(2px, 1cqw, 8px);
+  max-width: 100%;
+  max-height: 100%;
+  min-height: 0;
+  padding: clamp(4px, 1.6cqw, 16px) clamp(6px, 2.4cqw, 24px);
+  overflow: hidden;
+  border: 1px solid var(--zp-line);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--zp-surface) 90%, transparent);
+  box-shadow: 0 8px 24px -16px rgba(0, 0, 0, .5);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
 }
 .zp-nm {
   display: flex;
@@ -8429,7 +8790,6 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   font-size: clamp(12px, 1.9cqw, 13.5px);
   font-weight: 600;
   line-height: 1.2;
-  text-shadow: none;
 }
 .zp-pillars small {
   color: var(--zp-ink-4);
@@ -8483,13 +8843,29 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   .zp-scope-tag { position: absolute; bottom: 2px; left: 4px; margin: 0 }
   .zp-pillars { gap: 2px }
 }
-/* 左栏不够高：先收说明文字，卡片本身不滚动 */
-@container zp-side (max-height: 590px) { .zp-brief { -webkit-line-clamp: 2 } }
+/* 中宫不够高：格局只留名字，说明收起来（悬停在名字上看不到说明，但左栏不够宽时格局本来就在左栏） */
+@container (max-height: 560px) { .zp-cpats .zp-pat-desc { display: none } }
+/* 左栏不够高：按「月历只留三周 → 星曜解释少一行 → 宫干四化 → 时间条」的顺序收，卡片本身不滚动 */
+@container zp-side (max-height: 730px) { .zp-strip-cell.zp-far { display: none } }
+@container zp-side (max-height: 560px) { .zp-strip { display: none } }
+/* 格局卡还在左栏时（盘面不够宽）多占一张卡的高度，上面两档各提前一些 */
+@container zp-body (max-width: 979.98px) {
+  @container zp-side (max-height: 848px) { .zp-strip-cell.zp-far { display: none } }
+  @container zp-side (max-height: 680px) { .zp-strip { display: none } }
+}
+/* 宫位卡按自己的高度收：星曜解释少一行 → 宫干四化 → 解释只留一行 → 不要解释。左栏窄的时候四化要排四行，提前收 */
+@container zp-detail (max-height: 350px) { .zp-brief { -webkit-line-clamp: 2 } }
+@container zp-detail (max-height: 330px) { .zp-kv-fly { display: none } }
+@container zp-detail (max-width: 268px) and (max-height: 400px) { .zp-kv-fly { display: none } }
+@container zp-detail (max-height: 270px) { .zp-brief { -webkit-line-clamp: 1 } }
+@container zp-detail (max-height: 240px) { .zp-brief { display: none } }
+/* 宫位卡窄的时候标题那一行放不下「看什么」，整个不要（留半截省略号没有用） */
+@container zp-detail (max-width: 268px) { .zp-theme { display: none } }
 @container zp-side (max-height: 540px) {
   .zp-pat-desc { -webkit-line-clamp: 1 }
   .zp-side .zp-card { gap: 6px; padding: 8px 12px }
 }
-@container zp-side (max-height: 470px) { .zp-brief, .zp-pat-desc { display: none } }
+@container zp-side (max-height: 470px) { .zp-pat-desc { display: none } }
 
 /* ---------------- 窄档：盘在上，下面一张卡，用三个页签切换，照样一屏 ---------------- */
 .zp-root[data-w="narrow"] .zp-body {
@@ -8511,8 +8887,10 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
 .zp-root[data-w="narrow"] .zp-side[data-pane="scope"] .zp-scope,
 .zp-root[data-w="narrow"] .zp-side[data-pane="pats"] .zp-pats,
 .zp-root[data-w="narrow"] .zp-side[data-pane="detail"] .zp-detail { display: flex }
-.zp-root[data-w="narrow"] .zp-brief { -webkit-line-clamp: 3 }
+.zp-root[data-w="narrow"] .zp-brief { -webkit-line-clamp: 1 }
 .zp-root[data-w="narrow"] .zp-pat-desc { -webkit-line-clamp: 2 }
+/* 窄档一次只看一张卡、高度是定的：时间条和宫干四化不放 */
+.zp-root[data-w="narrow"] .zp-strip, .zp-root[data-w="narrow"] .zp-kv-fly { display: none }
 /* ---- src/ui/css/80-assistant.css ---- */
 /* ================================================================
  * 80-assistant：紫微师面板。宽档和命盘并排（外壳的第二列），中、窄档浮在命盘上
@@ -11383,11 +11761,13 @@ function ModelModal() {
  *   ChartSide          pane（div.zp-side[data-pane]），卡片作为 children 原样往下传
  *   ChartPanes         窄档才渲染：pane、tab、sel（第三个页签是选中宫的宫名）
  *   ScopeCard          tab、when（本命下不看 when）。ScopeReportButton 只选报告状态这一个字符串
- *   PatternCard        当前命盘、pat
- *   PalaceCard         sel、tab、when、showAdj；点星名看解释是组件内状态，换宫（或换盘）时复位
+ *   ScopeStrip         时间条，在时间卡里：tab、when。直接跳到某个大限 / 年 / 月 / 日（store.setWhen）
+ *   PatternCard        当前命盘、pat。盘面够宽时由 CSS 藏起来，格局改在中宫里显示（PatternCenter，同一份状态）
+ *   PalaceCard         sel、tab、when、showAdj；点星名看解释是组件内状态，换宫（或换盘）时复位。
+ *                      多了三样：这一宫管什么、三方四正每一宫的主星、宫干四化落在哪
  *   ChartBoard         只选「是不是运限层级」（div.zp-board 的 zp-scoped）；宫格、中宫、连线的元素只建一次
  *   BoardCell × 12     每格自己选：选中 / 三方四正两个布尔值 + tab、when、showAdj；格子里的字按运限签名 useMemo
- *   BoardCenter        当前命盘、tab、when
+ *   BoardCenter        当前命盘、tab、when。字在 div.zp-plate 上（连线从它下面穿过）；里面的 PatternCenter 另外订阅 pat
  *   BoardLines         sel；layout effect 里量宫格 → ZWUI.linePoints，key 没变不重画；ResizeObserver 看盘面
  * 流式增量只换 readings：这里只有 ScopeReportButton 看它，选出来的是 'idle' | 'running' | 'resume' | 'done'，
  * 写的过程中一直是 'running'，所以整页只在任务开始、结束时各重渲染这一个按钮。
@@ -11660,10 +12040,46 @@ function ScopeCard() {
         name ? h('b', { style: chartStarStyle(name) }, name) : null,
         name ? h('i', { className: CHART_SEAL[k] }, SCOPE_MU[k]) : null);
     })),
+    h(ScopeStrip, null),
     h('div', { className: 'zp-card-f' },
       h('button', { type: 'button', className: 'zp-btn', onClick: natal ? chartReadChart : chartReadScope }, model.readLabel),
       natal ? h(ScopeReportButton, null)
         : (model.isNow ? null : h('button', { type: 'button', className: 'zp-link', onClick: chartBackToNow }, t('chartBackToToday')))));
+}
+
+/* 时间条（spec 2026-11-20 §3.8）：直接跳到某个大限、某一年、某个月、某一天，不用一下一下翻。
+   本命下是「此刻」四行（大限 / 流年 / 流月 / 流日各走到哪），点一行切到那个页签的今天。
+   数据是 24-scope 的 scopeStrip；这里只订阅命盘、页签、日期，选宫不重画。左栏不够高时由 CSS 先把它收起来。 */
+function ScopeStrip() {
+  const m = useStore(chartTimeOf);
+  const store = appStore();
+  const chart = useMemo(function () { return chartOfEntry(m.entry); }, [m.entry]);
+  const today = store.todayOf();
+  const todayKey = today.y + '-' + today.m + '-' + today.d;
+  const strip = useMemo(function () {
+    return chart ? scopeStrip(chart, m.tab, m.when || today, today) : null;
+  }, [chart, m.tab, m.when, todayKey]);
+  if (!strip) return null;
+  if (strip.kind === 'now') {
+    return h('div', { className: 'zp-strip', 'data-kind': 'now', role: 'group', 'aria-label': strip.title }, strip.items.map(function (it) {
+      return h('button', {
+        key: it.key, type: 'button', className: 'zp-now-row',
+        onClick: function () { store.setWhen(it.target, it.key); }
+      }, h('b', null, it.label), h('span', null, it.text), h(Icon, { name: 'caret', size: 12 }));
+    }));
+  }
+  return h('div', { className: 'zp-strip', 'data-kind': strip.kind, role: 'group', 'aria-label': strip.title },
+    h('div', { className: 'zp-strip-h' }, strip.title),
+    h('div', { className: 'zp-strip-grid', 'data-cols': strip.cols },
+      strip.head ? strip.head.map(function (x, i) { return h('i', { key: 'h' + i, 'aria-hidden': true }, x); }) : null,
+      strip.items.map(function (it) {
+        return h('button', {
+          key: it.key, type: 'button', title: it.title,
+          className: 'zp-strip-cell' + (it.now ? ' zp-now' : '') + (it.dim ? ' zp-dim' : '') + (it.far ? ' zp-far' : ''),
+          'aria-pressed': it.on ? 'true' : 'false', disabled: it.target ? undefined : true,
+          onClick: function () { store.setWhen(it.target); }
+        }, it.label, it.sub ? h('small', null, it.sub) : null);
+      })));
 }
 
 /* 报告按钮：字跟着报告状态走，点了都是去报告页（开始写、接着写在报告页上） */
@@ -11672,27 +12088,47 @@ function ScopeReportButton() {
   return h('button', { type: 'button', className: 'zp-btn', onClick: chartOpenReport }, t(CHART_REPORT_KEYS[kind] || CHART_REPORT_KEYS.idle));
 }
 
-/* ---------------- 格局卡 ---------------- */
+/* ---------------- 格局 ----------------
+ * 格局不随选宫和时间变，所以放在同样不动的中宫里（PatternCenter）；盘面窄、中宫放不下时仍在左栏（PatternCard，
+ * 窄档是第二个页签）。两处都渲染、共用 session.pat，由 CSS 按 .zp-body 的宽度只显示一处（css/70-chart.css）。 */
+function chartPatternsOf(chart) {
+  if (!chart) return [];
+  try { return E.detectPatterns(chart) || []; } catch (e) { return []; }
+}
+
+function chartPatChips(list, at) {
+  return h('div', { className: 'zp-pat-chips' }, list.map(function (x, i) {
+    const lv = CHART_LEVELS[x.level] || CHART_LEVELS['\u4e2d'];
+    return h('button', {
+      key: i, type: 'button', className: 'zp-pat', 'aria-pressed': i === at ? 'true' : 'false',
+      onClick: function () { appStore().setPat(i); }
+    }, x.name, h('i', { className: lv[0] }, t(lv[1])));
+  }));
+}
+
 function PatternCard() {
   const m = useStore(chartPatsOf);
   const chart = useMemo(function () { return chartOfEntry(m.entry); }, [m.entry]);
-  const list = useMemo(function () {
-    if (!chart) return [];
-    try { return E.detectPatterns(chart) || []; } catch (e) { return []; }
-  }, [chart]);
+  const list = useMemo(function () { return chartPatternsOf(chart); }, [chart]);
   const at = m.pat >= 0 && m.pat < list.length ? m.pat : 0;
   return h('section', { className: 'zp-card zp-pats', 'data-region': 'PATTERNS' },
     h('div', { className: 'zp-card-h' },
       h('h3', null, t('chartPatsTitle')),
       list.length ? h('span', { className: 'zp-cnt' }, t('chartPatCount', { n: list.length })) : null),
-    list.length ? h('div', { className: 'zp-pat-chips' }, list.map(function (x, i) {
-      const lv = CHART_LEVELS[x.level] || CHART_LEVELS['\u4e2d'];
-      return h('button', {
-        key: i, type: 'button', className: 'zp-pat', 'aria-pressed': i === at ? 'true' : 'false',
-        onClick: function () { appStore().setPat(i); }
-      }, x.name, h('i', { className: lv[0] }, t(lv[1])));
-    })) : null,
+    list.length ? chartPatChips(list, at) : null,
     h('p', { className: 'zp-pat-desc' }, list.length ? list[at].desc : t('chartPatEmpty')));
+}
+
+/* 中宫里的格局：一排格局名，点哪个下面显示哪个的说明。没有格局时不占地方 */
+function PatternCenter() {
+  const m = useStore(chartPatsOf);
+  const chart = useMemo(function () { return chartOfEntry(m.entry); }, [m.entry]);
+  const list = useMemo(function () { return chartPatternsOf(chart); }, [chart]);
+  if (!list.length) return null;
+  const at = m.pat >= 0 && m.pat < list.length ? m.pat : 0;
+  return h('div', { className: 'zp-cpats', role: 'group', 'aria-label': t('chartPatsTitle') },
+    chartPatChips(list, at),
+    h('p', { className: 'zp-pat-desc' }, list[at].desc));
 }
 
 /* ---------------- 宫位卡 ---------------- */
@@ -11726,12 +12162,16 @@ function PalaceCard() {
     if (k) minors.push(sep);
     minors.push(starButton(s, true));
   });
-  const rel = relatedPalaces(sel);
-  const trio = [];
-  [rel.opp, rel.tri[0], rel.tri[1]].forEach(function (idx, k) {
-    if (k) trio.push(t('chartTrioSep'));
-    trio.push(h('button', { type: 'button', className: 'zp-kv-link', onClick: function () { appStore().selectPalace(idx); } }, chart.palaces[idx].name));
-  });
+  /* 三方四正每一宫带上它的主星；宫干四化是这一宫的天干让哪四颗星化禄权科忌、各落在哪一宫（24-scope 的 palaceFacts） */
+  const facts = palaceFacts(chart, sel);
+  const palaceLink = function (idx, name) {
+    return h('button', { type: 'button', className: 'zp-kv-link', onClick: function () { appStore().selectPalace(idx); } }, name);
+  };
+  /* 一宫一组：宫名（可点）+ 它的主星。三合的两宫放在同一个 dd 里，放不下自己换行 */
+  const palGroup = function (x) {
+    return h('span', { className: 'zp-kv-pal' }, palaceLink(x.index, x.name),
+      h('span', { className: 'zp-kv-stars' }, x.stars.length ? x.stars.join(sep) : t('chartEmptyPalace')));
+  };
   const range = p.decadal && p.decadal.range ? p.decadal.range : [0, 0];
   const rows = [h('dt', null, t('chartKvMinor')), minors.length ? chartEl('dd', null, minors) : h('dd', null, t('chartNone'))];
   if (m.adj) {
@@ -11739,11 +12179,21 @@ function PalaceCard() {
     rows.push(h('dt', null, t('chartKvAdj')), h('dd', null, adj.length ? adj.join(sep) : t('chartNone')));
   }
   rows.push(
-    h('dt', null, t('chartKvTrio')), chartEl('dd', null, trio),
-    h('dt', null, t('chartKvDecade')), h('dd', null, t('chartDecadeAges', { from: range[0], to: range[1] })));
+    h('dt', null, t('chartKvOpp')), h('dd', { className: 'zp-kv-trio' }, palGroup(facts.trio[0])),
+    h('dt', null, t('chartKvTri')), h('dd', { className: 'zp-kv-trio' }, palGroup(facts.trio[1]), palGroup(facts.trio[2])));
+  if (facts.fly.length) {
+    rows.push(h('dt', { className: 'zp-kv-fly' }, t('chartKvFly', { stem: facts.stem })),
+      chartEl('dd', { className: 'zp-fly zp-kv-fly' }, facts.fly.map(function (x, k) {
+        return h('span', null,
+          h('b', { style: chartStarStyle(x.star) }, x.star), h('i', { className: CHART_SEAL_SCOPED[k] }, x.mu),
+          x.index >= 0 ? palaceLink(x.index, x.palace) : null);
+      })));
+  }
+  rows.push(h('dt', null, t('chartKvDecade')), h('dd', null, t('chartDecadeAges', { from: range[0], to: range[1] })));
   return h('section', { className: 'zp-card zp-detail', 'data-region': 'INSPECTOR' },
     h('div', { className: 'zp-card-h' },
       h('h3', { className: 'zp-serif' }, p.name, h('small', null, p.stem + p.branch)),
+      h('span', { className: 'zp-theme' }, t('chartPalaceTheme', { theme: facts.theme })),
       scope ? h('span', { className: 'zp-tag' }, t('chartScopeTag', { prefix: prefix, palace: scope.palaceNames[sel] })) : null,
       h('div', { className: 'zp-card-right' },
         h('button', { type: 'button', className: 'zp-link', onClick: function () { chartAskPalace(chart, sel); } }, t('chartAskThisPalace')))),
@@ -11834,16 +12284,19 @@ function BoardCenter() {
     h('span', null, t('chartFactSolarTime'), ' ', h('b', null, sc && sc.solarTime ? sc.solarTime : t('chartFactUncorrected')))
   ];
   if (scope) facts.push(h('span', null, scopeTabName(m.tab), ' ', h('b', null, scope.stem + scope.branch)));
+  /* 字都放在一块牌子（div.zp-plate）上：三方四正的连线从牌子下面穿过，不压在字上 */
   return h('div', { className: 'zp-center' },
-    h('div', { className: 'zp-nm' },
-      h('i', { className: 'zp-orb', 'aria-hidden': true, style: chartStarStyle(soulStars(chart).names[0]) }),
-      String(m.entry.name || '') || t('headUnnamed')),
-    h('div', { className: 'zp-birth' }, birth.join(' · ')),
-    chartEl('div', { className: 'zp-pillars', role: 'group', 'aria-label': t('chartPillars') }, CHART_PILLARS.map(function (k) {
-      return h('span', null, chart.pillars[k[0]], h('small', null, t(k[1])));
-    })),
-    chartEl('div', { className: 'zp-facts' }, facts),
-    sc && sc.boundaryWarning ? h('p', { className: 'zp-warn' }, t('chartBoundaryWarn')) : null);
+    h('div', { className: 'zp-plate' },
+      h('div', { className: 'zp-nm' },
+        h('i', { className: 'zp-orb', 'aria-hidden': true, style: chartStarStyle(soulStars(chart).names[0]) }),
+        String(m.entry.name || '') || t('headUnnamed')),
+      h('div', { className: 'zp-birth' }, birth.join(' · ')),
+      chartEl('div', { className: 'zp-pillars', role: 'group', 'aria-label': t('chartPillars') }, CHART_PILLARS.map(function (k) {
+        return h('span', null, chart.pillars[k[0]], h('small', null, t(k[1])));
+      })),
+      chartEl('div', { className: 'zp-facts' }, facts),
+      sc && sc.boundaryWarning ? h('p', { className: 'zp-warn' }, t('chartBoundaryWarn')) : null,
+      h(PatternCenter, null)));
 }
 
 /* ---------------- 三方四正连线 ---------------- */

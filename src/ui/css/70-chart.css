@@ -8,7 +8,9 @@
  *         div.zp-panes.zp-seg[role=tablist]   PANES（只在窄档显示）
  *         section.zp-card.zp-scope            SCOPE
  *           div.zp-card-h > h3, div.zp-card-right > button.zp-step × 2
- *           p.zp-when, p.zp-line, div.zp-mut > span > b + i.zp-seal, div.zp-card-f
+ *           p.zp-when, p.zp-line, div.zp-mut > span > b + i.zp-seal,
+ *           div.zp-strip[data-kind]（时间条：div.zp-strip-h + div.zp-strip-grid[data-cols] > button.zp-strip-cell[aria-pressed]；
+ *             本命下是 button.zp-now-row × 4）, div.zp-card-f
  *         section.zp-card.zp-pats             PATTERNS
  *           div.zp-card-h > h3, span.zp-cnt
  *           div.zp-pat-chips > button.zp-pat[aria-pressed] > 名称 + i.zp-lv.zp-lv-ji|zhong|xiong
@@ -16,7 +18,7 @@
  *         section.zp-card.zp-detail           INSPECTOR
  *           div.zp-card-h > h3.zp-serif > 宫名 + small 干支, span.zp-tag, div.zp-card-right > button.zp-link
  *           div.zp-stars > button.zp-star[aria-pressed]（点星名换解释）
- *           p.zp-brief, dl.zp-kv > dt + dd（dd 里的宫名是 button.zp-kv-link）
+ *           p.zp-brief, dl.zp-kv > dt + dd（dd 里的宫名是 button.zp-kv-link；宫干四化那一行是 dd.zp-fly）
  *       div.zp-board-wrap
  *         div.zp-board                        BOARD；运限层级下加 zp-scoped
  *           button.zp-cell[data-i][aria-pressed] × 12   三方四正加 zp-rel，运限命宫加 zp-scope-focus
@@ -25,7 +27,8 @@
  *             div.zp-minors > span.zp-good | span.zp-bad
  *             div.zp-adj                      杂曜（开关打开时）
  *             div.zp-cell-foot > span.zp-dec, span.zp-gods
- *           div.zp-center > div.zp-nm（i.zp-orb + 称呼）, div.zp-birth, div.zp-pillars > span（+ small）, div.zp-facts > span, p.zp-warn
+ *           div.zp-center > div.zp-plate > div.zp-nm（i.zp-orb + 称呼）, div.zp-birth, div.zp-pillars > span（+ small）,
+ *             div.zp-facts > span, p.zp-warn, div.zp-cpats（中宫里的格局：div.zp-pat-chips + p.zp-pat-desc）
  *           svg.zp-lines                      三方四正连线；位置没变不重画，没换宫不描线（加 zp-still）
  *     div.zp-rbody                            报告舞台，见 86-reportview.css
  *
@@ -38,6 +41,8 @@
 }
 .zp-chart.zp-enter > div { animation: zp-rise 240ms ease both }
 .zp-body {
+  /* 格局显示在中宫还是左栏，看这一块有多宽（见「格局」一段的 @container zp-body） */
+  container: zp-body / inline-size;
   display: grid;
   grid-template-columns: clamp(244px, 25%, 316px) minmax(0, 1fr);
   gap: 16px;
@@ -95,6 +100,81 @@
 }
 .zp-mut .zp-seal { vertical-align: 0 }
 
+/* ---------------- 时间条：直接跳到某个大限 / 年 / 月 / 日 ---------------- */
+.zp-strip { display: flex; flex-direction: column; gap: 4px; min-height: 0 }
+.zp-strip-h { color: var(--zp-ink-4); font-size: 11px; line-height: 16px }
+.zp-strip-grid { display: grid; gap: 2px }
+.zp-strip-grid[data-cols="4"] { grid-template-columns: repeat(4, minmax(0, 1fr)) }
+.zp-strip-grid[data-cols="5"] { grid-template-columns: repeat(5, minmax(0, 1fr)) }
+.zp-strip-grid[data-cols="6"] { grid-template-columns: repeat(6, minmax(0, 1fr)) }
+.zp-strip-grid[data-cols="7"] { grid-template-columns: repeat(7, minmax(0, 1fr)) }
+/* 月历的星期行 */
+.zp-strip-grid > i {
+  color: var(--zp-ink-4);
+  font-size: 10.5px;
+  font-style: normal;
+  line-height: 16px;
+  text-align: center;
+}
+.zp-strip-cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 24px;
+  padding: 2px 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  font-size: 12px;
+  line-height: 16px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+.zp-root .zp-strip-cell { color: var(--zp-ink-2) }
+.zp-root .zp-strip-cell:hover { background: var(--zp-hover); color: var(--zp-ink) }
+.zp-root .zp-strip-cell.zp-dim { color: var(--zp-ink-4) }
+.zp-root .zp-strip-cell[aria-pressed="true"] { background: var(--zp-primary); color: var(--zp-on-primary) }
+.zp-strip-cell:disabled { opacity: .35 }
+.zp-strip-cell small { color: var(--zp-ink-4); font-family: var(--zp-font-serif); font-size: 10.5px; line-height: 14px }
+.zp-strip-cell[aria-pressed="true"] small { color: inherit; opacity: .7 }
+/* 今天所在的那一格：右上角一个金点 */
+.zp-strip-cell.zp-now::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--zp-gold);
+}
+/* 本命下的「此刻」：大限 / 流年 / 流月 / 流日各一行，点了切到那个页签 */
+.zp-strip[data-kind="now"] { gap: 0 }
+.zp-now-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+  margin: 0 -4px;
+  padding: 0 4px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  font-size: 12px;
+  text-align: left;
+  white-space: nowrap;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+.zp-root .zp-now-row { color: var(--zp-ink-2) }
+.zp-root .zp-now-row:hover { background: var(--zp-hover); color: var(--zp-ink) }
+.zp-now-row b { flex: none; min-width: 28px; color: var(--zp-ink-3); font-weight: 400 }
+.zp-now-row span { flex: 1; min-width: 0; overflow: hidden; font-variant-numeric: tabular-nums; text-overflow: ellipsis }
+.zp-now-row .zp-icon { color: var(--zp-ink-4) }
+
 /* ---------------- 格局卡 ---------------- */
 .zp-pat-chips {
   display: flex;
@@ -148,8 +228,28 @@
   -webkit-line-clamp: 2;
 }
 
+/* 中宫里的格局：盘面够宽时格局在这里，左栏的格局卡收起来；窄的时候反过来。两处是同一份状态，同一时间只显示一处 */
+.zp-cpats {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  min-width: 0;
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px solid var(--zp-line-2);
+}
+.zp-cpats .zp-pat-chips { justify-content: center; max-height: 56px }
+.zp-cpats .zp-pat-desc { max-width: 100%; text-align: center }
+@container zp-body (min-width: 980px) {
+  .zp-side .zp-pats { display: none }
+  .zp-cpats { display: flex }
+}
+
 /* ---------------- 宫位卡 ---------------- */
-.zp-card.zp-detail { flex: 1 1 auto; overflow: hidden }
+/* 宫位卡拿左栏剩下的高度（不看自己的内容），所以它是一个尺寸容器：下面按它实际有多高来收内容，不会出现最后一行被裁掉一半 */
+.zp-card.zp-detail { flex: 1 1 0; container: zp-detail / size; overflow: hidden }
 .zp-stars { display: flex; flex-wrap: wrap; gap: 2px 8px }
 .zp-detail .zp-star {
   padding: 0;
@@ -188,6 +288,26 @@
 .zp-kv-link { padding: 0; border: 0; background: transparent; font-size: 13px }
 .zp-root .zp-kv-link { color: var(--zp-ink) }
 .zp-kv-link:hover { text-decoration: underline }
+/* 这一宫管什么：跟在宫名和干支后面 */
+.zp-theme {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--zp-ink-3);
+  font-size: 12px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+/* 三方四正：一宫一组（宫名 + 主星），三合的两组在同一行，放不下自己换行 */
+.zp-kv-trio { display: flex; flex-wrap: wrap; gap: 0 12px }
+.zp-kv-pal { display: inline-flex; align-items: baseline; gap: 6px; white-space: nowrap }
+.zp-kv-stars { color: var(--zp-ink-3) }
+/* 宫干四化：星名、四化印、落在哪一宫 */
+.zp-fly { display: flex; flex-wrap: wrap; gap: 2px 12px }
+.zp-fly span { display: inline-flex; align-items: center; gap: 2px; white-space: nowrap }
+.zp-fly b { color: var(--zp-c, var(--zp-ink)); font-family: var(--zp-font-serif); font-weight: 600 }
+.zp-fly .zp-seal { margin: 0; vertical-align: 0 }
+.zp-root .zp-fly .zp-kv-link { color: var(--zp-ink-3) }
+.zp-fly .zp-kv-link::before { content: "→"; margin: 0 2px; color: var(--zp-ink-4) }
 
 /* ---------------- 盘面：把高度用满；宽度跟着可用空间在 1.05–1.62 的宽高比之间伸缩 ---------------- */
 .zp-board-wrap {
@@ -359,10 +479,25 @@
   background: radial-gradient(80% 70% at 50% 30%, color-mix(in srgb, var(--zp-zi) 10%, transparent), transparent 70%), var(--zp-raised);
   text-align: center;
 }
-.zp-center > * {
+/* 字都在这块牌子上：它盖在连线（z-index: 0）上面，线从牌子下面穿过，不压在字上 */
+.zp-plate {
   position: relative;
   z-index: 1;
-  text-shadow: 0 0 4px var(--zp-raised), 0 0 8px var(--zp-raised);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(2px, 1cqw, 8px);
+  max-width: 100%;
+  max-height: 100%;
+  min-height: 0;
+  padding: clamp(4px, 1.6cqw, 16px) clamp(6px, 2.4cqw, 24px);
+  overflow: hidden;
+  border: 1px solid var(--zp-line);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--zp-surface) 90%, transparent);
+  box-shadow: 0 8px 24px -16px rgba(0, 0, 0, .5);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
 }
 .zp-nm {
   display: flex;
@@ -391,7 +526,6 @@
   font-size: clamp(12px, 1.9cqw, 13.5px);
   font-weight: 600;
   line-height: 1.2;
-  text-shadow: none;
 }
 .zp-pillars small {
   color: var(--zp-ink-4);
@@ -445,13 +579,29 @@
   .zp-scope-tag { position: absolute; bottom: 2px; left: 4px; margin: 0 }
   .zp-pillars { gap: 2px }
 }
-/* 左栏不够高：先收说明文字，卡片本身不滚动 */
-@container zp-side (max-height: 590px) { .zp-brief { -webkit-line-clamp: 2 } }
+/* 中宫不够高：格局只留名字，说明收起来（悬停在名字上看不到说明，但左栏不够宽时格局本来就在左栏） */
+@container (max-height: 560px) { .zp-cpats .zp-pat-desc { display: none } }
+/* 左栏不够高：按「月历只留三周 → 星曜解释少一行 → 宫干四化 → 时间条」的顺序收，卡片本身不滚动 */
+@container zp-side (max-height: 730px) { .zp-strip-cell.zp-far { display: none } }
+@container zp-side (max-height: 560px) { .zp-strip { display: none } }
+/* 格局卡还在左栏时（盘面不够宽）多占一张卡的高度，上面两档各提前一些 */
+@container zp-body (max-width: 979.98px) {
+  @container zp-side (max-height: 848px) { .zp-strip-cell.zp-far { display: none } }
+  @container zp-side (max-height: 680px) { .zp-strip { display: none } }
+}
+/* 宫位卡按自己的高度收：星曜解释少一行 → 宫干四化 → 解释只留一行 → 不要解释。左栏窄的时候四化要排四行，提前收 */
+@container zp-detail (max-height: 350px) { .zp-brief { -webkit-line-clamp: 2 } }
+@container zp-detail (max-height: 330px) { .zp-kv-fly { display: none } }
+@container zp-detail (max-width: 268px) and (max-height: 400px) { .zp-kv-fly { display: none } }
+@container zp-detail (max-height: 270px) { .zp-brief { -webkit-line-clamp: 1 } }
+@container zp-detail (max-height: 240px) { .zp-brief { display: none } }
+/* 宫位卡窄的时候标题那一行放不下「看什么」，整个不要（留半截省略号没有用） */
+@container zp-detail (max-width: 268px) { .zp-theme { display: none } }
 @container zp-side (max-height: 540px) {
   .zp-pat-desc { -webkit-line-clamp: 1 }
   .zp-side .zp-card { gap: 6px; padding: 8px 12px }
 }
-@container zp-side (max-height: 470px) { .zp-brief, .zp-pat-desc { display: none } }
+@container zp-side (max-height: 470px) { .zp-pat-desc { display: none } }
 
 /* ---------------- 窄档：盘在上，下面一张卡，用三个页签切换，照样一屏 ---------------- */
 .zp-root[data-w="narrow"] .zp-body {
@@ -473,5 +623,7 @@
 .zp-root[data-w="narrow"] .zp-side[data-pane="scope"] .zp-scope,
 .zp-root[data-w="narrow"] .zp-side[data-pane="pats"] .zp-pats,
 .zp-root[data-w="narrow"] .zp-side[data-pane="detail"] .zp-detail { display: flex }
-.zp-root[data-w="narrow"] .zp-brief { -webkit-line-clamp: 3 }
+.zp-root[data-w="narrow"] .zp-brief { -webkit-line-clamp: 1 }
 .zp-root[data-w="narrow"] .zp-pat-desc { -webkit-line-clamp: 2 }
+/* 窄档一次只看一张卡、高度是定的：时间条和宫干四化不放 */
+.zp-root[data-w="narrow"] .zp-strip, .zp-root[data-w="narrow"] .zp-kv-fly { display: none }

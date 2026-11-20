@@ -10,11 +10,13 @@
  *   ChartSide          pane（div.zp-side[data-pane]），卡片作为 children 原样往下传
  *   ChartPanes         窄档才渲染：pane、tab、sel（第三个页签是选中宫的宫名）
  *   ScopeCard          tab、when（本命下不看 when）。ScopeReportButton 只选报告状态这一个字符串
- *   PatternCard        当前命盘、pat
- *   PalaceCard         sel、tab、when、showAdj；点星名看解释是组件内状态，换宫（或换盘）时复位
+ *   ScopeStrip         时间条，在时间卡里：tab、when。直接跳到某个大限 / 年 / 月 / 日（store.setWhen）
+ *   PatternCard        当前命盘、pat。盘面够宽时由 CSS 藏起来，格局改在中宫里显示（PatternCenter，同一份状态）
+ *   PalaceCard         sel、tab、when、showAdj；点星名看解释是组件内状态，换宫（或换盘）时复位。
+ *                      多了三样：这一宫管什么、三方四正每一宫的主星、宫干四化落在哪
  *   ChartBoard         只选「是不是运限层级」（div.zp-board 的 zp-scoped）；宫格、中宫、连线的元素只建一次
  *   BoardCell × 12     每格自己选：选中 / 三方四正两个布尔值 + tab、when、showAdj；格子里的字按运限签名 useMemo
- *   BoardCenter        当前命盘、tab、when
+ *   BoardCenter        当前命盘、tab、when。字在 div.zp-plate 上（连线从它下面穿过）；里面的 PatternCenter 另外订阅 pat
  *   BoardLines         sel；layout effect 里量宫格 → ZWUI.linePoints，key 没变不重画；ResizeObserver 看盘面
  * 流式增量只换 readings：这里只有 ScopeReportButton 看它，选出来的是 'idle' | 'running' | 'resume' | 'done'，
  * 写的过程中一直是 'running'，所以整页只在任务开始、结束时各重渲染这一个按钮。
@@ -287,10 +289,46 @@ function ScopeCard() {
         name ? h('b', { style: chartStarStyle(name) }, name) : null,
         name ? h('i', { className: CHART_SEAL[k] }, SCOPE_MU[k]) : null);
     })),
+    h(ScopeStrip, null),
     h('div', { className: 'zp-card-f' },
       h('button', { type: 'button', className: 'zp-btn', onClick: natal ? chartReadChart : chartReadScope }, model.readLabel),
       natal ? h(ScopeReportButton, null)
         : (model.isNow ? null : h('button', { type: 'button', className: 'zp-link', onClick: chartBackToNow }, t('chartBackToToday')))));
+}
+
+/* 时间条（spec 2026-11-20 §3.8）：直接跳到某个大限、某一年、某个月、某一天，不用一下一下翻。
+   本命下是「此刻」四行（大限 / 流年 / 流月 / 流日各走到哪），点一行切到那个页签的今天。
+   数据是 24-scope 的 scopeStrip；这里只订阅命盘、页签、日期，选宫不重画。左栏不够高时由 CSS 先把它收起来。 */
+function ScopeStrip() {
+  const m = useStore(chartTimeOf);
+  const store = appStore();
+  const chart = useMemo(function () { return chartOfEntry(m.entry); }, [m.entry]);
+  const today = store.todayOf();
+  const todayKey = today.y + '-' + today.m + '-' + today.d;
+  const strip = useMemo(function () {
+    return chart ? scopeStrip(chart, m.tab, m.when || today, today) : null;
+  }, [chart, m.tab, m.when, todayKey]);
+  if (!strip) return null;
+  if (strip.kind === 'now') {
+    return h('div', { className: 'zp-strip', 'data-kind': 'now', role: 'group', 'aria-label': strip.title }, strip.items.map(function (it) {
+      return h('button', {
+        key: it.key, type: 'button', className: 'zp-now-row',
+        onClick: function () { store.setWhen(it.target, it.key); }
+      }, h('b', null, it.label), h('span', null, it.text), h(Icon, { name: 'caret', size: 12 }));
+    }));
+  }
+  return h('div', { className: 'zp-strip', 'data-kind': strip.kind, role: 'group', 'aria-label': strip.title },
+    h('div', { className: 'zp-strip-h' }, strip.title),
+    h('div', { className: 'zp-strip-grid', 'data-cols': strip.cols },
+      strip.head ? strip.head.map(function (x, i) { return h('i', { key: 'h' + i, 'aria-hidden': true }, x); }) : null,
+      strip.items.map(function (it) {
+        return h('button', {
+          key: it.key, type: 'button', title: it.title,
+          className: 'zp-strip-cell' + (it.now ? ' zp-now' : '') + (it.dim ? ' zp-dim' : '') + (it.far ? ' zp-far' : ''),
+          'aria-pressed': it.on ? 'true' : 'false', disabled: it.target ? undefined : true,
+          onClick: function () { store.setWhen(it.target); }
+        }, it.label, it.sub ? h('small', null, it.sub) : null);
+      })));
 }
 
 /* 报告按钮：字跟着报告状态走，点了都是去报告页（开始写、接着写在报告页上） */
@@ -299,27 +337,47 @@ function ScopeReportButton() {
   return h('button', { type: 'button', className: 'zp-btn', onClick: chartOpenReport }, t(CHART_REPORT_KEYS[kind] || CHART_REPORT_KEYS.idle));
 }
 
-/* ---------------- 格局卡 ---------------- */
+/* ---------------- 格局 ----------------
+ * 格局不随选宫和时间变，所以放在同样不动的中宫里（PatternCenter）；盘面窄、中宫放不下时仍在左栏（PatternCard，
+ * 窄档是第二个页签）。两处都渲染、共用 session.pat，由 CSS 按 .zp-body 的宽度只显示一处（css/70-chart.css）。 */
+function chartPatternsOf(chart) {
+  if (!chart) return [];
+  try { return E.detectPatterns(chart) || []; } catch (e) { return []; }
+}
+
+function chartPatChips(list, at) {
+  return h('div', { className: 'zp-pat-chips' }, list.map(function (x, i) {
+    const lv = CHART_LEVELS[x.level] || CHART_LEVELS['\u4e2d'];
+    return h('button', {
+      key: i, type: 'button', className: 'zp-pat', 'aria-pressed': i === at ? 'true' : 'false',
+      onClick: function () { appStore().setPat(i); }
+    }, x.name, h('i', { className: lv[0] }, t(lv[1])));
+  }));
+}
+
 function PatternCard() {
   const m = useStore(chartPatsOf);
   const chart = useMemo(function () { return chartOfEntry(m.entry); }, [m.entry]);
-  const list = useMemo(function () {
-    if (!chart) return [];
-    try { return E.detectPatterns(chart) || []; } catch (e) { return []; }
-  }, [chart]);
+  const list = useMemo(function () { return chartPatternsOf(chart); }, [chart]);
   const at = m.pat >= 0 && m.pat < list.length ? m.pat : 0;
   return h('section', { className: 'zp-card zp-pats', 'data-region': 'PATTERNS' },
     h('div', { className: 'zp-card-h' },
       h('h3', null, t('chartPatsTitle')),
       list.length ? h('span', { className: 'zp-cnt' }, t('chartPatCount', { n: list.length })) : null),
-    list.length ? h('div', { className: 'zp-pat-chips' }, list.map(function (x, i) {
-      const lv = CHART_LEVELS[x.level] || CHART_LEVELS['\u4e2d'];
-      return h('button', {
-        key: i, type: 'button', className: 'zp-pat', 'aria-pressed': i === at ? 'true' : 'false',
-        onClick: function () { appStore().setPat(i); }
-      }, x.name, h('i', { className: lv[0] }, t(lv[1])));
-    })) : null,
+    list.length ? chartPatChips(list, at) : null,
     h('p', { className: 'zp-pat-desc' }, list.length ? list[at].desc : t('chartPatEmpty')));
+}
+
+/* 中宫里的格局：一排格局名，点哪个下面显示哪个的说明。没有格局时不占地方 */
+function PatternCenter() {
+  const m = useStore(chartPatsOf);
+  const chart = useMemo(function () { return chartOfEntry(m.entry); }, [m.entry]);
+  const list = useMemo(function () { return chartPatternsOf(chart); }, [chart]);
+  if (!list.length) return null;
+  const at = m.pat >= 0 && m.pat < list.length ? m.pat : 0;
+  return h('div', { className: 'zp-cpats', role: 'group', 'aria-label': t('chartPatsTitle') },
+    chartPatChips(list, at),
+    h('p', { className: 'zp-pat-desc' }, list[at].desc));
 }
 
 /* ---------------- 宫位卡 ---------------- */
@@ -353,12 +411,16 @@ function PalaceCard() {
     if (k) minors.push(sep);
     minors.push(starButton(s, true));
   });
-  const rel = relatedPalaces(sel);
-  const trio = [];
-  [rel.opp, rel.tri[0], rel.tri[1]].forEach(function (idx, k) {
-    if (k) trio.push(t('chartTrioSep'));
-    trio.push(h('button', { type: 'button', className: 'zp-kv-link', onClick: function () { appStore().selectPalace(idx); } }, chart.palaces[idx].name));
-  });
+  /* 三方四正每一宫带上它的主星；宫干四化是这一宫的天干让哪四颗星化禄权科忌、各落在哪一宫（24-scope 的 palaceFacts） */
+  const facts = palaceFacts(chart, sel);
+  const palaceLink = function (idx, name) {
+    return h('button', { type: 'button', className: 'zp-kv-link', onClick: function () { appStore().selectPalace(idx); } }, name);
+  };
+  /* 一宫一组：宫名（可点）+ 它的主星。三合的两宫放在同一个 dd 里，放不下自己换行 */
+  const palGroup = function (x) {
+    return h('span', { className: 'zp-kv-pal' }, palaceLink(x.index, x.name),
+      h('span', { className: 'zp-kv-stars' }, x.stars.length ? x.stars.join(sep) : t('chartEmptyPalace')));
+  };
   const range = p.decadal && p.decadal.range ? p.decadal.range : [0, 0];
   const rows = [h('dt', null, t('chartKvMinor')), minors.length ? chartEl('dd', null, minors) : h('dd', null, t('chartNone'))];
   if (m.adj) {
@@ -366,11 +428,21 @@ function PalaceCard() {
     rows.push(h('dt', null, t('chartKvAdj')), h('dd', null, adj.length ? adj.join(sep) : t('chartNone')));
   }
   rows.push(
-    h('dt', null, t('chartKvTrio')), chartEl('dd', null, trio),
-    h('dt', null, t('chartKvDecade')), h('dd', null, t('chartDecadeAges', { from: range[0], to: range[1] })));
+    h('dt', null, t('chartKvOpp')), h('dd', { className: 'zp-kv-trio' }, palGroup(facts.trio[0])),
+    h('dt', null, t('chartKvTri')), h('dd', { className: 'zp-kv-trio' }, palGroup(facts.trio[1]), palGroup(facts.trio[2])));
+  if (facts.fly.length) {
+    rows.push(h('dt', { className: 'zp-kv-fly' }, t('chartKvFly', { stem: facts.stem })),
+      chartEl('dd', { className: 'zp-fly zp-kv-fly' }, facts.fly.map(function (x, k) {
+        return h('span', null,
+          h('b', { style: chartStarStyle(x.star) }, x.star), h('i', { className: CHART_SEAL_SCOPED[k] }, x.mu),
+          x.index >= 0 ? palaceLink(x.index, x.palace) : null);
+      })));
+  }
+  rows.push(h('dt', null, t('chartKvDecade')), h('dd', null, t('chartDecadeAges', { from: range[0], to: range[1] })));
   return h('section', { className: 'zp-card zp-detail', 'data-region': 'INSPECTOR' },
     h('div', { className: 'zp-card-h' },
       h('h3', { className: 'zp-serif' }, p.name, h('small', null, p.stem + p.branch)),
+      h('span', { className: 'zp-theme' }, t('chartPalaceTheme', { theme: facts.theme })),
       scope ? h('span', { className: 'zp-tag' }, t('chartScopeTag', { prefix: prefix, palace: scope.palaceNames[sel] })) : null,
       h('div', { className: 'zp-card-right' },
         h('button', { type: 'button', className: 'zp-link', onClick: function () { chartAskPalace(chart, sel); } }, t('chartAskThisPalace')))),
@@ -461,16 +533,19 @@ function BoardCenter() {
     h('span', null, t('chartFactSolarTime'), ' ', h('b', null, sc && sc.solarTime ? sc.solarTime : t('chartFactUncorrected')))
   ];
   if (scope) facts.push(h('span', null, scopeTabName(m.tab), ' ', h('b', null, scope.stem + scope.branch)));
+  /* 字都放在一块牌子（div.zp-plate）上：三方四正的连线从牌子下面穿过，不压在字上 */
   return h('div', { className: 'zp-center' },
-    h('div', { className: 'zp-nm' },
-      h('i', { className: 'zp-orb', 'aria-hidden': true, style: chartStarStyle(soulStars(chart).names[0]) }),
-      String(m.entry.name || '') || t('headUnnamed')),
-    h('div', { className: 'zp-birth' }, birth.join(' · ')),
-    chartEl('div', { className: 'zp-pillars', role: 'group', 'aria-label': t('chartPillars') }, CHART_PILLARS.map(function (k) {
-      return h('span', null, chart.pillars[k[0]], h('small', null, t(k[1])));
-    })),
-    chartEl('div', { className: 'zp-facts' }, facts),
-    sc && sc.boundaryWarning ? h('p', { className: 'zp-warn' }, t('chartBoundaryWarn')) : null);
+    h('div', { className: 'zp-plate' },
+      h('div', { className: 'zp-nm' },
+        h('i', { className: 'zp-orb', 'aria-hidden': true, style: chartStarStyle(soulStars(chart).names[0]) }),
+        String(m.entry.name || '') || t('headUnnamed')),
+      h('div', { className: 'zp-birth' }, birth.join(' · ')),
+      chartEl('div', { className: 'zp-pillars', role: 'group', 'aria-label': t('chartPillars') }, CHART_PILLARS.map(function (k) {
+        return h('span', null, chart.pillars[k[0]], h('small', null, t(k[1])));
+      })),
+      chartEl('div', { className: 'zp-facts' }, facts),
+      sc && sc.boundaryWarning ? h('p', { className: 'zp-warn' }, t('chartBoundaryWarn')) : null,
+      h(PatternCenter, null)));
 }
 
 /* ---------------- 三方四正连线 ---------------- */

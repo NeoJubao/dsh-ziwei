@@ -42,6 +42,7 @@
  * ---------------- 导航（都不发请求） ----------------
  *   openChart(id, { tab, when, panel }?) → boolean   goHome()   setTab(tab)（'report' 等于 setStage('report')）
  *   setStage(stage)   selectPalace(i)   stepScope(dir)（到头时状态不变、给提示）   backToNow()
+ *   setWhen({ y, m, d }, tab?) → boolean   时间条：直接跳到某一天（tab 给了就同时切页签）；排不出运限的日子不动
  *   setPane(pane)   setPat(i)   setPanel(open)   setQuote(q|null)（截到 600 字）   setDraft(text, key?)   setReadPos(pos, key?)
  *   patchSession(patch)   UI 自己的字段（onboarding、focusId、introPlayed …）；导航字段、toast、草稿不能从这里改
  *   showToast(text, { error, action, undo })   dismissToast()
@@ -591,6 +592,22 @@ function createStore(deps) {
     if (cur.tab !== 'natal' && h && h[cur.tab]) patch.sel = h[cur.tab].index;
     return patchSessionRaw(patch);
   }
+  /* 时间条：直接跳到某一天。tab 给了就同时切到那个页签（本命卡的「此刻」四行）。
+     排不出运限的日子（出生以前、超出范围）不动，返回 false。选中宫跟到这一层的运限命宫，和前后翻一样 */
+  function setWhen(when, tab) {
+    const cur = state.session;
+    const entry = currentEntry();
+    const nextTab = tab === undefined ? cur.tab : tab;
+    if (!entry || nextTab === 'natal' || SCOPE_TABS.indexOf(nextTab) < 0 || !storeValidWhen(when)) return false;
+    const same = cur.when.y === when.y && cur.when.m === when.m && cur.when.d === when.d;
+    const w = same ? cur.when : { y: when.y, m: when.m, d: when.d };
+    const h = horoscopeFor(entry, w);
+    if (!h || !h[nextTab]) return false;
+    const patch = { when: w, sel: h[nextTab].index };
+    if (cur.tab !== nextTab) { patch.tab = nextTab; patch.pane = 'scope'; }
+    if (cur.stage !== 'board') patch.stage = 'board';
+    return patchSessionRaw(patch);
+  }
   function setPane(pane) {
     if (STORE_PANES.indexOf(pane) < 0) return false;
     return patchSessionRaw({ pane: pane });
@@ -1008,6 +1025,7 @@ function createStore(deps) {
     selectPalace: selectPalace,
     stepScope: stepScopeAction,
     backToNow: backToNow,
+    setWhen: setWhen,
     setPane: setPane,
     setPat: setPat,
     setPanel: setPanel,

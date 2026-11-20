@@ -428,3 +428,179 @@ function quickLook(chart, today) {
   return { soul: soul, patterns: patterns, decade: decade, today: todayInfo };
 }
 ZWUI.quickLook = quickLook;
+
+/* ---------- 时间条（spec 2026-11-20 §3.8）----------
+ * 时间卡下面那一排可以直接点的格子：不用一下一下翻，直接跳到某个大限、某一年、某个月、某一天。
+ * scopeStrip(chart, tab, when, today) → { kind, cols, head, title, items } 或 null（排不出运限时）。
+ *   natal    kind 'now'：此刻的大限 / 流年 / 流月 / 流日各一行，items: [{ key: tab, label, text, target: today }]
+ *   decadal  十二个大限，4 列：label '32–41'，sub 这个大限落在本命哪一宫
+ *   yearly   when 所在大限的十年（童限是出生到起运前那几年），5 列：label 公历年，sub 干支
+ *   monthly  when 所在农历年的十二个流月单位，6 列：label 正月…腊月
+ *   daily    when 所在公历月的月历，7 列、6 行（前后补上相邻月的日子，点了就翻到那个月）；head 是周一到周日
+ * 每一项：{ key, label, sub?, title?, on（现在看的这一格）, now（今天所在的那一格）, dim?（月历里相邻月的日子）,
+ *           far?（月历里离选中那周超过一周的格子，左栏不够高时收起来）,
+ *           target: { y, m, d } | null（点了跳到哪天；null = 不可点：出生以前、超出最后一个大限或 2100 年） }
+ * 跳转的落点和前后翻（stepScope）同一个规则：流年、大限落在同一个农历月日（日子按那个月的天数截），
+ * 翻进出生那一年时停在出生日。 */
+const SCOPE_GAN = '甲乙丙丁戊己庚辛壬癸';
+const SCOPE_ZHI = '子丑寅卯辰巳午未申酉戌亥';
+
+/* 农历年的干支（1984 是甲子年） */
+function scopeYearGanzhi(year) {
+  const n = ((year - 1984) % 60 + 60) % 60;
+  return SCOPE_GAN.charAt(n % 10) + SCOPE_ZHI.charAt(n % 12);
+}
+
+/* 这一天排得出运限吗：不早于出生、虚岁不超过最后一个大限、在农历数据范围内（不调引擎） */
+function scopeInRange(chart, w) {
+  if (!scopeValidDate(w)) return false;
+  const birth = scopeBirthDate(chart);
+  if (scopeDayNum(w) < scopeDayNum(birth)) return false;
+  const l = scopeLunar(w);
+  return !!l && l.year - scopeBirthLunarYear(chart) + 1 <= scopeMaxAge(chart);
+}
+
+/* 农历 ty 年里和 l 同一个月日的那天（日子按那个月的天数截，闰月按本月）；早于出生就停在出生日；排不出来是 null */
+function scopeSameLunarDay(chart, l, ty) {
+  const by = scopeBirthLunarYear(chart);
+  if (ty < by) return null;
+  const days = E.lunarMonthDays(ty, l.month, false);
+  const s = days ? E.lunar2solar(ty, l.month, Math.min(l.day, days), false) : null;
+  if (!s) return null;
+  let w = { y: s.y, m: s.m, d: s.d };
+  const birth = scopeBirthDate(chart);
+  if (scopeDayNum(w) < scopeDayNum(birth)) w = ty === by ? birth : null;
+  return w && scopeInRange(chart, w) ? w : null;
+}
+
+function scopeStrip(chart, tab, when, today) {
+  if (!chart || SCOPE_TABS.indexOf(tab) < 0) return null;
+  const hasToday = scopeValidDate(today);
+  if (tab === 'natal') {
+    const h = hasToday ? horoscopeAt(chart, today) : null;
+    if (!h) return null;
+    const pal = function (sc) { return chart.palaces[sc.index].name; };
+    const info = decadalInfo(chart, h);
+    const l = scopeLunar(today), u = lunarUnit(today);
+    const items = [];
+    if (info) {
+      items.push({
+        key: 'decadal', label: scopeTabName('decadal'), target: today,
+        text: info.childhood ? t('scopeNowChildhood', { age: info.age, palace: pal(h.decadal) })
+          : t('scopeNowDecadal', { from: info.range[0], to: info.range[1], palace: pal(h.decadal) })
+      });
+    }
+    items.push({ key: 'yearly', label: scopeTabName('yearly'), target: today, text: t('scopeNowYearly', { year: l.year, gz: h.yearly.stem + h.yearly.branch, palace: pal(h.yearly) }) });
+    items.push({ key: 'monthly', label: scopeTabName('monthly'), target: today, text: t('scopeNowMonthly', { unit: u.label, gz: h.monthly.stem + h.monthly.branch, palace: pal(h.monthly) }) });
+    items.push({ key: 'daily', label: scopeTabName('daily'), target: today, text: t('scopeNowDaily', { m: today.m, d: today.d, gz: h.daily.stem + h.daily.branch, palace: pal(h.daily) }) });
+    return { kind: 'now', cols: 1, head: null, title: t('scopeStripNow'), items: items };
+  }
+  if (!scopeValidDate(when)) return null;
+  const h = horoscopeAt(chart, when);
+  const l = scopeLunar(when);
+  if (!h || !l) return null;
+  const by = scopeBirthLunarYear(chart);
+  const tl = hasToday ? scopeLunar(today) : null;
+  const info = decadalInfo(chart, h);
+
+  if (tab === 'decadal') {
+    const todayInfo = hasToday ? decadalInfo(chart, horoscopeAt(chart, today)) : null;
+    /* 现在是这个大限的第几年（0–9），跳到别的大限时落在同一年 */
+    const offset = info && !info.childhood ? Math.max(0, Math.min(9, l.year - (by + info.range[0] - 1))) : 0;
+    const items = E.decadalList(chart).map(function (dc) {
+      const from = dc.ageRange[0], to = dc.ageRange[1];
+      return {
+        key: 'd' + from, label: from + '–' + to, sub: dc.palaceName,
+        title: t('scopeStripDecadeTitle', { from: from, to: to, palace: dc.palaceName, gz: dc.stem + dc.branch }),
+        on: !!info && !info.childhood && info.range[0] === from,
+        now: !!todayInfo && !todayInfo.childhood && todayInfo.range[0] === from,
+        target: scopeSameLunarDay(chart, l, by + from - 1 + offset)
+      };
+    });
+    return { kind: 'decadal', cols: 4, head: null, title: t('scopeStripDecades'), items: items };
+  }
+
+  if (tab === 'yearly') {
+    if (!info) return null;
+    const items = [];
+    for (let age = info.range[0]; age <= info.range[1]; age++) {
+      const year = by + age - 1, gz = scopeYearGanzhi(year);
+      items.push({
+        key: 'y' + year, label: String(year), sub: gz, title: t('scopeStripYearTitle', { year: year, gz: gz, age: age }),
+        on: l.year === year, now: !!tl && tl.year === year,
+        target: scopeSameLunarDay(chart, l, year)
+      });
+    }
+    const title = info.childhood ? t('scopeStripYearsChildhood') : t('scopeStripYears', { from: info.range[0], to: info.range[1] });
+    return { kind: 'yearly', cols: 5, head: null, title: title, items: items };
+  }
+
+  if (tab === 'monthly') {
+    const u = lunarUnit(when), tu = hasToday ? lunarUnit(today) : null;
+    const birth = scopeBirthDate(chart), bu = lunarUnit(birth);
+    const items = [];
+    for (let m = 1; m <= 12; m++) {
+      const s = E.lunar2solar(u.year, m, 1, false);
+      let target = s ? { y: s.y, m: s.m, d: s.d } : null;
+      /* 出生那个月：落在出生日 */
+      if (target && bu && bu.key === u.year + '-' + m && scopeDayNum(target) < scopeDayNum(birth)) target = birth;
+      if (target && !scopeInRange(chart, target)) target = null;
+      items.push({
+        key: 'm' + m, label: birthLunarMonthText(m, false), on: u.month === m, now: !!tu && tu.key === u.year + '-' + m, target: target
+      });
+    }
+    return { kind: 'monthly', cols: 6, head: null, title: t('scopeStripMonths', { year: u.year, gz: scopeYearGanzhi(u.year) }), items: items };
+  }
+
+  /* daily：when 所在公历月的月历，周一开头，固定 6 行 */
+  const first = scopeDayNum({ y: when.y, m: when.m, d: 1 });
+  /* 1970-01-01（日序号 0）是周四：周一 = 0 的星期序号 */
+  const lead = ((first + 3) % 7 + 7) % 7;
+  const todayNum = hasToday ? scopeDayNum(today) : NaN, whenNum = scopeDayNum(when);
+  /* 左栏不够高时月历只留三周：选中那天所在的一周和它前后各一周（在头尾时往里收），其余的格子标 far */
+  const selWeek = Math.floor((whenNum - (first - lead)) / 7);
+  const nearFrom = Math.max(0, Math.min(3, selWeek - 1));
+  const items = [];
+  for (let i = 0; i < 42; i++) {
+    const n = first - lead + i, w = scopeFromDayNum(n), week = Math.floor(i / 7);
+    items.push({
+      key: 'x' + n, label: String(w.d), on: n === whenNum, now: n === todayNum, dim: w.m !== when.m,
+      far: week < nearFrom || week > nearFrom + 2,
+      target: scopeInRange(chart, w) ? w : null
+    });
+  }
+  return {
+    kind: 'daily', cols: 7, head: t('scopeStripWeekdays').split('|'), title: t('scopeStripDays', { year: when.y, m: when.m }), items: items
+  };
+}
+ZWUI.scopeStrip = scopeStrip;
+
+/* ---------- 宫位卡的补充信息 ----------
+ * palaceFacts(chart, index) → { theme, trio, fly }
+ *   theme  这一宫管什么（palaceTheme）
+ *   trio   三方四正：[{ index, name, rel: 'opp' | 'tri', stars: [主星名…]（空宫是 []） }]，对宫在前
+ *   fly    宫干四化：这一宫的天干让哪四颗星化禄 / 权 / 科 / 忌，各落在本命哪一宫
+ *          [{ mu: '禄', star, index（-1 = 盘上没有这颗星）, palace }]。四化表取引擎的（大限天干就是宫干） */
+function palaceFacts(chart, index) {
+  const p = chart && chart.palaces ? chart.palaces[index] : null;
+  if (!p) return null;
+  const rel = relatedPalaces(index);
+  const trio = [[rel.opp, 'opp'], [rel.tri[0], 'tri'], [rel.tri[1], 'tri']].map(function (x) {
+    const q = chart.palaces[x[0]];
+    return { index: x[0], name: q.name, rel: x[1], stars: q.major.map(function (s) { return s.name; }) };
+  });
+  let names = [];
+  try {
+    const hit = (E.decadalList(chart) || []).filter(function (dc) { return dc.index === index; })[0];
+    names = hit && Array.isArray(hit.mutagen) ? hit.mutagen : [];
+  } catch (e) { names = []; }
+  const fly = names.map(function (star, k) {
+    let at = -1;
+    chart.palaces.forEach(function (q, i) {
+      if (q.major.concat(q.minor).some(function (s) { return s.name === star; })) at = i;
+    });
+    return { mu: SCOPE_MU[k], star: star, index: at, palace: at >= 0 ? chart.palaces[at].name : '' };
+  });
+  return { theme: palaceTheme(p.name), stem: p.stem, trio: trio, fly: fly };
+}
+ZWUI.palaceFacts = palaceFacts;

@@ -32,7 +32,8 @@ export default async function scope(t) {
   ok('拿到 window.ZWUi 和 ZWEngine', !!Z && !!E);
   if (!Z || !E) return;
   const API = ['parseBirthDate', 'parseBirthTime', 'shichenOf', 'horoscopeAt', 'lunarUnit', 'stepScope', 'decadalInfo', 'relWord', 'whenLine',
-    'scopeCardModel', 'scopeRequest', 'planetItem', 'homeStatus', 'quickLook', 'soulStars', 'natalMutagen', 'ringStep', 'linePoints'];
+    'scopeCardModel', 'scopeRequest', 'planetItem', 'homeStatus', 'quickLook', 'soulStars', 'natalMutagen', 'ringStep', 'linePoints',
+    'scopeStrip', 'palaceFacts'];
   const missing = API.filter((k) => typeof Z[k] !== 'function');
   ok('ZWUi 上有 T3c 的全部纯函数', missing.length === 0, 'missing: ' + missing.join(', '));
   ok('ZWUi.CELL_POS 是 12 个宫位的网格坐标', !!Z.CELL_POS && Object.keys(Z.CELL_POS).length === 12);
@@ -278,6 +279,77 @@ export default async function scope(t) {
   ok('linePoints：相同输入给出相同的 key', LP(rects.map((r) => Object.assign({}, r)), 11).key === lp.key && !!lp.key);
   ok('linePoints：抖动 0.01 像素 key 不变，换宫 key 变', LP(rects.map((r) => Object.assign({}, r, { left: r.left + 0.01 })), 11).key === lp.key && LP(rects, 2).key !== lp.key);
   eq('linePoints：rects 不全 → null', attempt(() => fn('linePoints')(rects.slice(0, 5), 0)).v, null);
+
+  /* ---------------------------------------------------------------- */
+  section('v6 时间条（spec 2026-11-20 §3.8）');
+  const SS = (tab, when) => attempt(() => fn('scopeStrip')(chart, tab, when || TODAY, TODAY)).v || null;
+  const tg = (s) => s.items.map((i) => (i.target ? iso(i.target) : null));
+  {
+    const s = SS('natal');
+    eq('本命：此刻的四层各一行（大限 / 流年 / 流月 / 流日），点了跳到今天',
+      [s && s.kind, s && s.cols, s && s.items.map((i) => i.key), s && s.items.map((i) => i.label), s && s.items.every((i) => iso(i.target) === '2026-11-19')],
+      ['now', 1, ['decadal', 'yearly', 'monthly', 'daily'], ['大限', '流年', '流月', '流日'], true]);
+    /* 黄金用例：木三局阳男顺行，33–42 岁走田宅（辰）；2026 丙午年流年命宫在午 = 仆役；11 月 19 日丁酉，流日命宫在父母 */
+    eq('大限、流年、流日三行的文字', s && [s.items[0].text, s.items[1].text, s.items[3].text], ['33–42 岁 · 田宅', '2026 丙午 · 仆役', '11月19日 丁酉 · 父母']);
+    const hm = fn('horoscopeAt')(chart, TODAY).monthly;
+    eq('流月那一行：流月单位、干支、落在本命哪一宫（和运限盘一致）', s && s.items[2].text, '农历十月 ' + hm.stem + hm.branch + ' · ' + chart.palaces[hm.index].name);
+  }
+  {
+    const s = SS('decadal');
+    eq('大限：十二个大限按岁数排（4 列），每格带它落在本命哪一宫',
+      [s && s.kind, s && s.cols, s && s.items.map((i) => i.label), s && s.items.map((i) => i.sub)],
+      ['decadal', 4, ['3–12', '13–22', '23–32', '33–42', '43–52', '53–62', '63–72', '73–82', '83–92', '93–102', '103–112', '113–122'],
+        ['命宫', '父母', '福德', '田宅', '官禄', '仆役', '迁移', '疾厄', '财帛', '子女', '夫妻', '兄弟']]);
+    eq('现在看的和今天所在的都是 33–42', s && [s.items.filter((i) => i.on).map((i) => i.label), s.items.filter((i) => i.now).map((i) => i.label)], [['33–42'], ['33–42']]);
+    /* 2026 是这个大限的第 3 年：跳到别的大限也落在第 3 年、同一个农历月日（十月十一） */
+    eq('点别的大限：落在那个大限的同一年次、同一个农历月日；2100 年以后的不可点',
+      s && [tg(s).slice(0, 5), tg(s)[11], s.items.slice(0, 11).every((i) => { const l = E.solar2lunar(i.target.y, i.target.m, i.target.d); return l.month === 10 && l.day === 11; })],
+      [['1996-11-21', '2006-12-01', '2016-11-10', '2026-11-19', '2036-11-28'], null, true]);
+    const early = SS('decadal', D('2017-03-01'));
+    eq('翻到别的大限：现在看的那格跟着变，今天那格不变', early && [early.items.filter((i) => i.on).map((i) => i.label), early.items.filter((i) => i.now).map((i) => i.label)], [['23–32'], ['33–42']]);
+  }
+  {
+    const s = SS('yearly');
+    eq('流年：这个大限的十年（5 列），公历年加干支',
+      [s && s.cols, s && s.items.map((i) => i.label), s && s.items.map((i) => i.sub)],
+      [5, ['2024', '2025', '2026', '2027', '2028', '2029', '2030', '2031', '2032', '2033'], ['甲辰', '乙巳', '丙午', '丁未', '戊申', '己酉', '庚戌', '辛亥', '壬子', '癸丑']]);
+    eq('今年高亮；点别的年落在同一个农历月日', s && [s.items.filter((i) => i.on).map((i) => i.label), s.items.filter((i) => i.now).map((i) => i.label), tg(s).slice(0, 4)],
+      [['2026'], ['2026'], ['2024-11-11', '2025-11-30', '2026-11-19', '2027-11-08']]);
+    const kid = SS('yearly', D('1993-03-01'));
+    eq('童限（起运前）：只有出生到起运前那几年；出生那一年落在出生日之后', kid && [kid.items.map((i) => i.label), kid.items.filter((i) => i.on).map((i) => i.label), tg(kid)[0] >= '1992-05-03'], [['1992', '1993'], ['1993'], true]);
+  }
+  {
+    const s = SS('monthly');
+    eq('流月：这一农历年的十二个月（6 列）', [s && s.cols, s && s.items.map((i) => i.label)],
+      [6, ['正月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '冬月', '腊月']]);
+    /* 2026 年春节是 2 月 17 日 */
+    eq('十月高亮；正月落在 2026-02-17', s && [s.items.filter((i) => i.on).map((i) => i.label), s.items.filter((i) => i.now).map((i) => i.label), tg(s)[0]], [['十月'], ['十月'], '2026-02-17']);
+    ok('每个月的落点都在那个流月单位里', !!s && s.items.every((i, k) => fn('lunarUnit')(i.target).month === k + 1));
+  }
+  {
+    const s = SS('daily');
+    /* 2026-11-01 是星期日：周一开头的月历第一格是 10 月 26 日 */
+    eq('流日：这个公历月的月历，周一开头、7 列 6 行；相邻月的日子变淡',
+      [s && s.cols, s && s.head, s && s.items.length, s && tg(s)[0], s && tg(s)[41], s && s.items.filter((i) => i.dim).length],
+      [7, ['一', '二', '三', '四', '五', '六', '日'], 42, '2026-10-26', '2026-12-06', 12]);
+    eq('今天高亮也是今天那格', s && [s.items.filter((i) => i.on).map((i) => i.label), s.items.filter((i) => i.now).map((i) => i.label)], [['19'], ['19']]);
+    const born = SS('daily', D('1992-05-10'));
+    eq('出生那个月：出生以前的日子不可点', born && [tg(born).indexOf('1992-05-03'), tg(born).slice(0, tg(born).indexOf('1992-05-03')).every((x) => x === null), born.items.some((i) => i.now)], [6, true, false]);
+  }
+  eq('排不出运限的日子（出生以前）没有时间条', [SS('yearly', D('1990-01-01')), SS('daily', D('1990-01-01'))], [null, null]);
+
+  section('v6 宫位卡的补充信息');
+  {
+    const f = attempt(() => fn('palaceFacts')(chart, chart.soulIndex)).v || {};
+    eq('命宫（癸丑）：这一宫管什么；三方四正对宫在前，各带主星（空宫是空的）',
+      [typeof f.theme === 'string' && f.theme.length > 0, f.stem, (f.trio || []).map((x) => [x.name, x.rel, x.stars])],
+      [true, '癸', [['迁移', 'opp', []], ['官禄', 'tri', ['天梁']], ['财帛', 'tri', []]]]);
+    /* 癸干四化：破军禄、巨门权、太阴科、贪狼忌（《全书》十干四化） */
+    eq('宫干四化：癸干让破军化禄、巨门化权、太阴化科、贪狼化忌，各落在本命哪一宫',
+      (f.fly || []).map((x) => [x.mu, x.star, x.palace]), [['禄', '破军', '子女'], ['权', '巨门', '福德'], ['科', '太阴', '命宫'], ['忌', '贪狼', '父母']]);
+    ok('落宫和盘面一致', (f.fly || []).every((x) => x.index >= 0 && chart.palaces[x.index].major.concat(chart.palaces[x.index].minor).some((s) => s.name === x.star)));
+    eq('宫位序号不对 → null', attempt(() => fn('palaceFacts')(chart, 12)).v, null);
+  }
 
   if (host) host.disposeAll();
 }

@@ -60,5 +60,19 @@
   "scopeQuickSoulEmpty": ["命宫在{gz}，没有主星。", "The life palace is {gz} with no major star."],
   "scopeQuickDecade": ["现在走{palace}大限（{from}–{to} 岁），重心在{theme}。", "You are in the {palace} decade (ages {from}–{to}); the focus is {theme}."],
   "scopeQuickChildhood": ["现在是童限（{age} 岁），看{palace}，重心在{theme}。", "This is the childhood period (age {age}), read from {palace}; the focus is {theme}."],
-  "scopeQuickToday": ["流日命宫在{palace}，{lu}化禄、{ji}化忌；重心在{theme}。", "Today's day palace is {palace}: {lu} 禄, {ji} 忌; the focus is {theme}."]
+  "scopeQuickToday": ["流日命宫在{palace}，{lu}化禄、{ji}化忌；重心在{theme}。", "Today's day palace is {palace}: {lu} 禄, {ji} 忌; the focus is {theme}."],
+  "scopeStripNow": ["此刻", "Right now"],
+  "scopeNowDecadal": ["{from}–{to} 岁 · {palace}", "Ages {from}–{to} · {palace}"],
+  "scopeNowChildhood": ["童限 {age} 岁 · {palace}", "Childhood, age {age} · {palace}"],
+  "scopeNowYearly": ["{year} {gz} · {palace}", "{year} {gz} · {palace}"],
+  "scopeNowMonthly": ["{unit} {gz} · {palace}", "{unit} {gz} · {palace}"],
+  "scopeNowDaily": ["{m}月{d}日 {gz} · {palace}", "{m}/{d} {gz} · {palace}"],
+  "scopeStripDecades": ["十二个大限", "The twelve decades"],
+  "scopeStripDecadeTitle": ["{from}–{to} 岁，{gz}，走{palace}", "Ages {from}–{to}, {gz}, on {palace}"],
+  "scopeStripYears": ["{from}–{to} 岁这十年", "The ten years of ages {from}–{to}"],
+  "scopeStripYearsChildhood": ["起运前这几年", "The years before the first decade"],
+  "scopeStripYearTitle": ["{year} {gz}年，虚岁 {age}", "{year} ({gz}), nominal age {age}"],
+  "scopeStripMonths": ["农历 {year} {gz}年", "Lunar year {year} ({gz})"],
+  "scopeStripDays": ["{year}年{m}月", "{year}-{m}"],
+  "scopeStripWeekdays": ["一|二|三|四|五|六|日", "M|T|W|T|F|S|S"]
 }

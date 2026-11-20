@@ -214,9 +214,9 @@ async function deepChecks(t, ok, eq, section) {
 
   /* ---------- 中宫 ---------- */
   const center = centerOf(tree);
-  eq('中宫：称呼（带命宫主星颜色的小星球）、生日行、四柱、底数；没有时辰边界告警',
-    [kidsOf(center).map((n) => classesOf(n).join('.')), text(first(center, 'zp-nm')), attr(first(center, 'zp-orb'), 'style'), text(first(center, 'zp-birth'))],
-    [['zp-nm', 'zp-birth', 'zp-pillars', 'zp-facts'], '甲', { '--zp-c': 'var(--zp-s2)' }, '1992.05.03 · 农历四月初一 · 辰时']);
+  eq('中宫：字都在一块牌子（div.zp-plate）上，连线从它下面穿过。牌子里是称呼（带命宫主星颜色的小星球）、生日行、四柱、底数、格局；没有时辰边界告警',
+    [kidsOf(center).map((n) => classesOf(n).join('.')), kidsOf(first(center, 'zp-plate')).map((n) => classesOf(n).join('.')), text(first(center, 'zp-nm')), attr(first(center, 'zp-orb'), 'style'), text(first(center, 'zp-birth'))],
+    [['zp-plate'], ['zp-nm', 'zp-birth', 'zp-pillars', 'zp-facts', 'zp-cpats'], '甲', { '--zp-c': 'var(--zp-s2)' }, '1992.05.03 · 农历四月初一 · 辰时']);
   eq('四柱：四个 span（干支 + small 年月日时），容器有名字', [kidsOf(first(center, 'zp-pillars')).map((n) => [text(n), text(find(n, (x) => x.type === 'small')[0])]), attr(first(center, 'zp-pillars'), 'aria-label')],
     [[['壬申年', '年'], ['甲辰月', '月'], ['己卯日', '日'], ['戊辰时', '时']], '四柱']);
   const facts = (tr) => kidsOf(first(centerOf(tr), 'zp-facts')).map(text);
@@ -271,9 +271,19 @@ async function deepChecks(t, ok, eq, section) {
   eq('「问这一宫」是 div.zp-card-right 里的 button.zp-link', buttons(first(pal, 'zp-card-right')).map((n) => [classesOf(n), text(n)]), [[['zp-link'], '问这一宫']]);
   eq('主星是 button.zp-star[aria-pressed]（第一颗按下），下面是它的解释', [starsOf(pal), text(first(pal, 'zp-brief'))],
     [[[['zp-star'], '太阳不', 'true'], [['zp-star'], '太阴庙', 'false']], BRIEF.太阳]);
-  eq('键值：辅星（没有写 —）、三方四正、大限', kv(pal), [['dt', '辅星'], ['dd', '—'], ['dt', '三方四正'], ['dd', '迁移 · 官禄 · 财帛'], ['dt', '大限'], ['dd', '3–12 岁']]);
+  /* 三方四正每一宫带主星（空宫写「空宫」）；宫干四化：癸干让破军化禄、巨门化权、太阴化科、贪狼化忌，各落在哪一宫 */
+  eq('键值：辅星（没有写 —）、对宫、三合（两宫在同一行里，一宫一组）、宫干四化、大限', kv(pal),
+    [['dt', '辅星'], ['dd', '—'], ['dt', '对宫'], ['dd', '迁移空宫'], ['dt', '三合'], ['dd', '官禄天梁财帛空宫'],
+      ['dt', '癸干四化'], ['dd', '破军禄子女巨门权福德太阴科命宫贪狼忌父母'], ['dt', '大限'], ['dd', '3–12 岁']]);
+  eq('三方四正一宫一组：span.zp-kv-pal > button.zp-kv-link（宫名）+ span.zp-kv-stars（主星，空宫写「空宫」）',
+    findByClass(pal, 'zp-kv-pal').map((g) => [text(first(g, 'zp-kv-link')), text(first(g, 'zp-kv-stars'))]), [['迁移', '空宫'], ['官禄', '天梁'], ['财帛', '空宫']]);
+  eq('宫名后面写这一宫管什么', text(first(pal, 'zp-theme')), '看你自己');
+  const fly = first(pal, 'zp-fly');
+  eq('宫干四化：四颗星按星色，各带一个空心的四化印（禄权科忌）', [kidsOf(fly).map((n) => text(find(n, (x) => x.type === 'b')[0])), findByClass(fly, 'zp-seal').map((n) => [text(n), classesOf(n).includes('zp-scoped')]), attr(find(fly, (x) => x.type === 'b')[0], 'style')],
+    [['破军', '巨门', '太阴', '贪狼'], [['禄', true], ['权', true], ['科', true], ['忌', true]], { '--zp-c': 'var(--zp-s13)' }]);
   const links = findByClass(pal, 'zp-kv-link');
-  eq('三方四正的宫名是 button.zp-kv-link（对宫、两个三合宫）', links.map((n) => [n.type, attr(n, 'type'), text(n)]), [['button', 'button', '迁移'], ['button', 'button', '官禄'], ['button', 'button', '财帛']]);
+  eq('宫名都是 button.zp-kv-link：对宫、两个三合宫，再加四化落的四宫', links.map((n) => [n.type, attr(n, 'type'), text(n)]),
+    [['button', 'button', '迁移'], ['button', 'button', '官禄'], ['button', 'button', '财帛'], ['button', 'button', '子女'], ['button', 'button', '福德'], ['button', 'button', '命宫'], ['button', 'button', '父母']]);
   links[1].props.onClick();
   eq('点三方四正里的「官禄」：选中官禄（store.selectPalace(3)），窄档页签切到宫位卡', [store.getState().session.sel, store.getState().session.pane], [3, 'detail']);
   store.selectPalace(1);
@@ -291,8 +301,8 @@ async function deepChecks(t, ok, eq, section) {
   tree = page();
   eq('显示杂曜：每个宫格多一行 div.zp-adj', findByClass(tree, 'zp-adj').map(text).slice(0, 3).concat([findByClass(tree, 'zp-adj').length]),
     ['凤阁 天月 截路 天虚 年解', '空亡', '天姚 华盖 蜚廉', 12]);
-  eq('显示杂曜：宫位卡多一行「杂曜」（在辅星和三方四正之间）', kv(palaceCard(tree)),
-    [['dt', '辅星'], ['dd', '—'], ['dt', '杂曜'], ['dd', '天喜、月德'], ['dt', '三方四正'], ['dd', '迁移 · 官禄 · 财帛'], ['dt', '大限'], ['dd', '3–12 岁']]);
+  eq('显示杂曜：宫位卡多一行「杂曜」（在辅星和对宫之间）', kv(palaceCard(tree)).slice(0, 6),
+    [['dt', '辅星'], ['dd', '—'], ['dt', '杂曜'], ['dd', '天喜、月德'], ['dt', '对宫'], ['dd', '迁移空宫']]);
   store.setPref('showAdj', false);
   tree = page();
   eq('关掉：宫格和宫位卡都不再有杂曜', [findByClass(tree, 'zp-adj').length, kv(palaceCard(tree)).filter((x) => x[1] === '杂曜').length], [0, 0]);
@@ -315,9 +325,10 @@ async function deepChecks(t, ok, eq, section) {
   eq('选中 9：恰好一个按下、tabIndex 0；zp-rel 是 3 / 1 / 5', [cB.filter((c) => attr(c, 'aria-pressed') === 'true').map((c) => [attr(c, 'data-i'), attr(c, 'tabIndex')]), cB.filter((c) => classesOf(c).includes('zp-rel')).map((c) => attr(c, 'data-i'))],
     [[[9, 0]], [1, 3, 5]]);
   eq('整棵树的 key 选宫前后一个不变（key 不随选中宫变）', [keysOf(A).length > 12, keysOf(A).join('|') === keysOf(B).join('|')], [true, true]);
-  eq('宫位卡跟着换：夫妻 辛亥、天同、禄存、官禄 · 福德 · 迁移、103–112 岁',
-    [palHead(palaceCard(B))[0], starsOf(palaceCard(B)).map((x) => x[1]), kv(palaceCard(B)).map((x) => x[1])],
-    ['夫妻辛亥', ['天同庙'], ['辅星', '禄存', '三方四正', '官禄 · 福德 · 迁移', '大限', '103–112 岁']]);
+  /* 辛干四化：巨门禄、太阳权、文曲科、文昌忌 */
+  eq('宫位卡跟着换：夫妻 辛亥、天同、禄存；对宫官禄、三合福德和迁移各带主星；辛干四化；103–112 岁',
+    [palHead(palaceCard(B))[0], starsOf(palaceCard(B)).map((x) => x[1]), kv(palaceCard(B)).map((x) => x[1]), text(first(palaceCard(B), 'zp-theme'))],
+    ['夫妻辛亥', ['天同庙'], ['辅星', '禄存', '对宫', '官禄天梁', '三合', '福德天机、巨门迁移空宫', '辛干四化', '巨门禄福德太阳权命宫文曲科疾厄文昌忌仆役', '大限', '103–112 岁'], '看伴侣与感情']);
   eq('窄档页签第三个换成新宫名', find(region(B, 'PANES')[0], (n) => attr(n, 'role') === 'tab').map(text), ['本命', '格局', '夫妻']);
   cellsOf(B)[4].props.onClick();
   eq('点宫格：store.selectPalace(4)，页签切到宫位卡', [store.getState().session.sel, store.getState().session.pane], [4, 'detail']);
@@ -369,6 +380,75 @@ async function deepChecks(t, ok, eq, section) {
   eq('流月 / 流日的印用「月」「日」，大限用「限」', [trees[1], trees[3], trees[4]].map((tr) => find(board(tr), (n) => n.type === 'i' && classesOf(n).includes('zp-scoped')).map(text)[0].charAt(0)), ['限', '月', '日']);
 
   /* ---------- 前后翻、回到今天、到头 ---------- */
+  section('命盘页：时间条、中宫里的格局（spec 2026-11-20 §3.8，深渲染）');
+  {
+    const strip = (tr) => first(scopeCard(tr), 'zp-strip');
+    const grid = (tr) => first(strip(tr), 'zp-strip-grid');
+    const sc = (tr) => findByClass(strip(tr), 'zp-strip-cell');
+    const onOf = (tr) => sc(tr).filter((c) => attr(c, 'aria-pressed') === 'true').map(text);
+    const nowOf = (tr) => sc(tr).filter((c) => classesOf(c).includes('zp-now')).map(text);
+    store.openChart(entry.id);
+    let tr = page('wide');
+    const rows = findByClass(strip(tr), 'zp-now-row');
+    eq('本命：时间卡里是「此刻」四行（大限 / 流年 / 流月 / 流日），每行一个按钮',
+      [attr(strip(tr), 'data-kind'), attr(strip(tr), 'role'), attr(strip(tr), 'aria-label'), rows.map((r) => text(find(r, (n) => n.type === 'b')[0])), rows.every((r) => attr(r, 'type') === 'button')],
+      ['now', 'group', '此刻', ['大限', '流年', '流月', '流日'], true]);
+    eq('时间条在四化和按钮之间', kidsOf(scopeCard(tr)).map((n) => classesOf(n)[0]), ['zp-card-h', 'zp-when', 'zp-line', 'zp-mut', 'zp-strip', 'zp-card-f']);
+    rows[1].props.onClick();
+    eq('点「流年」那一行：切到流年页签，日期是今天', [store.getState().session.tab, store.getState().session.when], ['yearly', { y: 2026, m: 11, d: 19 }]);
+    tr = page('wide');
+    eq('流年：这个大限的十年（5 列），今年按下、带今天的标记；每格是 type=button、有 aria-pressed',
+      [attr(strip(tr), 'data-kind'), attr(grid(tr), 'data-cols'), sc(tr).length, onOf(tr), nowOf(tr), sc(tr).every((c) => attr(c, 'type') === 'button' && ['true', 'false'].includes(attr(c, 'aria-pressed')))],
+      ['yearly', 5, 10, ['2026丙午'], ['2026丙午'], true]);
+    sc(tr)[4].props.onClick();
+    eq('点 2028：跳到 2028 年同一个农历月日，选中宫跟到那一年的流年命宫（戊申年 → 申宫）',
+      [store.getState().session.when.y, chart.palaces[store.getState().session.sel].branch], [2028, '申']);
+    tr = page('wide');
+    eq('时间条跟着变：按下的是 2028，今天的标记还在 2026', [onOf(tr), nowOf(tr)], [['2028戊申'], ['2026丙午']]);
+    store.setTab('decadal');
+    tr = page('wide');
+    eq('大限：十二格（4 列）；2100 年以后的那一个不可点', [sc(tr).length, attr(grid(tr), 'data-cols'), sc(tr).filter((c) => attr(c, 'disabled')).map(text)], [12, 4, ['113–122兄弟']]);
+    store.setTab('monthly');
+    tr = page('wide');
+    eq('流月：十二格（6 列）', [sc(tr).length, attr(grid(tr), 'data-cols')], [12, 6]);
+    store.backToNow();
+    store.setTab('daily');
+    tr = page('wide');
+    const heads = find(grid(tr), (n) => n.type === 'i');
+    eq('流日：月历 42 格（7 列），上面一行星期（aria-hidden）；今天按下；离选中那周超过一周的格子带 zp-far（左栏不够高时收起来，剩三周）',
+      [sc(tr).length, attr(grid(tr), 'data-cols'), heads.map(text), heads.every((n) => attr(n, 'aria-hidden') === true), onOf(tr), sc(tr).filter((c) => !classesOf(c).includes('zp-far')).length],
+      [42, 7, ['一', '二', '三', '四', '五', '六', '日'], true, ['19'], 21]);
+    sc(tr)[0].props.onClick();
+    eq('点月历里上个月的日子：翻到那一天（月历随后显示那个月）', store.getState().session.when, { y: 2026, m: 10, d: 26 });
+    store.backToNow();
+    store.setTab('natal');
+    store.selectPalace(chart.soulIndex);
+
+    tr = page('wide');
+    const sidePats = patsCard(tr), centerPats = first(centerOf(tr), 'zp-cpats');
+    const names = findByClass(sidePats, 'zp-pat').map(text);
+    eq('格局在两处都渲染：左栏的格局卡和中宫里，内容一样（显示哪一处由样式按盘面宽度定）',
+      [names.length >= 2, findByClass(centerPats, 'zp-pat').map(text), attr(centerPats, 'role'), attr(centerPats, 'aria-label')], [true, names, 'group', '格局']);
+    const lastPat = findByClass(centerPats, 'zp-pat').pop();
+    lastPat.props.onClick();
+    tr = page('wide');
+    const pressedIn = (root) => findByClass(root, 'zp-pat').filter((b) => attr(b, 'aria-pressed') === 'true').map(text);
+    eq('在中宫点另一个格局：两处一起换（同一份 session.pat），说明也一样',
+      [pressedIn(first(centerOf(tr), 'zp-cpats')), pressedIn(patsCard(tr)), text(first(first(centerOf(tr), 'zp-cpats'), 'zp-pat-desc')) === text(first(patsCard(tr), 'zp-pat-desc'))],
+      [[names[names.length - 1]], [names[names.length - 1]], true]);
+    store.setPat(0);
+    const realDetect2 = E.detectPatterns;
+    E.detectPatterns = () => [];
+    const trNone = renderDeep(h(ChartPage, { tier: 'wide' }));
+    E.detectPatterns = realDetect2;
+    eq('没有格局：中宫里不留那一块', findByClass(centerOf(trNone), 'zp-cpats').length, 0);
+    ok('样式：盘面够宽时格局在中宫、左栏的格局卡收起；默认相反（同一时间只显示一处）',
+      /@container zp-body \(min-width: 980px\) \{\s*\.zp-side \.zp-pats \{ display: none \}\s*\.zp-cpats \{ display: flex \}\s*\}/.test(t.client) &&
+      /\.zp-cpats \{\s*display: none;/.test(t.client));
+    ok('样式：中宫的字在 .zp-plate 上，它排在连线上面（z-index 1 对 0）',
+      /\.zp-plate \{[^}]*z-index: 1;/.test(t.client) && /\.zp-lines \{[^}]*z-index: 0;/.test(t.client));
+  }
+
   section('命盘页（T5b）：前后翻和动作（深渲染）');
   store.setTab('yearly');
   byLabel(scopeCard(page()), '下一年').props.onClick();
@@ -679,7 +759,7 @@ async function sourceChecks(t, ok, eq, section) {
 
   const css = ['10-base.css', '70-chart.css'].map((f) => readFileSync(join(t.root, 'src', 'ui', 'css', f), 'utf8')).join('\n').replace(/\/\*[\s\S]*?\*\//g, '');
   const rules = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((m) => [m[1].trim(), m[2]]);
-  const STILL = /\.zp-(?:cell|card|scope|pats|detail|board|center|side|body|star|pat|step|mut)(?![\w-])/;
+  const STILL = /\.zp-(?:cell|card|scope|pats|detail|board|center|side|body|star|pat|step|mut|strip|strip-cell|now-row|plate|cpats|fly)(?![\w-])/;
   const bad = rules.filter(([sel, body]) => STILL.test(sel) && /(^|[;\s])animation(-name)?\s*:/.test(body)).map(([sel]) => sel);
   eq('样式：宫格、卡片、盘面、中宫、左栏的规则里没有 animation（选宫、切页签不重放任何东西）', bad, []);
   ok('样式：.zp-cell 和 .zp-card 的规则都找到了', rules.some(([sel]) => /\.zp-cell(?![\w-])/.test(sel)) && rules.some(([sel]) => /\.zp-card(?![\w-])/.test(sel)));

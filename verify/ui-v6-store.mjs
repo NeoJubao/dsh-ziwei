@@ -799,6 +799,29 @@ export default async function store(t) {
     eq('HTTP 500 → 错误提示', [st.getState().session.toast && st.getState().session.toast.text, st.getState().session.toast && st.getState().session.toast.error], [ZH.handoffFailed500, true]);
   }
 
+  section('v6 store：时间条的跳转（setWhen）');
+  {
+    const { st } = mk();
+    const a = st.addChart(GOLDEN, '甲');
+    st.openChart(a.id, { tab: 'yearly' });
+    const s0 = st.getState().session;
+    eq('setWhen：跳到 2030 年的同一天，选中宫跟到那一年的流年命宫（2030 庚戌 → 戌宫）',
+      [st.setWhen({ y: 2030, m: 11, d: 19 }), st.getState().session.when, st.getState().session.tab, chart.palaces[st.getState().session.sel].branch], [true, { y: 2030, m: 11, d: 19 }, 'yearly', '戌']);
+    let ticks = 0;
+    st.subscribe(() => { ticks++; });
+    const w1 = st.getState().session.when;
+    eq('同一天再设一次：不变、不通知，when 还是原来那个对象', [st.setWhen({ y: 2030, m: 11, d: 19 }), ticks, st.getState().session.when === w1], [false, 0, true]);
+    eq('出生以前、不是日期的：不动', [st.setWhen({ y: 1990, m: 1, d: 1 }), st.setWhen({ y: 2030, m: 13, d: 1 }), st.setWhen(null), st.getState().session.when], [false, false, false, { y: 2030, m: 11, d: 19 }]);
+    st.setTab('natal');
+    eq('本命下不带页签调：不动（本命不看日期）', [st.setWhen({ y: 2026, m: 11, d: 19 }), st.getState().session.tab], [false, 'natal']);
+    st.setStage('report');
+    eq('带上页签：切到流日、回到盘面、日期是今天、左栏回到时间卡',
+      [st.setWhen({ y: 2026, m: 11, d: 19 }, 'daily'), st.getState().session.tab, st.getState().session.stage, st.getState().session.when, st.getState().session.pane, chart.palaces[st.getState().session.sel].name],
+      [true, 'daily', 'board', { y: 2026, m: 11, d: 19 }, 'scope', '父母']);
+    eq('页签不认识：不动', st.setWhen({ y: 2026, m: 11, d: 19 }, 'hourly'), false);
+    void s0;
+  }
+
   section('v6 store：引导问答不赖在首页');
   {
     const { st } = mk();
