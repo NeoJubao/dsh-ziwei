@@ -360,6 +360,14 @@ const lastText = (opts) => { const m = opts.messages[opts.messages.length - 1]; 
   const a = await run({ provider: 'px', model: 'mx' });
   ok('请求体带 model: { provider, model } → 用它调用模型，start 帧里也是它', a.used === 'px/mx' && /"provider":"px","model":"mx"/.test(a.body), a.used + ' ' + a.body.slice(0, 120));
   ok('不带 model → 用 DSH 的默认模型', (await run(undefined)).used === 'p/m');
+  {
+    /* 面板在会话之外调模型：每次请求都带同一个插件会话标识（有些网关按会话路由，没有会直接拒绝） */
+    const { ctx, calls } = scripted([ANSWER, ANSWER]);
+    await withTimeout(handleInterpret(ctx, core, makeReq(BODY), makeRes(), withBudget(5000)), 8000, '会话标识');
+    await withTimeout(handleInterpret(ctx, core, makeReq(BODY), makeRes(), withBudget(5000)), 8000, '会话标识 2');
+    ok('模型请求带 sessionId（ziwei-workbench-<uuid>），同一个进程里不变',
+      calls.length === 2 && /^ziwei-workbench-[0-9a-f-]{36}$/.test(String(calls[0].sessionId)) && calls[0].sessionId === calls[1].sessionId, String(calls[0] && calls[0].sessionId));
+  }
   const bad = [{ provider: 'px' }, { model: 'mx' }, { provider: 1, model: 2 }, { provider: '', model: 'mx' }, 'px/mx', null, { provider: 'x'.repeat(201), model: 'mx' }];
   const got = [];
   for (const b of bad) got.push((await run(b)).used);

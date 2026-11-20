@@ -15,6 +15,7 @@ import { appendFileSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import vm from 'node:vm';
+import { randomUUID } from 'node:crypto';
 
 /* 插件身份与依赖 (A1): bundle 以 link: 装载时，宿主按 cordis inject 语义等待服务就绪；
    否则 apply() 会在 tools/systemPrompt/webServer 尚未注册时执行，全部注册被静默跳过。
@@ -749,6 +750,10 @@ async function readBody(req, limitBytes = 300000) {
   return Buffer.concat(chunks).toString('utf8');
 }
 
+/* 面板在会话之外调模型，自己带一个会话标识（每个 Host 进程一个）。有些网关按会话路由，请求里没有会话标识会直接拒绝；
+   DSH 会把 sessionId 映射成它们要的请求头。用户能在面板里换模型之后，这一点才会碰上（自媒体工作台也是这么做的）。 */
+const PLUGIN_SESSION_ID = `ziwei-workbench-${randomUUID()}`;
+
 /* 空答重试时加在消息末尾的那句话（给模型看的，固定用中文） */
 const EMPTY_RETRY_NUDGE = '（上一次你只做了思考，没有写出回答。请直接给出回答正文。）';
 
@@ -962,6 +967,7 @@ async function handleInterpret(ctx, core, req, res, budget) {
       system: built.system,
       temperature: mode === 'report' ? 0.7 : 0.6,
       maxTokens,
+      sessionId: PLUGIN_SESSION_ID,
       signal: controller.signal
     }, extra || null));
     /* 真实 dsh-llm 是同步返回 AsyncIterable；若某层中间件返回 Promise，这里兜一下 */
