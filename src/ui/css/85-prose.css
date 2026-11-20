@@ -194,12 +194,12 @@
 /* 面板里：--zr-* 映射到宿主 token 和 --zp-*（导出文件里没有 .zp-root，这两段不生效）。
    字体：宋体栈只给分部标题、小标题、心法和编号；引用用楷体，其余跟宿主正文字体。 */
 .zp-root .zr-prose {
-  --zr-paper: var(--dsw-alias-bg-layer-1);
-  --zr-fill: var(--dsw-alias-interactive-bg-hover);
-  --zr-ink: var(--dsw-alias-label-primary);
-  --zr-ink-2: var(--dsw-alias-label-secondary);
-  --zr-ink-3: var(--dsw-alias-label-tertiary);
-  --zr-rule: var(--dsw-alias-border-l1);
+  --zr-paper: var(--zp-surface);
+  --zr-fill: var(--zp-hover);
+  --zr-ink: var(--zp-ink);
+  --zr-ink-2: var(--zp-ink-2);
+  --zr-ink-3: var(--zp-ink-3);
+  --zr-rule: var(--zp-line);
   --zr-gold: var(--zp-gold);
   --zr-gold-text: var(--zp-gold-text);
   --zr-zi: var(--zp-zi);
@@ -226,4 +226,4 @@
   --zr-kai: "Kaiti SC", "STKaiti", "KaiTi", var(--zp-font-serif);
   --zr-sans: var(--dsh-font-family-text-default, -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", sans-serif);
 }
-body[data-ds-dark-theme] .zp-root .zr-prose { --zr-em-halo: .5 }
+.zp-root[data-theme="dark"] .zr-prose { --zr-em-halo: .5 }

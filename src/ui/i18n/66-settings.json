@@ -1,4 +1,9 @@
 {
+  "setTheme": ["外观", "Appearance"],
+  "setThemeHint": ["默认深色。选「跟随 DSH」时，深浅色和 DeepSeek Harness 保持一致", "Dark by default. Choose Follow DSH to match DeepSeek Harness"],
+  "setThemeDark": ["深色", "Dark"],
+  "setThemeLight": ["浅色", "Light"],
+  "setThemeAuto": ["跟随 DSH", "Follow DSH"],
   "setAutoOpen": ["启动时自动打开工作台", "Open workbench on launch"],
   "setAutoOpenHint": ["DSH 启动后直接切到紫微面板", "Switch to this panel when DSH starts"],
   "setSky": ["首页 3D 星图", "3D star map on the home page"],

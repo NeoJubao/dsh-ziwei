@@ -327,7 +327,7 @@ export default async function report(t) {
   ok('面板里把 --zr-* 映射到宿主 token 和 --zp-*（四化用 --zp-mu-*）',
     /--zr-lu:\s*var\(--zp-mu-lu\)/.test(panelMap) && /--zr-quan:\s*var\(--zp-mu-quan\)/.test(panelMap) &&
     /--zr-ke:\s*var\(--zp-mu-ke\)/.test(panelMap) && /--zr-ji:\s*var\(--zp-mu-ji\)/.test(panelMap) &&
-    /--zr-ink:\s*var\(--dsw-alias-label-primary\)/.test(panelMap) && /--zr-s13:\s*var\(--zp-s13\)/.test(panelMap));
+    /--zr-ink:\s*var\(--zp-ink\)/.test(panelMap) && /--zr-s13:\s*var\(--zp-s13\)/.test(panelMap));
   const used = [...new Set([...proseFile.replace(/\.zp-root \.zr-prose\s*\{[^}]*\}/, '').matchAll(/var\((--zr-[\w-]+)/g)].map((m) => m[1]))];
   const panelVars = varsOf(panelMap);
   const exportVars = { ...varsOf(R.FONTS), ...varsOf(R.LIGHT) };

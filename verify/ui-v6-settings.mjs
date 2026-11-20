@@ -40,8 +40,8 @@ export default async function settingsChecks(t) {
   gear().node.focus();
   rt.click(gear());
   eq('点顶栏的设置：div.zp-modal[role=dialog]，有名字、aria-modal、MODAL 区域', [!!modal(), attr(modal(), 'role'), attr(modal(), 'aria-modal'), attr(modal(), 'aria-label'), attr(modal(), 'data-region')], [true, 'dialog', 'true', '设置', 'MODAL']);
-  eq('五块：自动打开、首页 3D 星图、本机数据、版本、关于', [findByClass(modal(), 'zp-setting').map((r) => text(find(r, (n) => n.type === 'b')[0])), findByClass(modal(), 'zp-about').length >= 1],
-    [['启动时自动打开工作台', '首页 3D 星图', '本机数据', '版本 ' + t.version], true]);
+  eq('六块：外观、自动打开、首页 3D 星图、本机数据、版本、关于', [findByClass(modal(), 'zp-setting').map((r) => text(find(r, (n) => n.type === 'b')[0])), findByClass(modal(), 'zp-about').length >= 1],
+    [['外观', '启动时自动打开工作台', '首页 3D 星图', '本机数据', '版本 ' + t.version], true]);
   ok('弹层里每个按钮都有文字或名字', find(modal(), (n) => n.type === 'button').every((n) => text(n).trim() || attr(n, 'aria-label')));
   ok('焦点进了弹层', modal().node.contains(rt.doc.activeElement));
   rt.key(modal(), 'Escape');
@@ -50,8 +50,34 @@ export default async function settingsChecks(t) {
   rt.click(findByClass(tree(), 'zp-mask')[0]);
   ok('点遮罩也关掉', !modal());
 
-  section('v6 设置：两个开关');
+  section('v6 设置：外观');
   rt.click(gear());
+  {
+    const group = () => find(rowOf('外观'), (n) => attr(n, 'role') === 'radiogroup')[0];
+    const radios = () => find(group(), (n) => attr(n, 'role') === 'radio');
+    const root = () => findByClass(tree(), 'zp-root')[0];
+    eq('外观是一个单选组（radiogroup，有名字），三项：深色 / 浅色 / 跟随 DSH；默认选深色，根节点 data-theme="dark"',
+      [attr(group(), 'aria-label'), radios().map(text), radios().map((n) => attr(n, 'aria-checked')), attr(root(), 'data-theme'), store.getState().prefs.theme],
+      ['外观', ['深色', '浅色', '跟随 DSH'], ['true', 'false', 'false'], 'dark', 'dark']);
+    rt.click(radios()[1]);
+    eq('选浅色：偏好、本机记录、根节点都变了', [store.getState().prefs.theme, storage.getItem('ziwei-pro.theme'), attr(root(), 'data-theme'), radios().map((n) => attr(n, 'aria-checked'))],
+      ['light', 'light', 'light', ['false', 'true', 'false']]);
+    rt.click(radios()[2]);
+    eq('选跟随 DSH：宿主是浅色（body 上没有 data-ds-dark-theme）时解析成浅色', [store.getState().prefs.theme, attr(root(), 'data-theme')], ['auto', 'light']);
+    rt.doc.body.setAttribute('data-ds-dark-theme', '');
+    rt.flush();
+    eq('宿主切到深色：面板跟着变', attr(root(), 'data-theme'), 'dark');
+    rt.doc.body.removeAttribute('data-ds-dark-theme');
+    rt.flush();
+    eq('宿主切回浅色：面板跟着变', attr(root(), 'data-theme'), 'light');
+    rt.doc.body.setAttribute('data-ds-dark-theme', '');
+    rt.click(radios()[0]);
+    rt.doc.body.removeAttribute('data-ds-dark-theme');
+    rt.flush();
+    eq('选回深色之后不再看宿主', [store.getState().prefs.theme, attr(root(), 'data-theme')], ['dark', 'dark']);
+  }
+
+  section('v6 设置：两个开关');
   const sw = (title) => findByClass(rowOf(title), 'zp-switch')[0];
   eq('开关的初值跟着偏好：自动打开 关，3D 星图 开；开关有名字', [attr(sw('启动时自动打开工作台'), 'aria-pressed'), attr(sw('首页 3D 星图'), 'aria-pressed'), attr(sw('启动时自动打开工作台'), 'aria-label'), sw('首页 3D 星图').type],
     ['false', 'true', '启动时自动打开工作台', 'button']);

@@ -437,6 +437,21 @@ export default async function storageChecks(t) {
       s.setItem('ziwei-pro.autopen', 'true'); const auto = api.prefs.autoOpen();
       return sky === true && auto === false;
     });
+    check('偏好：外观默认深色；只认 dark / light / auto，别的值读写都按 dark', () => {
+      const s2 = memoryStorage();
+      const api2 = mk(s2);
+      const first = api2.prefs.theme();
+      api2.prefs.setTheme('light'); const a = [s2.getItem('ziwei-pro.theme'), api2.prefs.theme()].join(',');
+      api2.prefs.setTheme('auto'); const b = [s2.getItem('ziwei-pro.theme'), api2.prefs.theme()].join(',');
+      api2.prefs.setTheme('sepia'); const c = [s2.getItem('ziwei-pro.theme'), api2.prefs.theme()].join(',');
+      s2.setItem('ziwei-pro.theme', 'LIGHT'); const d = api2.prefs.theme();
+      return [first === 'dark' && a === 'light,light' && b === 'auto,auto' && c === 'dark,dark' && d === 'dark', `${first} | ${a} | ${b} | ${c} | ${d}`];
+    });
+    check('外观解析：dark / light 原样；auto 看宿主是不是深色', () => {
+      const r = ui.resolveTheme;
+      const got = [r('dark', false), r('light', true), r('auto', true), r('auto', false), r(undefined, false), r('x', true)].join(',');
+      return [got === 'dark,light,dark,light,dark,dark', got];
+    });
   }
 
   /* ---------------------------------------------------------------- */

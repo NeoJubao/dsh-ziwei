@@ -32,7 +32,7 @@
 .zp-mask {
   position: absolute;
   inset: 0;
-  background: var(--dsw-alias-bg-mask-1);
+  background: var(--zp-mask);
   animation: zp-fade 160ms ease-out both;
 }
 @keyframes zp-fade { from { opacity: 0 } to { opacity: 1 } }
@@ -46,8 +46,8 @@
   flex-direction: column;
   width: min(420px, 100%);
   height: 100%;
-  border-left: 1px solid var(--dsw-alias-border-l2);
-  background: var(--dsw-alias-bg-layer-1);
+  border-left: 1px solid var(--zp-line-2);
+  background: var(--zp-surface);
   box-shadow: -24px 0 48px -32px rgba(0, 0, 0, .45);
   animation: zp-slide-in 180ms cubic-bezier(.22, .61, .36, 1) both;
 }
@@ -57,9 +57,9 @@
   flex-direction: column;
   width: min(520px, 100%);
   max-height: 100%;
-  border: 1px solid var(--dsw-alias-border-l1);
+  border: 1px solid var(--zp-line);
   border-radius: 16px;
-  background: var(--dsw-alias-bg-layer-1);
+  background: var(--zp-surface);
   box-shadow: 0 24px 48px -24px rgba(0, 0, 0, .45);
   animation: zp-pop 160ms cubic-bezier(.22, .61, .36, 1) both;
 }
@@ -70,7 +70,7 @@
   gap: 8px;
   min-height: 56px;
   padding: 12px 16px;
-  border-bottom: 1px solid var(--dsw-alias-border-l2);
+  border-bottom: 1px solid var(--zp-line-2);
 }
 .zp-dialog-h h2 {
   margin: 0;
@@ -93,7 +93,7 @@
   justify-content: flex-end;
   gap: 8px;
   padding: 12px 16px;
-  border-top: 1px solid var(--dsw-alias-border-l2);
+  border-top: 1px solid var(--zp-line-2);
 }
 
 /* ---------------- 菜单 ---------------- */
@@ -108,9 +108,9 @@
   min-width: 168px;
   margin-top: 4px;
   padding: 4px;
-  border: 1px solid var(--dsw-alias-border-l1);
+  border: 1px solid var(--zp-line);
   border-radius: 12px;
-  background: var(--dsw-alias-bg-layer-1);
+  background: var(--zp-surface);
   box-shadow: 0 12px 32px -16px rgba(0, 0, 0, .45);
   animation: zp-pop 160ms cubic-bezier(.22, .61, .36, 1) both;
 }
@@ -127,8 +127,8 @@
   text-align: left;
   white-space: nowrap;
 }
-.zp-root .zp-menu button { color: var(--dsw-alias-label-primary) }
-.zp-root .zp-menu button:hover { background: var(--dsw-alias-interactive-bg-hover) }
+.zp-root .zp-menu button { color: var(--zp-ink) }
+.zp-root .zp-menu button:hover { background: var(--zp-hover) }
 .zp-root .zp-menu button.zp-danger { color: var(--zp-mu-ji) }
 .zp-menu button[aria-pressed="true"]::after {
   content: "";
@@ -151,8 +151,8 @@
   max-width: calc(100% - 32px);
   padding: 8px 12px;
   border-radius: 8px;
-  background: var(--dsw-alias-button-primary-fill);
-  color: var(--dsw-alias-label-primary-inverted);
+  background: var(--zp-primary);
+  color: var(--zp-on-primary);
   font-size: 13px;
   line-height: 20px;
   transform: translateX(-50%);
@@ -167,7 +167,7 @@
   font-weight: 600;
   text-decoration: underline;
 }
-.zp-root .zp-toast button { color: var(--dsw-alias-label-primary-inverted) }
+.zp-root .zp-toast button { color: var(--zp-on-primary) }
 
 /* ---------------- 表单控件（生辰表单、设置） ---------------- */
 .zp-field {
@@ -177,7 +177,7 @@
   margin-bottom: 12px;
 }
 .zp-field > span, .zp-field > label {
-  color: var(--dsw-alias-label-secondary);
+  color: var(--zp-ink-2);
   font-size: 12px;
   line-height: 18px;
 }
@@ -187,16 +187,16 @@
   width: 100%;
   height: 32px;
   padding: 0 8px;
-  border: 1px solid var(--dsw-alias-border-l1);
+  border: 1px solid var(--zp-line);
   border-radius: 8px;
-  background: var(--dsw-alias-bg-base);
+  background: var(--zp-bg);
   font-size: 13px;
   outline: none;
 }
 .zp-input:focus { border-color: var(--zp-zi) }
 .zp-field-hint {
   margin: 0;
-  color: var(--dsw-alias-label-tertiary);
+  color: var(--zp-ink-3);
   font-size: 12px;
   line-height: 18px;
 }
@@ -208,7 +208,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  color: var(--dsw-alias-label-secondary);
+  color: var(--zp-ink-2);
   font-size: 12px;
   white-space: nowrap;
 }
@@ -216,11 +216,11 @@
   margin: 4px 0 12px;
   padding: 8px 12px;
   border-radius: 8px;
-  /* 浅色主题里 bg-layer-2 和底色是同一个白，用悬停底色才看得出这是一块 */
-  background: var(--dsw-alias-interactive-bg-hover);
+  /* 淡底色用悬停叠色：落在哪层底上都看得出这是一块 */
+  background: var(--zp-hover);
 }
 .zp-more > summary {
-  color: var(--dsw-alias-label-secondary);
+  color: var(--zp-ink-2);
   font-size: 13px;
   cursor: pointer;
 }
@@ -231,12 +231,12 @@
   align-items: center;
   gap: 12px;
   padding: 12px 0;
-  border-bottom: 1px solid var(--dsw-alias-border-l2);
+  border-bottom: 1px solid var(--zp-line-2);
 }
 .zp-setting:last-child { border-bottom: 0 }
 .zp-setting-text { flex: 1; min-width: 0 }
 .zp-setting-text b { display: block; font-size: 13px; font-weight: 500; line-height: 20px }
-.zp-setting-text span { display: block; color: var(--dsw-alias-label-tertiary); font-size: 12px; line-height: 18px }
+.zp-setting-text span { display: block; color: var(--zp-ink-3); font-size: 12px; line-height: 18px }
 .zp-switch {
   position: relative;
   flex: none;
@@ -245,8 +245,8 @@
   padding: 0;
   border: 0;
   border-radius: 999px;
-  /* 关着的轨道：按文字色调出一层灰（bg-layer-3 在浅色主题里是白的，白钮落在白轨上看不见） */
-  background: color-mix(in srgb, var(--dsw-alias-label-primary) 20%, transparent);
+  /* 关着的轨道：按文字色调出一层灰，白钮落在上面看得见 */
+  background: color-mix(in srgb, var(--zp-ink) 22%, transparent);
   transition: background-color 120ms ease;
 }
 .zp-switch::after {
@@ -257,7 +257,8 @@
   width: 16px;
   height: 16px;
   border-radius: 999px;
-  background: var(--dsw-alias-bg-layer-1);
+  /* 钮在两套外观下都是白的（深色下用卡片色会变成一颗黑钮） */
+  background: var(--zp-orb-hi);
   box-shadow: 0 1px 2px rgba(0, 0, 0, .3);
   transition: transform 120ms ease;
 }
@@ -266,7 +267,7 @@
 /* 检查更新的结果：一行说明（出错加 zp-err）；有新版本时下面是一行给终端用的命令 */
 .zp-update {
   margin: 4px 0 0;
-  color: var(--dsw-alias-label-secondary);
+  color: var(--zp-ink-2);
   font-size: 12px;
   line-height: 18px;
 }
@@ -276,7 +277,7 @@
   margin-top: 4px;
   padding: 4px 8px;
   border-radius: 4px;
-  background: var(--dsw-alias-interactive-bg-hover);
+  background: var(--zp-hover);
   font-size: 12px;
   line-height: 18px;
   overflow-wrap: anywhere;
@@ -286,7 +287,7 @@
 .zp-about + .zp-about { margin-top: 4px }
 .zp-about {
   margin: 0;
-  color: var(--dsw-alias-label-tertiary);
+  color: var(--zp-ink-3);
   font-size: 12px;
   line-height: 1.6;
 }
@@ -300,7 +301,7 @@
   padding: 4px 4px 4px 8px;
   border-radius: 8px;
 }
-.zp-list-item:hover { background: var(--dsw-alias-interactive-bg-hover) }
+.zp-list-item:hover { background: var(--zp-hover) }
 .zp-list-open {
   flex: 1;
   display: flex;
@@ -322,12 +323,12 @@
 }
 .zp-list-meta {
   flex: none;
-  color: var(--dsw-alias-label-tertiary);
+  color: var(--zp-ink-3);
   font-size: 12px;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
-.zp-list-empty { margin: 24px 0; color: var(--dsw-alias-label-tertiary); font-size: 13px; text-align: center }
+.zp-list-empty { margin: 24px 0; color: var(--zp-ink-3); font-size: 13px; text-align: center }
 /* 一行就地改名（li > input.zp-input + 两个 button.zp-btn.zp-sm）、删除前问一句（li > span.zp-list-ask + 两个按钮） */
 .zp-list-item .zp-input { flex: 1; min-width: 0 }
 .zp-list-ask { flex: 1; min-width: 0; font-size: 13px }

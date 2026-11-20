@@ -26,8 +26,9 @@
  *   exit back close more list gear settings caret chevronLeft chevronRight send stop sparkle newChat handoff
  *   copy download export report quote refresh check。新图标先加进表里再用。
  *
- * Seg { items, value, onChange(id), label, className?, region? }
+ * Seg { items, value, onChange(id), label, className?, region?, radio? }
  *   分段页签：div.zp-seg[role=tablist][aria-label=label]（className 追加在 zp-seg 后面，region → data-region）。
+ *   radio: true 时是单选组（设置里的三选一）：div[role=radiogroup] > button[role=radio][aria-checked]，其余一样。
  *   items：[{ id, label, sep?, after?, disabled? }]。每项一个 button[role=tab][type=button]，
  *   aria-selected="true|false"，roving tabIndex（选中的 0，其余 -1；没有选中项时第一项 0）；
  *   sep: true 时在这一项前放 i.zp-seg-sep；after 是放在文字后面的元素（例如顶栏报告页签的 i.zp-pulse）。
@@ -382,6 +383,9 @@ function Icon(props) {
 function Seg(props) {
   const items = props.items || [];
   const value = props.value;
+  /* radio: true 时是单选组（选一个值，不是切换视图）：radiogroup > radio[aria-checked]；键盘和样式一样 */
+  const role = props.radio ? 'radio' : 'tab';
+  const stateAttr = props.radio ? 'aria-checked' : 'aria-selected';
   const hasValue = items.some(function (it) { return it.id === value; });
   const onKeyDown = function (ev) {
     const k = ev.key;
@@ -400,24 +404,25 @@ function Seg(props) {
     const idx = live[j];
     if (items[idx].id !== value) props.onChange(items[idx].id);
     const root = ev.currentTarget;
-    const tabs = root && typeof root.querySelectorAll === 'function' ? root.querySelectorAll('[role="tab"]') : [];
+    const tabs = root && typeof root.querySelectorAll === 'function' ? root.querySelectorAll('[role="' + role + '"]') : [];
     if (tabs[idx]) focusQuietly(tabs[idx]);
   };
   const kids = [];
   items.forEach(function (it, i) {
     const on = it.id === value;
     if (it.sep) kids.push(h('i', { key: 'sep-' + it.id, className: 'zp-seg-sep', 'aria-hidden': true }));
-    kids.push(h('button', {
-      key: 'tab-' + it.id, type: 'button', role: 'tab',
-      'aria-selected': on ? 'true' : 'false',
+    const p = {
+      key: 'tab-' + it.id, type: 'button', role: role,
       tabIndex: on || (!hasValue && i === 0) ? 0 : -1,
       disabled: it.disabled ? true : undefined,
       onClick: function () { if (!on) props.onChange(it.id); }
-    }, it.label, it.after || null));
+    };
+    p[stateAttr] = on ? 'true' : 'false';
+    kids.push(h('button', p, it.label, it.after || null));
   });
   return h('div', {
     className: 'zp-seg' + (props.className ? ' ' + props.className : ''),
-    role: 'tablist', 'aria-label': props.label, 'data-region': props.region || undefined, onKeyDown: onKeyDown
+    role: props.radio ? 'radiogroup' : 'tablist', 'aria-label': props.label, 'data-region': props.region || undefined, onKeyDown: onKeyDown
   }, kids);
 }
 

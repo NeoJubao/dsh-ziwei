@@ -745,9 +745,10 @@ function checkC13v6(ctx) {
   return { count, samples };
 }
 
-/** 宿主底色（2026-11 实测，和 tokens.md §5 同一组） */
-const V6_BACKGROUNDS = { light: ['#ffffff', '#ffffff'], dark: ['#151517', '#232324'] };
+/** 面板自己的三层底色（tokens.md §2 登记的值，ADR-0005）：前景色对这三层分别算对比度，取最低 */
+const V6_BACKGROUND_TOKENS = ['--zp-bg', '--zp-surface', '--zp-raised'];
 const V6_CONTRAST = [
+  ['--zp-ink', 7], ['--zp-ink-2', 4.5], ['--zp-ink-3', 4.5], ['--zp-ink-4', 3],
   ['--zp-gold-text', 4.5], ['--zp-mu-lu', 4.5], ['--zp-mu-quan', 4.5], ['--zp-mu-ke', 4.5], ['--zp-mu-ji', 4.5],
   ['--zp-zi', 3], ['--zp-gold', 3],
   ...Array.from({ length: 14 }, (_, i) => [`--zp-s${i}`, 3])
@@ -760,7 +761,7 @@ function checkC15v6(ctx) {
   const isColor = (v) => /^#[0-9a-f]{3,8}$/i.test(v) || /^(?:rgb|hsl)a?\(/i.test(v);
   const pick = (block) => Object.fromEntries(Object.entries(block || {}).filter(([, v]) => isColor(v)).map(([k, v]) => [k, v.toLowerCase()]));
   const light = pick(readCustomProps(css, '.zp-root {'));
-  const dark = pick(readCustomProps(css, 'body[data-ds-dark-theme] .zp-root'));
+  const dark = pick(readCustomProps(css, '.zp-root[data-theme="dark"] {'));
   for (const k of Object.keys(light)) if (!(k in dark)) { count++; samples.push(`深色缺内容色 ${k}`); }
   for (const k of Object.keys(dark)) if (!(k in light)) { count++; samples.push(`深色多出未配对的 ${k}`); }
   const reg = ctx.contentColors;
@@ -777,7 +778,8 @@ function checkC15v6(ctx) {
       const fg = values[name];
       if (!fg || !/^#/.test(fg)) continue;
       groups++;
-      const bgs = V6_BACKGROUNDS[theme === '浅色' ? 'light' : 'dark'];
+      const bgs = V6_BACKGROUND_TOKENS.map((k) => values[k]).filter((v) => v && /^#[0-9a-f]{6}$/i.test(v));
+      if (!bgs.length) { count++; samples.push(`${theme} 缺底色 ${V6_BACKGROUND_TOKENS.join(' / ')}，算不了对比度`); break; }
       const worst = Math.min(...bgs.map((bg) => contrastRatio(fg, bg)).filter((r) => r !== null));
       if (worst < bar) {
         count++;
@@ -785,7 +787,15 @@ function checkC15v6(ctx) {
       }
     }
   }
-  if (count === 0) samples.push(`内容色浅 / 深 ${Object.keys(light).length}/${Object.keys(dark).length} 成对、和 tokens.md 一致；对比度 ${groups} 组都达标`);
+  /* 主按钮：字对底 */
+  for (const [theme, values] of [['浅色', light], ['深色', dark]]) {
+    const fg = values['--zp-on-primary'], bg = values['--zp-primary'];
+    if (!fg || !bg) continue;
+    groups++;
+    const r = contrastRatio(fg, bg);
+    if (r !== null && r < 4.5) { count++; samples.push(`${theme} 主按钮 ${fg} 对 ${bg}：${Math.round(r * 100) / 100}:1 < 4.5:1`); }
+  }
+  if (count === 0) samples.push(`配色浅 / 深 ${Object.keys(light).length}/${Object.keys(dark).length} 成对、和 tokens.md 一致；对比度 ${groups} 组都达标`);
   return { count, samples };
 }
 

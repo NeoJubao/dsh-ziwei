@@ -283,7 +283,7 @@ export default async function store(t) {
     const s0 = st.getState();
     eq('初始 session', [s0.session.view, s0.session.chartId, s0.session.tab, s0.session.stage, s0.session.when, s0.session.panelOpen, s0.session.quote, s0.session.toast],
       ['home', null, 'natal', 'board', TODAY, false, null, null]);
-    eq('初始 library 为空，prefs 是默认值', [s0.library, s0.prefs], [[], { autoOpen: false, showAdj: false, sky: true }]);
+    eq('初始 library 为空，prefs 是默认值（外观默认深色）', [s0.library, s0.prefs], [[], { autoOpen: false, showAdj: false, sky: true, theme: 'dark' }]);
     eq('todayOf() 来自注入的 now()', st.todayOf(), TODAY);
     const log = [];
     let first = true;

@@ -1,16 +1,33 @@
 /* ================================================================
- * 00-tokens：根节点、内容色、宿主约定（界面约定 v6，docs/ui-contract/）
- * - 系统色（底、描边、文字、主按钮、悬停、遮罩）只用宿主的 --dsw-alias-*，这里不定义。
- * - 内容色 --zp-* 浅 / 深成对，值登记在 tokens.md；改值先改文档，体检脚本逐个核对。
+ * 00-tokens：根节点、配色、宿主约定（界面约定 v6，docs/ui-contract/）
+ * - 面板自带深浅两套配色（ADR-0005）：全部是 --zp-*，浅色写在 .zp-root，深色写在 .zp-root[data-theme="dark"]，
+ *   两边的键集合完全相同，值登记在 tokens.md §2；改值先改文档，体检脚本逐个核对。
+ * - data-theme 由 90-app.js 的 ProApp 按偏好写（dark / light；跟随 DSH 时由脚本解析成这两个之一）。
+ *   样式表里不读宿主的颜色变量，也不用 body[data-ds-dark-theme] 选择器。
  * - 根节点按面板实测宽度分档（data-w = narrow / mid / wide），不用视口媒体查询。
  * ================================================================ */
 .zp-root {
+  /* 系统色：底、卡片、卡片里再抬一层；四级文字；两级描边；悬停；主按钮；遮罩 */
+  --zp-bg: #f4f4f9;
+  --zp-surface: #ffffff;
+  --zp-raised: #f8f8fc;
+  --zp-ink: #15141f;
+  --zp-ink-2: #53526a;
+  --zp-ink-3: #6c6b84;
+  --zp-ink-4: #89889f;
+  --zp-line: #1514220f;
+  --zp-line-2: #15142221;
+  --zp-hover: #2a28500f;
+  --zp-primary: #17161f;
+  --zp-on-primary: #ffffff;
+  --zp-mask: #0c0b1840;
+  /* 内容色 */
   --zp-zi: #6b55d4;
   --zp-gold: #a07a2c;
-  --zp-gold-text: #8a6a1f;
-  --zp-mu-lu: #15803d;
+  --zp-gold-text: #86661c;
+  --zp-mu-lu: #137a3a;
   --zp-mu-quan: #1d4ed8;
-  --zp-mu-ke: #a16207;
+  --zp-mu-ke: #9a5e06;
   --zp-mu-ji: #b91c1c;
   --zp-s0: #8a5cc4;
   --zp-s1: #2f84b8;
@@ -29,24 +46,40 @@
   --zp-orb-hi: #ffffff;
   --zp-orb-lo: #0b0b14;
   --zp-font-serif: "Songti SC", "STSong", "SimSun", "Noto Serif SC", serif;
+  /* 焦点框：宿主在鼠标点击时把非输入控件的 --dsw-focus-ring-color 设成透明，所以先读它 */
+  --zp-ring: var(--dsw-focus-ring-color, var(--zp-zi));
   position: relative;
   height: 100%;
   overflow: hidden;
   box-sizing: border-box;
-  color: var(--dsw-alias-label-primary);
-  background: var(--dsw-alias-bg-base);
+  color: var(--zp-ink);
+  background: var(--zp-bg);
   font-family: var(--dsh-font-family-text-default, -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", sans-serif);
   font-size: 14px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   scrollbar-width: thin;
+  color-scheme: light;
   /* 把面板内部的 z-index 关进自己的层叠上下文：侧栏折叠后 frame 的 shell.leading 出口
      （z-index 15）不能被面板里的浮层盖住或抢走点击。 */
   isolation: isolate;
 }
 
-/* 深色主题：只给内容色换值，键集合和浅色完全相同 */
-body[data-ds-dark-theme] .zp-root {
+/* 深色：带一点靛色的夜空底，和首页 3D 场景的夜空接得上。只换值，键集合和浅色完全相同 */
+.zp-root[data-theme="dark"] {
+  --zp-bg: #0e0d16;
+  --zp-surface: #181723;
+  --zp-raised: #21202e;
+  --zp-ink: #f3f2f8;
+  --zp-ink-2: #c9c7d6;
+  --zp-ink-3: #9e9cb1;
+  --zp-ink-4: #77758d;
+  --zp-line: #ffffff12;
+  --zp-line-2: #ffffff21;
+  --zp-hover: #ffffff14;
+  --zp-primary: #f3f2f8;
+  --zp-on-primary: #1b1a26;
+  --zp-mask: #0403098c;
   --zp-zi: #b9a7fa;
   --zp-gold: #dcb96f;
   --zp-gold-text: #dcb96f;
@@ -70,6 +103,7 @@ body[data-ds-dark-theme] .zp-root {
   --zp-s13: #93aaea;
   --zp-orb-hi: #ffffff;
   --zp-orb-lo: #0b0b14;
+  color-scheme: dark;
 }
 
 /* ---------------- 宿主约定：macOS 窗口 chrome 避让 ----------------

@@ -2819,6 +2819,11 @@ const DICT = {
     "sheetSoulLine": "{stars}坐命 · {five}",
     "sheetSoulBorrowed": "命宫空宫，借{stars} · {five}",
     "sheetStarSep": "、",
+    "setTheme": "外观",
+    "setThemeHint": "默认深色。选「跟随 DSH」时，深浅色和 DeepSeek Harness 保持一致",
+    "setThemeDark": "深色",
+    "setThemeLight": "浅色",
+    "setThemeAuto": "跟随 DSH",
     "setAutoOpen": "启动时自动打开工作台",
     "setAutoOpenHint": "DSH 启动后直接切到紫微面板",
     "setSky": "首页 3D 星图",
@@ -3218,6 +3223,11 @@ const DICT = {
     "sheetSoulLine": "{stars} in the life palace · {five}",
     "sheetSoulBorrowed": "Empty life palace, borrowing {stars} · {five}",
     "sheetStarSep": ", ",
+    "setTheme": "Appearance",
+    "setThemeHint": "Dark by default. Choose Follow DSH to match DeepSeek Harness",
+    "setThemeDark": "Dark",
+    "setThemeLight": "Light",
+    "setThemeAuto": "Follow DSH",
     "setAutoOpen": "Open workbench on launch",
     "setAutoOpenHint": "Switch to this panel when DSH starts",
     "setSky": "3D star map on the home page",
@@ -3412,6 +3422,20 @@ function tierOf(panelW) {
 }
 ZWUI.tierOf = tierOf;
 
+/* 外观偏好只有三个值：dark（默认）/ light / auto（跟随 DSH）。别的一律按 dark。 */
+function themePrefOf(v) {
+  return v === 'light' || v === 'auto' ? v : 'dark';
+}
+ZWUI.themePrefOf = themePrefOf;
+
+/* 根节点 data-theme 的值：auto 时看宿主是不是深色（body[data-ds-dark-theme]，由调用方读了传进来） */
+function resolveTheme(pref, hostDark) {
+  const p = themePrefOf(pref);
+  if (p === 'auto') return hostDark ? 'dark' : 'light';
+  return p;
+}
+ZWUI.resolveTheme = resolveTheme;
+
 /* 三方四正：对宫 = +6，三合 = +4 / +8（宫位序号 mod 12）。和 v5 同一个函数。 */
 function relatedPalaces(index) {
   const i = +index;
@@ -3558,6 +3582,7 @@ ZWUI.pickPoint = pickPoint;
  *   ziwei-pro.form / ziwei-pro.formV133   生辰表单草稿 / v1.3.3 的一次性迁移标记
  *   ziwei-pro.autopen / ziwei-pro.showadj 偏好（'1' 开）
  *   ziwei-pro.sky（新）      首页 3D 星图（'0' 关，其余开）
+ *   ziwei-pro.theme（新）    外观：'dark'（默认）/ 'light' / 'auto'（跟随 DSH）；没有这个键或值不认识按 'dark'
  *   ziwei-pro.v6（新）       '1' = 已做过一次性导入（上次命盘和解读记录进命盘库）
  * v5 的 ziwei-pro.studio / .rail / .focus 不读不写，也不删。
  * 所有读写都包在 try/catch 里：storage 拿不到、读写抛错（隐私模式、配额满、沙箱 iframe）时返回默认值，不外抛。 */
@@ -3904,7 +3929,12 @@ function createStorageApi(storage, opts) {
     sky: function () {
       try { const s = src(); return !s || s.getItem('ziwei-pro.sky') !== '0'; } catch (e) { return true; }
     },
-    setSky: function (v) { set('ziwei-pro.sky', v ? '1' : '0'); }
+    setSky: function (v) { set('ziwei-pro.sky', v ? '1' : '0'); },
+    /* 外观：没有这个键、或值不认识，都按深色 */
+    theme: function () {
+      try { const s = src(); return themePrefOf(s ? s.getItem('ziwei-pro.theme') : null); } catch (e) { return 'dark'; }
+    },
+    setTheme: function (v) { set('ziwei-pro.theme', themePrefOf(v)); }
   };
 
   /* 旧版曾在 localStorage 明文保存 DeepSeek API Key（已无消费方），启动时清掉残留 */
@@ -4870,7 +4900,7 @@ ZWUI.linePoints = linePoints;
  *
  * ---------------- 状态（getState() 返回当前快照；每次变化换一个新对象，没变化不换） ----------------
  *   library   命盘库 [{ id, name, input, openedAt? }]（新→旧）
- *   prefs     { autoOpen, showAdj, sky }
+ *   prefs     { autoOpen, showAdj, sky, theme: 'dark' | 'light' | 'auto' }
  *   session   { view: 'home'|'chart', chartId, tab: 'natal'|'decadal'|'yearly'|'monthly'|'daily', stage: 'board'|'report',
  *               when: { y, m, d }, sel: 0–11, pat, pane: 'scope'|'pats'|'detail', panelOpen, focusId, introPlayed,
  *               onboarding（引导问答的状态，store 不解读）, quote: { label, text }|null,
@@ -4891,7 +4921,7 @@ ZWUI.linePoints = linePoints;
  * ---------------- 命盘库 ----------------
  *   addChart(input, name) → entry | null        renameChart(id, name) → entry | null
  *   updateChartInput(id, input) → entry | null  removeChart(id) → boolean（提示里可撤销）
- *   openSample(opts?) → boolean                 setPref('autoOpen'|'showAdj'|'sky', bool)
+ *   openSample(opts?) → boolean                 setPref('autoOpen'|'showAdj'|'sky', bool)；setPref('theme', 'dark'|'light'|'auto')
  *   clearLocalRecords() → boolean（有任务在跑时不清，返回 false）
  * ---------------- 导航（都不发请求） ----------------
  *   openChart(id, { tab, when, panel }?) → boolean   goHome()   setTab(tab)（'report' 等于 setStage('report')）
@@ -5055,7 +5085,7 @@ function createStore(deps) {
 
   let state = {
     library: api.library.list(),
-    prefs: { autoOpen: api.prefs.autoOpen(), showAdj: api.prefs.showAdj(), sky: api.prefs.sky() },
+    prefs: { autoOpen: api.prefs.autoOpen(), showAdj: api.prefs.showAdj(), sky: api.prefs.sky(), theme: api.prefs.theme() },
     session: {
       view: 'home', chartId: null, tab: 'natal', stage: 'board', when: todayOf(), sel: 0, pat: 0, pane: 'scope',
       panelOpen: false, focusId: startupFocus(), introPlayed: false, onboarding: null, quote: null, toast: null,
@@ -5322,9 +5352,10 @@ function createStore(deps) {
     return true;
   }
   function setPref(name, value) {
-    const setters = { autoOpen: api.prefs.setAutoOpen, showAdj: api.prefs.setShowAdj, sky: api.prefs.setSky };
+    const setters = { autoOpen: api.prefs.setAutoOpen, showAdj: api.prefs.setShowAdj, sky: api.prefs.setSky, theme: api.prefs.setTheme };
     if (!setters[name]) return false;
-    const v = !!value;
+    /* 外观是三选一的字符串，其余是开关 */
+    const v = name === 'theme' ? themePrefOf(value) : !!value;
     setters[name](v);
     if (state.prefs[name] !== v) commit(Object.assign({}, state, { prefs: Object.assign({}, state.prefs, storeWithKey({}, name, v)) }));
     return true;
@@ -6073,12 +6104,12 @@ const ZWREPORT = (function () {
 /* 面板里：--zr-* 映射到宿主 token 和 --zp-*（导出文件里没有 .zp-root，这两段不生效）。
    字体：宋体栈只给分部标题、小标题、心法和编号；引用用楷体，其余跟宿主正文字体。 */
 .zp-root .zr-prose {
-  --zr-paper: var(--dsw-alias-bg-layer-1);
-  --zr-fill: var(--dsw-alias-interactive-bg-hover);
-  --zr-ink: var(--dsw-alias-label-primary);
-  --zr-ink-2: var(--dsw-alias-label-secondary);
-  --zr-ink-3: var(--dsw-alias-label-tertiary);
-  --zr-rule: var(--dsw-alias-border-l1);
+  --zr-paper: var(--zp-surface);
+  --zr-fill: var(--zp-hover);
+  --zr-ink: var(--zp-ink);
+  --zr-ink-2: var(--zp-ink-2);
+  --zr-ink-3: var(--zp-ink-3);
+  --zr-rule: var(--zp-line);
   --zr-gold: var(--zp-gold);
   --zr-gold-text: var(--zp-gold-text);
   --zr-zi: var(--zp-zi);
@@ -6105,7 +6136,7 @@ const ZWREPORT = (function () {
   --zr-kai: "Kaiti SC", "STKaiti", "KaiTi", var(--zp-font-serif);
   --zr-sans: var(--dsh-font-family-text-default, -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", sans-serif);
 }
-body[data-ds-dark-theme] .zp-root .zr-prose { --zr-em-halo: .5 }
+.zp-root[data-theme="dark"] .zr-prose { --zr-em-halo: .5 }
 `;
 
   const escHtml = (t) => String(t == null ? '' : t)
@@ -6559,18 +6590,35 @@ body[data-ds-dark-theme] .zp-root .zr-prose { --zr-em-halo: .5 }
  * apply() 在 ctx.effect 里把它放进一个 <style>，插件卸载时移除。 */
 const CSS = `/* ---- src/ui/css/00-tokens.css ---- */
 /* ================================================================
- * 00-tokens：根节点、内容色、宿主约定（界面约定 v6，docs/ui-contract/）
- * - 系统色（底、描边、文字、主按钮、悬停、遮罩）只用宿主的 --dsw-alias-*，这里不定义。
- * - 内容色 --zp-* 浅 / 深成对，值登记在 tokens.md；改值先改文档，体检脚本逐个核对。
+ * 00-tokens：根节点、配色、宿主约定（界面约定 v6，docs/ui-contract/）
+ * - 面板自带深浅两套配色（ADR-0005）：全部是 --zp-*，浅色写在 .zp-root，深色写在 .zp-root[data-theme="dark"]，
+ *   两边的键集合完全相同，值登记在 tokens.md §2；改值先改文档，体检脚本逐个核对。
+ * - data-theme 由 90-app.js 的 ProApp 按偏好写（dark / light；跟随 DSH 时由脚本解析成这两个之一）。
+ *   样式表里不读宿主的颜色变量，也不用 body[data-ds-dark-theme] 选择器。
  * - 根节点按面板实测宽度分档（data-w = narrow / mid / wide），不用视口媒体查询。
  * ================================================================ */
 .zp-root {
+  /* 系统色：底、卡片、卡片里再抬一层；四级文字；两级描边；悬停；主按钮；遮罩 */
+  --zp-bg: #f4f4f9;
+  --zp-surface: #ffffff;
+  --zp-raised: #f8f8fc;
+  --zp-ink: #15141f;
+  --zp-ink-2: #53526a;
+  --zp-ink-3: #6c6b84;
+  --zp-ink-4: #89889f;
+  --zp-line: #1514220f;
+  --zp-line-2: #15142221;
+  --zp-hover: #2a28500f;
+  --zp-primary: #17161f;
+  --zp-on-primary: #ffffff;
+  --zp-mask: #0c0b1840;
+  /* 内容色 */
   --zp-zi: #6b55d4;
   --zp-gold: #a07a2c;
-  --zp-gold-text: #8a6a1f;
-  --zp-mu-lu: #15803d;
+  --zp-gold-text: #86661c;
+  --zp-mu-lu: #137a3a;
   --zp-mu-quan: #1d4ed8;
-  --zp-mu-ke: #a16207;
+  --zp-mu-ke: #9a5e06;
   --zp-mu-ji: #b91c1c;
   --zp-s0: #8a5cc4;
   --zp-s1: #2f84b8;
@@ -6589,24 +6637,40 @@ const CSS = `/* ---- src/ui/css/00-tokens.css ---- */
   --zp-orb-hi: #ffffff;
   --zp-orb-lo: #0b0b14;
   --zp-font-serif: "Songti SC", "STSong", "SimSun", "Noto Serif SC", serif;
+  /* 焦点框：宿主在鼠标点击时把非输入控件的 --dsw-focus-ring-color 设成透明，所以先读它 */
+  --zp-ring: var(--dsw-focus-ring-color, var(--zp-zi));
   position: relative;
   height: 100%;
   overflow: hidden;
   box-sizing: border-box;
-  color: var(--dsw-alias-label-primary);
-  background: var(--dsw-alias-bg-base);
+  color: var(--zp-ink);
+  background: var(--zp-bg);
   font-family: var(--dsh-font-family-text-default, -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", sans-serif);
   font-size: 14px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   scrollbar-width: thin;
+  color-scheme: light;
   /* 把面板内部的 z-index 关进自己的层叠上下文：侧栏折叠后 frame 的 shell.leading 出口
      （z-index 15）不能被面板里的浮层盖住或抢走点击。 */
   isolation: isolate;
 }
 
-/* 深色主题：只给内容色换值，键集合和浅色完全相同 */
-body[data-ds-dark-theme] .zp-root {
+/* 深色：带一点靛色的夜空底，和首页 3D 场景的夜空接得上。只换值，键集合和浅色完全相同 */
+.zp-root[data-theme="dark"] {
+  --zp-bg: #0e0d16;
+  --zp-surface: #181723;
+  --zp-raised: #21202e;
+  --zp-ink: #f3f2f8;
+  --zp-ink-2: #c9c7d6;
+  --zp-ink-3: #9e9cb1;
+  --zp-ink-4: #77758d;
+  --zp-line: #ffffff12;
+  --zp-line-2: #ffffff21;
+  --zp-hover: #ffffff14;
+  --zp-primary: #f3f2f8;
+  --zp-on-primary: #1b1a26;
+  --zp-mask: #0403098c;
   --zp-zi: #b9a7fa;
   --zp-gold: #dcb96f;
   --zp-gold-text: #dcb96f;
@@ -6630,6 +6694,7 @@ body[data-ds-dark-theme] .zp-root {
   --zp-s13: #93aaea;
   --zp-orb-hi: #ffffff;
   --zp-orb-lo: #0b0b14;
+  color-scheme: dark;
 }
 
 /* ---------------- 宿主约定：macOS 窗口 chrome 避让 ----------------
@@ -6711,8 +6776,8 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   padding: 0 20px;
 }
 .zp-root[data-view="chart"] .zp-head {
-  border-bottom: 1px solid var(--dsw-alias-border-l2);
-  background: var(--dsw-alias-bg-base);
+  border-bottom: 1px solid var(--zp-line-2);
+  background: var(--zp-bg);
 }
 .zp-root[data-w="narrow"] .zp-head { height: 52px; padding: 0 12px }
 /* 窄档的命盘页：顶栏两行，页签独占第二行 */
@@ -6732,21 +6797,21 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   gap: 6px;
   min-width: 0;
   font-size: 14px;
-  color: var(--dsw-alias-label-tertiary);
+  color: var(--zp-ink-3);
 }
 .zp-crumb-home {
   padding: 4px 6px;
   border: 0;
   border-radius: 4px;
   background: transparent;
-  color: var(--dsw-alias-label-tertiary);
+  color: var(--zp-ink-3);
   font-size: 14px;
   white-space: nowrap;
 }
-.zp-crumb-home:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary) }
+.zp-crumb-home:hover { background: var(--zp-hover); color: var(--zp-ink) }
 .zp-crumb-name {
   overflow: hidden;
-  color: var(--dsw-alias-label-primary);
+  color: var(--zp-ink);
   font-weight: 600;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -6755,8 +6820,8 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   flex: none;
   padding: 0 6px;
   border-radius: 4px;
-  background: var(--dsw-alias-interactive-bg-hover);
-  color: var(--dsw-alias-label-tertiary);
+  background: var(--zp-hover);
+  color: var(--zp-ink-3);
   font-size: 12px;
   line-height: 18px;
   white-space: nowrap;
@@ -6769,7 +6834,7 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   height: 12px;
   border-radius: 999px;
   background: radial-gradient(circle at 32% 30%, var(--zp-orb-hi) 0, var(--zp-c, var(--zp-gold)) 38%, color-mix(in srgb, var(--zp-c, var(--zp-gold)) 40%, var(--zp-orb-lo)) 100%);
-  box-shadow: 0 0 0 1px var(--dsw-alias-border-l2);
+  box-shadow: 0 0 0 1px var(--zp-line-2);
 }
 
 /* ---------------- 按钮 ---------------- */
@@ -6785,27 +6850,27 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   width: 32px;
   height: 32px;
   padding: 0;
-  border: 1px solid var(--dsw-alias-border-l1);
+  border: 1px solid var(--zp-line);
   border-radius: 8px;
-  background: var(--dsw-alias-bg-layer-1);
-  color: var(--dsw-alias-label-secondary);
+  background: var(--zp-surface);
+  color: var(--zp-ink-2);
   cursor: pointer;
   transition: background-color 120ms ease, color 120ms ease;
 }
 .zp-icon-btn:hover {
-  background: var(--dsw-alias-interactive-bg-hover);
-  color: var(--dsw-alias-label-primary);
+  background: var(--zp-hover);
+  color: var(--zp-ink);
 }
 .zp-icon-btn:disabled { opacity: 0.55; cursor: default }
 /* 首页的图标按钮浮在星图上：半透明底 */
 .zp-root[data-view="home"] .zp-head .zp-icon-btn {
-  background: color-mix(in srgb, var(--dsw-alias-bg-base) 66%, transparent);
+  background: color-mix(in srgb, var(--zp-bg) 66%, transparent);
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
 }
 .zp-icon-btn.zp-plain { border-color: transparent; background: transparent }
 /* 「返回会话」：顶栏第一个控件，常驻 */
-.zp-exit { color: var(--dsw-alias-label-primary) }
+.zp-exit { color: var(--zp-ink) }
 
 .zp-btn {
   display: inline-flex;
@@ -6813,16 +6878,16 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   gap: 6px;
   height: 32px;
   padding: 0 12px;
-  border: 1px solid var(--dsw-alias-border-l1);
+  border: 1px solid var(--zp-line);
   border-radius: 8px;
-  background: var(--dsw-alias-bg-layer-1);
+  background: var(--zp-surface);
   font-family: inherit;
   font-size: 13px;
   white-space: nowrap;
   cursor: pointer;
   transition: background-color 120ms ease;
 }
-.zp-btn:hover { background: var(--dsw-alias-interactive-bg-hover) }
+.zp-btn:hover { background: var(--zp-hover) }
 .zp-btn:disabled { opacity: 0.55 }
 .zp-btn.zp-sm { height: 28px }
 .zp-btn-primary {
@@ -6833,14 +6898,14 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   padding: 0 12px;
   border: 0;
   border-radius: 8px;
-  background: var(--dsw-alias-button-primary-fill);
-  color: var(--dsw-alias-label-primary-inverted);
+  background: var(--zp-primary);
+  color: var(--zp-on-primary);
   font-size: 13px;
   font-weight: 500;
   white-space: nowrap;
   transition: opacity 120ms ease;
 }
-.zp-root .zp-btn-primary { color: var(--dsw-alias-label-primary-inverted) }
+.zp-root .zp-btn-primary { color: var(--zp-on-primary) }
 .zp-btn-primary:hover { opacity: 0.88 }
 .zp-btn-primary:disabled { opacity: 0.55 }
 .zp-link {
@@ -6848,12 +6913,12 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   border: 0;
   border-radius: 4px;
   background: transparent;
-  color: var(--dsw-alias-label-tertiary);
+  color: var(--zp-ink-3);
   font-size: 12px;
   white-space: nowrap;
 }
-.zp-root .zp-link { color: var(--dsw-alias-label-tertiary) }
-.zp-root .zp-link:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary) }
+.zp-root .zp-link { color: var(--zp-ink-3) }
+.zp-root .zp-link:hover { background: var(--zp-hover); color: var(--zp-ink) }
 .zp-root .zp-link.zp-armed, .zp-root .zp-danger { color: var(--zp-mu-ji) }
 .zp-send {
   flex: none;
@@ -6864,9 +6929,9 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   padding: 0;
   border: 0;
   border-radius: 8px;
-  background: var(--dsw-alias-button-primary-fill);
+  background: var(--zp-primary);
 }
-.zp-root .zp-send { color: var(--dsw-alias-label-primary-inverted) }
+.zp-root .zp-send { color: var(--zp-on-primary) }
 .zp-send:disabled { opacity: 0.55 }
 
 /* ---------------- 分段页签（顶栏六个页签、窄档三张卡的页签） ---------------- */
@@ -6874,7 +6939,7 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   display: inline-flex;
   padding: 2px;
   border-radius: 8px;
-  background: var(--dsw-alias-interactive-bg-hover);
+  background: var(--zp-hover);
 }
 .zp-seg button {
   padding: 4px 12px;
@@ -6885,18 +6950,18 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   line-height: 20px;
   white-space: nowrap;
 }
-.zp-root .zp-seg button { color: var(--dsw-alias-label-secondary) }
-.zp-root .zp-seg button[aria-selected="true"] {
-  background: var(--dsw-alias-bg-layer-1);
-  color: var(--dsw-alias-label-primary);
+.zp-root .zp-seg button { color: var(--zp-ink-2) }
+.zp-root .zp-seg button[aria-selected="true"], .zp-root .zp-seg button[aria-checked="true"] {
+  background: var(--zp-surface);
+  color: var(--zp-ink);
   font-weight: 500;
-  box-shadow: 0 0 0 1px var(--dsw-alias-border-l2), 0 1px 2px rgba(0, 0, 0, .06);
+  box-shadow: 0 0 0 1px var(--zp-line-2), 0 1px 2px rgba(0, 0, 0, .06);
 }
 .zp-seg-sep {
   flex: none;
   width: 1px;
   margin: 6px 4px;
-  background: var(--dsw-alias-border-l1);
+  background: var(--zp-line);
 }
 /* 加载指示：脉冲点。报告正在写时，放在顶栏「报告」页签的文字后面，以及报告页的状态栏里 */
 .zp-pulse {
@@ -6914,28 +6979,28 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
 /* ---------------- chip ---------------- */
 .zp-chip {
   padding: 4px 12px;
-  border: 1px solid var(--dsw-alias-border-l1);
+  border: 1px solid var(--zp-line);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--dsw-alias-bg-base) 66%, transparent);
+  background: color-mix(in srgb, var(--zp-bg) 66%, transparent);
   font-size: 13px;
   line-height: 20px;
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   transition: border-color 120ms ease, color 120ms ease;
 }
-.zp-root .zp-chip { color: var(--dsw-alias-label-secondary) }
-.zp-root .zp-chip:hover { border-color: var(--dsw-alias-label-caption); color: var(--dsw-alias-label-primary) }
+.zp-root .zp-chip { color: var(--zp-ink-2) }
+.zp-root .zp-chip:hover { border-color: var(--zp-ink-4); color: var(--zp-ink) }
 .zp-root .zp-chip.zp-on {
   border-color: var(--zp-zi);
-  background: color-mix(in srgb, var(--zp-zi) 10%, var(--dsw-alias-bg-base));
-  color: var(--dsw-alias-label-primary);
+  background: color-mix(in srgb, var(--zp-zi) 10%, var(--zp-bg));
+  color: var(--zp-ink);
 }
 .zp-root .zp-chip.zp-primary {
   border-color: transparent;
-  background: var(--dsw-alias-button-primary-fill);
-  color: var(--dsw-alias-label-primary-inverted);
+  background: var(--zp-primary);
+  color: var(--zp-on-primary);
 }
-.zp-chip small { margin-left: 4px; color: var(--dsw-alias-label-caption); font-size: 11px }
+.zp-chip small { margin-left: 4px; color: var(--zp-ink-4); font-size: 11px }
 
 /* ---------------- 卡片（命盘页左栏、报告目录） ---------------- */
 .zp-card {
@@ -6945,9 +7010,9 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   gap: 8px;
   min-height: 0;
   padding: 12px 16px;
-  border: 1px solid var(--dsw-alias-border-l1);
+  border: 1px solid var(--zp-line);
   border-radius: 12px;
-  background: var(--dsw-alias-bg-layer-1);
+  background: var(--zp-surface);
 }
 .zp-card > * { flex: none }
 .zp-card-h {
@@ -6958,7 +7023,7 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
 }
 .zp-card-h h3 {
   margin: 0;
-  color: var(--dsw-alias-label-primary);
+  color: var(--zp-ink);
   font-size: 14px;
   font-weight: 600;
   white-space: nowrap;
@@ -6971,12 +7036,12 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
 }
 .zp-card-h h3 small {
   margin-left: 6px;
-  color: var(--dsw-alias-label-tertiary);
+  color: var(--zp-ink-3);
   font-family: var(--zp-font-serif);
   font-size: 13px;
   font-weight: 400;
 }
-.zp-cnt { color: var(--dsw-alias-label-tertiary); font-size: 12px }
+.zp-cnt { color: var(--zp-ink-3); font-size: 12px }
 .zp-tag {
   padding: 0 6px;
   border-radius: 4px;
@@ -7008,8 +7073,8 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   border-radius: 4px;
   background: transparent;
 }
-.zp-root .zp-step { color: var(--dsw-alias-label-tertiary) }
-.zp-root .zp-step:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary) }
+.zp-root .zp-step { color: var(--zp-ink-3) }
+.zp-root .zp-step:hover { background: var(--zp-hover); color: var(--zp-ink) }
 
 /* 四化印：禄权科忌。实心 = 生年四化；空心 = 运限四化 */
 .zp-seal {
@@ -7017,7 +7082,7 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   margin-left: 2px;
   padding: 0 2px;
   border-radius: 4px;
-  color: var(--dsw-alias-label-primary-inverted);
+  color: var(--zp-on-primary);
   font-family: var(--dsh-font-family-text-default, sans-serif);
   font-size: 9.5px;
   font-style: normal;
@@ -7040,12 +7105,12 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
 .zp-crash-msg {
   margin: 0 0 8px;
   font-size: 14px;
-  color: var(--dsw-alias-label-primary);
+  color: var(--zp-ink);
 }
 .zp-crash-hint {
   margin: 0 0 12px;
   font-size: 13px;
-  color: var(--dsw-alias-label-secondary);
+  color: var(--zp-ink-2);
 }
 
 /* ---------------- 减少动态效果：界面过渡和动画全部关掉（3D 只画静止的一帧，由 sky.js 处理） ---------------- */
@@ -7087,7 +7152,7 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
 .zp-mask {
   position: absolute;
   inset: 0;
-  background: var(--dsw-alias-bg-mask-1);
+  background: var(--zp-mask);
   animation: zp-fade 160ms ease-out both;
 }
 @keyframes zp-fade { from { opacity: 0 } to { opacity: 1 } }
@@ -7101,8 +7166,8 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   flex-direction: column;
   width: min(420px, 100%);
   height: 100%;
-  border-left: 1px solid var(--dsw-alias-border-l2);
-  background: var(--dsw-alias-bg-layer-1);
+  border-left: 1px solid var(--zp-line-2);
+  background: var(--zp-surface);
   box-shadow: -24px 0 48px -32px rgba(0, 0, 0, .45);
   animation: zp-slide-in 180ms cubic-bezier(.22, .61, .36, 1) both;
 }
@@ -7112,9 +7177,9 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   flex-direction: column;
   width: min(520px, 100%);
   max-height: 100%;
-  border: 1px solid var(--dsw-alias-border-l1);
+  border: 1px solid var(--zp-line);
   border-radius: 16px;
-  background: var(--dsw-alias-bg-layer-1);
+  background: var(--zp-surface);
   box-shadow: 0 24px 48px -24px rgba(0, 0, 0, .45);
   animation: zp-pop 160ms cubic-bezier(.22, .61, .36, 1) both;
 }
@@ -7125,7 +7190,7 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   gap: 8px;
   min-height: 56px;
   padding: 12px 16px;
-  border-bottom: 1px solid var(--dsw-alias-border-l2);
+  border-bottom: 1px solid var(--zp-line-2);
 }
 .zp-dialog-h h2 {
   margin: 0;
@@ -7148,7 +7213,7 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   justify-content: flex-end;
   gap: 8px;
   padding: 12px 16px;
-  border-top: 1px solid var(--dsw-alias-border-l2);
+  border-top: 1px solid var(--zp-line-2);
 }
 
 /* ---------------- 菜单 ---------------- */
@@ -7163,9 +7228,9 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   min-width: 168px;
   margin-top: 4px;
   padding: 4px;
-  border: 1px solid var(--dsw-alias-border-l1);
+  border: 1px solid var(--zp-line);
   border-radius: 12px;
-  background: var(--dsw-alias-bg-layer-1);
+  background: var(--zp-surface);
   box-shadow: 0 12px 32px -16px rgba(0, 0, 0, .45);
   animation: zp-pop 160ms cubic-bezier(.22, .61, .36, 1) both;
 }
@@ -7182,8 +7247,8 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   text-align: left;
   white-space: nowrap;
 }
-.zp-root .zp-menu button { color: var(--dsw-alias-label-primary) }
-.zp-root .zp-menu button:hover { background: var(--dsw-alias-interactive-bg-hover) }
+.zp-root .zp-menu button { color: var(--zp-ink) }
+.zp-root .zp-menu button:hover { background: var(--zp-hover) }
 .zp-root .zp-menu button.zp-danger { color: var(--zp-mu-ji) }
 .zp-menu button[aria-pressed="true"]::after {
   content: "";
@@ -7206,8 +7271,8 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   max-width: calc(100% - 32px);
   padding: 8px 12px;
   border-radius: 8px;
-  background: var(--dsw-alias-button-primary-fill);
-  color: var(--dsw-alias-label-primary-inverted);
+  background: var(--zp-primary);
+  color: var(--zp-on-primary);
   font-size: 13px;
   line-height: 20px;
   transform: translateX(-50%);
@@ -7222,7 +7287,7 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   font-weight: 600;
   text-decoration: underline;
 }
-.zp-root .zp-toast button { color: var(--dsw-alias-label-primary-inverted) }
+.zp-root .zp-toast button { color: var(--zp-on-primary) }
 
 /* ---------------- 表单控件（生辰表单、设置） ---------------- */
 .zp-field {
@@ -7232,7 +7297,7 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   margin-bottom: 12px;
 }
 .zp-field > span, .zp-field > label {
-  color: var(--dsw-alias-label-secondary);
+  color: var(--zp-ink-2);
   font-size: 12px;
   line-height: 18px;
 }
@@ -7242,16 +7307,16 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   width: 100%;
   height: 32px;
   padding: 0 8px;
-  border: 1px solid var(--dsw-alias-border-l1);
+  border: 1px solid var(--zp-line);
   border-radius: 8px;
-  background: var(--dsw-alias-bg-base);
+  background: var(--zp-bg);
   font-size: 13px;
   outline: none;
 }
 .zp-input:focus { border-color: var(--zp-zi) }
 .zp-field-hint {
   margin: 0;
-  color: var(--dsw-alias-label-tertiary);
+  color: var(--zp-ink-3);
   font-size: 12px;
   line-height: 18px;
 }
@@ -7263,7 +7328,7 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   display: flex;
   align-items: center;
   gap: 4px;
-  color: var(--dsw-alias-label-secondary);
+  color: var(--zp-ink-2);
   font-size: 12px;
   white-space: nowrap;
 }
@@ -7271,11 +7336,11 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   margin: 4px 0 12px;
   padding: 8px 12px;
   border-radius: 8px;
-  /* 浅色主题里 bg-layer-2 和底色是同一个白，用悬停底色才看得出这是一块 */
-  background: var(--dsw-alias-interactive-bg-hover);
+  /* 淡底色用悬停叠色：落在哪层底上都看得出这是一块 */
+  background: var(--zp-hover);
 }
 .zp-more > summary {
-  color: var(--dsw-alias-label-secondary);
+  color: var(--zp-ink-2);
   font-size: 13px;
   cursor: pointer;
 }
@@ -7286,12 +7351,12 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   align-items: center;
   gap: 12px;
   padding: 12px 0;
-  border-bottom: 1px solid var(--dsw-alias-border-l2);
+  border-bottom: 1px solid var(--zp-line-2);
 }
 .zp-setting:last-child { border-bottom: 0 }
 .zp-setting-text { flex: 1; min-width: 0 }
 .zp-setting-text b { display: block; font-size: 13px; font-weight: 500; line-height: 20px }
-.zp-setting-text span { display: block; color: var(--dsw-alias-label-tertiary); font-size: 12px; line-height: 18px }
+.zp-setting-text span { display: block; color: var(--zp-ink-3); font-size: 12px; line-height: 18px }
 .zp-switch {
   position: relative;
   flex: none;
@@ -7300,8 +7365,8 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   padding: 0;
   border: 0;
   border-radius: 999px;
-  /* 关着的轨道：按文字色调出一层灰（bg-layer-3 在浅色主题里是白的，白钮落在白轨上看不见） */
-  background: color-mix(in srgb, var(--dsw-alias-label-primary) 20%, transparent);
+  /* 关着的轨道：按文字色调出一层灰，白钮落在上面看得见 */
+  background: color-mix(in srgb, var(--zp-ink) 22%, transparent);
   transition: background-color 120ms ease;
 }
 .zp-switch::after {
@@ -7312,7 +7377,8 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   width: 16px;
   height: 16px;
   border-radius: 999px;
-  background: var(--dsw-alias-bg-layer-1);
+  /* 钮在两套外观下都是白的（深色下用卡片色会变成一颗黑钮） */
+  background: var(--zp-orb-hi);
   box-shadow: 0 1px 2px rgba(0, 0, 0, .3);
   transition: transform 120ms ease;
 }
@@ -7321,7 +7387,7 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
 /* 检查更新的结果：一行说明（出错加 zp-err）；有新版本时下面是一行给终端用的命令 */
 .zp-update {
   margin: 4px 0 0;
-  color: var(--dsw-alias-label-secondary);
+  color: var(--zp-ink-2);
   font-size: 12px;
   line-height: 18px;
 }
@@ -7331,7 +7397,7 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   margin-top: 4px;
   padding: 4px 8px;
   border-radius: 4px;
-  background: var(--dsw-alias-interactive-bg-hover);
+  background: var(--zp-hover);
   font-size: 12px;
   line-height: 18px;
   overflow-wrap: anywhere;
@@ -7341,7 +7407,7 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
 .zp-about + .zp-about { margin-top: 4px }
 .zp-about {
   margin: 0;
-  color: var(--dsw-alias-label-tertiary);
+  color: var(--zp-ink-3);
   font-size: 12px;
   line-height: 1.6;
 }
@@ -7355,7 +7421,7 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   padding: 4px 4px 4px 8px;
   border-radius: 8px;
 }
-.zp-list-item:hover { background: var(--dsw-alias-interactive-bg-hover) }
+.zp-list-item:hover { background: var(--zp-hover) }
 .zp-list-open {
   flex: 1;
   display: flex;
@@ -7377,12 +7443,12 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
 }
 .zp-list-meta {
   flex: none;
-  color: var(--dsw-alias-label-tertiary);
+  color: var(--zp-ink-3);
   font-size: 12px;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
-.zp-list-empty { margin: 24px 0; color: var(--dsw-alias-label-tertiary); font-size: 13px; text-align: center }
+.zp-list-empty { margin: 24px 0; color: var(--zp-ink-3); font-size: 13px; text-align: center }
 /* 一行就地改名（li > input.zp-input + 两个 button.zp-btn.zp-sm）、删除前问一句（li > span.zp-list-ask + 两个按钮） */
 .zp-list-item .zp-input { flex: 1; min-width: 0 }
 .zp-list-ask { flex: 1; min-width: 0; font-size: 13px }
@@ -7470,30 +7536,30 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
 }
 .zp-date-line {
   margin: 0;
-  color: var(--dsw-alias-label-tertiary);
+  color: var(--zp-ink-3);
   font-size: 13px;
-  text-shadow: 0 0 12px var(--dsw-alias-bg-base);
+  text-shadow: 0 0 12px var(--zp-bg);
 }
 .zp-date-line b { color: var(--zp-gold-text); font-weight: 500 }
 .zp-status {
   margin: 0;
-  color: var(--dsw-alias-label-secondary);
+  color: var(--zp-ink-2);
   font-family: var(--zp-font-serif);
   font-size: clamp(20px, 2.25cqw, 28px);
   font-weight: 400;
   line-height: 1.5;
   text-wrap: balance;
-  text-shadow: 0 0 12px var(--dsw-alias-bg-base), 0 0 2px var(--dsw-alias-bg-base);
+  text-shadow: 0 0 12px var(--zp-bg), 0 0 2px var(--zp-bg);
 }
 /* 宫名、星名不从中间断行 */
-.zp-status strong { color: var(--dsw-alias-label-primary); font-weight: 600; white-space: nowrap }
-.zp-status .zp-st { color: var(--zp-c, var(--dsw-alias-label-primary)); font-weight: 600; white-space: nowrap }
+.zp-status strong { color: var(--zp-ink); font-weight: 600; white-space: nowrap }
+.zp-status .zp-st { color: var(--zp-c, var(--zp-ink)); font-weight: 600; white-space: nowrap }
 .zp-status > span { display: block; animation: zp-rise 240ms ease both }
 /* 状态句里的补充说明（引导问答确认步的真太阳时校正）：小一号，另起一行 */
 .zp-status small {
   display: block;
   margin-top: 8px;
-  color: var(--dsw-alias-label-secondary);
+  color: var(--zp-ink-2);
   font-size: 14px;
   line-height: 1.6;
   text-wrap: pretty;
@@ -7504,16 +7570,16 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   display: inline-flex;
   gap: 6px;
   padding: 2px 8px;
-  border: 1px solid var(--dsw-alias-border-l1);
+  border: 1px solid var(--zp-line);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--dsw-alias-bg-base) 66%, transparent);
+  background: color-mix(in srgb, var(--zp-bg) 66%, transparent);
   font-size: 12px;
   line-height: 18px;
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
 }
-.zp-root .zp-receipt { color: var(--dsw-alias-label-tertiary) }
-.zp-receipt b { color: var(--dsw-alias-label-primary); font-weight: 500 }
+.zp-root .zp-receipt { color: var(--zp-ink-3) }
+.zp-receipt b { color: var(--zp-ink); font-weight: 500 }
 .zp-receipt:hover { border-color: var(--zp-zi) }
 .zp-ask {
   display: flex;
@@ -7522,9 +7588,9 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   height: 48px;
   margin: 0;
   padding: 8px 8px 8px 16px;
-  border: 1px solid var(--dsw-alias-border-l1);
+  border: 1px solid var(--zp-line);
   border-radius: 16px;
-  background: color-mix(in srgb, var(--dsw-alias-bg-base) 66%, transparent);
+  background: color-mix(in srgb, var(--zp-bg) 66%, transparent);
   box-shadow: 0 14px 40px -22px rgba(0, 0, 0, .5);
   -webkit-backdrop-filter: blur(20px) saturate(140%);
   backdrop-filter: blur(20px) saturate(140%);
@@ -7539,11 +7605,11 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   font-size: 14px;
   outline: none;
 }
-.zp-ask input::placeholder { color: var(--dsw-alias-label-tertiary) }
+.zp-ask input::placeholder { color: var(--zp-ink-3) }
 .zp-hint {
   min-height: 18px;
   margin: -4px 0;
-  color: var(--dsw-alias-label-tertiary);
+  color: var(--zp-ink-3);
   font-size: 12px;
   line-height: 18px;
 }
@@ -7555,9 +7621,9 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   bottom: 16px;
   z-index: 3;
   margin: 0;
-  color: var(--dsw-alias-label-tertiary);
+  color: var(--zp-ink-3);
   font-size: 12px;
-  text-shadow: 0 0 8px var(--dsw-alias-bg-base);
+  text-shadow: 0 0 8px var(--zp-bg);
   transition: opacity 240ms ease;
 }
 .zp-gesture.zp-gone { opacity: 0 }
@@ -7590,11 +7656,11 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   background: transparent;
   text-align: center;
   white-space: nowrap;
-  text-shadow: 0 0 8px var(--dsw-alias-bg-base), 0 0 2px var(--dsw-alias-bg-base);
+  text-shadow: 0 0 8px var(--zp-bg), 0 0 2px var(--zp-bg);
   pointer-events: auto;
 }
 .zp-ptag-main b {
-  color: var(--dsw-alias-label-primary);
+  color: var(--zp-ink);
   font-family: var(--zp-font-serif);
   font-size: 14px;
   font-weight: 600;
@@ -7602,7 +7668,7 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   letter-spacing: .04em;
 }
 .zp-ptag-main span {
-  color: var(--dsw-alias-label-tertiary);
+  color: var(--zp-ink-3);
   font-size: 12px;
   line-height: 1.4;
   font-variant-numeric: tabular-nums;
@@ -7632,9 +7698,9 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   pointer-events: auto;
   transition: opacity 120ms ease;
 }
-.zp-root .zp-ptag-more { color: var(--dsw-alias-label-tertiary) }
+.zp-root .zp-ptag-more { color: var(--zp-ink-3) }
 .zp-ptag.zp-on .zp-ptag-more, .zp-ptag-more:focus-visible { opacity: 1 }
-.zp-root .zp-ptag-more:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary) }
+.zp-root .zp-ptag-more:hover { background: var(--zp-hover); color: var(--zp-ink) }
 .zp-ptag-menu {
   position: absolute;
   top: 100%;
@@ -7645,9 +7711,9 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   gap: 6px;
   margin-top: 4px;
   padding: 6px;
-  border: 1px solid var(--dsw-alias-border-l1);
+  border: 1px solid var(--zp-line);
   border-radius: 12px;
-  background: var(--dsw-alias-bg-layer-1);
+  background: var(--zp-surface);
   box-shadow: 0 12px 32px -16px rgba(0, 0, 0, .45);
   font-size: 13px;
   white-space: nowrap;
@@ -7658,9 +7724,9 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   width: 116px;
   height: 28px;
   padding: 0 8px;
-  border: 1px solid var(--dsw-alias-border-l1);
+  border: 1px solid var(--zp-line);
   border-radius: 8px;
-  background: var(--dsw-alias-bg-base);
+  background: var(--zp-bg);
   font-size: 13px;
   outline: none;
 }
@@ -7673,10 +7739,10 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   background: transparent;
   font-size: 13px;
 }
-.zp-root .zp-ptag-menu button { color: var(--dsw-alias-label-secondary) }
-.zp-root .zp-ptag-menu button:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary) }
+.zp-root .zp-ptag-menu button { color: var(--zp-ink-2) }
+.zp-root .zp-ptag-menu button:hover { background: var(--zp-hover); color: var(--zp-ink) }
 .zp-root .zp-ptag-menu button.zp-danger { color: var(--zp-mu-ji) }
-.zp-ptag-menu span { padding: 0 4px 0 6px; color: var(--dsw-alias-label-secondary) }
+.zp-ptag-menu span { padding: 0 4px 0 6px; color: var(--zp-ink-2) }
 
 .zp-reticle {
   position: absolute;
@@ -7827,18 +7893,18 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
 /* ---------------- 时间卡 ---------------- */
 .zp-when {
   margin: -4px 0 0;
-  color: var(--dsw-alias-label-tertiary);
+  color: var(--zp-ink-3);
   font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
 .zp-when b { color: var(--zp-gold-text); font-weight: 500 }
 .zp-line {
   margin: 0;
-  color: var(--dsw-alias-label-secondary);
+  color: var(--zp-ink-2);
   font-size: 14px;
   line-height: 1.6;
 }
-.zp-line b { color: var(--dsw-alias-label-primary); font-weight: 600 }
+.zp-line b { color: var(--zp-ink); font-weight: 600 }
 .zp-mut {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -7851,13 +7917,13 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   min-height: 24px;
   padding: 0 2px;
   border-radius: 4px;
-  /* 淡底色用悬停底色（一层叠色）：宿主浅色主题里 bg-layer-1/2/3 是同一个白，拿它们当底色看不见 */
-  background: var(--dsw-alias-interactive-bg-hover);
+  /* 淡底色用悬停叠色：落在哪层底上都看得出 */
+  background: var(--zp-hover);
   white-space: nowrap;
 }
 .zp-mut span:empty { visibility: hidden }
 .zp-mut b {
-  color: var(--zp-c, var(--dsw-alias-label-primary));
+  color: var(--zp-c, var(--zp-ink));
   font-family: var(--zp-font-serif);
   font-size: 13px;
   font-weight: 600;
@@ -7879,7 +7945,7 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   gap: 4px;
   height: 24px;
   padding: 0 8px;
-  border: 1px solid var(--dsw-alias-border-l1);
+  border: 1px solid var(--zp-line);
   border-radius: 4px;
   background: transparent;
   font-family: var(--zp-font-serif);
@@ -7887,12 +7953,12 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   font-weight: 500;
   white-space: nowrap;
 }
-.zp-root .zp-pat { color: var(--dsw-alias-label-secondary) }
-.zp-root .zp-pat:hover { background: var(--dsw-alias-interactive-bg-hover) }
+.zp-root .zp-pat { color: var(--zp-ink-2) }
+.zp-root .zp-pat:hover { background: var(--zp-hover) }
 .zp-root .zp-pat[aria-pressed="true"] {
-  border-color: var(--dsw-alias-label-tertiary);
-  background: var(--dsw-alias-interactive-bg-hover);
-  color: var(--dsw-alias-label-primary);
+  border-color: var(--zp-ink-3);
+  background: var(--zp-hover);
+  color: var(--zp-ink);
 }
 .zp-lv {
   padding: 0 4px;
@@ -7910,7 +7976,7 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   display: -webkit-box;
   margin: 0;
   overflow: hidden;
-  color: var(--dsw-alias-label-tertiary);
+  color: var(--zp-ink-3);
   font-size: 12px;
   line-height: 1.6;
   -webkit-box-orient: vertical;
@@ -7925,21 +7991,21 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   border: 0;
   border-bottom: 1px solid transparent;
   background: transparent;
-  color: var(--zp-c, var(--dsw-alias-label-primary));
+  color: var(--zp-c, var(--zp-ink));
   font-family: var(--zp-font-serif);
   font-size: 16px;
   font-weight: 600;
   line-height: 1.3;
   white-space: nowrap;
 }
-.zp-root .zp-detail .zp-star { color: var(--zp-c, var(--dsw-alias-label-primary)) }
+.zp-root .zp-detail .zp-star { color: var(--zp-c, var(--zp-ink)) }
 .zp-detail .zp-star[aria-pressed="true"] { border-bottom-color: currentColor }
 .zp-detail .zp-star.zp-minor { font-size: 13px; font-weight: 500 }
 .zp-brief {
   display: -webkit-box;
   margin: 0;
   overflow: hidden;
-  color: var(--dsw-alias-label-tertiary);
+  color: var(--zp-ink-3);
   font-size: 12px;
   line-height: 1.6;
   -webkit-box-orient: vertical;
@@ -7952,10 +8018,10 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   margin: 0;
   font-size: 13px;
 }
-.zp-kv dt { color: var(--dsw-alias-label-tertiary); white-space: nowrap }
-.zp-kv dd { min-width: 0; margin: 0; color: var(--dsw-alias-label-primary) }
+.zp-kv dt { color: var(--zp-ink-3); white-space: nowrap }
+.zp-kv dd { min-width: 0; margin: 0; color: var(--zp-ink) }
 .zp-kv-link { padding: 0; border: 0; background: transparent; font-size: 13px }
-.zp-root .zp-kv-link { color: var(--dsw-alias-label-primary) }
+.zp-root .zp-kv-link { color: var(--zp-ink) }
 .zp-kv-link:hover { text-decoration: underline }
 
 /* ---------------- 盘面：把高度用满；宽度跟着可用空间在 1.05–1.62 的宽高比之间伸缩 ---------------- */
@@ -7985,21 +8051,21 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   min-height: 0;
   padding: clamp(4px, 1.1cqw, 8px) clamp(4px, 1.25cqw, 12px) clamp(2px, .8cqw, 6px);
   overflow: hidden;
-  border: 1px solid var(--dsw-alias-border-l1);
+  border: 1px solid var(--zp-line);
   border-radius: 8px;
-  background: var(--dsw-alias-bg-layer-1);
+  background: var(--zp-surface);
   text-align: left;
   transition: border-color 120ms ease, background-color 120ms ease, box-shadow 120ms ease;
 }
-.zp-cell:hover { background-image: linear-gradient(var(--dsw-alias-interactive-bg-hover), var(--dsw-alias-interactive-bg-hover)) }
+.zp-cell:hover { background-image: linear-gradient(var(--zp-hover), var(--zp-hover)) }
 .zp-cell[aria-pressed="true"] {
   border-color: var(--zp-zi);
-  background: color-mix(in srgb, var(--zp-zi) 10%, var(--dsw-alias-bg-layer-1));
+  background: color-mix(in srgb, var(--zp-zi) 10%, var(--zp-surface));
   box-shadow: inset 0 0 0 1px var(--zp-zi);
 }
 .zp-cell.zp-rel {
   border-color: color-mix(in srgb, var(--zp-gold) 55%, transparent);
-  background: color-mix(in srgb, var(--zp-gold) 10%, var(--dsw-alias-bg-layer-1));
+  background: color-mix(in srgb, var(--zp-gold) 10%, var(--zp-surface));
 }
 .zp-cell.zp-scope-focus::after {
   content: "";
@@ -8017,7 +8083,7 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
 }
 .zp-pname, .zp-gz { flex: none; white-space: nowrap }
 .zp-pname {
-  color: var(--dsw-alias-label-primary);
+  color: var(--zp-ink);
   font-family: var(--zp-font-serif);
   font-size: clamp(11.5px, 1.8cqw, 13.5px);
   font-weight: 600;
@@ -8030,7 +8096,7 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   padding: 0 2px;
   border-radius: 4px;
   background: var(--zp-zi);
-  color: var(--dsw-alias-label-primary-inverted);
+  color: var(--zp-on-primary);
   font-family: var(--dsh-font-family-text-default, sans-serif);
   font-size: 9.5px;
   font-weight: 500;
@@ -8040,7 +8106,7 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
 }
 .zp-mk.zp-mk-body { background: var(--zp-gold) }
 .zp-gz {
-  color: var(--dsw-alias-label-caption);
+  color: var(--zp-ink-4);
   font-family: var(--zp-font-serif);
   font-size: clamp(9.5px, 1.45cqw, 12px);
   line-height: 1;
@@ -8061,7 +8127,7 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
 }
 .zp-majors { display: flex; flex-wrap: wrap; gap: 0 6px; margin-top: 2px }
 .zp-board .zp-star {
-  color: var(--zp-c, var(--dsw-alias-label-primary));
+  color: var(--zp-c, var(--zp-ink));
   font-family: var(--zp-font-serif);
   font-size: clamp(12px, 2.02cqw, 16px);
   font-weight: 600;
@@ -8070,7 +8136,7 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
 }
 .zp-board .zp-star sup, .zp-detail .zp-star sup {
   margin-left: 2px;
-  color: var(--dsw-alias-label-caption);
+  color: var(--zp-ink-4);
   font-family: var(--dsh-font-family-text-default, sans-serif);
   font-size: 9.5px;
   font-weight: 400;
@@ -8080,7 +8146,7 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   display: flex;
   flex-wrap: wrap;
   gap: 0 6px;
-  color: var(--dsw-alias-label-secondary);
+  color: var(--zp-ink-2);
   font-family: var(--zp-font-serif);
   font-size: clamp(10.5px, 1.5cqw, 12px);
   font-weight: 500;
@@ -8090,12 +8156,12 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
 .zp-minors .zp-bad { color: var(--zp-mu-ji) }
 .zp-adj {
   overflow: hidden;
-  color: var(--dsw-alias-label-caption);
+  color: var(--zp-ink-4);
   font-size: clamp(9.5px, 1.3cqw, 10.5px);
   line-height: 1.4;
 }
 .zp-empty-p {
-  color: var(--dsw-alias-label-caption);
+  color: var(--zp-ink-4);
   font-family: var(--zp-font-serif);
   font-size: clamp(10.5px, 1.5cqw, 12px);
 }
@@ -8104,7 +8170,7 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   justify-content: space-between;
   gap: 6px;
   margin-top: auto;
-  color: var(--dsw-alias-label-caption);
+  color: var(--zp-ink-4);
   font-size: clamp(9.5px, 1.35cqw, 11px);
   line-height: 1.3;
   white-space: nowrap;
@@ -8123,15 +8189,15 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   min-height: 0;
   padding: 8px;
   overflow: hidden;
-  border: 1px solid var(--dsw-alias-border-l2);
+  border: 1px solid var(--zp-line-2);
   border-radius: 12px;
-  background: radial-gradient(80% 70% at 50% 30%, color-mix(in srgb, var(--zp-zi) 10%, transparent), transparent 70%), var(--dsw-alias-bg-layer-2);
+  background: radial-gradient(80% 70% at 50% 30%, color-mix(in srgb, var(--zp-zi) 10%, transparent), transparent 70%), var(--zp-raised);
   text-align: center;
 }
 .zp-center > * {
   position: relative;
   z-index: 1;
-  text-shadow: 0 0 4px var(--dsw-alias-bg-layer-2), 0 0 8px var(--dsw-alias-bg-layer-2);
+  text-shadow: 0 0 4px var(--zp-raised), 0 0 8px var(--zp-raised);
 }
 .zp-nm {
   display: flex;
@@ -8144,7 +8210,7 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
 }
 .zp-nm .zp-orb { width: clamp(12px, 2.2cqw, 16px); height: clamp(12px, 2.2cqw, 16px) }
 .zp-birth {
-  color: var(--dsw-alias-label-secondary);
+  color: var(--zp-ink-2);
   font-size: clamp(10.5px, 1.6cqw, 12px);
   line-height: 1.5;
 }
@@ -8153,9 +8219,9 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   display: grid;
   gap: 2px;
   padding: clamp(2px, .6cqw, 4px) clamp(4px, 1cqw, 8px);
-  border: 1px solid var(--dsw-alias-border-l2);
+  border: 1px solid var(--zp-line-2);
   border-radius: 4px;
-  background: var(--dsw-alias-bg-layer-1);
+  background: var(--zp-surface);
   font-family: var(--zp-font-serif);
   font-size: clamp(12px, 1.9cqw, 13.5px);
   font-weight: 600;
@@ -8163,7 +8229,7 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   text-shadow: none;
 }
 .zp-pillars small {
-  color: var(--dsw-alias-label-caption);
+  color: var(--zp-ink-4);
   font-family: var(--dsh-font-family-text-default, sans-serif);
   font-size: 9.5px;
   font-weight: 400;
@@ -8173,10 +8239,10 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   flex-wrap: wrap;
   justify-content: center;
   gap: 2px 12px;
-  color: var(--dsw-alias-label-tertiary);
+  color: var(--zp-ink-3);
   font-size: clamp(10.5px, 1.6cqw, 12px);
 }
-.zp-facts b { color: var(--dsw-alias-label-primary); font-weight: 500 }
+.zp-facts b { color: var(--zp-ink); font-weight: 500 }
 .zp-warn { margin: 0; color: var(--zp-mu-ke); font-size: clamp(10.5px, 1.6cqw, 12px) }
 
 /* 三方四正：从选中宫朝向中宫的那个角，连到对宫和两个三合宫 */
@@ -8272,8 +8338,8 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   flex-direction: column;
   min-width: 0;
   overflow: hidden;
-  border-left: 1px solid var(--dsw-alias-border-l2);
-  background: var(--dsw-alias-bg-layer-1);
+  border-left: 1px solid var(--zp-line-2);
+  background: var(--zp-surface);
 }
 .zp-root[data-panel="closed"] .zp-assistant { display: none }
 /* 中、窄档：浮在命盘上，从右侧滑入。
@@ -8294,7 +8360,7 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   position: absolute;
   inset: 0;
   z-index: 59;
-  background: var(--dsw-alias-bg-mask-1);
+  background: var(--zp-mask);
   animation: zp-fade 160ms ease-out both;
 }
 
@@ -8305,14 +8371,14 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   gap: 8px;
   min-height: 60px;
   padding: 12px 16px;
-  border-bottom: 1px solid var(--dsw-alias-border-l2);
+  border-bottom: 1px solid var(--zp-line-2);
   white-space: nowrap;
 }
 .zp-as-head b { font-size: 14px; font-weight: 600 }
 .zp-as-head small {
   min-width: 0;
   overflow: hidden;
-  color: var(--dsw-alias-label-tertiary);
+  color: var(--zp-ink-3);
   font-size: 12px;
   text-overflow: ellipsis;
 }
@@ -8331,7 +8397,7 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
 .zp-as-empty { display: flex; flex-direction: column; gap: 12px; margin: auto 0 }
 .zp-as-empty p { margin: 0 }
 .zp-l1 {
-  color: var(--dsw-alias-label-primary);
+  color: var(--zp-ink);
   font-family: var(--zp-font-serif);
   font-size: 20px;
   line-height: 1.5;
@@ -8342,9 +8408,9 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   flex-direction: column;
   gap: 8px;
   padding: 12px;
-  border: 1px solid var(--dsw-alias-border-l2);
+  border: 1px solid var(--zp-line-2);
   border-radius: 12px;
-  background: var(--dsw-alias-bg-layer-2);
+  background: var(--zp-raised);
 }
 .zp-quick h4 {
   margin: 0;
@@ -8354,11 +8420,11 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   line-height: 18px;
 }
 .zp-quick p {
-  color: var(--dsw-alias-label-secondary);
+  color: var(--zp-ink-2);
   font-size: 13px;
   line-height: 1.6;
 }
-.zp-quick p b { color: var(--dsw-alias-label-primary); font-weight: 600 }
+.zp-quick p b { color: var(--zp-ink); font-weight: 600 }
 .zp-as-starts { display: flex; flex-wrap: wrap; gap: 8px }
 
 .zp-msg.zp-me {
@@ -8366,8 +8432,8 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   max-width: 86%;
   padding: 8px 12px;
   border-radius: 12px 12px 4px 12px;
-  /* 宿主浅色主题里 bg-layer-1/2/3 是同一个白，拿它们当底色会看不见；用悬停底色（一层很淡的叠色）才分得出来 */
-  background: var(--dsw-alias-interactive-bg-hover);
+  /* 淡底色用悬停叠色：落在哪层底上都分得出来 */
+  background: var(--zp-hover);
   font-size: 14px;
   line-height: 1.6;
   overflow-wrap: anywhere;
@@ -8378,27 +8444,27 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   margin-bottom: 4px;
   padding-left: 8px;
   border-left: 2px solid var(--zp-gold);
-  color: var(--dsw-alias-label-tertiary);
+  color: var(--zp-ink-3);
   font-size: 12px;
   quotes: none;
 }
 .zp-msg.zp-bot { font-size: 14px; line-height: 1.8; overflow-wrap: anywhere }
 .zp-md-h {
   margin: 8px 0 2px;
-  color: var(--dsw-alias-label-primary);
+  color: var(--zp-ink);
   font-size: 14px;
   font-weight: 600;
 }
 .zp-md > .zp-md-h:first-child { margin-top: 0 }
 .zp-md-h1, .zp-md-h2 { font-family: var(--zp-font-serif); font-size: 16px }
-.zp-md-p { margin: 0 0 6px; color: var(--dsw-alias-label-secondary) }
-.zp-md-p strong, .zp-md-li strong { color: var(--dsw-alias-label-primary); font-weight: 600 }
-.zp-md-li { margin: 0 0 4px; padding-left: 8px; color: var(--dsw-alias-label-secondary) }
+.zp-md-p { margin: 0 0 6px; color: var(--zp-ink-2) }
+.zp-md-p strong, .zp-md-li strong { color: var(--zp-ink); font-weight: 600 }
+.zp-md-li { margin: 0 0 4px; padding-left: 8px; color: var(--zp-ink-2) }
 .zp-md-quote {
   margin: 6px 0;
   padding-left: 12px;
   border-left: 2px solid var(--zp-gold);
-  color: var(--dsw-alias-label-tertiary);
+  color: var(--zp-ink-3);
 }
 .zp-md-gap { height: 6px }
 .zp-md-table {
@@ -8410,16 +8476,16 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
 }
 .zp-md-table th, .zp-md-table td {
   padding: 4px 6px;
-  border-bottom: 1px solid var(--dsw-alias-border-l2);
+  border-bottom: 1px solid var(--zp-line-2);
   text-align: left;
   vertical-align: top;
 }
-.zp-md-table th { color: var(--dsw-alias-label-secondary); font-weight: 600 }
+.zp-md-table th { color: var(--zp-ink-2); font-weight: 600 }
 .zp-typing {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: var(--dsw-alias-label-caption);
+  color: var(--zp-ink-4);
   font-size: 12px;
 }
 
@@ -8452,8 +8518,8 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   font-size: 13px;
   text-align: left;
 }
-.zp-root .zp-suggest button { color: var(--dsw-alias-label-secondary) }
-.zp-root .zp-suggest button:hover { color: var(--dsw-alias-label-primary) }
+.zp-root .zp-suggest button { color: var(--zp-ink-2) }
+.zp-root .zp-suggest button:hover { color: var(--zp-ink) }
 .zp-quote {
   flex: none;
   display: flex;
@@ -8463,7 +8529,7 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   padding: 4px 6px 4px 12px;
   border-radius: 8px;
   background: color-mix(in srgb, var(--zp-gold) 12%, transparent);
-  color: var(--dsw-alias-label-secondary);
+  color: var(--zp-ink-2);
   font-size: 12px;
 }
 .zp-quote span {
@@ -8484,8 +8550,8 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   border-radius: 4px;
   background: transparent;
 }
-.zp-root .zp-quote button { color: var(--dsw-alias-label-tertiary) }
-.zp-root .zp-quote button:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary) }
+.zp-root .zp-quote button { color: var(--zp-ink-3) }
+.zp-root .zp-quote button:hover { background: var(--zp-hover); color: var(--zp-ink) }
 .zp-as-form {
   flex: none;
   display: flex;
@@ -8493,9 +8559,9 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   gap: 8px;
   margin: 0 12px 12px;
   padding: 6px 6px 6px 12px;
-  border: 1px solid var(--dsw-alias-border-l1);
+  border: 1px solid var(--zp-line);
   border-radius: 12px;
-  background: var(--dsw-alias-bg-layer-1);
+  background: var(--zp-surface);
 }
 .zp-as-form:focus-within { border-color: var(--zp-zi) }
 .zp-as-form textarea {
@@ -8510,13 +8576,13 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   outline: none;
   resize: none;
 }
-.zp-as-form textarea::placeholder { color: var(--dsw-alias-label-caption) }
-.zp-send.zp-stop { background: var(--dsw-alias-interactive-bg-hover); box-shadow: inset 0 0 0 1px var(--dsw-alias-border-l1) }
-.zp-root .zp-send.zp-stop { color: var(--dsw-alias-label-primary) }
+.zp-as-form textarea::placeholder { color: var(--zp-ink-4) }
+.zp-send.zp-stop { background: var(--zp-hover); box-shadow: inset 0 0 0 1px var(--zp-line) }
+.zp-root .zp-send.zp-stop { color: var(--zp-ink) }
 .zp-as-foot {
   flex: none;
   margin: -4px 16px 12px;
-  color: var(--dsw-alias-label-caption);
+  color: var(--zp-ink-4);
   font-size: 11px;
 }
 /* ---- src/ui/css/85-prose.css ---- */
@@ -8716,12 +8782,12 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
 /* 面板里：--zr-* 映射到宿主 token 和 --zp-*（导出文件里没有 .zp-root，这两段不生效）。
    字体：宋体栈只给分部标题、小标题、心法和编号；引用用楷体，其余跟宿主正文字体。 */
 .zp-root .zr-prose {
-  --zr-paper: var(--dsw-alias-bg-layer-1);
-  --zr-fill: var(--dsw-alias-interactive-bg-hover);
-  --zr-ink: var(--dsw-alias-label-primary);
-  --zr-ink-2: var(--dsw-alias-label-secondary);
-  --zr-ink-3: var(--dsw-alias-label-tertiary);
-  --zr-rule: var(--dsw-alias-border-l1);
+  --zr-paper: var(--zp-surface);
+  --zr-fill: var(--zp-hover);
+  --zr-ink: var(--zp-ink);
+  --zr-ink-2: var(--zp-ink-2);
+  --zr-ink-3: var(--zp-ink-3);
+  --zr-rule: var(--zp-line);
   --zr-gold: var(--zp-gold);
   --zr-gold-text: var(--zp-gold-text);
   --zr-zi: var(--zp-zi);
@@ -8748,7 +8814,7 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   --zr-kai: "Kaiti SC", "STKaiti", "KaiTi", var(--zp-font-serif);
   --zr-sans: var(--dsh-font-family-text-default, -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", sans-serif);
 }
-body[data-ds-dark-theme] .zp-root .zr-prose { --zr-em-halo: .5 }
+.zp-root[data-theme="dark"] .zr-prose { --zr-em-halo: .5 }
 /* ---- src/ui/css/86-reportview.css ---- */
 /* ================================================================
  * 86-reportview：报告页。和命盘页同一副骨架：左边目录，右边阅读栏；整页不滚，只有阅读栏自己滚
@@ -8802,7 +8868,7 @@ body[data-ds-dark-theme] .zp-root .zr-prose { --zr-em-halo: .5 }
   line-height: 1.5;
   text-align: left;
 }
-.zp-root .zp-toc button { color: var(--dsw-alias-label-secondary) }
+.zp-root .zp-toc button { color: var(--zp-ink-2) }
 .zp-toc button i {
   flex: none;
   width: 28px;
@@ -8813,12 +8879,12 @@ body[data-ds-dark-theme] .zp-root .zr-prose { --zr-em-halo: .5 }
   font-weight: 600;
 }
 .zp-root .zp-toc button:hover, .zp-root .zp-toc button[aria-current="true"] {
-  background: var(--dsw-alias-interactive-bg-hover);
-  color: var(--dsw-alias-label-primary);
+  background: var(--zp-hover);
+  color: var(--zp-ink);
 }
-.zp-root .zp-toc button.zp-todo { background: transparent; color: var(--dsw-alias-label-caption) }
-.zp-toc button.zp-todo i { color: var(--dsw-alias-label-caption) }
-.zp-root .zp-toc button.zp-now { color: var(--dsw-alias-label-primary) }
+.zp-root .zp-toc button.zp-todo { background: transparent; color: var(--zp-ink-4) }
+.zp-toc button.zp-todo i { color: var(--zp-ink-4) }
+.zp-root .zp-toc button.zp-now { color: var(--zp-ink) }
 .zp-toc-now { margin-left: 4px; color: var(--zp-gold-text); font-size: 12px }
 
 .zp-rmain {
@@ -8829,9 +8895,9 @@ body[data-ds-dark-theme] .zp-root .zr-prose { --zr-em-halo: .5 }
   min-width: 0;
   min-height: 0;
   overflow: hidden;
-  border: 1px solid var(--dsw-alias-border-l1);
+  border: 1px solid var(--zp-line);
   border-radius: 12px;
-  background: var(--dsw-alias-bg-layer-1);
+  background: var(--zp-surface);
 }
 .zp-rbar {
   flex: none;
@@ -8840,8 +8906,8 @@ body[data-ds-dark-theme] .zp-root .zr-prose { --zr-em-halo: .5 }
   gap: 8px;
   min-height: 44px;
   padding: 6px 12px;
-  border-bottom: 1px solid var(--dsw-alias-border-l2);
-  color: var(--dsw-alias-label-secondary);
+  border-bottom: 1px solid var(--zp-line-2);
+  color: var(--zp-ink-2);
   font-size: 13px;
 }
 .zp-rbar-text { flex: 1; min-width: 0 }
@@ -8860,7 +8926,7 @@ body[data-ds-dark-theme] .zp-root .zr-prose { --zr-em-halo: .5 }
   gap: 20px;
   margin-bottom: 32px;
   padding-bottom: 24px;
-  border-bottom: 1px solid var(--dsw-alias-border-l1);
+  border-bottom: 1px solid var(--zp-line);
 }
 .zp-rtop .zp-emblem { flex: none; width: 104px; height: 104px }
 .zp-rtop h1 {
@@ -8874,7 +8940,7 @@ body[data-ds-dark-theme] .zp-root .zr-prose { --zr-em-halo: .5 }
 }
 .zp-rtop p {
   margin: 4px 0 0;
-  color: var(--dsw-alias-label-tertiary);
+  color: var(--zp-ink-3);
   font-size: 13px;
   line-height: 1.5;
   font-variant-numeric: tabular-nums;
@@ -8897,7 +8963,7 @@ body[data-ds-dark-theme] .zp-root .zr-prose { --zr-em-halo: .5 }
   line-height: 1.3;
   letter-spacing: .08em;
 }
-.zp-rempty p { margin: 0 0 8px; color: var(--dsw-alias-label-tertiary); font-size: 14px }
+.zp-rempty p { margin: 0 0 8px; color: var(--zp-ink-3); font-size: 14px }
 .zp-rpick {
   position: absolute;
   z-index: 3;
@@ -8905,12 +8971,12 @@ body[data-ds-dark-theme] .zp-root .zr-prose { --zr-em-halo: .5 }
   padding: 0 8px;
   border: 0;
   border-radius: 8px;
-  background: var(--dsw-alias-button-primary-fill);
+  background: var(--zp-primary);
   font-size: 12px;
   white-space: nowrap;
   box-shadow: 0 6px 18px -8px rgba(0, 0, 0, .5);
 }
-.zp-root .zp-rpick { color: var(--dsw-alias-label-primary-inverted) }
+.zp-root .zp-rpick { color: var(--zp-on-primary) }
 
 /* ---------------- 窄档：目录变成横向的一条，阅读栏在下面 ---------------- */
 .zp-root[data-w="narrow"] .zp-rbody {
@@ -8932,7 +8998,7 @@ body[data-ds-dark-theme] .zp-root .zr-prose { --zr-em-halo: .5 }
   flex: none;
   gap: 4px;
   padding: 2px 8px;
-  border: 1px solid var(--dsw-alias-border-l1);
+  border: 1px solid var(--zp-line);
   white-space: nowrap;
 }
 .zp-root[data-w="narrow"] .zp-toc button i { width: auto }
@@ -8971,8 +9037,9 @@ body[data-ds-dark-theme] .zp-root .zr-prose { --zr-em-halo: .5 }
  *   exit back close more list gear settings caret chevronLeft chevronRight send stop sparkle newChat handoff
  *   copy download export report quote refresh check。新图标先加进表里再用。
  *
- * Seg { items, value, onChange(id), label, className?, region? }
+ * Seg { items, value, onChange(id), label, className?, region?, radio? }
  *   分段页签：div.zp-seg[role=tablist][aria-label=label]（className 追加在 zp-seg 后面，region → data-region）。
+ *   radio: true 时是单选组（设置里的三选一）：div[role=radiogroup] > button[role=radio][aria-checked]，其余一样。
  *   items：[{ id, label, sep?, after?, disabled? }]。每项一个 button[role=tab][type=button]，
  *   aria-selected="true|false"，roving tabIndex（选中的 0，其余 -1；没有选中项时第一项 0）；
  *   sep: true 时在这一项前放 i.zp-seg-sep；after 是放在文字后面的元素（例如顶栏报告页签的 i.zp-pulse）。
@@ -9327,6 +9394,9 @@ function Icon(props) {
 function Seg(props) {
   const items = props.items || [];
   const value = props.value;
+  /* radio: true 时是单选组（选一个值，不是切换视图）：radiogroup > radio[aria-checked]；键盘和样式一样 */
+  const role = props.radio ? 'radio' : 'tab';
+  const stateAttr = props.radio ? 'aria-checked' : 'aria-selected';
   const hasValue = items.some(function (it) { return it.id === value; });
   const onKeyDown = function (ev) {
     const k = ev.key;
@@ -9345,24 +9415,25 @@ function Seg(props) {
     const idx = live[j];
     if (items[idx].id !== value) props.onChange(items[idx].id);
     const root = ev.currentTarget;
-    const tabs = root && typeof root.querySelectorAll === 'function' ? root.querySelectorAll('[role="tab"]') : [];
+    const tabs = root && typeof root.querySelectorAll === 'function' ? root.querySelectorAll('[role="' + role + '"]') : [];
     if (tabs[idx]) focusQuietly(tabs[idx]);
   };
   const kids = [];
   items.forEach(function (it, i) {
     const on = it.id === value;
     if (it.sep) kids.push(h('i', { key: 'sep-' + it.id, className: 'zp-seg-sep', 'aria-hidden': true }));
-    kids.push(h('button', {
-      key: 'tab-' + it.id, type: 'button', role: 'tab',
-      'aria-selected': on ? 'true' : 'false',
+    const p = {
+      key: 'tab-' + it.id, type: 'button', role: role,
       tabIndex: on || (!hasValue && i === 0) ? 0 : -1,
       disabled: it.disabled ? true : undefined,
       onClick: function () { if (!on) props.onChange(it.id); }
-    }, it.label, it.after || null));
+    };
+    p[stateAttr] = on ? 'true' : 'false';
+    kids.push(h('button', p, it.label, it.after || null));
   });
   return h('div', {
     className: 'zp-seg' + (props.className ? ' ' + props.className : ''),
-    role: 'tablist', 'aria-label': props.label, 'data-region': props.region || undefined, onKeyDown: onKeyDown
+    role: props.radio ? 'radiogroup' : 'tablist', 'aria-label': props.label, 'data-region': props.region || undefined, onKeyDown: onKeyDown
   }, kids);
 }
 
@@ -9547,6 +9618,7 @@ ZWUI.parts = {
  *     不带着场景写过的内联样式。
  *
  * 状态放哪：
+ *   props      tier（档位）、theme（dark / light，决定夜空还是晨光）
  *   store      看的是哪张盘、聚焦哪一张（session.focusId）、引导问答（session.onboarding）、开场播过没有
  *              （session.introPlayed）、操作提示看过没有（session.homeGestureSeen）
  *   组件自己   指着哪个标签、哪个标签的菜单开着、输入框里的字、界面是不是先收着（data-busy）
@@ -9617,13 +9689,6 @@ function homeModel(store, library, today) {
 }
 
 /* ---------------- 只在 effect 和事件里用的小工具（碰 DOM / window） ---------------- */
-function homeIsDark(el) {
-  try {
-    const doc = el && el.ownerDocument;
-    return !!(doc && doc.body && doc.body.hasAttribute('data-ds-dark-theme'));
-  } catch (e) { return false; }
-}
-
 /* 面板底色的计算值：给场景做飞入 / 拉远时的过渡色，以及文字背后的衬底 */
 function homeBg(el) {
   try {
@@ -9823,7 +9888,10 @@ function HomeView(props) {
   const prefRef = useRef(m.skyPref);
   const planetKeys = useRef({});
   const hoverOff = useRef(null);
+  /* 夜空 / 晨光跟面板的外观走（props.theme 是 ProApp 解析好的 dark / light） */
+  const darkRef = useRef(props.theme !== 'light');
   prefRef.current = m.skyPref;
+  darkRef.current = props.theme !== 'light';
 
   const want = m.skyPref && skyBundled && seen;
   const mode = !m.skyPref || !skyBundled ? 'none' : glState;
@@ -9905,7 +9973,7 @@ function HomeView(props) {
   useEffect(function () {
     if (!want) return undefined;
     const el = sectionRef.current;
-    const dark = homeIsDark(el);
+    const dark = darkRef.current;
     let api = null, sky = null;
     try {
       api = __ziweiBootstrapSky();
@@ -10007,20 +10075,16 @@ function HomeView(props) {
     return uiLater(function () { if (!leaving.current) setBusy(false); }, HOME_RISE_MS);
   }, [m.view, mode]);
 
-  /* ---------- 主题：夜空 / 晨光跟着宿主的深浅色 ---------- */
+  /* ---------- 外观变了：夜空 / 晨光跟着换（根节点的 data-theme 这时已经更新，底色读得到新的） ---------- */
+  const themeSeen = useRef(props.theme);
   useEffect(function () {
-    const el = sectionRef.current;
-    const doc = el && el.ownerDocument;
-    if (mode !== 'ok' || !doc || !doc.body || typeof MutationObserver !== 'function') return undefined;
-    const mo = new MutationObserver(function () {
-      const sky = skyRef.current;
-      if (!sky) return;
-      sky.grade(!homeIsDark(el));
-      sky.scrim(homeBg(el));
-    });
-    mo.observe(doc.body, { attributes: true, attributeFilter: ['data-ds-dark-theme'] });
-    return function () { mo.disconnect(); };
-  }, [mode]);
+    const sky = skyRef.current;
+    if (themeSeen.current === props.theme) return;
+    themeSeen.current = props.theme;
+    if (mode !== 'ok' || !sky) return;
+    sky.grade(props.theme === 'light');
+    sky.scrim(homeBg(sectionRef.current));
+  }, [mode, props.theme]);
 
   /* ---------- 操作提示：动过一次或者 14 秒后收起，这次 DSH 运行里不再出现 ---------- */
   const showGesture = mode === 'ok' && !onboarding && (!m.gestureSeen || gestureGone);
@@ -10900,7 +10964,7 @@ ZWUI.sheets = { SheetHost: SheetHost, BirthFormSheet: BirthFormSheet, ChartListS
  * 66-settings：设置弹层（T9）。ProApp 在 session.modal === 'settings' 时渲染 SettingsModal；外框用 50-parts 的 Modal
  * （遮罩、焦点陷阱、Esc、焦点归还）。结构见 css/50-parts.css 的"表单控件"一段：
  *   div.zp-setting > div.zp-setting-text（b 标题 + span 说明）+ 右边的开关或按钮
- * 五块：启动时自动打开工作台（prefs.autoOpen）、首页 3D 星图（prefs.sky）、本机数据（清除对话与报告，要点两次；
+ * 六块：外观（prefs.theme：深色 / 浅色 / 跟随 DSH，默认深色）、启动时自动打开工作台（prefs.autoOpen）、首页 3D 星图（prefs.sky）、本机数据（清除对话与报告，要点两次；
  * 有任务在跑时不能清）、版本和检查更新、关于。
  * 检查更新只在点击时请求一次 /ziwei/version（store.checkVersion）；没有轮询、没有定时器。
  * 更新命令是给终端用的原文，不翻译。
@@ -10909,7 +10973,7 @@ ZWUI.sheets = { SheetHost: SheetHost, BirthFormSheet: BirthFormSheet, ChartListS
 const SET_UPDATE_CMD = 'dsh plugin --profile <profile> update dsh-ziwei';
 
 function setShellOf(s) {
-  return { autoOpen: !!s.prefs.autoOpen, sky: !!s.prefs.sky, busy: Object.keys(s.jobs).length > 0 };
+  return { autoOpen: !!s.prefs.autoOpen, sky: !!s.prefs.sky, theme: s.prefs.theme, busy: Object.keys(s.jobs).length > 0 };
 }
 
 /* 一行设置：左边标题和说明，右边一个控件；extra 是说明下面多出来的内容 */
@@ -10957,6 +11021,16 @@ function SettingsModal() {
     verdict = h('p', { className: 'zp-update zp-err' }, t('setUpdateFailed', { reason: r.reason || 'unknown' }));
   }
   return h(Modal, { title: t('headSettings'), onClose: closeLayers },
+    setRow('theme', t('setTheme'), t('setThemeHint'),
+      h(Seg, {
+        radio: true, label: t('setTheme'), value: m.theme,
+        items: [
+          { id: 'dark', label: t('setThemeDark') },
+          { id: 'light', label: t('setThemeLight') },
+          { id: 'auto', label: t('setThemeAuto') }
+        ],
+        onChange: function (id) { store.setPref('theme', id); }
+      })),
     setRow('auto', t('setAutoOpen'), t('setAutoOpenHint'),
       setSwitch(t('setAutoOpen'), m.autoOpen, function (v) { store.setPref('autoOpen', v); })),
     setRow('sky', t('setSky'), t('setSkyHint'),
@@ -12612,7 +12686,8 @@ ZWUI.rvPickPlace = rvPickPlace;
  * 90-app：ProApp（面板根组件）、顶栏、Boundary（错误边界）、插件入口 __ziweiPlugin（factory 的返回值）（T5a）
  *
  * ProApp 渲染的外壳（结构见 css/10-base.css 开头）：
- *   div.zp-root[data-w][data-view][data-stage][data-panel]        data-w 在 layout effect 里按面板实测宽度定
+ *   div.zp-root[data-w][data-theme][data-view][data-stage][data-panel]   data-w 在 layout effect 里按面板实测宽度定；
+ *                                            data-theme 是 dark / light（偏好 prefs.theme，auto 时跟宿主）
  *     div.zp-shell
  *       div.zp-main
  *         header.zp-head[data-region=HEAD]   第一个控件是「返回会话」（ProApp 自己渲染，不在任何错误边界里），
@@ -12627,7 +12702,7 @@ ZWUI.rvPickPlace = rvPickPlace;
  *       SettingsModal    session.modal === 'settings' 时才渲染
  *       Toast
  * 视图组件由后面的任务写：ProApp 用 typeof 判断它存在才渲染，所以那些任务不用改这个文件。
- * 每个视图都收到 props { tier: 'narrow' | 'mid' | 'wide' }（面板档位，不在 store 里），各包一层错误边界：
+ * 每个视图都收到 props { tier: 'narrow' | 'mid' | 'wide', theme: 'dark' | 'light' }（都不在 store 里），各包一层错误边界：
  * 一个视图出错只把它自己换成错误提示，「返回会话」和其余视图照常。
  *
  * ProApp 只订阅 view / stage / panelOpen / chartId / sheet / modal；顶栏的命盘部分（HeadChart）另外订阅
@@ -12644,7 +12719,7 @@ function shellOf(s) {
   const ss = s.session;
   return {
     view: ss.view, stage: ss.stage, panel: !!ss.panelOpen, chartId: ss.chartId,
-    sheet: ss.sheet || null, modal: ss.modal || null
+    sheet: ss.sheet || null, modal: ss.modal || null, themePref: s.prefs.theme
   };
 }
 
@@ -12743,6 +12818,22 @@ function ProApp(props) {
   const rootRef = useRef(null);
   const chartRef = useRef(null);
   const tier = tierOf(panelW);
+  /* 外观：偏好是「跟随 DSH」时才去看宿主的深浅色（body[data-ds-dark-theme]），并跟着它变。
+     在 layout effect 里读，所以跟随深色的宿主时不会先画一帧浅色 */
+  const [hostDark, setHostDark] = useState(false);
+  const theme = resolveTheme(app.themePref, hostDark);
+  useLayoutEffect(function () {
+    if (app.themePref !== 'auto') return undefined;
+    const el = rootRef.current;
+    const body = el && el.ownerDocument ? el.ownerDocument.body : null;
+    if (!body || typeof body.hasAttribute !== 'function') return undefined;
+    const read = function () { setHostDark(body.hasAttribute('data-ds-dark-theme')); };
+    read();
+    if (typeof MutationObserver !== 'function') return undefined;
+    const mo = new MutationObserver(read);
+    mo.observe(body, { attributes: true, attributeFilter: ['data-ds-dark-theme'] });
+    return function () { mo.disconnect(); };
+  }, [app.themePref]);
   useLayoutEffect(function () {
     const el = rootRef.current;
     if (!el || typeof ResizeObserver !== 'function') return undefined;
@@ -12788,11 +12879,11 @@ function ProApp(props) {
     if (s.view === 'chart' && s.panelOpen && tier !== 'wide') { store.setPanel(false); ev.stopPropagation(); }
   };
 
-  const viewProps = { tier: tier };
+  const viewProps = { tier: tier, theme: theme };
   const inChart = app.view === 'chart';
   return h('div', {
     className: 'zp-root', ref: rootRef, onKeyDown: onKeyDown,
-    'data-w': tier, 'data-view': app.view, 'data-stage': app.stage, 'data-panel': app.panel ? 'open' : 'closed'
+    'data-w': tier, 'data-theme': theme, 'data-view': app.view, 'data-stage': app.stage, 'data-panel': app.panel ? 'open' : 'closed'
   },
   h('div', { className: 'zp-shell' },
     h('div', { className: 'zp-main' },
@@ -12830,7 +12921,11 @@ class Boundary extends React.Component {
     const err = this.state.error;
     const self = this;
     const actions = this.props.actions || null;
-    return h('div', { className: this.props.root ? 'zp-root zp-crash' : 'zp-crash', role: 'alert' },
+    /* 最外层出错时自己就是根节点：配色也要自己定（跟随 DSH 的在这里按深色） */
+    return h('div', {
+      className: this.props.root ? 'zp-root zp-crash' : 'zp-crash', role: 'alert',
+      'data-theme': this.props.root ? resolveTheme(crashThemePref(), true) : undefined
+    },
       actions && actions.canReturnToConversation ? h('button', {
         className: 'zp-icon-btn zp-exit', type: 'button',
         title: t('backToConversation'), 'aria-label': t('backToConversation'),
@@ -12840,6 +12935,10 @@ class Boundary extends React.Component {
       h('p', { className: 'zp-crash-hint' }, t('crashHint')),
       h('button', { className: 'zp-btn', type: 'button', onClick: function () { self.setState({ error: null }); } }, t('retry')));
   }
+}
+
+function crashThemePref() {
+  try { return localStore.prefs.theme(); } catch (e) { return 'dark'; }
 }
 
 /* 侧栏入口图标（在面板之外的宿主侧栏里渲染，面板的 --zp-* 用不到；和 v5 同一个图形） */

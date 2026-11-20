@@ -2,7 +2,8 @@
  * 90-app：ProApp（面板根组件）、顶栏、Boundary（错误边界）、插件入口 __ziweiPlugin（factory 的返回值）（T5a）
  *
  * ProApp 渲染的外壳（结构见 css/10-base.css 开头）：
- *   div.zp-root[data-w][data-view][data-stage][data-panel]        data-w 在 layout effect 里按面板实测宽度定
+ *   div.zp-root[data-w][data-theme][data-view][data-stage][data-panel]   data-w 在 layout effect 里按面板实测宽度定；
+ *                                            data-theme 是 dark / light（偏好 prefs.theme，auto 时跟宿主）
  *     div.zp-shell
  *       div.zp-main
  *         header.zp-head[data-region=HEAD]   第一个控件是「返回会话」（ProApp 自己渲染，不在任何错误边界里），
@@ -17,7 +18,7 @@
  *       SettingsModal    session.modal === 'settings' 时才渲染
  *       Toast
  * 视图组件由后面的任务写：ProApp 用 typeof 判断它存在才渲染，所以那些任务不用改这个文件。
- * 每个视图都收到 props { tier: 'narrow' | 'mid' | 'wide' }（面板档位，不在 store 里），各包一层错误边界：
+ * 每个视图都收到 props { tier: 'narrow' | 'mid' | 'wide', theme: 'dark' | 'light' }（都不在 store 里），各包一层错误边界：
  * 一个视图出错只把它自己换成错误提示，「返回会话」和其余视图照常。
  *
  * ProApp 只订阅 view / stage / panelOpen / chartId / sheet / modal；顶栏的命盘部分（HeadChart）另外订阅
@@ -34,7 +35,7 @@ function shellOf(s) {
   const ss = s.session;
   return {
     view: ss.view, stage: ss.stage, panel: !!ss.panelOpen, chartId: ss.chartId,
-    sheet: ss.sheet || null, modal: ss.modal || null
+    sheet: ss.sheet || null, modal: ss.modal || null, themePref: s.prefs.theme
   };
 }
 
@@ -133,6 +134,22 @@ function ProApp(props) {
   const rootRef = useRef(null);
   const chartRef = useRef(null);
   const tier = tierOf(panelW);
+  /* 外观：偏好是「跟随 DSH」时才去看宿主的深浅色（body[data-ds-dark-theme]），并跟着它变。
+     在 layout effect 里读，所以跟随深色的宿主时不会先画一帧浅色 */
+  const [hostDark, setHostDark] = useState(false);
+  const theme = resolveTheme(app.themePref, hostDark);
+  useLayoutEffect(function () {
+    if (app.themePref !== 'auto') return undefined;
+    const el = rootRef.current;
+    const body = el && el.ownerDocument ? el.ownerDocument.body : null;
+    if (!body || typeof body.hasAttribute !== 'function') return undefined;
+    const read = function () { setHostDark(body.hasAttribute('data-ds-dark-theme')); };
+    read();
+    if (typeof MutationObserver !== 'function') return undefined;
+    const mo = new MutationObserver(read);
+    mo.observe(body, { attributes: true, attributeFilter: ['data-ds-dark-theme'] });
+    return function () { mo.disconnect(); };
+  }, [app.themePref]);
   useLayoutEffect(function () {
     const el = rootRef.current;
     if (!el || typeof ResizeObserver !== 'function') return undefined;
@@ -178,11 +195,11 @@ function ProApp(props) {
     if (s.view === 'chart' && s.panelOpen && tier !== 'wide') { store.setPanel(false); ev.stopPropagation(); }
   };
 
-  const viewProps = { tier: tier };
+  const viewProps = { tier: tier, theme: theme };
   const inChart = app.view === 'chart';
   return h('div', {
     className: 'zp-root', ref: rootRef, onKeyDown: onKeyDown,
-    'data-w': tier, 'data-view': app.view, 'data-stage': app.stage, 'data-panel': app.panel ? 'open' : 'closed'
+    'data-w': tier, 'data-theme': theme, 'data-view': app.view, 'data-stage': app.stage, 'data-panel': app.panel ? 'open' : 'closed'
   },
   h('div', { className: 'zp-shell' },
     h('div', { className: 'zp-main' },
@@ -220,7 +237,11 @@ class Boundary extends React.Component {
     const err = this.state.error;
     const self = this;
     const actions = this.props.actions || null;
-    return h('div', { className: this.props.root ? 'zp-root zp-crash' : 'zp-crash', role: 'alert' },
+    /* 最外层出错时自己就是根节点：配色也要自己定（跟随 DSH 的在这里按深色） */
+    return h('div', {
+      className: this.props.root ? 'zp-root zp-crash' : 'zp-crash', role: 'alert',
+      'data-theme': this.props.root ? resolveTheme(crashThemePref(), true) : undefined
+    },
       actions && actions.canReturnToConversation ? h('button', {
         className: 'zp-icon-btn zp-exit', type: 'button',
         title: t('backToConversation'), 'aria-label': t('backToConversation'),
@@ -230,6 +251,10 @@ class Boundary extends React.Component {
       h('p', { className: 'zp-crash-hint' }, t('crashHint')),
       h('button', { className: 'zp-btn', type: 'button', onClick: function () { self.setState({ error: null }); } }, t('retry')));
   }
+}
+
+function crashThemePref() {
+  try { return localStore.prefs.theme(); } catch (e) { return 'dark'; }
 }
 
 /* 侧栏入口图标（在面板之外的宿主侧栏里渲染，面板的 --zp-* 用不到；和 v5 同一个图形） */

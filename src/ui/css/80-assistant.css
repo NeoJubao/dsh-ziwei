@@ -25,8 +25,8 @@
   flex-direction: column;
   min-width: 0;
   overflow: hidden;
-  border-left: 1px solid var(--dsw-alias-border-l2);
-  background: var(--dsw-alias-bg-layer-1);
+  border-left: 1px solid var(--zp-line-2);
+  background: var(--zp-surface);
 }
 .zp-root[data-panel="closed"] .zp-assistant { display: none }
 /* 中、窄档：浮在命盘上，从右侧滑入。
@@ -47,7 +47,7 @@
   position: absolute;
   inset: 0;
   z-index: 59;
-  background: var(--dsw-alias-bg-mask-1);
+  background: var(--zp-mask);
   animation: zp-fade 160ms ease-out both;
 }
 
@@ -58,14 +58,14 @@
   gap: 8px;
   min-height: 60px;
   padding: 12px 16px;
-  border-bottom: 1px solid var(--dsw-alias-border-l2);
+  border-bottom: 1px solid var(--zp-line-2);
   white-space: nowrap;
 }
 .zp-as-head b { font-size: 14px; font-weight: 600 }
 .zp-as-head small {
   min-width: 0;
   overflow: hidden;
-  color: var(--dsw-alias-label-tertiary);
+  color: var(--zp-ink-3);
   font-size: 12px;
   text-overflow: ellipsis;
 }
@@ -84,7 +84,7 @@
 .zp-as-empty { display: flex; flex-direction: column; gap: 12px; margin: auto 0 }
 .zp-as-empty p { margin: 0 }
 .zp-l1 {
-  color: var(--dsw-alias-label-primary);
+  color: var(--zp-ink);
   font-family: var(--zp-font-serif);
   font-size: 20px;
   line-height: 1.5;
@@ -95,9 +95,9 @@
   flex-direction: column;
   gap: 8px;
   padding: 12px;
-  border: 1px solid var(--dsw-alias-border-l2);
+  border: 1px solid var(--zp-line-2);
   border-radius: 12px;
-  background: var(--dsw-alias-bg-layer-2);
+  background: var(--zp-raised);
 }
 .zp-quick h4 {
   margin: 0;
@@ -107,11 +107,11 @@
   line-height: 18px;
 }
 .zp-quick p {
-  color: var(--dsw-alias-label-secondary);
+  color: var(--zp-ink-2);
   font-size: 13px;
   line-height: 1.6;
 }
-.zp-quick p b { color: var(--dsw-alias-label-primary); font-weight: 600 }
+.zp-quick p b { color: var(--zp-ink); font-weight: 600 }
 .zp-as-starts { display: flex; flex-wrap: wrap; gap: 8px }
 
 .zp-msg.zp-me {
@@ -119,8 +119,8 @@
   max-width: 86%;
   padding: 8px 12px;
   border-radius: 12px 12px 4px 12px;
-  /* 宿主浅色主题里 bg-layer-1/2/3 是同一个白，拿它们当底色会看不见；用悬停底色（一层很淡的叠色）才分得出来 */
-  background: var(--dsw-alias-interactive-bg-hover);
+  /* 淡底色用悬停叠色：落在哪层底上都分得出来 */
+  background: var(--zp-hover);
   font-size: 14px;
   line-height: 1.6;
   overflow-wrap: anywhere;
@@ -131,27 +131,27 @@
   margin-bottom: 4px;
   padding-left: 8px;
   border-left: 2px solid var(--zp-gold);
-  color: var(--dsw-alias-label-tertiary);
+  color: var(--zp-ink-3);
   font-size: 12px;
   quotes: none;
 }
 .zp-msg.zp-bot { font-size: 14px; line-height: 1.8; overflow-wrap: anywhere }
 .zp-md-h {
   margin: 8px 0 2px;
-  color: var(--dsw-alias-label-primary);
+  color: var(--zp-ink);
   font-size: 14px;
   font-weight: 600;
 }
 .zp-md > .zp-md-h:first-child { margin-top: 0 }
 .zp-md-h1, .zp-md-h2 { font-family: var(--zp-font-serif); font-size: 16px }
-.zp-md-p { margin: 0 0 6px; color: var(--dsw-alias-label-secondary) }
-.zp-md-p strong, .zp-md-li strong { color: var(--dsw-alias-label-primary); font-weight: 600 }
-.zp-md-li { margin: 0 0 4px; padding-left: 8px; color: var(--dsw-alias-label-secondary) }
+.zp-md-p { margin: 0 0 6px; color: var(--zp-ink-2) }
+.zp-md-p strong, .zp-md-li strong { color: var(--zp-ink); font-weight: 600 }
+.zp-md-li { margin: 0 0 4px; padding-left: 8px; color: var(--zp-ink-2) }
 .zp-md-quote {
   margin: 6px 0;
   padding-left: 12px;
   border-left: 2px solid var(--zp-gold);
-  color: var(--dsw-alias-label-tertiary);
+  color: var(--zp-ink-3);
 }
 .zp-md-gap { height: 6px }
 .zp-md-table {
@@ -163,16 +163,16 @@
 }
 .zp-md-table th, .zp-md-table td {
   padding: 4px 6px;
-  border-bottom: 1px solid var(--dsw-alias-border-l2);
+  border-bottom: 1px solid var(--zp-line-2);
   text-align: left;
   vertical-align: top;
 }
-.zp-md-table th { color: var(--dsw-alias-label-secondary); font-weight: 600 }
+.zp-md-table th { color: var(--zp-ink-2); font-weight: 600 }
 .zp-typing {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: var(--dsw-alias-label-caption);
+  color: var(--zp-ink-4);
   font-size: 12px;
 }
 
@@ -205,8 +205,8 @@
   font-size: 13px;
   text-align: left;
 }
-.zp-root .zp-suggest button { color: var(--dsw-alias-label-secondary) }
-.zp-root .zp-suggest button:hover { color: var(--dsw-alias-label-primary) }
+.zp-root .zp-suggest button { color: var(--zp-ink-2) }
+.zp-root .zp-suggest button:hover { color: var(--zp-ink) }
 .zp-quote {
   flex: none;
   display: flex;
@@ -216,7 +216,7 @@
   padding: 4px 6px 4px 12px;
   border-radius: 8px;
   background: color-mix(in srgb, var(--zp-gold) 12%, transparent);
-  color: var(--dsw-alias-label-secondary);
+  color: var(--zp-ink-2);
   font-size: 12px;
 }
 .zp-quote span {
@@ -237,8 +237,8 @@
   border-radius: 4px;
   background: transparent;
 }
-.zp-root .zp-quote button { color: var(--dsw-alias-label-tertiary) }
-.zp-root .zp-quote button:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary) }
+.zp-root .zp-quote button { color: var(--zp-ink-3) }
+.zp-root .zp-quote button:hover { background: var(--zp-hover); color: var(--zp-ink) }
 .zp-as-form {
   flex: none;
   display: flex;
@@ -246,9 +246,9 @@
   gap: 8px;
   margin: 0 12px 12px;
   padding: 6px 6px 6px 12px;
-  border: 1px solid var(--dsw-alias-border-l1);
+  border: 1px solid var(--zp-line);
   border-radius: 12px;
-  background: var(--dsw-alias-bg-layer-1);
+  background: var(--zp-surface);
 }
 .zp-as-form:focus-within { border-color: var(--zp-zi) }
 .zp-as-form textarea {
@@ -263,12 +263,12 @@
   outline: none;
   resize: none;
 }
-.zp-as-form textarea::placeholder { color: var(--dsw-alias-label-caption) }
-.zp-send.zp-stop { background: var(--dsw-alias-interactive-bg-hover); box-shadow: inset 0 0 0 1px var(--dsw-alias-border-l1) }
-.zp-root .zp-send.zp-stop { color: var(--dsw-alias-label-primary) }
+.zp-as-form textarea::placeholder { color: var(--zp-ink-4) }
+.zp-send.zp-stop { background: var(--zp-hover); box-shadow: inset 0 0 0 1px var(--zp-line) }
+.zp-root .zp-send.zp-stop { color: var(--zp-ink) }
 .zp-as-foot {
   flex: none;
   margin: -4px 16px 12px;
-  color: var(--dsw-alias-label-caption);
+  color: var(--zp-ink-4);
   font-size: 11px;
 }

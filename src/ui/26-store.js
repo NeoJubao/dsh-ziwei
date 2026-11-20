@@ -14,7 +14,7 @@
  *
  * ---------------- 状态（getState() 返回当前快照；每次变化换一个新对象，没变化不换） ----------------
  *   library   命盘库 [{ id, name, input, openedAt? }]（新→旧）
- *   prefs     { autoOpen, showAdj, sky }
+ *   prefs     { autoOpen, showAdj, sky, theme: 'dark' | 'light' | 'auto' }
  *   session   { view: 'home'|'chart', chartId, tab: 'natal'|'decadal'|'yearly'|'monthly'|'daily', stage: 'board'|'report',
  *               when: { y, m, d }, sel: 0–11, pat, pane: 'scope'|'pats'|'detail', panelOpen, focusId, introPlayed,
  *               onboarding（引导问答的状态，store 不解读）, quote: { label, text }|null,
@@ -35,7 +35,7 @@
  * ---------------- 命盘库 ----------------
  *   addChart(input, name) → entry | null        renameChart(id, name) → entry | null
  *   updateChartInput(id, input) → entry | null  removeChart(id) → boolean（提示里可撤销）
- *   openSample(opts?) → boolean                 setPref('autoOpen'|'showAdj'|'sky', bool)
+ *   openSample(opts?) → boolean                 setPref('autoOpen'|'showAdj'|'sky', bool)；setPref('theme', 'dark'|'light'|'auto')
  *   clearLocalRecords() → boolean（有任务在跑时不清，返回 false）
  * ---------------- 导航（都不发请求） ----------------
  *   openChart(id, { tab, when, panel }?) → boolean   goHome()   setTab(tab)（'report' 等于 setStage('report')）
@@ -199,7 +199,7 @@ function createStore(deps) {
 
   let state = {
     library: api.library.list(),
-    prefs: { autoOpen: api.prefs.autoOpen(), showAdj: api.prefs.showAdj(), sky: api.prefs.sky() },
+    prefs: { autoOpen: api.prefs.autoOpen(), showAdj: api.prefs.showAdj(), sky: api.prefs.sky(), theme: api.prefs.theme() },
     session: {
       view: 'home', chartId: null, tab: 'natal', stage: 'board', when: todayOf(), sel: 0, pat: 0, pane: 'scope',
       panelOpen: false, focusId: startupFocus(), introPlayed: false, onboarding: null, quote: null, toast: null,
@@ -466,9 +466,10 @@ function createStore(deps) {
     return true;
   }
   function setPref(name, value) {
-    const setters = { autoOpen: api.prefs.setAutoOpen, showAdj: api.prefs.setShowAdj, sky: api.prefs.setSky };
+    const setters = { autoOpen: api.prefs.setAutoOpen, showAdj: api.prefs.setShowAdj, sky: api.prefs.setSky, theme: api.prefs.setTheme };
     if (!setters[name]) return false;
-    const v = !!value;
+    /* 外观是三选一的字符串，其余是开关 */
+    const v = name === 'theme' ? themePrefOf(value) : !!value;
     setters[name](v);
     if (state.prefs[name] !== v) commit(Object.assign({}, state, { prefs: Object.assign({}, state.prefs, storeWithKey({}, name, v)) }));
     return true;

@@ -78,30 +78,30 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
 }
 .zp-date-line {
   margin: 0;
-  color: var(--dsw-alias-label-tertiary);
+  color: var(--zp-ink-3);
   font-size: 13px;
-  text-shadow: 0 0 12px var(--dsw-alias-bg-base);
+  text-shadow: 0 0 12px var(--zp-bg);
 }
 .zp-date-line b { color: var(--zp-gold-text); font-weight: 500 }
 .zp-status {
   margin: 0;
-  color: var(--dsw-alias-label-secondary);
+  color: var(--zp-ink-2);
   font-family: var(--zp-font-serif);
   font-size: clamp(20px, 2.25cqw, 28px);
   font-weight: 400;
   line-height: 1.5;
   text-wrap: balance;
-  text-shadow: 0 0 12px var(--dsw-alias-bg-base), 0 0 2px var(--dsw-alias-bg-base);
+  text-shadow: 0 0 12px var(--zp-bg), 0 0 2px var(--zp-bg);
 }
 /* 宫名、星名不从中间断行 */
-.zp-status strong { color: var(--dsw-alias-label-primary); font-weight: 600; white-space: nowrap }
-.zp-status .zp-st { color: var(--zp-c, var(--dsw-alias-label-primary)); font-weight: 600; white-space: nowrap }
+.zp-status strong { color: var(--zp-ink); font-weight: 600; white-space: nowrap }
+.zp-status .zp-st { color: var(--zp-c, var(--zp-ink)); font-weight: 600; white-space: nowrap }
 .zp-status > span { display: block; animation: zp-rise 240ms ease both }
 /* 状态句里的补充说明（引导问答确认步的真太阳时校正）：小一号，另起一行 */
 .zp-status small {
   display: block;
   margin-top: 8px;
-  color: var(--dsw-alias-label-secondary);
+  color: var(--zp-ink-2);
   font-size: 14px;
   line-height: 1.6;
   text-wrap: pretty;
@@ -112,16 +112,16 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   display: inline-flex;
   gap: 6px;
   padding: 2px 8px;
-  border: 1px solid var(--dsw-alias-border-l1);
+  border: 1px solid var(--zp-line);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--dsw-alias-bg-base) 66%, transparent);
+  background: color-mix(in srgb, var(--zp-bg) 66%, transparent);
   font-size: 12px;
   line-height: 18px;
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
 }
-.zp-root .zp-receipt { color: var(--dsw-alias-label-tertiary) }
-.zp-receipt b { color: var(--dsw-alias-label-primary); font-weight: 500 }
+.zp-root .zp-receipt { color: var(--zp-ink-3) }
+.zp-receipt b { color: var(--zp-ink); font-weight: 500 }
 .zp-receipt:hover { border-color: var(--zp-zi) }
 .zp-ask {
   display: flex;
@@ -130,9 +130,9 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   height: 48px;
   margin: 0;
   padding: 8px 8px 8px 16px;
-  border: 1px solid var(--dsw-alias-border-l1);
+  border: 1px solid var(--zp-line);
   border-radius: 16px;
-  background: color-mix(in srgb, var(--dsw-alias-bg-base) 66%, transparent);
+  background: color-mix(in srgb, var(--zp-bg) 66%, transparent);
   box-shadow: 0 14px 40px -22px rgba(0, 0, 0, .5);
   -webkit-backdrop-filter: blur(20px) saturate(140%);
   backdrop-filter: blur(20px) saturate(140%);
@@ -147,11 +147,11 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   font-size: 14px;
   outline: none;
 }
-.zp-ask input::placeholder { color: var(--dsw-alias-label-tertiary) }
+.zp-ask input::placeholder { color: var(--zp-ink-3) }
 .zp-hint {
   min-height: 18px;
   margin: -4px 0;
-  color: var(--dsw-alias-label-tertiary);
+  color: var(--zp-ink-3);
   font-size: 12px;
   line-height: 18px;
 }
@@ -163,9 +163,9 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   bottom: 16px;
   z-index: 3;
   margin: 0;
-  color: var(--dsw-alias-label-tertiary);
+  color: var(--zp-ink-3);
   font-size: 12px;
-  text-shadow: 0 0 8px var(--dsw-alias-bg-base);
+  text-shadow: 0 0 8px var(--zp-bg);
   transition: opacity 240ms ease;
 }
 .zp-gesture.zp-gone { opacity: 0 }
@@ -198,11 +198,11 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   background: transparent;
   text-align: center;
   white-space: nowrap;
-  text-shadow: 0 0 8px var(--dsw-alias-bg-base), 0 0 2px var(--dsw-alias-bg-base);
+  text-shadow: 0 0 8px var(--zp-bg), 0 0 2px var(--zp-bg);
   pointer-events: auto;
 }
 .zp-ptag-main b {
-  color: var(--dsw-alias-label-primary);
+  color: var(--zp-ink);
   font-family: var(--zp-font-serif);
   font-size: 14px;
   font-weight: 600;
@@ -210,7 +210,7 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   letter-spacing: .04em;
 }
 .zp-ptag-main span {
-  color: var(--dsw-alias-label-tertiary);
+  color: var(--zp-ink-3);
   font-size: 12px;
   line-height: 1.4;
   font-variant-numeric: tabular-nums;
@@ -240,9 +240,9 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   pointer-events: auto;
   transition: opacity 120ms ease;
 }
-.zp-root .zp-ptag-more { color: var(--dsw-alias-label-tertiary) }
+.zp-root .zp-ptag-more { color: var(--zp-ink-3) }
 .zp-ptag.zp-on .zp-ptag-more, .zp-ptag-more:focus-visible { opacity: 1 }
-.zp-root .zp-ptag-more:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary) }
+.zp-root .zp-ptag-more:hover { background: var(--zp-hover); color: var(--zp-ink) }
 .zp-ptag-menu {
   position: absolute;
   top: 100%;
@@ -253,9 +253,9 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   gap: 6px;
   margin-top: 4px;
   padding: 6px;
-  border: 1px solid var(--dsw-alias-border-l1);
+  border: 1px solid var(--zp-line);
   border-radius: 12px;
-  background: var(--dsw-alias-bg-layer-1);
+  background: var(--zp-surface);
   box-shadow: 0 12px 32px -16px rgba(0, 0, 0, .45);
   font-size: 13px;
   white-space: nowrap;
@@ -266,9 +266,9 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   width: 116px;
   height: 28px;
   padding: 0 8px;
-  border: 1px solid var(--dsw-alias-border-l1);
+  border: 1px solid var(--zp-line);
   border-radius: 8px;
-  background: var(--dsw-alias-bg-base);
+  background: var(--zp-bg);
   font-size: 13px;
   outline: none;
 }
@@ -281,10 +281,10 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   background: transparent;
   font-size: 13px;
 }
-.zp-root .zp-ptag-menu button { color: var(--dsw-alias-label-secondary) }
-.zp-root .zp-ptag-menu button:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary) }
+.zp-root .zp-ptag-menu button { color: var(--zp-ink-2) }
+.zp-root .zp-ptag-menu button:hover { background: var(--zp-hover); color: var(--zp-ink) }
 .zp-root .zp-ptag-menu button.zp-danger { color: var(--zp-mu-ji) }
-.zp-ptag-menu span { padding: 0 4px 0 6px; color: var(--dsw-alias-label-secondary) }
+.zp-ptag-menu span { padding: 0 4px 0 6px; color: var(--zp-ink-2) }
 
 .zp-reticle {
   position: absolute;

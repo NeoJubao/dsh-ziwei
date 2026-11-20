@@ -12,6 +12,7 @@
  *     不带着场景写过的内联样式。
  *
  * 状态放哪：
+ *   props      tier（档位）、theme（dark / light，决定夜空还是晨光）
  *   store      看的是哪张盘、聚焦哪一张（session.focusId）、引导问答（session.onboarding）、开场播过没有
  *              （session.introPlayed）、操作提示看过没有（session.homeGestureSeen）
  *   组件自己   指着哪个标签、哪个标签的菜单开着、输入框里的字、界面是不是先收着（data-busy）
@@ -82,13 +83,6 @@ function homeModel(store, library, today) {
 }
 
 /* ---------------- 只在 effect 和事件里用的小工具（碰 DOM / window） ---------------- */
-function homeIsDark(el) {
-  try {
-    const doc = el && el.ownerDocument;
-    return !!(doc && doc.body && doc.body.hasAttribute('data-ds-dark-theme'));
-  } catch (e) { return false; }
-}
-
 /* 面板底色的计算值：给场景做飞入 / 拉远时的过渡色，以及文字背后的衬底 */
 function homeBg(el) {
   try {
@@ -288,7 +282,10 @@ function HomeView(props) {
   const prefRef = useRef(m.skyPref);
   const planetKeys = useRef({});
   const hoverOff = useRef(null);
+  /* 夜空 / 晨光跟面板的外观走（props.theme 是 ProApp 解析好的 dark / light） */
+  const darkRef = useRef(props.theme !== 'light');
   prefRef.current = m.skyPref;
+  darkRef.current = props.theme !== 'light';
 
   const want = m.skyPref && skyBundled && seen;
   const mode = !m.skyPref || !skyBundled ? 'none' : glState;
@@ -370,7 +367,7 @@ function HomeView(props) {
   useEffect(function () {
     if (!want) return undefined;
     const el = sectionRef.current;
-    const dark = homeIsDark(el);
+    const dark = darkRef.current;
     let api = null, sky = null;
     try {
       api = __ziweiBootstrapSky();
@@ -472,20 +469,16 @@ function HomeView(props) {
     return uiLater(function () { if (!leaving.current) setBusy(false); }, HOME_RISE_MS);
   }, [m.view, mode]);
 
-  /* ---------- 主题：夜空 / 晨光跟着宿主的深浅色 ---------- */
+  /* ---------- 外观变了：夜空 / 晨光跟着换（根节点的 data-theme 这时已经更新，底色读得到新的） ---------- */
+  const themeSeen = useRef(props.theme);
   useEffect(function () {
-    const el = sectionRef.current;
-    const doc = el && el.ownerDocument;
-    if (mode !== 'ok' || !doc || !doc.body || typeof MutationObserver !== 'function') return undefined;
-    const mo = new MutationObserver(function () {
-      const sky = skyRef.current;
-      if (!sky) return;
-      sky.grade(!homeIsDark(el));
-      sky.scrim(homeBg(el));
-    });
-    mo.observe(doc.body, { attributes: true, attributeFilter: ['data-ds-dark-theme'] });
-    return function () { mo.disconnect(); };
-  }, [mode]);
+    const sky = skyRef.current;
+    if (themeSeen.current === props.theme) return;
+    themeSeen.current = props.theme;
+    if (mode !== 'ok' || !sky) return;
+    sky.grade(props.theme === 'light');
+    sky.scrim(homeBg(sectionRef.current));
+  }, [mode, props.theme]);
 
   /* ---------- 操作提示：动过一次或者 14 秒后收起，这次 DSH 运行里不再出现 ---------- */
   const showGesture = mode === 'ok' && !onboarding && (!m.gestureSeen || gestureGone);

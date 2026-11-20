@@ -54,8 +54,8 @@
   padding: 0 20px;
 }
 .zp-root[data-view="chart"] .zp-head {
-  border-bottom: 1px solid var(--dsw-alias-border-l2);
-  background: var(--dsw-alias-bg-base);
+  border-bottom: 1px solid var(--zp-line-2);
+  background: var(--zp-bg);
 }
 .zp-root[data-w="narrow"] .zp-head { height: 52px; padding: 0 12px }
 /* 窄档的命盘页：顶栏两行，页签独占第二行 */
@@ -75,21 +75,21 @@
   gap: 6px;
   min-width: 0;
   font-size: 14px;
-  color: var(--dsw-alias-label-tertiary);
+  color: var(--zp-ink-3);
 }
 .zp-crumb-home {
   padding: 4px 6px;
   border: 0;
   border-radius: 4px;
   background: transparent;
-  color: var(--dsw-alias-label-tertiary);
+  color: var(--zp-ink-3);
   font-size: 14px;
   white-space: nowrap;
 }
-.zp-crumb-home:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary) }
+.zp-crumb-home:hover { background: var(--zp-hover); color: var(--zp-ink) }
 .zp-crumb-name {
   overflow: hidden;
-  color: var(--dsw-alias-label-primary);
+  color: var(--zp-ink);
   font-weight: 600;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -98,8 +98,8 @@
   flex: none;
   padding: 0 6px;
   border-radius: 4px;
-  background: var(--dsw-alias-interactive-bg-hover);
-  color: var(--dsw-alias-label-tertiary);
+  background: var(--zp-hover);
+  color: var(--zp-ink-3);
   font-size: 12px;
   line-height: 18px;
   white-space: nowrap;
@@ -112,7 +112,7 @@
   height: 12px;
   border-radius: 999px;
   background: radial-gradient(circle at 32% 30%, var(--zp-orb-hi) 0, var(--zp-c, var(--zp-gold)) 38%, color-mix(in srgb, var(--zp-c, var(--zp-gold)) 40%, var(--zp-orb-lo)) 100%);
-  box-shadow: 0 0 0 1px var(--dsw-alias-border-l2);
+  box-shadow: 0 0 0 1px var(--zp-line-2);
 }
 
 /* ---------------- 按钮 ---------------- */
@@ -128,27 +128,27 @@
   width: 32px;
   height: 32px;
   padding: 0;
-  border: 1px solid var(--dsw-alias-border-l1);
+  border: 1px solid var(--zp-line);
   border-radius: 8px;
-  background: var(--dsw-alias-bg-layer-1);
-  color: var(--dsw-alias-label-secondary);
+  background: var(--zp-surface);
+  color: var(--zp-ink-2);
   cursor: pointer;
   transition: background-color 120ms ease, color 120ms ease;
 }
 .zp-icon-btn:hover {
-  background: var(--dsw-alias-interactive-bg-hover);
-  color: var(--dsw-alias-label-primary);
+  background: var(--zp-hover);
+  color: var(--zp-ink);
 }
 .zp-icon-btn:disabled { opacity: 0.55; cursor: default }
 /* 首页的图标按钮浮在星图上：半透明底 */
 .zp-root[data-view="home"] .zp-head .zp-icon-btn {
-  background: color-mix(in srgb, var(--dsw-alias-bg-base) 66%, transparent);
+  background: color-mix(in srgb, var(--zp-bg) 66%, transparent);
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
 }
 .zp-icon-btn.zp-plain { border-color: transparent; background: transparent }
 /* 「返回会话」：顶栏第一个控件，常驻 */
-.zp-exit { color: var(--dsw-alias-label-primary) }
+.zp-exit { color: var(--zp-ink) }
 
 .zp-btn {
   display: inline-flex;
@@ -156,16 +156,16 @@
   gap: 6px;
   height: 32px;
   padding: 0 12px;
-  border: 1px solid var(--dsw-alias-border-l1);
+  border: 1px solid var(--zp-line);
   border-radius: 8px;
-  background: var(--dsw-alias-bg-layer-1);
+  background: var(--zp-surface);
   font-family: inherit;
   font-size: 13px;
   white-space: nowrap;
   cursor: pointer;
   transition: background-color 120ms ease;
 }
-.zp-btn:hover { background: var(--dsw-alias-interactive-bg-hover) }
+.zp-btn:hover { background: var(--zp-hover) }
 .zp-btn:disabled { opacity: 0.55 }
 .zp-btn.zp-sm { height: 28px }
 .zp-btn-primary {
@@ -176,14 +176,14 @@
   padding: 0 12px;
   border: 0;
   border-radius: 8px;
-  background: var(--dsw-alias-button-primary-fill);
-  color: var(--dsw-alias-label-primary-inverted);
+  background: var(--zp-primary);
+  color: var(--zp-on-primary);
   font-size: 13px;
   font-weight: 500;
   white-space: nowrap;
   transition: opacity 120ms ease;
 }
-.zp-root .zp-btn-primary { color: var(--dsw-alias-label-primary-inverted) }
+.zp-root .zp-btn-primary { color: var(--zp-on-primary) }
 .zp-btn-primary:hover { opacity: 0.88 }
 .zp-btn-primary:disabled { opacity: 0.55 }
 .zp-link {
@@ -191,12 +191,12 @@
   border: 0;
   border-radius: 4px;
   background: transparent;
-  color: var(--dsw-alias-label-tertiary);
+  color: var(--zp-ink-3);
   font-size: 12px;
   white-space: nowrap;
 }
-.zp-root .zp-link { color: var(--dsw-alias-label-tertiary) }
-.zp-root .zp-link:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary) }
+.zp-root .zp-link { color: var(--zp-ink-3) }
+.zp-root .zp-link:hover { background: var(--zp-hover); color: var(--zp-ink) }
 .zp-root .zp-link.zp-armed, .zp-root .zp-danger { color: var(--zp-mu-ji) }
 .zp-send {
   flex: none;
@@ -207,9 +207,9 @@
   padding: 0;
   border: 0;
   border-radius: 8px;
-  background: var(--dsw-alias-button-primary-fill);
+  background: var(--zp-primary);
 }
-.zp-root .zp-send { color: var(--dsw-alias-label-primary-inverted) }
+.zp-root .zp-send { color: var(--zp-on-primary) }
 .zp-send:disabled { opacity: 0.55 }
 
 /* ---------------- 分段页签（顶栏六个页签、窄档三张卡的页签） ---------------- */
@@ -217,7 +217,7 @@
   display: inline-flex;
   padding: 2px;
   border-radius: 8px;
-  background: var(--dsw-alias-interactive-bg-hover);
+  background: var(--zp-hover);
 }
 .zp-seg button {
   padding: 4px 12px;
@@ -228,18 +228,18 @@
   line-height: 20px;
   white-space: nowrap;
 }
-.zp-root .zp-seg button { color: var(--dsw-alias-label-secondary) }
-.zp-root .zp-seg button[aria-selected="true"] {
-  background: var(--dsw-alias-bg-layer-1);
-  color: var(--dsw-alias-label-primary);
+.zp-root .zp-seg button { color: var(--zp-ink-2) }
+.zp-root .zp-seg button[aria-selected="true"], .zp-root .zp-seg button[aria-checked="true"] {
+  background: var(--zp-surface);
+  color: var(--zp-ink);
   font-weight: 500;
-  box-shadow: 0 0 0 1px var(--dsw-alias-border-l2), 0 1px 2px rgba(0, 0, 0, .06);
+  box-shadow: 0 0 0 1px var(--zp-line-2), 0 1px 2px rgba(0, 0, 0, .06);
 }
 .zp-seg-sep {
   flex: none;
   width: 1px;
   margin: 6px 4px;
-  background: var(--dsw-alias-border-l1);
+  background: var(--zp-line);
 }
 /* 加载指示：脉冲点。报告正在写时，放在顶栏「报告」页签的文字后面，以及报告页的状态栏里 */
 .zp-pulse {
@@ -257,28 +257,28 @@
 /* ---------------- chip ---------------- */
 .zp-chip {
   padding: 4px 12px;
-  border: 1px solid var(--dsw-alias-border-l1);
+  border: 1px solid var(--zp-line);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--dsw-alias-bg-base) 66%, transparent);
+  background: color-mix(in srgb, var(--zp-bg) 66%, transparent);
   font-size: 13px;
   line-height: 20px;
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   transition: border-color 120ms ease, color 120ms ease;
 }
-.zp-root .zp-chip { color: var(--dsw-alias-label-secondary) }
-.zp-root .zp-chip:hover { border-color: var(--dsw-alias-label-caption); color: var(--dsw-alias-label-primary) }
+.zp-root .zp-chip { color: var(--zp-ink-2) }
+.zp-root .zp-chip:hover { border-color: var(--zp-ink-4); color: var(--zp-ink) }
 .zp-root .zp-chip.zp-on {
   border-color: var(--zp-zi);
-  background: color-mix(in srgb, var(--zp-zi) 10%, var(--dsw-alias-bg-base));
-  color: var(--dsw-alias-label-primary);
+  background: color-mix(in srgb, var(--zp-zi) 10%, var(--zp-bg));
+  color: var(--zp-ink);
 }
 .zp-root .zp-chip.zp-primary {
   border-color: transparent;
-  background: var(--dsw-alias-button-primary-fill);
-  color: var(--dsw-alias-label-primary-inverted);
+  background: var(--zp-primary);
+  color: var(--zp-on-primary);
 }
-.zp-chip small { margin-left: 4px; color: var(--dsw-alias-label-caption); font-size: 11px }
+.zp-chip small { margin-left: 4px; color: var(--zp-ink-4); font-size: 11px }
 
 /* ---------------- 卡片（命盘页左栏、报告目录） ---------------- */
 .zp-card {
@@ -288,9 +288,9 @@
   gap: 8px;
   min-height: 0;
   padding: 12px 16px;
-  border: 1px solid var(--dsw-alias-border-l1);
+  border: 1px solid var(--zp-line);
   border-radius: 12px;
-  background: var(--dsw-alias-bg-layer-1);
+  background: var(--zp-surface);
 }
 .zp-card > * { flex: none }
 .zp-card-h {
@@ -301,7 +301,7 @@
 }
 .zp-card-h h3 {
   margin: 0;
-  color: var(--dsw-alias-label-primary);
+  color: var(--zp-ink);
   font-size: 14px;
   font-weight: 600;
   white-space: nowrap;
@@ -314,12 +314,12 @@
 }
 .zp-card-h h3 small {
   margin-left: 6px;
-  color: var(--dsw-alias-label-tertiary);
+  color: var(--zp-ink-3);
   font-family: var(--zp-font-serif);
   font-size: 13px;
   font-weight: 400;
 }
-.zp-cnt { color: var(--dsw-alias-label-tertiary); font-size: 12px }
+.zp-cnt { color: var(--zp-ink-3); font-size: 12px }
 .zp-tag {
   padding: 0 6px;
   border-radius: 4px;
@@ -351,8 +351,8 @@
   border-radius: 4px;
   background: transparent;
 }
-.zp-root .zp-step { color: var(--dsw-alias-label-tertiary) }
-.zp-root .zp-step:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary) }
+.zp-root .zp-step { color: var(--zp-ink-3) }
+.zp-root .zp-step:hover { background: var(--zp-hover); color: var(--zp-ink) }
 
 /* 四化印：禄权科忌。实心 = 生年四化；空心 = 运限四化 */
 .zp-seal {
@@ -360,7 +360,7 @@
   margin-left: 2px;
   padding: 0 2px;
   border-radius: 4px;
-  color: var(--dsw-alias-label-primary-inverted);
+  color: var(--zp-on-primary);
   font-family: var(--dsh-font-family-text-default, sans-serif);
   font-size: 9.5px;
   font-style: normal;
@@ -383,12 +383,12 @@
 .zp-crash-msg {
   margin: 0 0 8px;
   font-size: 14px;
-  color: var(--dsw-alias-label-primary);
+  color: var(--zp-ink);
 }
 .zp-crash-hint {
   margin: 0 0 12px;
   font-size: 13px;
-  color: var(--dsw-alias-label-secondary);
+  color: var(--zp-ink-2);
 }
 
 /* ---------------- 减少动态效果：界面过渡和动画全部关掉（3D 只画静止的一帧，由 sky.js 处理） ---------------- */

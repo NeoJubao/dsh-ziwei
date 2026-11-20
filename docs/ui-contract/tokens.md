@@ -1,41 +1,65 @@
 # 界面约定 v6 · token（tokens.md）
 
-> **状态**：现行界面（v6）的约定（spec [2026-11-19_v6-redesign](../specs/2026-11-19_v6-redesign.md) §4.6）；切换到 v6 时取代了 v5 版。
+> **状态**：现行界面（v6）的约定。2026-11-20 起面板自带深浅两套配色（[ADR-0005](../adr/0005-own-palette-and-theme.md)、spec [2026-11-20_v6-polish](../specs/2026-11-20_v6-polish.md) §3.6），不再读宿主的颜色变量。
 > **分工**：layout.md 管「放哪里」，design.md 管「什么规则」，本文管「用哪个名字、值是多少」。
-> 系统色的值由宿主主题提供，本仓库不拥有、不复制、不覆盖，本文只登记名字。
 
 - 适用对象：`src/ui/css/00-tokens.css`（`--zp-*` 的定义都在这里）
-- 体检脚本读本文的两张表：§2 内容色（表头含 `变量`、`浅色`、`深色`）——C1 的白名单和 C15 的成对、取值、对比度都从它来；§4 字面色白名单（表头含 `白名单值`）。改表即改检查。
+- 体检脚本读本文的两张表：§2 配色（表头含 `变量`、`浅色`、`深色`）——C1 的白名单和 C15 的成对、取值、对比度都从它来；§4 字面色白名单（表头含 `白名单值`）。改表即改检查。
 
 ---
 
-## §1 系统色（宿主 token，只消费）
+## §1 主题和宿主变量
 
-| 用途 | token |
+- 根节点带 `data-theme="dark" | "light"`，由 `ProApp` 按偏好 `ziwei-pro.theme` 写：`dark`（默认）、`light`、`auto`（跟随 DSH：脚本读 `body[data-ds-dark-theme]`，解析成前两者之一，并监听它的变化）。
+- 浅色值写在 `.zp-root`，深色值写在 `.zp-root[data-theme="dark"]`，两边的键集合完全相同。两个块里还各写一条 `color-scheme`，让系统画的控件（下拉列表、滚动条）跟着走。
+- 样式表里不出现 `--dsw-alias-*`，也不用 `body[data-ds-dark-theme]` 选择器。还在用的宿主变量只有三类：
+
+| 宿主变量 | 用途 |
 |---|---|
-| 底 | `--dsw-alias-bg-base`、`--dsw-alias-bg-layer-1`、`--dsw-alias-bg-layer-2`、`--dsw-alias-bg-layer-3` |
-| 描边 | `--dsw-alias-border-l1`、`--dsw-alias-border-l2` |
-| 文字 | `--dsw-alias-label-primary`、`--dsw-alias-label-secondary`、`--dsw-alias-label-tertiary`、`--dsw-alias-label-caption` |
-| 主按钮 | `--dsw-alias-button-primary-fill` + `--dsw-alias-label-primary-inverted` |
-| 悬停 | `--dsw-alias-interactive-bg-hover` |
-| 遮罩 | `--dsw-alias-bg-mask-1` |
+| `--dsh-font-family-text-default` | 正文字体族 |
+| `--dsh-frame-top-clearance`、`--dsh-frame-leading-clearance`、`--dsh-frame-overlay-top` | macOS 窗口标题带的避让（design.md §7） |
+| `--dsw-focus-ring-color` | 焦点框颜色。宿主在鼠标点击时把非输入控件的这个变量设成透明；面板用 `--zp-ring: var(--dsw-focus-ring-color, var(--zp-zi))` 接住 |
 
-原型的颜色变量按这张表换：`--bg` → `bg-base`，`--l1/2/3` → `bg-layer-1/2/3`，`--border` → `border-l1`，`--border-soft` → `border-l2`，`--text` / `-2` / `-3` / `-4` → `label-primary` / `-secondary` / `-tertiary` / `-caption`，`--btn` → `button-primary-fill`，`--btn-text` → `label-primary-inverted`，`--hover` → `interactive-bg-hover`。
+原型和 v6 第一版里的名字按这张表对应：
+
+| 以前（宿主变量） | 现在 |
+|---|---|
+| `--dsw-alias-bg-base` | `--zp-bg` |
+| `--dsw-alias-bg-layer-1` | `--zp-surface` |
+| `--dsw-alias-bg-layer-2`、`-3` | `--zp-raised` |
+| `--dsw-alias-label-primary` / `-secondary` / `-tertiary` / `-caption` | `--zp-ink` / `--zp-ink-2` / `--zp-ink-3` / `--zp-ink-4` |
+| `--dsw-alias-border-l1` / `-l2` | `--zp-line` / `--zp-line-2` |
+| `--dsw-alias-interactive-bg-hover` | `--zp-hover` |
+| `--dsw-alias-button-primary-fill` + `--dsw-alias-label-primary-inverted` | `--zp-primary` + `--zp-on-primary` |
+| `--dsw-alias-bg-mask-1` | `--zp-mask` |
 
 ---
 
-## §2 内容色（`--zp-*`，浅 / 深成对）
+## §2 配色（`--zp-*`，浅 / 深成对）
 
-浅色写在 `.zp-root`，深色写在 `body[data-ds-dark-theme] .zp-root`，两边的键集合完全相同。
+带透明度的值写成 8 位十六进制（最后两位是透明度）。
 
 | 变量 | 浅色 | 深色 | 用途 |
 |---|---|---|---|
-| `--zp-zi` | `#6b55d4` | `#b9a7fa` | 紫微色：选中宫的描边和底、命宫标记。只在盘面内容里用 |
+| `--zp-bg` | `#f4f4f9` | `#0e0d16` | 面板的底。深色是带一点靛色的夜空底，和首页 3D 场景的夜空接得上 |
+| `--zp-surface` | `#ffffff` | `#181723` | 卡片、宫格、紫微师面板、浮层、菜单 |
+| `--zp-raised` | `#f8f8fc` | `#21202e` | 卡片里再抬一层：中宫、速览、输入框 |
+| `--zp-ink` | `#15141f` | `#f3f2f8` | 正文 |
+| `--zp-ink-2` | `#53526a` | `#c9c7d6` | 次要文字 |
+| `--zp-ink-3` | `#6c6b84` | `#9e9cb1` | 说明、标签（12–13px 的字，对比度不低于 4.5:1） |
+| `--zp-ink-4` | `#89889f` | `#77758d` | 最淡一级：干支、亮度、占位文字（不低于 3:1） |
+| `--zp-line` | `#1514220f` | `#ffffff12` | 卡片和宫格的细描边 |
+| `--zp-line-2` | `#15142221` | `#ffffff21` | 分隔线、需要看得清的描边 |
+| `--zp-hover` | `#2a28500f` | `#ffffff14` | 悬停、淡底色（一层叠色，落在哪层底上都看得出） |
+| `--zp-primary` | `#17161f` | `#f3f2f8` | 主按钮的底 |
+| `--zp-on-primary` | `#ffffff` | `#1b1a26` | 主按钮上的字、四化印和命 / 身标记上的字 |
+| `--zp-mask` | `#0c0b1840` | `#0403098c` | 浮层后面的遮罩 |
+| `--zp-zi` | `#6b55d4` | `#b9a7fa` | 紫微色：选中宫的描边和底、命宫标记、输入框聚焦时的描边、焦点框的兜底色 |
 | `--zp-gold` | `#a07a2c` | `#dcb96f` | 金：连线、时间层级的标记、编号、徽记 |
-| `--zp-gold-text` | `#8a6a1f` | `#dcb96f` | 金色小字（浅色底上对比度约 5:1） |
-| `--zp-mu-lu` | `#15803d` | `#4ade80` | 化禄、吉 |
+| `--zp-gold-text` | `#86661c` | `#dcb96f` | 金色小字 |
+| `--zp-mu-lu` | `#137a3a` | `#4ade80` | 化禄、吉 |
 | `--zp-mu-quan` | `#1d4ed8` | `#7aa2ff` | 化权 |
-| `--zp-mu-ke` | `#a16207` | `#e3b341` | 化科、中 |
+| `--zp-mu-ke` | `#9a5e06` | `#e3b341` | 化科、中 |
 | `--zp-mu-ji` | `#b91c1c` | `#f87171` | 化忌、凶 |
 | `--zp-s0` | `#8a5cc4` | `#c7aaf5` | 紫微 |
 | `--zp-s1` | `#2f84b8` | `#86c3e8` | 天机 |
@@ -54,9 +78,10 @@
 | `--zp-orb-hi` | `#ffffff` | `#ffffff` | 小星球（盘名旁、中宫）的高光。两套主题同值 |
 | `--zp-orb-lo` | `#0b0b14` | `#0b0b14` | 小星球的暗面。两套主题同值 |
 
+- 前十三行是系统色（底、文字、描边、悬停、主按钮、遮罩），其余是内容色。
 - 十四主星按「紫微、天机、太阳、武曲、天同、廉贞、天府、太阴、贪狼、巨门、天相、天梁、七杀、破军」的顺序编号 `s0`–`s13`。
 - 四化的配色沿用 v5：禄绿、权蓝、科金、忌红（原型里权和科的颜色对调了，不照搬）。
-- 新增内容色要同时：在本表加一行（浅、深两个值）、在 `00-tokens.css` 两个块里都定义、在 §5 判断要不要进对比度组。
+- 新增颜色要同时：在本表加一行（浅、深两个值）、在 `00-tokens.css` 两个块里都定义、在 §5 判断要不要进对比度组。
 
 ### 非颜色变量
 
@@ -64,6 +89,7 @@
 |---|---|---|
 | `--zp-font-serif` | `"Songti SC", "STSong", "SimSun", "Noto Serif SC", serif` | 宋体栈：状态句、宫名、星名、四柱、报告标题 |
 | `--zp-c` | 没有默认值，由 JS 内联成 `var(--zp-sN)` | 星曜色的管道：星名、小星球、星球标签用它取色，换主题不用重新渲染 |
+| `--zp-ring` | `var(--dsw-focus-ring-color, var(--zp-zi))` | 焦点框的颜色（design.md §8） |
 
 ---
 
@@ -71,7 +97,7 @@
 
 | 变量 | 去向 |
 |---|---|
-| `--zp-accent`、`--zp-accent-deep` | 选中、高亮用 `--zp-zi`（只在盘面内）；按钮用宿主主按钮 token（体检 C16） |
+| `--zp-accent`、`--zp-accent-deep` | 选中、高亮用 `--zp-zi`；按钮用 `--zp-primary`（体检 C16） |
 | `--zp-fill-accent`、`--zp-fill-accent-deep` | 同上（体检 C16） |
 | `--zp-gold-dim` | `--zp-gold-text` |
 | `--zp-good`、`--zp-bad` | `--zp-mu-lu`、`--zp-mu-ji` |
@@ -97,31 +123,29 @@ v6 不设白名单：面板 CSS 里的字面色只允许出现在 §2 登记的 
 
 ## §5 深色与对比度
 
-宿主底色（2026-11 从宿主主题实测，`--dsw-static-neutral-bluish-*`）。体检脚本内置同一组值：
-
-| 主题 | `bg-base` | `bg-layer-1` |
-|---|---|---|
-| 浅色 | `#ffffff` | `#ffffff` |
-| 深色 | `#151517` | `#232324` |
-
-对比度组（每个前景分别对上表同一主题的两种底色计算，取较低值）：
+底色就是 §2 的 `--zp-bg`、`--zp-surface`、`--zp-raised` 三层。每个前景分别对同一主题的三层底色计算，取最低值（体检脚本从 §2 读这三个值，不另存一份）：
 
 | 前景 | 底线 | 理由 | 浅色实测（最低） | 深色实测（最低） |
 |---|---|---|---|---|
-| `--zp-gold-text` | 4.5:1 | 金色小字 | 5.05 | 8.38 |
-| `--zp-mu-lu` / `-quan` / `-ke` / `-ji` | 4.5:1 | 四化是字（禄权科忌） | 4.92（科） | 5.68（忌） |
-| `--zp-zi` | 3:1 | 描边、标记（图形） | 5.42 | 7.46 |
-| `--zp-gold` | 3:1 | 连线、标记、徽记（图形） | 3.95 | 8.38 |
-| `--zp-s0` … `--zp-s13` | 3:1 | 星名是加粗的衬线字，按大字计 | 3.77（太阳） | 5.86（七杀） |
+| `--zp-ink` | 7:1 | 正文 | 16.63 | 14.39 |
+| `--zp-ink-2` | 4.5:1 | 次要文字 | 6.88 | 9.63 |
+| `--zp-ink-3` | 4.5:1 | 12–13px 的说明和标签 | 4.70 | 5.98 |
+| `--zp-ink-4` | 3:1 | 最淡一级的小字 | 3.15 | 3.60 |
+| `--zp-gold-text` | 4.5:1 | 金色小字 | 4.87 | 8.55 |
+| `--zp-mu-lu` / `-quan` / `-ke` / `-ji` | 4.5:1 | 四化是字（禄权科忌） | 4.82（科） | 5.79（忌） |
+| `--zp-zi` | 3:1 | 描边、标记（图形） | 4.94 | 7.61 |
+| `--zp-gold` | 3:1 | 连线、标记、徽记（图形） | 3.60 | 8.55 |
+| `--zp-s0` … `--zp-s13` | 3:1 | 星名是加粗的衬线字，按大字计 | 3.44（太阳） | 5.98（七杀） |
+| `--zp-on-primary` 对 `--zp-primary` | 4.5:1 | 主按钮上的字 | 17.93 | 15.44 |
 
-低于底线的组数就是 C15 的计数，基线 0。系统色 token 的值以宿主主题为准，宿主改了主题要回来更新上表。
+低于底线的组数就是 C15 的计数，基线 0。
 
 ---
 
-## §6 和体检脚本的对应（`--profile v6`）
+## §6 和体检脚本的对应
 
 | 检查 | 读本文哪里 | 判定 |
 |---|---|---|
 | C1 字面色 | §2 表、§4 表 | 字面色只在 §2 登记的变量定义和阴影里 |
-| C15 深色成对 + 对比度 | §2 表、§5 | CSS 里浅 / 深两块的内容色键集合相等、和 §2 表一致、取值一致；对比度不低于底线 |
+| C15 深色成对 + 对比度 | §2 表、§5 | CSS 里 `.zp-root` 和 `.zp-root[data-theme="dark"]` 两块的颜色键集合相等、和 §2 表一致、取值一致；对比度不低于底线 |
 | C16 退役的品牌色 | §3 | `--zp-accent*`、`--zp-fill-accent*` 出现即失败 |

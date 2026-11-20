@@ -13,6 +13,20 @@ function tierOf(panelW) {
 }
 ZWUI.tierOf = tierOf;
 
+/* 外观偏好只有三个值：dark（默认）/ light / auto（跟随 DSH）。别的一律按 dark。 */
+function themePrefOf(v) {
+  return v === 'light' || v === 'auto' ? v : 'dark';
+}
+ZWUI.themePrefOf = themePrefOf;
+
+/* 根节点 data-theme 的值：auto 时看宿主是不是深色（body[data-ds-dark-theme]，由调用方读了传进来） */
+function resolveTheme(pref, hostDark) {
+  const p = themePrefOf(pref);
+  if (p === 'auto') return hostDark ? 'dark' : 'light';
+  return p;
+}
+ZWUI.resolveTheme = resolveTheme;
+
 /* 三方四正：对宫 = +6，三合 = +4 / +8（宫位序号 mod 12）。和 v5 同一个函数。 */
 function relatedPalaces(index) {
   const i = +index;

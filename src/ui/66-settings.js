@@ -2,7 +2,7 @@
  * 66-settings：设置弹层（T9）。ProApp 在 session.modal === 'settings' 时渲染 SettingsModal；外框用 50-parts 的 Modal
  * （遮罩、焦点陷阱、Esc、焦点归还）。结构见 css/50-parts.css 的"表单控件"一段：
  *   div.zp-setting > div.zp-setting-text（b 标题 + span 说明）+ 右边的开关或按钮
- * 五块：启动时自动打开工作台（prefs.autoOpen）、首页 3D 星图（prefs.sky）、本机数据（清除对话与报告，要点两次；
+ * 六块：外观（prefs.theme：深色 / 浅色 / 跟随 DSH，默认深色）、启动时自动打开工作台（prefs.autoOpen）、首页 3D 星图（prefs.sky）、本机数据（清除对话与报告，要点两次；
  * 有任务在跑时不能清）、版本和检查更新、关于。
  * 检查更新只在点击时请求一次 /ziwei/version（store.checkVersion）；没有轮询、没有定时器。
  * 更新命令是给终端用的原文，不翻译。
@@ -11,7 +11,7 @@
 const SET_UPDATE_CMD = 'dsh plugin --profile <profile> update dsh-ziwei';
 
 function setShellOf(s) {
-  return { autoOpen: !!s.prefs.autoOpen, sky: !!s.prefs.sky, busy: Object.keys(s.jobs).length > 0 };
+  return { autoOpen: !!s.prefs.autoOpen, sky: !!s.prefs.sky, theme: s.prefs.theme, busy: Object.keys(s.jobs).length > 0 };
 }
 
 /* 一行设置：左边标题和说明，右边一个控件；extra 是说明下面多出来的内容 */
@@ -59,6 +59,16 @@ function SettingsModal() {
     verdict = h('p', { className: 'zp-update zp-err' }, t('setUpdateFailed', { reason: r.reason || 'unknown' }));
   }
   return h(Modal, { title: t('headSettings'), onClose: closeLayers },
+    setRow('theme', t('setTheme'), t('setThemeHint'),
+      h(Seg, {
+        radio: true, label: t('setTheme'), value: m.theme,
+        items: [
+          { id: 'dark', label: t('setThemeDark') },
+          { id: 'light', label: t('setThemeLight') },
+          { id: 'auto', label: t('setThemeAuto') }
+        ],
+        onChange: function (id) { store.setPref('theme', id); }
+      })),
     setRow('auto', t('setAutoOpen'), t('setAutoOpenHint'),
       setSwitch(t('setAutoOpen'), m.autoOpen, function (v) { store.setPref('autoOpen', v); })),
     setRow('sky', t('setSky'), t('setSkyHint'),

@@ -20,7 +20,7 @@
 |---|---|---|
 | [layout.md](layout.md) | 结构：落位表、14 个 RegionId 白名单、三种页型与外壳、三档阈值公式、宿主约定 | **不写颜色/字号/圆角/间距值**（结构参数除外） |
 | [design.md](design.md) | 视觉规则：颜色规则、字号与字重、间距档位、圆角与控件、动效（含豁免表）、类名 / 单位 / 选择器（含例外表） | **不写区域与栏宽** |
-| [tokens.md](tokens.md) | 值：`--dsw-alias-*` 系统色（只消费）、`--zp-*` 内容色（浅 / 深成对）、退役的变量、对比度底线 | 内容色表是 audit C1 / C15 的判据 |
+| [tokens.md](tokens.md) | 值：面板自带的两套配色 `--zp-*`（浅 / 深成对，含系统色和内容色）、还在用的宿主变量、退役的变量、对比度底线 | 配色表是 audit C1 / C15 的判据 |
 | `scripts/audit-ui.mjs` | 体检脚本：报告漂移，**不修** | 无第三方依赖、不联网、不启动 GUI |
 
 **文档与代码冲突时，改代码**（ui-contract 原文的硬规则）。
@@ -62,7 +62,7 @@ node scripts/audit-ui.mjs -v
 | C12 | 结构类 + 区域接线 | 硬 | `layout.md` §2「选择器」列：接了线的区域，登记的类名都在 CSS 里，带 `data-region` 的元素带着第一个类名 |
 | C13 | 阈值公式对账 | 硬 | `layout.md` §4.1 参数齐全；`MID`、`WIDE` 等于公式；源码里和 `panelW` 比较的字面量恰好是这两个值 |
 | C14 | RegionId 白名单 | 硬 | 源码 `data-region` 值必须在 `layout.md` §2 表内 |
-| C15 | 深色成对 + 对比度 | 棘轮（基线 0） | 浅 / 深内容色键集合相等、和 `tokens.md` §2 一致；对比度不低于 `tokens.md` §5 的底线 |
+| C15 | 深色成对 + 对比度 | 棘轮（基线 0） | `.zp-root` 和 `.zp-root[data-theme="dark"]` 两块的颜色键集合相等、和 `tokens.md` §2 一致；对比度不低于 `tokens.md` §5 的底线 |
 | C16 | 退役的品牌色 | 硬 | `--zp-accent*`、`--zp-fill-accent*` 不定义、不引用 |
 | C17 | 动效 | 硬 | 时长 ≤ 300ms、`infinite` 只在 `design.md` §5.2 登记的类上、布局属性不过渡、有 reduced-motion 段 |
 | C18 | 单位、选择器、类名 | 硬 | 没有 `vw` / `vh`、按宽高的 `@media`、id 选择器、`env(`；类名以 `zp-` 开头（`design.md` §6 的例外除外） |
@@ -83,7 +83,7 @@ v6 没有历史欠账：`audit-baseline.json` 全部为 0。C15 是唯一的棘�
 | `@deepseek-ai/dsh-client-ui-layout` 的 window-chrome seat（`--dsh-frame-top-clearance` 等） | layout.md §5 + audit C5；这是宿主契约，不许绕开 |
 | `@deepseek-ai/dsh-client-ui-primitives`（`useModalLayer`、`SegmentedControl`、Button 几何） | layout.md §3 浮层规则、design.md §4 控件几何、audit C8 |
 
-**不复制官方样式值**：官方 token 的**值**由宿主主题持有，本仓库只消费**名字**（tokens.md §1）。抄值会在主题切换时错。
+**颜色自己管，其余跟宿主**：2026-11-20 起面板自带深浅两套配色（[ADR-0005](../adr/0005-own-palette-and-theme.md)），不再读宿主的颜色变量；字体族、窗口避让、焦点框颜色仍然读宿主的变量（tokens.md §1），不抄它们的值。
 
 ---
 

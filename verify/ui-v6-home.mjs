@@ -9,7 +9,7 @@
  * 只用黄金用例（1992-05-03 09:30，男，经度 105.97）和它的女命变体。"今天"固定为 2026-11-19。
  */
 import vm from 'node:vm';
-import { bootRuntime, classesOf, find, findByClass, settle, text } from './client-harness.mjs';
+import { bootRuntime, classesOf, find, findByClass, memoryStorage, settle, text } from './client-harness.mjs';
 
 const GOLDEN = {
   name: '', calendar: 'solar', year: 1992, month: 5, day: 3, isLeap: false, hour: 9, minute: 30, gender: 'male',
@@ -53,7 +53,7 @@ export default async function homeChecks(t) {
 
   /** 一套新环境：bundle + 运行时 + 默认 store；sky 给了就把假星图装到 __ziweiBootstrapSky 上 */
   const fresh = (o = {}) => {
-    const env = bootRuntime(t.client, { now: NOW, width: o.width || 1300 });
+    const env = bootRuntime(t.client, { now: NOW, width: o.width || 1300, storage: o.storage || null });
     if (env.error) throw env.error;
     if (o.sky) env.loaded.sandbox.__ziweiBootstrapSky = o.sky.boot;
     env.mount = () => env.rt.mount(env.h(env.Main));
@@ -144,7 +144,7 @@ export default async function homeChecks(t) {
     const a = store.addChart(GOLDEN, '甲');
     const b = store.addChart(GOLDEN_F, '乙');
     env.mount();
-    eq('首页第一次显示：向场景要一次画面，浅色主题用晨光，开场还没播过', [sky.count('acquire'), sky.last('acquire').slice(1)], [1, [{ day: true, playIntro: true }, true]]);
+    eq('首页第一次显示：向场景要一次画面，默认外观是深色、用夜空，开场还没播过', [sky.count('acquire'), sky.last('acquire').slice(1)], [1, [{ day: false, playIntro: true }, true]]);
     eq('开场只算一次：会话里记下已经播过', store.getState().session.introPlayed, true);
     const planets = sky.last('setPlanets')[1];
     eq('星球：最近的 8 张盘，id 和标签一致；颜色是命宫主星的星色（太阳）', [planets.map((p) => p.id), planets.map((p) => p.color), planets[0].star],
@@ -218,9 +218,30 @@ export default async function homeChecks(t) {
     store.addChart(GOLDEN, '甲');
     env.mount();
     ok('开场播放时界面收着', has(env.home(), 'data-busy'));
-    eq('浅色主题下等开场的八成（2880ms）再放开', timers.delays().includes(2880), true);
+    eq('深色下等开场过半（3600 × 0.52 = 1872ms）再放开', timers.delays().includes(1872), true);
     timers.runAll(); rt.flush();
     ok('开场过后放开', !has(env.home(), 'data-busy'));
+    rt.unmount();
+  }
+  {
+    /* 外观：夜空 / 晨光跟面板自己的 data-theme 走，不看宿主 */
+    const sky = fakeSky({ introMs: 3600 });
+    const env = fresh({ sky, storage: memoryStorage({ 'ziwei-pro.theme': 'light' }) });
+    const { store, rt, timers } = env;
+    store.addChart(GOLDEN, '甲');
+    env.mount();
+    eq('外观选了浅色：根节点 data-theme="light"，场景用晨光，等开场的八成（2880ms）再放开',
+      [attr(findByClass(env.tree(), 'zp-root')[0], 'data-theme'), sky.last('acquire')[1].day, timers.delays().includes(2880)], ['light', true, true]);
+    timers.runAll(); rt.flush();
+    const before = [sky.count('grade'), sky.count('scrim')];
+    store.setPref('theme', 'dark');
+    rt.flush();
+    eq('用着的时候换成深色：根节点跟着变，场景换成夜空（grade(false)）并重取一次底色（scrim）',
+      [attr(findByClass(env.tree(), 'zp-root')[0], 'data-theme'), sky.count('grade') - before[0], sky.last('grade')[1], sky.count('scrim') - before[1]], ['dark', 1, false, 1]);
+    eq('偏好写进了本机记录', env.storage.getItem('ziwei-pro.theme'), 'dark');
+    store.setPref('theme', 'dark');
+    rt.flush();
+    eq('同一个值再设一次：场景不动', sky.count('grade') - before[0], 1);
     rt.unmount();
   }
 

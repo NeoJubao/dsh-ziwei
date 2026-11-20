@@ -14,17 +14,19 @@
 
 | 组 | 用什么 | 说明 |
 |---|---|---|
-| 底 | `--dsw-alias-bg-base` / `-bg-layer-1` / `-bg-layer-2` / `-bg-layer-3` | 层级靠底色差，不靠阴影 |
-| 描边 | `--dsw-alias-border-l1` / `-border-l2` | 一档宽度 1px |
-| 文字 | `--dsw-alias-label-primary` / `-secondary` / `-tertiary` / `-caption` | 四级封顶 |
-| 主按钮 | `--dsw-alias-button-primary-fill` + `--dsw-alias-label-primary-inverted` | 一屏一个 |
-| 悬停 | `--dsw-alias-interactive-bg-hover` | 不改文字颜色以外的东西 |
-| 遮罩 | `--dsw-alias-bg-mask-1` | 浮层后面那一层 |
-| 内容色（紫微、金、四化、十四主星） | `--zp-*`，值和用途见 tokens.md | 唯一允许写字面色值的地方 |
+| 底 | `--zp-bg`（面板的底）/ `--zp-surface`（卡片、宫格、浮层）/ `--zp-raised`（卡片里再抬一层） | 层级靠底色差，不靠阴影 |
+| 描边 | `--zp-line` / `--zp-line-2` | 一档宽度 1px |
+| 文字 | `--zp-ink` / `--zp-ink-2` / `--zp-ink-3` / `--zp-ink-4` | 四级封顶 |
+| 主按钮 | `--zp-primary` + `--zp-on-primary` | 一屏一个 |
+| 悬停、淡底色 | `--zp-hover` | 一层叠色，落在哪层底上都看得出 |
+| 遮罩 | `--zp-mask` | 浮层后面那一层 |
+| 内容色（紫微、金、四化、十四主星） | `--zp-zi`、`--zp-gold*`、`--zp-mu-*`、`--zp-s0…13` | 值和用途见 tokens.md |
+
+- 面板自带深浅两套配色（[ADR-0005](../adr/0005-own-palette-and-theme.md)）：根节点 `data-theme="dark" | "light"`，默认深色，设置里可以切到浅色或跟随 DSH。样式表里不读宿主的颜色变量，也不用 `body[data-ds-dark-theme]` 选择器；换外观只换 `--zp-*` 的值，组件的规则不分深浅。
 
 - 面板 CSS 里的字面色（`#hex`、`rgb()`、`hsl()`、`white`、`black`）只允许出现在已登记的 `--zp-*` 定义和阴影（`box-shadow`、`text-shadow`）里。
 - 星名、四化用 `var(--zp-…)` 引用，不在 JS 里写颜色值；换主题不需要重新渲染。
-- 首页的毛玻璃底和文字光晕用 `color-mix()` 从 `--dsw-alias-bg-base` 派生。
+- 首页的毛玻璃底和文字光晕用 `color-mix()` 从 `--zp-bg` 派生。
 - 颜色不是唯一的信息载体：四化有字（禄权科忌），格局吉凶有字。
 - 焦点框的颜色和粗细由宿主的 `:focus-visible` 给，面板只补 `outline-style` 和 `outline-offset`。
 
@@ -126,7 +128,7 @@
 
 ## §7 原型到插件的换算
 
-照 spec §4.7：类名加 `zp-` 前缀；原型的颜色变量换成宿主 token；`@media (max-width: 720px)` → `.zp-root[data-w="narrow"]`，`@media (max-width: 1180px)` → `.zp-root:not([data-w="wide"])`；字号、间距、圆角、时长就近取本文的档位（12.5 → 12，15 → 14，17 → 18，22 / 23 → 24；10 / 14 的间距 → 8 或 12 / 12 或 16；350–500ms → 180 或 240ms）；`#app { position: fixed }` → `.zp-root { position: relative; height: 100% }`。
+照 spec §4.7：类名加 `zp-` 前缀；原型的颜色变量换成 tokens.md §1 那张对应表里的 `--zp-*`；`@media (max-width: 720px)` → `.zp-root[data-w="narrow"]`，`@media (max-width: 1180px)` → `.zp-root:not([data-w="wide"])`；字号、间距、圆角、时长就近取本文的档位（12.5 → 12，15 → 14，17 → 18，22 / 23 → 24；10 / 14 的间距 → 8 或 12 / 12 或 16；350–500ms → 180 或 240ms）；`#app { position: fixed }` → `.zp-root { position: relative; height: 100% }`。
 
 ---
 

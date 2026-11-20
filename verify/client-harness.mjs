@@ -406,6 +406,13 @@ export function manualTimers() {
   };
 }
 
+/** 假的 MutationObserver：只认运行时假 DOM 节点上的 setAttribute / removeAttribute，同步回调（见 makeRuntime 的 makeNode） */
+export class FakeMutationObserver {
+  constructor(cb) { this.cb = cb; this.nodes = []; }
+  observe(node) { if (node && node.__mo) { node.__mo.add(this); this.nodes.push(node); } }
+  disconnect() { this.nodes.forEach((n) => n.__mo.delete(this)); this.nodes = []; }
+}
+
 export class FakeResizeObserver {
   constructor(cb) { this.cb = cb; }
   observe() {}
@@ -509,8 +516,12 @@ export function makeRuntime() {
       querySelectorAll(sel) { const out = []; walk(this, (n) => { if (matches(n, sel)) out.push(n); }); return out; },
       querySelector(sel) { return this.querySelectorAll(sel)[0] || null; },
       getBoundingClientRect() { return { width: rt.width, height: 640, left: 0, top: 0, right: rt.width, bottom: 640, x: 0, y: 0 }; },
-      setAttribute() {},
-      removeAttribute() {}
+      /* 脚本直接写在节点上的属性（和 React props 分开存）；改的时候同步通知 FakeMutationObserver */
+      __attrs: {}, __mo: new Set(),
+      setAttribute(k, v) { this.__attrs[k] = String(v); this.__mo.forEach((o) => o.cb([{ type: 'attributes', attributeName: k }], o)); },
+      removeAttribute(k) { if (!(k in this.__attrs)) return; delete this.__attrs[k]; this.__mo.forEach((o) => o.cb([{ type: 'attributes', attributeName: k }], o)); },
+      hasAttribute(k) { return k in this.__attrs; },
+      getAttribute(k) { return k in this.__attrs ? this.__attrs[k] : null; }
     };
   };
   doc.body = makeNode('body', null);
@@ -811,7 +822,7 @@ export function makeRuntime() {
 export function bootRuntime(client, { width = 1300, services = {}, now = Date.now(), storage = null, reply = null } = {}) {
   const rt = makeRuntime();
   rt.width = width;
-  const loaded = loadBundle(client, { globals: { AbortController, ResizeObserver: FakeResizeObserver } });
+  const loaded = loadBundle(client, { globals: { AbortController, ResizeObserver: FakeResizeObserver, MutationObserver: FakeMutationObserver } });
   if (loaded.error || !loaded.entry) return { error: loaded.error || new Error('没有入口') };
   Object.assign(loaded.React, rt.React);
   const timers = manualTimers();
