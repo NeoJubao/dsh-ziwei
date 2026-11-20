@@ -16,6 +16,7 @@
  *       AssistantPanel   （只在命盘页）面板关着时它自己什么都不渲染
  *       SheetHost        session.sheet 有值时才渲染
  *       SettingsModal    session.modal === 'settings' 时才渲染
+ *       ModelModal       session.modal === 'model' 时才渲染（68-models）
  *       Toast
  * 视图组件由后面的任务写：ProApp 用 typeof 判断它存在才渲染，所以那些任务不用改这个文件。
  * 每个视图都收到 props { tier: 'narrow' | 'mid' | 'wide', theme: 'dark' | 'light' }（都不在 store 里），各包一层错误边界：
@@ -215,6 +216,7 @@ function ProApp(props) {
     app.sheet && typeof SheetHost === 'function' ? h(Boundary, { key: 'sheet' }, h(SheetHost, viewProps)) : null,
     app.modal === 'settings' && typeof SettingsModal === 'function'
       ? h(Boundary, { key: 'modal' }, h(SettingsModal, { tier: tier, theme: theme, actions: actions })) : null,
+    app.modal === 'model' && typeof ModelModal === 'function' ? h(Boundary, { key: 'modal-model' }, h(ModelModal, viewProps)) : null,
     h(Boundary, { key: 'toast' }, h(Toast))));
 }
 

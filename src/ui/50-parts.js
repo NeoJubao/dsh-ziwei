@@ -16,14 +16,14 @@
  *     不看正文的组件别选 readings。selector 每次变化都会跑，里面不要做重活。
  * openSheet(kind, chartId?)   打开面板内浮层：patchSession({ sheet: kind, sheetChartId, modal: null })。
  *                             kind：'birth'（直接填表 / 改生辰，chartId = 要改的盘）| 'charts'（全部命盘）
- * openModal(name)             打开弹层：patchSession({ modal: name, sheet: null, sheetChartId: null })。name：'settings'
+ * openModal(name)             打开弹层：patchSession({ modal: name, sheet: null, sheetChartId: null })。name：'settings' | 'model'
  * closeLayers()               关掉浮层和弹层（sheet、sheetChartId、modal 全部置空）
  *   同一时间只有一个模态层：sheet 和 modal 互斥；中、窄档里浮着的紫微师在浮层打开时由 ProApp 关上。
  *
  * ---------------- 部件 ----------------
  * Icon { name, size = 16 }
  *   svg.zp-icon（aria-hidden，线色随文字）。name 是 ICON_PATHS 的键（ZWUi.iconNames 列出全部）：
- *   exit back close more list gear settings caret chevronLeft chevronRight send stop sparkle newChat handoff
+ *   exit back close more list gear settings caret chevronLeft chevronRight chevronDown send stop sparkle newChat handoff
  *   copy download export report quote refresh check。新图标先加进表里再用。
  *
  * Seg { items, value, onChange(id), label, className?, region?, radio? }
@@ -295,6 +295,9 @@ const ICON_PATHS = {
   ],
   chevronLeft: [
     ['path', { d: 'M9.8 3.6L5.4 8l4.4 4.4' }]
+  ],
+  chevronDown: [
+    ['path', { d: 'M3.6 6.2L8 10.6l4.4-4.4' }]
   ],
   chevronRight: [
     ['path', { d: 'M6.2 3.6L10.6 8l-4.4 4.4' }]

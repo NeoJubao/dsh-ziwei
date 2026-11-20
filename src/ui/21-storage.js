@@ -13,6 +13,7 @@
  *   ziwei-pro.autopen / ziwei-pro.showadj 偏好（'1' 开）
  *   ziwei-pro.sky（新）      首页 3D 星图（'0' 关，其余开）
  *   ziwei-pro.theme（新）    外观：'dark'（默认）/ 'light' / 'auto'（跟随 DSH）；没有这个键或值不认识按 'dark'
+ *   ziwei-pro.model（新）    紫微师用的模型 { provider, model }；没有这个键 = 跟随 DSH 的默认模型
  *   ziwei-pro.v6（新）       '1' = 已做过一次性导入（上次命盘和解读记录进命盘库）
  * v5 的 ziwei-pro.studio / .rail / .focus 不读不写，也不删。
  * 所有读写都包在 try/catch 里：storage 拿不到、读写抛错（隐私模式、配额满、沙箱 iframe）时返回默认值，不外抛。 */
@@ -364,7 +365,15 @@ function createStorageApi(storage, opts) {
     theme: function () {
       try { const s = src(); return themePrefOf(s ? s.getItem('ziwei-pro.theme') : null); } catch (e) { return 'dark'; }
     },
-    setTheme: function (v) { set('ziwei-pro.theme', themePrefOf(v)); }
+    setTheme: function (v) { set('ziwei-pro.theme', themePrefOf(v)); },
+    /* 紫微师用的模型：null = 跟随 DSH 默认（这时不留这个键） */
+    model: function () {
+      try { return modelPrefOf(JSON.parse(get('ziwei-pro.model') || 'null')); } catch (e) { return null; }
+    },
+    setModel: function (v) {
+      const m = modelPrefOf(v);
+      if (m) set('ziwei-pro.model', JSON.stringify(m)); else remove('ziwei-pro.model');
+    }
   };
 
   /* 旧版曾在 localStorage 明文保存 DeepSeek API Key（已无消费方），启动时清掉残留 */

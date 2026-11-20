@@ -1,10 +1,11 @@
 /* 22-stream：SSE 客户端（T3b）
  *
- * openInterpretStream({ fetch, body, onStart, onThinking, onDelta, onDone, onFinish }) → { abort(userRequested) }
+ * openInterpretStream({ fetch, body, onStart, onRetry, onThinking, onDelta, onDone, onFinish }) → { abort(userRequested) }
  *   POST /ziwei/interpret（JSON 正文 body），按 SSE 读回复。线协议和结束语义照搬 v5 的 openStream：
  *   - 块之间用空行分隔，可能被拆在几次 read 里；块内 `event: ` 是事件名，`data: ` 行拼成 JSON。
  *     不认识的事件、解析不了的 JSON 跳过。
- *   - start → onStart()；thinking { chars } → onThinking(chars)；delta { text } → onDelta(text)；
+ *   - start { provider, model, … } → onStart(payload)；retry → onRetry(payload)（Host 在同一个请求里再问一次，见 index.js）；
+ *     thinking { chars } → onThinking(chars)；delta { text } → onDelta(text)；
  *     done { text } → onDone(text，没有就用已收到的全文)，然后正常结束；error { reason, kind, canContinue } → 带着它结束。
  *   - 只有收到 done 才算写完。流关了还没有 done → 断连原因 + { kind: 'stream-closed', canContinue }。
  *   - 非 2xx → 原因取 JSON 正文的 reason，没有就是 "HTTP <status>"（issue 为 null，和 v5 一样）。
@@ -40,7 +41,10 @@ function openInterpretStream(opts) {
     let payload = null;
     try { payload = JSON.parse(data); } catch (e) { return; }
     if (ev === 'start') {
-      call('onStart');
+      call('onStart', payload);
+    } else if (ev === 'retry') {
+      /* Host 发现模型没有作答、正在同一个请求里再问一次 */
+      call('onRetry', payload);
     } else if (ev === 'thinking') {
       call('onThinking', (payload && payload.chars) || 0);
     } else if (ev === 'delta' && payload && payload.text) {

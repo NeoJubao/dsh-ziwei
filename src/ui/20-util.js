@@ -27,6 +27,20 @@ function resolveTheme(pref, hostDark) {
 }
 ZWUI.resolveTheme = resolveTheme;
 
+/* 模型选择：{ provider, model } 两个都是 1–200 字的字符串才算数（和 Host 的 pickModelOverride 同一个口径），否则是 null = 跟随 DSH 默认 */
+function modelPrefOf(v) {
+  if (!v || typeof v !== 'object') return null;
+  const pick = function (x) { return typeof x === 'string' && x.trim() && x.length <= 200 ? x.trim() : ''; };
+  const provider = pick(v.provider), model = pick(v.model);
+  return provider && model ? { provider: provider, model: model } : null;
+}
+ZWUI.modelPrefOf = modelPrefOf;
+
+function sameModel(a, b) {
+  return (!a && !b) || (!!a && !!b && a.provider === b.provider && a.model === b.model);
+}
+ZWUI.sameModel = sameModel;
+
 /* 三方四正：对宫 = +6，三合 = +4 / +8（宫位序号 mod 12）。和 v5 同一个函数。 */
 function relatedPalaces(index) {
   const i = +index;

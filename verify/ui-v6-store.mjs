@@ -283,7 +283,7 @@ export default async function store(t) {
     const s0 = st.getState();
     eq('初始 session', [s0.session.view, s0.session.chartId, s0.session.tab, s0.session.stage, s0.session.when, s0.session.panelOpen, s0.session.quote, s0.session.toast],
       ['home', null, 'natal', 'board', TODAY, false, null, null]);
-    eq('初始 library 为空，prefs 是默认值（外观默认深色）', [s0.library, s0.prefs], [[], { autoOpen: false, showAdj: false, sky: true, theme: 'dark' }]);
+    eq('初始 library 为空，prefs 是默认值（外观默认深色）', [s0.library, s0.prefs], [[], { autoOpen: false, showAdj: false, sky: true, theme: 'dark', model: null }]);
     eq('todayOf() 来自注入的 now()', st.todayOf(), TODAY);
     const log = [];
     let first = true;
@@ -439,7 +439,7 @@ export default async function store(t) {
     ok('速览：ask("") → true', st.ask('') === true);
     await settle();
     eq('速览发出 question 为空的 brief 请求，没有用户气泡', [fetch.calls.length, last(fetch).body.question, last(fetch).body.mode, st.reading().thread], [1, '', 'brief', []]);
-    eq('进行中：job 是 chat', st.job(), { kind: 'chat', thinkChars: 0 });
+    eq('进行中：job 是 chat', st.job(), { kind: 'chat', thinkChars: 0, retried: false });
     last(fetch).send('thinking', { chars: 40 });
     await settle();
     eq('thinking → job.thinkChars', st.job().thinkChars, 40);
@@ -797,5 +797,74 @@ export default async function store(t) {
     await st.handoff();
     await settle();
     eq('HTTP 500 → 错误提示', [st.getState().session.toast && st.getState().session.toast.text, st.getState().session.toast && st.getState().session.toast.error], [ZH.handoffFailed500, true]);
+  }
+
+  section('v6 store：模型选择');
+  {
+    eq('请求体：没选模型时不带 model 字段（旧 Host 和默认模型都不受影响）', 'model' in B({}), false);
+    eq('请求体：选了模型就带上 { provider, model }', B({ model: { provider: 'px', model: 'mx' } }).model, { provider: 'px', model: 'mx' });
+    eq('请求体：只给一半、不是字符串的选择不带', ['model' in B({ model: { provider: 'px' } }), 'model' in B({ model: { provider: 1, model: 2 } }), 'model' in B({ model: 'px/mx' })], [false, false, false]);
+
+    const replies = [];
+    const f = streamFetch({ reply: (url) => (url === '/ziwei/models' ? replies.shift() : null) });
+    const { st, storage } = mk({ fetch: f });
+    const s0 = st.getState();
+    eq('初始：跟随 DSH 默认（prefs.model 是 null），列表还没读，也没有发请求', [s0.prefs.model, s0.models.status, s0.models.providers, f.calls.length], [null, 'idle', [], 0]);
+    replies.push({ json: { ok: true, providers: [{ id: 'ds', name: 'DeepSeek', models: [{ id: 'flash', name: 'Flash' }, { id: 'pro' }] }, { id: 'none', name: 'None', models: [] }], default: { provider: 'ds', model: 'flash' } } });
+    const p1 = st.loadModels();
+    const p1b = st.loadModels();
+    eq('loadModels()：读的时候 status 是 loading；还没回来时再调一次不会多发请求', [st.getState().models.status, f.calls.length, last(f).url, last(f).init.method, p1 === p1b], ['loading', 1, '/ziwei/models', 'GET', true]);
+    await p1;
+    eq('读到了：有模型的提供方才留下，模型没有名字时用 id，default 是 DSH 的默认模型',
+      st.getState().models, { status: 'ready', providers: [{ id: 'ds', name: 'DeepSeek', models: [{ id: 'flash', name: 'Flash' }, { id: 'pro', name: 'pro' }] }], def: { provider: 'ds', model: 'flash' }, error: '' });
+    replies.push({ status: 404, text: '<!DOCTYPE html><title>Not found</title>' });
+    await st.loadModels();
+    eq('loadModels() 每次都重读；旧 Host 没有这条路由（回的不是 JSON）→ status error，原因是 HTTP 状态', [f.calls.length, st.getState().models.status, st.getState().models.error, st.getState().models.providers], [2, 'error', 'HTTP 404', []]);
+    replies.push({ json: { ok: false, reason: 'llm 服务不可用' } });
+    await st.loadModels();
+    eq('Host 说不行 → 用它给的原因', [st.getState().models.status, st.getState().models.error], ['error', 'llm 服务不可用']);
+
+    let ticks = 0;
+    st.subscribe(() => { ticks++; });
+    eq('setModel：变了才是 true，写进 prefs 和本机记录', [st.setModel({ provider: 'ds', model: 'pro' }), st.getState().prefs.model, storage.getItem('ziwei-pro.model')], [true, { provider: 'ds', model: 'pro' }, '{"provider":"ds","model":"pro"}']);
+    const t1 = ticks;
+    eq('setModel 同一个值：false，不通知', [st.setModel({ provider: 'ds', model: 'pro' }), ticks - t1], [false, 0]);
+    const a = st.addChart(GOLDEN, '甲');
+    st.openChart(a.id);
+    st.ask('问');
+    await settle();
+    eq('提问的请求体带上选的模型', last(f).body.model, { provider: 'ds', model: 'pro' });
+    last(f).send('start', { provider: 'ds', model: 'pro', mode: 'brief' });
+    await settle();
+    eq('start 帧里是这次实际用的模型：记在 session.lastModel', st.getState().session.lastModel, { provider: 'ds', model: 'pro' });
+    last(f).send('thinking', { chars: 12 });
+    await settle();
+    last(f).send('retry', { reason: 'empty', attempt: 2 });
+    await settle();
+    eq('retry 帧（Host 正在同一个请求里再问一次）：job.retried 变真，任务还在跑', st.job(), { kind: 'chat', thinkChars: 12, retried: true });
+    last(f).send('delta', { text: '你好' });
+    await settle();
+    eq('第二次的正文来了：retried 变回假', st.job(), { kind: 'chat', thinkChars: 0, retried: false });
+    last(f).send('done', { text: '你好' });
+    await settle();
+    eq('照常写完', [st.job(), st.reading().thread.map((m) => m.content)], [null, ['问', '你好']]);
+    st.ask('再问');
+    await settle();
+    last(f).send('error', { reason: '模型只做了思考，没有给出回答', kind: 'empty', attempts: 2 });
+    await settle();
+    eq('两次都空：错误条的文字和 kind 来自 Host', [st.reading().chatError, st.reading().chatIssue && st.reading().chatIssue.kind], ['模型只做了思考，没有给出回答', 'empty']);
+    eq('setModel(null)：回到跟随默认，本机记录里不留这个键', [st.setModel(null), st.getState().prefs.model, storage.getItem('ziwei-pro.model')], [true, null, null]);
+    st.retryChat();
+    await settle();
+    eq('回到默认之后的请求体不带 model', 'model' in last(f).body, false);
+    last(f).send('done', { text: '好' });
+    await settle();
+    eq('patchSession 改不了 lastModel（只由 start 帧写）', [st.patchSession({ lastModel: null }), st.getState().session.lastModel], [false, { provider: 'ds', model: 'pro' }]);
+  }
+  {
+    const { st } = mk({ storage: memoryStorage({ 'ziwei-pro.model': '{"provider":"ds","model":"pro"}' }) });
+    eq('本机记录里有选择：启动时读进 prefs.model', st.getState().prefs.model, { provider: 'ds', model: 'pro' });
+    const bad = mk({ storage: memoryStorage({ 'ziwei-pro.model': '{bad json' }) }).st;
+    eq('本机记录坏了：按跟随默认', bad.getState().prefs.model, null);
   }
 }

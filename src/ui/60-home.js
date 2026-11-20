@@ -529,6 +529,7 @@ function HomeView(props) {
           autoComplete: 'off', enterKeyHint: 'send',
           onChange: function (ev) { setAsk(ev.target.value); }
         }),
+        h(ModelChip, { compact: true }),
         h('button', { className: 'zp-send', type: 'submit', title: t('homeSend'), 'aria-label': t('homeSend') }, h(Icon, { name: 'send' }))),
       h('div', { key: 'chips', className: 'zp-chips' },
         h('button', { className: 'zp-chip', type: 'button', onClick: function () { homeOpen(focusRow.id, { tab: 'daily' }); } }, t('homeChipToday')),

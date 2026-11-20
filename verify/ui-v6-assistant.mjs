@@ -45,8 +45,11 @@ const ZH = {
   ],
   starts: ['读这张盘', '写完整报告'],
   openReport: '查看完整报告',
-  examples: ['今年事业怎么样', '这十年感情要注意什么', '我适合做什么工作'],
-  suggestions: ['重点讲事业与财运', '这十年感情要注意什么', '说得再通俗一点', '讲讲我选的这一宫'],
+  /* 引导问题常驻在输入框上方：选中的宫、当前时间层级（本命下是这十年）、两条通用的。空对话 4 条，有对话 3 条；
+     报告写完、又有对话时第三条换成「说得再通俗一点」 */
+  sugEmpty: ['讲讲命宫', '这十年要注意什么', '我适合做什么工作', '感情上要注意什么'],
+  sugThread: ['讲讲命宫', '这十年要注意什么', '我适合做什么工作'],
+  sugReport: ['讲讲命宫', '这十年要注意什么', '说得再通俗一点'],
   inputLabel: '问紫微师',
   placeholder: '问紫微师',
   waitChat: '正在回答，写完再问下一个',
@@ -207,8 +210,11 @@ export default async function assistantChecks(t) {
     const starts = one(empty, 'zp-as-starts');
     eq('起手动作 div.zp-as-starts > button.zp-btn：读这张盘、写完整报告',
       buttons(starts).map((b) => [text(b), classesOf(b).includes('zp-btn')]), ZH.starts.map((s) => [s, true]));
-    eq('三个示例问题 div.zp-suggest > button', buttons(one(empty, 'zp-suggest')).map(text), ZH.examples);
-    eq('空态下没有错误条、追问建议、引用条',
+    const sug = one(a, 'zp-suggest');
+    eq('引导问题不在空态里，而是常驻在对话区外、输入框上方：div.zp-suggest[role=group]（有名字）> button，空对话时 4 条',
+      [one(empty, 'zp-suggest'), one(lg, 'zp-suggest'), attr(sug, 'role'), attr(sug, 'aria-label'), buttons(sug).map(text), buttons(sug).every((b) => attr(b, 'type') === 'button')],
+      [null, null, 'group', '可以这样问', ZH.sugEmpty, true]);
+    eq('空态下没有错误条、引用条；引导条只有一排',
       [errBar(), findByClass(a, 'zp-suggest').length, one(a, 'zp-quote')], [null, 1, null]);
     const form = one(a, 'zp-as-form');
     const area = ta();
@@ -522,9 +528,9 @@ export default async function assistantChecks(t) {
     store.startReport();
     await step();
     const p = last();
-    eq('报告在写：空态还在；「读这张盘」和示例禁用，报告按钮可点（去看进度）；提示去报告里看进度；输入框不能发送，也不是停止键（停报告在报告页）',
+    eq('报告在写：空态还在；「读这张盘」和引导问题禁用，报告按钮可点（去看进度）；提示去报告里看进度；输入框不能发送，也不是停止键（停报告在报告页）',
       [!!one(log(), 'zp-quick'), buttons(one(log(), 'zp-as-starts')).map((b) => [text(b), !!attr(b, 'disabled')]),
-        buttons(one(one(log(), 'zp-as-empty'), 'zp-suggest')).every((b) => !!attr(b, 'disabled')), text(typing()),
+        buttons(one(panel(), 'zp-suggest')).every((b) => !!attr(b, 'disabled')), text(typing()),
         classesOf(sendBtn()), attr(sendBtn(), 'aria-label'), !!attr(sendBtn(), 'disabled'), attr(ta(), 'placeholder')],
       [true, [[ZH.starts[0], true], [ZH.openReport, false]], true, ZH.reportRunning, ['zp-send'], '发送', true, '报告写完后再提问']);
     rt.click(sendBtn());
@@ -544,21 +550,35 @@ export default async function assistantChecks(t) {
   });
 
   /* ---------------------------------------------------------------- */
-  section('紫微师：报告写完后的追问建议');
-  await safe('追问建议', async () => {
-    eq('空态时不另出追问建议条（只有空态里的示例）', findByClass(panel(), 'zp-suggest').length, 1);
-    rt.click(byLabel(one(log(), 'zp-as-empty'), ZH.examples[0]));
+  section('紫微师：引导问题常驻');
+  await safe('引导问题', async () => {
+    const bar = () => one(panel(), 'zp-suggest');
+    eq('对话是空的：4 条', [findByClass(panel(), 'zp-suggest').length, buttons(bar()).map(text)], [1, ZH.sugEmpty]);
+    rt.click(byLabel(bar(), ZH.sugEmpty[2]));
     await step();
-    eq('点示例问题：直接发出', [last().body.question, meTexts()], [ZH.examples[0], [ZH.examples[0]]]);
+    eq('点一条通用问题：直接发出，不带引用', [last().body.question, meTexts()], [ZH.sugEmpty[2], [ZH.sugEmpty[2]]]);
+    ok('生成中引导问题还在，只是禁用', buttons(bar()).length >= 3 && buttons(bar()).every((b) => !!attr(b, 'disabled')));
     await finish(last());
-    const bar = one(panel(), 'zp-suggest');
-    eq('有报告、有对话：div.zp-suggest（在对话区外）四个 v5 的追问建议',
-      [one(log(), 'zp-suggest'), buttons(bar).map(text)], [null, ZH.suggestions]);
+    eq('有对话之后引导还在（3 条，在对话区外）；报告写完了，第三条换成「说得再通俗一点」',
+      [one(log(), 'zp-suggest'), buttons(bar()).map(text), buttons(bar()).some((b) => !!attr(b, 'disabled'))], [null, ZH.sugReport, false]);
     const pal = chart.palaces[store.getState().session.sel];
-    rt.click(byLabel(bar, ZH.suggestions[3]));
+    rt.click(byLabel(bar(), ZH.sugReport[0]));
     await step();
-    eq('「讲讲我选的这一宫」带上选中宫位的引用', last().body.question, '【引用：这一宫】\n' + ZW.palaceQuoteText(pal, '空宫') + '\n\n' + ZH.suggestions[3]);
+    eq('「讲讲命宫」带上选中宫位的星曜作引用', last().body.question, '【引用：这一宫】\n' + ZW.palaceQuoteText(pal, '空宫') + '\n\n讲讲' + pal.name);
     await finish(last());
+    /* 引导跟着正在看的东西走：换一宫、换到流年 */
+    store.selectPalace((store.getState().session.sel + 3) % 12);
+    store.setTab('yearly');
+    rt.flush();
+    const palNow = chart.palaces[store.getState().session.sel];
+    eq('换了宫、切到流年：第一条是新选的宫，第二条问今年', buttons(bar()).map(text).slice(0, 2), ['讲讲' + palNow.name, '今年怎么样']);
+    rt.click(byLabel(bar(), '今年怎么样'));
+    await step();
+    eq('问「今年怎么样」：带上流年的定位（yearlyFocus），气泡里只有那句话', [last().body.meta.yearlyFocus, meTexts().slice(-1)], [2026, ['今年怎么样']]);
+    await finish(last());
+    store.setTab('natal');
+    store.selectPalace(chart.soulIndex);
+    rt.flush();
     rt.click(byLabel(panel(), ZH.handoff));
     eq('有报告时交接：mode=report，interpretation 是报告正文', [last().url, last().body.mode, last().body.interpretation], ['/ziwei/handoff', 'report', store.reading().report.text]);
     await step();

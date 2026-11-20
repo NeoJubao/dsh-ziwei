@@ -2851,6 +2851,22 @@ const DICT = {
     "setAbout": "排盘依据《紫微斗数全书》安星诀，与开源库 iztro 逐项核对过；填了出生城市就按经度和均时差校正真太阳时。仅供研究和参考。",
     "setSignature": "紫微师 · 金聚｜道商意象紫微九诀",
     "setContact": "微信：neo2025new",
+    "mdlTitle": "模型",
+    "mdlChip": "模型：{model}，点击更换",
+    "mdlChipNone": "选择模型",
+    "mdlChipDefault": "默认模型",
+    "mdlIntro": "紫微师用哪个模型来回答。换了之后，下一次提问生效。",
+    "mdlFollow": "跟随 DSH 默认",
+    "mdlFollowWith": "跟随 DSH 默认（{model}）",
+    "mdlFollowHint": "在 DeepSeek Harness 里换了默认模型，这里跟着变。",
+    "mdlLoading": "正在读取可用模型…",
+    "mdlEmpty": "DeepSeek Harness 里还没有接入模型提供方。",
+    "mdlError": "读不到模型列表（{reason}）。",
+    "mdlErrorHint": "这一版的模型选择要重启 DeepSeek Harness 之后才能用。现在提问仍然用 DSH 的默认模型。",
+    "mdlReload": "重新读取",
+    "mdlSwitched": "已切换到 {model}",
+    "mdlSwitchedDefault": "已改回跟随 DSH 默认",
+    "mdlMissing": "现在选的 {model} 不在列表里，提问时可能失败。",
     "chartPanes": "下面看什么",
     "chartMutagen": "四化",
     "chartMutTitle": "{star}化{mu}",
@@ -2919,18 +2935,20 @@ const DICT = {
     "asStartRead": "读这张盘",
     "asStartReport": "写完整报告",
     "asOpenReport": "查看完整报告",
-    "asEx1": "今年事业怎么样",
-    "asEx2": "这十年感情要注意什么",
-    "asEx3": "我适合做什么工作",
+    "asSugLabel": "可以这样问",
+    "asSugPalace": "讲讲{palace}",
+    "asSugScope": "{rel}怎么样",
+    "asSugDecade": "这十年要注意什么",
+    "asSugCareer": "我适合做什么工作",
+    "asSugLove": "感情上要注意什么",
+    "asRetrying": "模型第一次没有作答，正在再问一次…",
+    "asSwapModel": "换个模型",
     "asThinking": "紫微师正在思考…",
     "asWriting": "正在回答…",
     "asReportRunning": "完整报告正在写，在「报告」里看进度",
     "asContinue": "接着写",
     "asRetry": "重试",
-    "asSuggestCareer": "重点讲事业与财运",
-    "asSuggestLove": "这十年感情要注意什么",
     "asSuggestPlain": "说得再通俗一点",
-    "asSuggestPalace": "讲讲我选的这一宫",
     "asQuotePalaceLabel": "这一宫",
     "asEmptyPalace": "空宫",
     "asQuoteText": "{label}：{text}",
@@ -3257,6 +3275,22 @@ const DICT = {
     "setAbout": "Chart placement follows the classic star-placement rules and is checked field by field against the open-source iztro library. With a birth city, true solar time is corrected for longitude and the equation of time. For research and reference only.",
     "setSignature": "紫微师 · 金聚｜道商意象紫微九诀",
     "setContact": "WeChat: neo2025new",
+    "mdlTitle": "Model",
+    "mdlChip": "Model: {model}. Click to change",
+    "mdlChipNone": "Choose a model",
+    "mdlChipDefault": "Default model",
+    "mdlIntro": "Which model answers your questions. A change applies to the next question.",
+    "mdlFollow": "Follow the DSH default",
+    "mdlFollowWith": "Follow the DSH default ({model})",
+    "mdlFollowHint": "Changes with the default model set in DeepSeek Harness.",
+    "mdlLoading": "Loading available models…",
+    "mdlEmpty": "No model providers are connected in DeepSeek Harness yet.",
+    "mdlError": "Could not load the model list ({reason}).",
+    "mdlErrorHint": "Model selection in this version needs a DeepSeek Harness restart. Questions still use the DSH default model for now.",
+    "mdlReload": "Reload",
+    "mdlSwitched": "Switched to {model}",
+    "mdlSwitchedDefault": "Back to following the DSH default",
+    "mdlMissing": "The selected model {model} is not in the list; questions may fail.",
     "chartPanes": "Card",
     "chartMutagen": "Four transformations",
     "chartMutTitle": "{star}: {mu}",
@@ -3325,18 +3359,20 @@ const DICT = {
     "asStartRead": "Read this chart",
     "asStartReport": "Write the full report",
     "asOpenReport": "Open full report",
-    "asEx1": "How is my career this year?",
-    "asEx2": "What should I watch for in love this decade?",
-    "asEx3": "What kind of work suits me?",
+    "asSugLabel": "Things you can ask",
+    "asSugPalace": "Explain {palace}",
+    "asSugScope": "How is {rel}?",
+    "asSugDecade": "What should I watch for this decade?",
+    "asSugCareer": "What kind of work suits me?",
+    "asSugLove": "What should I watch for in love?",
+    "asRetrying": "The model gave no answer the first time; asking once more…",
+    "asSwapModel": "Change model",
     "asThinking": "Thinking…",
     "asWriting": "Answering…",
     "asReportRunning": "The full report is being written; see progress under Report",
     "asContinue": "Continue",
     "asRetry": "Retry",
-    "asSuggestCareer": "Focus on career and money",
-    "asSuggestLove": "What to watch in love this decade",
     "asSuggestPlain": "Say it more plainly",
-    "asSuggestPalace": "Explain the palace I selected",
     "asQuotePalaceLabel": "This palace",
     "asEmptyPalace": "Empty",
     "asQuoteText": "{label}: {text}",
@@ -3444,6 +3480,20 @@ function resolveTheme(pref, hostDark) {
   return p;
 }
 ZWUI.resolveTheme = resolveTheme;
+
+/* 模型选择：{ provider, model } 两个都是 1–200 字的字符串才算数（和 Host 的 pickModelOverride 同一个口径），否则是 null = 跟随 DSH 默认 */
+function modelPrefOf(v) {
+  if (!v || typeof v !== 'object') return null;
+  const pick = function (x) { return typeof x === 'string' && x.trim() && x.length <= 200 ? x.trim() : ''; };
+  const provider = pick(v.provider), model = pick(v.model);
+  return provider && model ? { provider: provider, model: model } : null;
+}
+ZWUI.modelPrefOf = modelPrefOf;
+
+function sameModel(a, b) {
+  return (!a && !b) || (!!a && !!b && a.provider === b.provider && a.model === b.model);
+}
+ZWUI.sameModel = sameModel;
 
 /* 三方四正：对宫 = +6，三合 = +4 / +8（宫位序号 mod 12）。和 v5 同一个函数。 */
 function relatedPalaces(index) {
@@ -3592,6 +3642,7 @@ ZWUI.pickPoint = pickPoint;
  *   ziwei-pro.autopen / ziwei-pro.showadj 偏好（'1' 开）
  *   ziwei-pro.sky（新）      首页 3D 星图（'0' 关，其余开）
  *   ziwei-pro.theme（新）    外观：'dark'（默认）/ 'light' / 'auto'（跟随 DSH）；没有这个键或值不认识按 'dark'
+ *   ziwei-pro.model（新）    紫微师用的模型 { provider, model }；没有这个键 = 跟随 DSH 的默认模型
  *   ziwei-pro.v6（新）       '1' = 已做过一次性导入（上次命盘和解读记录进命盘库）
  * v5 的 ziwei-pro.studio / .rail / .focus 不读不写，也不删。
  * 所有读写都包在 try/catch 里：storage 拿不到、读写抛错（隐私模式、配额满、沙箱 iframe）时返回默认值，不外抛。 */
@@ -3943,7 +3994,15 @@ function createStorageApi(storage, opts) {
     theme: function () {
       try { const s = src(); return themePrefOf(s ? s.getItem('ziwei-pro.theme') : null); } catch (e) { return 'dark'; }
     },
-    setTheme: function (v) { set('ziwei-pro.theme', themePrefOf(v)); }
+    setTheme: function (v) { set('ziwei-pro.theme', themePrefOf(v)); },
+    /* 紫微师用的模型：null = 跟随 DSH 默认（这时不留这个键） */
+    model: function () {
+      try { return modelPrefOf(JSON.parse(get('ziwei-pro.model') || 'null')); } catch (e) { return null; }
+    },
+    setModel: function (v) {
+      const m = modelPrefOf(v);
+      if (m) set('ziwei-pro.model', JSON.stringify(m)); else remove('ziwei-pro.model');
+    }
   };
 
   /* 旧版曾在 localStorage 明文保存 DeepSeek API Key（已无消费方），启动时清掉残留 */
@@ -4178,11 +4237,12 @@ ZWUI.localStore = localStore;
 /* ---- src/ui/22-stream.js ---- */
 /* 22-stream：SSE 客户端（T3b）
  *
- * openInterpretStream({ fetch, body, onStart, onThinking, onDelta, onDone, onFinish }) → { abort(userRequested) }
+ * openInterpretStream({ fetch, body, onStart, onRetry, onThinking, onDelta, onDone, onFinish }) → { abort(userRequested) }
  *   POST /ziwei/interpret（JSON 正文 body），按 SSE 读回复。线协议和结束语义照搬 v5 的 openStream：
  *   - 块之间用空行分隔，可能被拆在几次 read 里；块内 `event: ` 是事件名，`data: ` 行拼成 JSON。
  *     不认识的事件、解析不了的 JSON 跳过。
- *   - start → onStart()；thinking { chars } → onThinking(chars)；delta { text } → onDelta(text)；
+ *   - start { provider, model, … } → onStart(payload)；retry → onRetry(payload)（Host 在同一个请求里再问一次，见 index.js）；
+ *     thinking { chars } → onThinking(chars)；delta { text } → onDelta(text)；
  *     done { text } → onDone(text，没有就用已收到的全文)，然后正常结束；error { reason, kind, canContinue } → 带着它结束。
  *   - 只有收到 done 才算写完。流关了还没有 done → 断连原因 + { kind: 'stream-closed', canContinue }。
  *   - 非 2xx → 原因取 JSON 正文的 reason，没有就是 "HTTP <status>"（issue 为 null，和 v5 一样）。
@@ -4218,7 +4278,10 @@ function openInterpretStream(opts) {
     let payload = null;
     try { payload = JSON.parse(data); } catch (e) { return; }
     if (ev === 'start') {
-      call('onStart');
+      call('onStart', payload);
+    } else if (ev === 'retry') {
+      /* Host 发现模型没有作答、正在同一个请求里再问一次 */
+      call('onRetry', payload);
     } else if (ev === 'thinking') {
       call('onThinking', (payload && payload.chars) || 0);
     } else if (ev === 'delta' && payload && payload.text) {
@@ -4909,14 +4972,16 @@ ZWUI.linePoints = linePoints;
  *
  * ---------------- 状态（getState() 返回当前快照；每次变化换一个新对象，没变化不换） ----------------
  *   library   命盘库 [{ id, name, input, openedAt? }]（新→旧）
- *   prefs     { autoOpen, showAdj, sky, theme: 'dark' | 'light' | 'auto' }
+ *   prefs     { autoOpen, showAdj, sky, theme: 'dark' | 'light' | 'auto', model: { provider, model } | null（null = 跟随 DSH 默认） }
+ *   models    { status: 'idle'|'loading'|'ready'|'error', providers: [{ id, name, models: [{ id, name }] }], def: { provider, model }|null, error }
  *   session   { view: 'home'|'chart', chartId, tab: 'natal'|'decadal'|'yearly'|'monthly'|'daily', stage: 'board'|'report',
  *               when: { y, m, d }, sel: 0–11, pat, pane: 'scope'|'pats'|'detail', panelOpen, focusId, introPlayed,
  *               onboarding（引导问答的状态，store 不解读）, quote: { label, text }|null,
  *               toast: { text, error, action: { label, run }|null, key }|null, handoff: null|'working'|'done',
  *               drafts: { [命盘 key]: 草稿 }, readPos: { [命盘 key]: 阅读位置 } }   —— 草稿和阅读位置只在内存里
  *   readings  { [命盘 key]: { thread, report, chatError, chatIssue, studioTab, name } }   第一次用到时从 storage 读
- *   jobs      { [命盘 key]: { kind: 'chat'|'report', thinkChars } }   没有任务的 key 不出现
+ *   jobs      { [命盘 key]: { kind: 'chat'|'report', thinkChars, retried } }   没有任务的 key 不出现；
+ *             retried：Host 发现模型没有作答、正在同一个请求里再问一次（收到正文后变回 false）
  * 命盘 key = readingKeyOf(entry.input)。示例盘的 chartId 是 'sample'，不进命盘库。
  * subscribe(fn) → 退订函数。每次变化后同步调用 fn(state)；fn 里再改状态不会重入，排在这一轮之后再通知一轮。
  * 流式增量每秒来很多次：它只换 readings（和那张盘的 reading），jobs 在 kind / thinkChars 没变时还是同一个对象，
@@ -4945,6 +5010,8 @@ ZWUI.linePoints = linePoints;
  *   stop(key?)        用户停止：保留已写的部分，可接着写
  *   handoff({ mode }?) → Promise<boolean>   在新会话里继续（v5 的 /ziwei/handoff），成功后交给 openSession
  *   checkVersion() → Promise<{ ok, current, latest, updateAvailable, reason }>   点「检查更新」时请求一次 /ziwei/version
+ *   setModel({ provider, model } | null) → boolean（变了才是 true）   loadModels() → Promise<state.models>（打开模型弹层时读）
+ *                                    session.lastModel 是最近一次回答实际用的模型（来自 SSE 的 start 帧）
  *   configure({ openSession })
  *   flush()           pagehide 时调用：正在写的报告按"中断、可接着写"落盘，对话存下已有的部分；任务不停
  *   abortAll()        插件卸载时调用：静默中止全部任务，各自按中断落盘
@@ -4961,7 +5028,7 @@ const STORE_HISTORY_MAX = 20;
 const STORE_TOAST_MS = { plain: 3200, undo: 6000, action: 8000 };
 const STORE_HANDOFF_TRIES = 6;
 const STORE_PANES = ['scope', 'pats', 'detail'];
-const STORE_PROTECTED = ['view', 'chartId', 'tab', 'stage', 'when', 'sel', 'toast', 'handoff', 'drafts', 'readPos'];
+const STORE_PROTECTED = ['view', 'chartId', 'tab', 'stage', 'when', 'sel', 'toast', 'handoff', 'drafts', 'readPos', 'lastModel'];
 
 function storeYmd(ms) {
   const dt = new Date(ms);
@@ -5038,7 +5105,7 @@ function buildInterpretBody(state) {
     chartText += '\n\n' + req.contextBlock;
     question = req.focusLine + (question ? '\n' + question : '');
   }
-  return {
+  const body = {
     chartText: chartText,
     mode: s.mode === 'report' ? 'report' : 'brief',
     question: question,
@@ -5051,6 +5118,10 @@ function buildInterpretBody(state) {
       decadalFocus: decadalFocus, yearlyFocus: yearlyFocus
     }
   };
+  /* 用户选了模型才带这个字段；不带时 Host 用 DSH 的默认模型（旧 Host 不认识这个字段，会忽略） */
+  const model = modelPrefOf(s.model);
+  if (model) body.model = model;
+  return body;
 }
 
 function storeLastAnswer(thread) {
@@ -5094,11 +5165,12 @@ function createStore(deps) {
 
   let state = {
     library: api.library.list(),
-    prefs: { autoOpen: api.prefs.autoOpen(), showAdj: api.prefs.showAdj(), sky: api.prefs.sky(), theme: api.prefs.theme() },
+    prefs: { autoOpen: api.prefs.autoOpen(), showAdj: api.prefs.showAdj(), sky: api.prefs.sky(), theme: api.prefs.theme(), model: api.prefs.model() },
+    models: { status: 'idle', providers: [], def: null, error: '' },
     session: {
       view: 'home', chartId: null, tab: 'natal', stage: 'board', when: todayOf(), sel: 0, pat: 0, pane: 'scope',
       panelOpen: false, focusId: startupFocus(), introPlayed: false, onboarding: null, quote: null, toast: null,
-      handoff: null, drafts: {}, readPos: {}
+      handoff: null, drafts: {}, readPos: {}, lastModel: null
     },
     readings: {},
     jobs: {}
@@ -5223,17 +5295,28 @@ function createStore(deps) {
     let readings = state.readings, jobs = state.jobs;
     if (readingPatch) readings = storeWithKey(readings, key, Object.assign({}, base, readingPatch));
     if (job !== undefined) {
-      /* kind / thinkChars 没变就留着原来的 job 对象（每个 delta 都会走到这里） */
+      /* kind / thinkChars / retried 没变就留着原来的 job 对象（每个 delta 都会走到这里） */
       const prev = jobs[key] || null;
-      const same = job ? (!!prev && prev.kind === job.kind && prev.thinkChars === job.thinkChars) : !prev;
-      if (!same) jobs = storeWithKey(jobs, key, job || undefined);
+      const next = job ? { kind: job.kind, thinkChars: job.thinkChars || 0, retried: !!job.retried } : null;
+      const same = next ? (!!prev && prev.kind === next.kind && prev.thinkChars === next.thinkChars && prev.retried === next.retried) : !prev;
+      if (!same) jobs = storeWithKey(jobs, key, next || undefined);
     }
     if (readings === state.readings && jobs === state.jobs) return;
     commit(Object.assign({}, state, { readings: readings, jobs: jobs }));
   }
   function setThink(key, chars) {
     const j = state.jobs[key];
-    if (j && j.thinkChars !== chars) updateKey(key, null, { kind: j.kind, thinkChars: chars });
+    if (j && j.thinkChars !== chars) updateKey(key, null, { kind: j.kind, thinkChars: chars, retried: j.retried });
+  }
+  /* Host 发现模型没有作答、正在同一个请求里再问一次：对话区把「正在思考」换成「正在再问一次」 */
+  function markRetry(key) {
+    const j = state.jobs[key];
+    if (j && !j.retried) updateKey(key, null, { kind: j.kind, thinkChars: j.thinkChars, retried: true });
+  }
+  /* start 帧里是这次回答实际用的模型 */
+  function noteModel(info) {
+    const m = modelPrefOf(info);
+    if (m && !sameModel(m, state.session.lastModel)) patchSessionRaw({ lastModel: m });
   }
   /* 落盘（v5 规则）：没有一条有字的回答、也没有报告正文 → 删掉这张盘的记录；否则整条写入 */
   function persist(key, entry, override) {
@@ -5517,7 +5600,7 @@ function createStore(deps) {
     if (!o.cont) lastAsk[key] = { baseLen: baseThread.length, shown: o.shown, question: o.question, scope: o.scope || null };
     const body = buildInterpretBody({
       chart: chart, input: entry.input, now: now(), core: core, engine: engine,
-      mode: 'brief', question: o.question, history: baseThread, scope: o.scope || null
+      mode: 'brief', question: o.question, history: baseThread, scope: o.scope || null, model: state.prefs.model
     });
     const job = { kind: 'chat', entry: entry, handle: null, userStop: false, unload: false };
     running[key] = job;
@@ -5526,7 +5609,8 @@ function createStore(deps) {
     job.handle = openInterpretStream({
       fetch: fetchFn,
       body: body,
-      onStart: function () { setThink(key, 0); },
+      onStart: function (info) { setThink(key, 0); noteModel(info); },
+      onRetry: function () { markRetry(key); },
       onThinking: function (chars) { setThink(key, chars); },
       onDelta: function (text) {
         const cur = readingRaw(key);
@@ -5628,7 +5712,8 @@ function createStore(deps) {
     const body = buildInterpretBody({
       chart: chart, input: entry.input, now: now(), core: core, engine: engine, mode: 'report',
       question: cont ? t('aiContinuePrompt') : '',
-      history: cont && base ? [{ role: 'assistant', content: base }] : r.thread.slice()
+      history: cont && base ? [{ role: 'assistant', content: base }] : r.thread.slice(),
+      model: state.prefs.model
     });
     const job = { kind: 'report', entry: entry, handle: null, userStop: false, unload: false, snapshot: snapshot };
     running[key] = job;
@@ -5639,7 +5724,8 @@ function createStore(deps) {
     job.handle = openInterpretStream({
       fetch: fetchFn,
       body: body,
-      onStart: function () { setThink(key, 0); },
+      onStart: function (info) { setThink(key, 0); noteModel(info); },
+      onRetry: function () { markRetry(key); },
       onThinking: function (chars) { setThink(key, chars); },
       onDelta: function (text) {
         const cur = readingRaw(key).report;
@@ -5772,6 +5858,51 @@ function createStore(deps) {
       return { ok: false, reason: String((e && e.message) || e) };
     });
   }
+  /* ---------------- 模型选择 ----------------
+     选择存在本机（prefs.model，null = 跟随 DSH 默认），每次提问带在请求体里。
+     列表只在打开模型弹层时读（loadModels()，每次都重读）：打开面板、挂上模型按钮都不发请求——列模型可能要去问提供方。
+     没读过列表、又没回答过时，按钮上只写「默认模型」；读过之后知道 DSH 的默认模型叫什么（models.def）。
+     旧 Host 没有 /ziwei/models（要重启 DSH）：status 是 'error'，提问照常用 DSH 的默认模型。 */
+  function setModel(sel) {
+    const m = modelPrefOf(sel);
+    api.prefs.setModel(m);
+    if (sameModel(m, state.prefs.model)) return false;
+    commit(Object.assign({}, state, { prefs: Object.assign({}, state.prefs, { model: m }) }));
+    return true;
+  }
+  let modelsPending = null;
+  function loadModels() {
+    if (modelsPending) return modelsPending;
+    commit(Object.assign({}, state, { models: Object.assign({}, state.models, { status: 'loading', error: '' }) }));
+    let p;
+    try {
+      p = Promise.resolve(fetchFn('/ziwei/models', { method: 'GET', headers: { accept: 'application/json' } }));
+    } catch (e) {
+      p = Promise.reject(e);
+    }
+    const fail = function (reason) {
+      commit(Object.assign({}, state, { models: { status: 'error', providers: [], def: null, error: String(reason || '') } }));
+      return state.models;
+    };
+    modelsPending = p.then(function (resp) {
+      const http = 'HTTP ' + resp.status;
+      return resp.json().then(function (j) {
+        if (!j || typeof j !== 'object' || !j.ok || !Array.isArray(j.providers)) return fail((j && j.reason) || http);
+        const providers = j.providers.map(function (pv) {
+          return {
+            id: String((pv && pv.id) || ''), name: String((pv && (pv.name || pv.id)) || ''),
+            models: (pv && Array.isArray(pv.models) ? pv.models : []).filter(function (x) { return x && x.id; })
+              .map(function (x) { return { id: String(x.id), name: String(x.name || x.id) }; })
+          };
+        }).filter(function (pv) { return pv.id && pv.models.length; });
+        commit(Object.assign({}, state, { models: { status: 'ready', providers: providers, def: modelPrefOf(j.default), error: '' } }));
+        return state.models;
+      }, function () { return fail(http); });
+    }, function (e) {
+      return fail(String((e && e.message) || e));
+    }).then(function (v) { modelsPending = null; return v; }, function (e) { modelsPending = null; throw e; });
+    return modelsPending;
+  }
   function configure(patch) {
     const p = patch || {};
     if (typeof p.openSession === 'function') openSessionFn = p.openSession;
@@ -5851,6 +5982,8 @@ function createStore(deps) {
     stop: stop,
     handoff: handoff,
     checkVersion: checkVersion,
+    setModel: setModel,
+    loadModels: loadModels,
     configure: configure,
     flush: flush,
     abortAll: abortAll
@@ -7433,6 +7566,45 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
   line-height: 1.6;
 }
 
+/* ---------------- 模型按钮和模型弹层（68-models） ---------------- */
+.zp-model {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 200px;
+  height: 28px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font-size: 12px;
+  white-space: nowrap;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+.zp-root .zp-model { color: var(--zp-ink-3) }
+.zp-root .zp-model:hover { background: var(--zp-hover); color: var(--zp-ink) }
+.zp-model span { min-width: 0; overflow: hidden; text-overflow: ellipsis }
+.zp-model.zp-compact { max-width: 168px }
+/* 窄档的首页提问框放不下模型名：只留图标 */
+.zp-root[data-w="narrow"] .zp-model.zp-compact span { display: none }
+/* 一组可选项（模型弹层里每个提供方一组）：选中的那个是实心的 */
+.zp-opts { display: flex; flex-wrap: wrap; gap: 6px }
+.zp-opt {
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--zp-line-2);
+  border-radius: 8px;
+  background: transparent;
+  font-size: 13px;
+  white-space: nowrap;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+.zp-root .zp-opt { color: var(--zp-ink-2) }
+.zp-root .zp-opt:hover { background: var(--zp-hover); color: var(--zp-ink) }
+.zp-root .zp-opt[aria-pressed="true"] { border-color: transparent; background: var(--zp-primary); color: var(--zp-on-primary) }
+.zp-about + .zp-field { margin-top: 12px }
+
 /* ---------------- 全部命盘 ---------------- */
 .zp-list { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 0; list-style: none }
 .zp-list-item {
@@ -8348,14 +8520,14 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
  *     header.zp-as-head > b, small, div.zp-as-actions（新对话、在新会话里继续、关闭）
  *     div.zp-chat-thread[role=log][aria-live=polite]
  *       div.zp-as-empty                       面板空着时：一句话 + 速览 + 起手动作 + 示例问题
- *         p.zp-l1, section.zp-quick > h4 + p（速览，本地算的）, div.zp-as-starts > button.zp-btn, div.zp-suggest > button
+ *         p.zp-l1, section.zp-quick > h4 + p（速览，本地算的）, div.zp-as-starts > button.zp-btn
  *       div.zp-msg.zp-me（+ q 引用）
  *       div.zp-msg.zp-bot > div.zp-md         回答（zp-md-h* / zp-md-p / zp-md-li / zp-md-quote / zp-md-table / zp-md-gap）
  *       div.zp-typing > span.zp-pulse + 文字  正在思考 / 正在写
  *     div.zp-as-error > span + button         出错：接着写 / 重试
- *     div.zp-suggest > button                 报告写完后的追问建议
+ *     div.zp-suggest[role=group] > button     引导问题，常驻（一行，放不下横着滚）
  *     div.zp-quote > span + button            引用条
- *     form.zp-as-form > textarea + button.zp-send（生成中换成停止，加 zp-stop）
+ *     form.zp-as-form > textarea + div.zp-as-tools > button.zp-model（模型）+ span.zp-grow + button.zp-send（生成中换成停止，加 zp-stop）
  *     div.zp-as-foot                          免责声明
  * ================================================================ */
 .zp-assistant {
@@ -8534,20 +8706,29 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
 .zp-suggest {
   flex: none;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding: 4px 16px 8px;
+  gap: 6px;
+  padding: 0 12px 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  /* 右边淡出：还有没露出来的问题时看得出可以横着滚 */
+  -webkit-mask-image: linear-gradient(90deg, var(--zp-orb-lo) calc(100% - 24px), transparent);
+  mask-image: linear-gradient(90deg, var(--zp-orb-lo) calc(100% - 24px), transparent);
 }
-.zp-as-empty .zp-suggest { padding: 0 }
 .zp-suggest button {
-  padding: 4px 0;
-  border: 0;
+  flex: none;
+  height: 28px;
+  padding: 0 12px;
+  border: 1px solid var(--zp-line-2);
+  border-radius: 999px;
   background: transparent;
-  font-size: 13px;
-  text-align: left;
+  font-size: 12px;
+  white-space: nowrap;
+  transition: background-color 120ms ease, color 120ms ease;
 }
+.zp-suggest button:last-child { margin-right: 16px }
 .zp-root .zp-suggest button { color: var(--zp-ink-2) }
-.zp-root .zp-suggest button:hover { color: var(--zp-ink) }
+.zp-root .zp-suggest button:hover { background: var(--zp-hover); color: var(--zp-ink) }
+.zp-suggest button:disabled { opacity: 0.55 }
 .zp-quote {
   flex: none;
   display: flex;
@@ -8580,24 +8761,25 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
 }
 .zp-root .zp-quote button { color: var(--zp-ink-3) }
 .zp-root .zp-quote button:hover { background: var(--zp-hover); color: var(--zp-ink) }
+/* 输入区：上面是输入框，下面一行是模型按钮和发送键 */
 .zp-as-form {
   flex: none;
   display: flex;
-  align-items: flex-end;
-  gap: 8px;
+  flex-direction: column;
+  gap: 4px;
   margin: 0 12px 12px;
-  padding: 6px 6px 6px 12px;
+  padding: 8px 8px 8px 12px;
   border: 1px solid var(--zp-line-2);
-  border-radius: 12px;
-  background: var(--zp-surface);
+  border-radius: 16px;
+  background: var(--zp-raised);
   transition: border-color 120ms ease, box-shadow 120ms ease;
 }
 .zp-as-form:focus-within { border-color: var(--zp-zi); box-shadow: 0 0 0 3px color-mix(in srgb, var(--zp-zi) 22%, transparent) }
 .zp-as-form textarea {
-  flex: 1;
+  width: 100%;
   min-width: 0;
   max-height: 120px;
-  padding: 6px 0;
+  padding: 4px 0;
   border: 0;
   background: transparent;
   font-size: 14px;
@@ -8606,6 +8788,8 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   resize: none;
 }
 .zp-as-form textarea::placeholder { color: var(--zp-ink-4) }
+.zp-as-tools { display: flex; align-items: center; gap: 8px; min-width: 0; margin-left: -8px }
+.zp-as-tools .zp-model { flex: 0 1 auto; min-width: 0 }
 .zp-send.zp-stop { background: var(--zp-hover); box-shadow: inset 0 0 0 1px var(--zp-line) }
 .zp-root .zp-send.zp-stop { color: var(--zp-ink) }
 .zp-as-foot {
@@ -9056,14 +9240,14 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
  *     不看正文的组件别选 readings。selector 每次变化都会跑，里面不要做重活。
  * openSheet(kind, chartId?)   打开面板内浮层：patchSession({ sheet: kind, sheetChartId, modal: null })。
  *                             kind：'birth'（直接填表 / 改生辰，chartId = 要改的盘）| 'charts'（全部命盘）
- * openModal(name)             打开弹层：patchSession({ modal: name, sheet: null, sheetChartId: null })。name：'settings'
+ * openModal(name)             打开弹层：patchSession({ modal: name, sheet: null, sheetChartId: null })。name：'settings' | 'model'
  * closeLayers()               关掉浮层和弹层（sheet、sheetChartId、modal 全部置空）
  *   同一时间只有一个模态层：sheet 和 modal 互斥；中、窄档里浮着的紫微师在浮层打开时由 ProApp 关上。
  *
  * ---------------- 部件 ----------------
  * Icon { name, size = 16 }
  *   svg.zp-icon（aria-hidden，线色随文字）。name 是 ICON_PATHS 的键（ZWUi.iconNames 列出全部）：
- *   exit back close more list gear settings caret chevronLeft chevronRight send stop sparkle newChat handoff
+ *   exit back close more list gear settings caret chevronLeft chevronRight chevronDown send stop sparkle newChat handoff
  *   copy download export report quote refresh check。新图标先加进表里再用。
  *
  * Seg { items, value, onChange(id), label, className?, region?, radio? }
@@ -9335,6 +9519,9 @@ const ICON_PATHS = {
   ],
   chevronLeft: [
     ['path', { d: 'M9.8 3.6L5.4 8l4.4 4.4' }]
+  ],
+  chevronDown: [
+    ['path', { d: 'M3.6 6.2L8 10.6l4.4-4.4' }]
   ],
   chevronRight: [
     ['path', { d: 'M6.2 3.6L10.6 8l-4.4 4.4' }]
@@ -10164,6 +10351,7 @@ function HomeView(props) {
           autoComplete: 'off', enterKeyHint: 'send',
           onChange: function (ev) { setAsk(ev.target.value); }
         }),
+        h(ModelChip, { compact: true }),
         h('button', { className: 'zp-send', type: 'submit', title: t('homeSend'), 'aria-label': t('homeSend') }, h(Icon, { name: 'send' }))),
       h('div', { key: 'chips', className: 'zp-chips' },
         h('button', { className: 'zp-chip', type: 'button', onClick: function () { homeOpen(focusRow.id, { tab: 'daily' }); } }, t('homeChipToday')),
@@ -11083,6 +11271,102 @@ function SettingsModal(props) {
     h('p', { key: 'about', className: 'zp-about' }, t('setAbout')),
     h('p', { key: 'sign', className: 'zp-about' }, t('setSignature'), h('br'), t('setContact')));
 }
+/* ---- src/ui/68-models.js ---- */
+/* ================================================================
+ * 68-models：模型选择（spec 2026-11-20 §3.5）。参考自媒体工作台（dsh-media-desk）的做法：提问的地方有一个模型按钮，
+ * 点开是一个弹层，第一项「跟随 DSH 默认」，下面按提供方分组列出模型。
+ *
+ * ModelChip { compact? }   button.zp-model：星形图标 + 当前生效的模型名 + 下箭头；点了 openModal('model')。
+ *   紫微师输入区（80-assistant）和首页提问框（60-home，compact）各放一个。挂上它不发任何请求。
+ *   模型名取：用户选的（prefs.model）→ DSH 的默认模型（models.def，读过列表才知道）→ 最近一次回答实际用的
+ *   （session.lastModel，来自 SSE 的 start 帧）→ 都不知道时写「默认模型」。
+ * ModelModal {}            ProApp 在 session.modal === 'model' 时渲染；外框用 50-parts 的 Modal。
+ *   打开时读一次列表（store.loadModels()）。四种状态：读取中、读到了、列表是空的、读不到（旧 Host：要重启 DSH）。
+ *   选一项：store.setModel(...)，关掉弹层，变了才提示；下一次提问生效（请求体带 model，见 26-store 的 buildInterpretBody）。
+ * 结构：div.zp-field > span（提供方名）+ div.zp-opts[role=group] > button.zp-opt[aria-pressed]；说明是 p.zp-field-hint。
+ * ================================================================ */
+
+function mdlShellOf(s) {
+  return { pref: s.prefs.model, models: s.models, last: s.session.lastModel };
+}
+
+/* 当前生效的模型名；不知道时是空串 */
+function mdlNameOf(m) {
+  if (m.pref) return m.pref.model;
+  if (m.models.def) return m.models.def.model;
+  if (m.last) return m.last.model;
+  return '';
+}
+ZWUI.modelNameOf = mdlNameOf;
+
+function ModelChip(props) {
+  const m = useStore(mdlShellOf);
+  const name = mdlNameOf(m);
+  const label = name ? t('mdlChip', { model: name }) : t('mdlChipNone');
+  return h('button', {
+    className: 'zp-model' + (props && props.compact ? ' zp-compact' : ''), type: 'button',
+    title: label, 'aria-label': label, 'aria-haspopup': 'dialog',
+    onClick: function () { openModal('model'); }
+  },
+  h(Icon, { name: 'sparkle', size: 14 }),
+  h('span', null, name || t('mdlChipDefault')),
+  h(Icon, { name: 'chevronDown', size: 12 }));
+}
+
+function ModelModal() {
+  const m = useStore(mdlShellOf);
+  const store = appStore();
+  /* 每次打开都重读一次：DSH 里可能刚接了新的提供方 */
+  useEffect(function () { store.loadModels(); }, []);
+  const st = m.models;
+  const pick = function (sel, name) {
+    const changed = store.setModel(sel);
+    closeLayers();
+    if (changed) store.showToast(sel ? t('mdlSwitched', { model: name }) : t('mdlSwitchedDefault'));
+  };
+  const isOn = function (providerId, modelId) {
+    return !!m.pref && m.pref.provider === providerId && m.pref.model === modelId;
+  };
+  const listed = !!m.pref && st.providers.some(function (p) {
+    return p.id === m.pref.provider && p.models.some(function (x) { return x.id === m.pref.model; });
+  });
+  const groups = st.providers.map(function (p) {
+    return h('div', { key: 'p-' + p.id, className: 'zp-field' },
+      h('span', null, p.name),
+      h('div', { className: 'zp-opts', role: 'group', 'aria-label': p.name }, p.models.map(function (x) {
+        return h('button', {
+          key: x.id, type: 'button', className: 'zp-opt', title: x.id,
+          'aria-pressed': isOn(p.id, x.id) ? 'true' : 'false',
+          onClick: function () { pick({ provider: p.id, model: x.id }, x.name); }
+        }, x.name);
+      })));
+  });
+  let status = null;
+  if (st.status === 'idle' || st.status === 'loading') {
+    status = h('p', { key: 'loading', className: 'zp-field-hint' }, t('mdlLoading'));
+  } else if (st.status === 'error') {
+    status = h('div', { key: 'error', className: 'zp-field' },
+      h('p', { className: 'zp-field-hint zp-err' }, t('mdlError', { reason: st.error || 'unknown' })),
+      h('p', { className: 'zp-field-hint' }, t('mdlErrorHint')),
+      h('div', { className: 'zp-opts' },
+        h('button', { type: 'button', className: 'zp-btn zp-sm', onClick: function () { store.loadModels(); } }, t('mdlReload'))));
+  } else if (!st.providers.length) {
+    status = h('p', { key: 'empty', className: 'zp-field-hint' }, t('mdlEmpty'));
+  }
+  return h(Modal, { title: t('mdlTitle'), onClose: closeLayers },
+    h('p', { key: 'intro', className: 'zp-about' }, t('mdlIntro')),
+    h('div', { key: 'follow', className: 'zp-field' },
+      h('div', { className: 'zp-opts' },
+        h('button', {
+          type: 'button', className: 'zp-opt', 'aria-pressed': m.pref ? 'false' : 'true',
+          onClick: function () { pick(null, ''); }
+        }, st.def ? t('mdlFollowWith', { model: st.def.model }) : t('mdlFollow'))),
+      h('p', { className: 'zp-field-hint' }, t('mdlFollowHint'))),
+    h('div', { key: 'live', 'aria-live': 'polite' }, status),
+    groups,
+    m.pref && st.status === 'ready' && !listed
+      ? h('p', { key: 'missing', className: 'zp-field-hint zp-err' }, t('mdlMissing', { model: m.pref.model })) : null);
+}
 /* ---- src/ui/70-chart.js ---- */
 /* ================================================================
  * 70-chart：命盘页——时间卡、格局卡、宫位卡、盘面、三方四正连线、窄档页签（T5b）
@@ -11641,11 +11925,12 @@ function BoardLines() {
  *   AssistantHead       header.zp-as-head：紫微师、上下文行（AssistantContext）、新对话 / 在新会话里继续 / 关闭
  *   AssistantThread     div.zp-chat-thread[role=log]：空态（AssistantEmpty）或消息（AssistantMsg）+ 输入指示；
  *                       离底部 48px 以内才跟随新内容
- *   AssistantEmpty      一句话、速览（AssistantQuick，本地算的，不调模型）、起手动作和示例问题（AssistantStarts）
- *   AssistantError      错误条：可接着写的给「接着写」，其余给「重试」
- *   AssistantSuggest    报告写完、对话不空时的四个追问建议（v5）
+ *   AssistantEmpty      一句话、速览（AssistantQuick，本地算的，不调模型）、起手动作（AssistantStarts）
+ *   AssistantError      错误条：可接着写的给「接着写」，其余给「重试」；模型没作答或调用失败时多一个「换个模型」
+ *   AssistantSuggest    引导问题，常驻在输入框上方（不只在空对话时）：选中的宫、当前时间层级、两条通用问题
  *   AssistantQuote      引用条（session.quote）
- *   AssistantComposer   输入框：草稿在 store 的 drafts 里（按盘、只在内存）；Enter 发送、Shift+Enter 换行、
+ *   AssistantComposer   输入区 form.zp-as-form：上面是输入框，下面一行 div.zp-as-tools 是模型按钮（68-models 的 ModelChip）
+ *                       和发送键。草稿在 store 的 drafts 里（按盘、只在内存）；Enter 发送、Shift+Enter 换行、
  *                       输入法组字时不发；对话在跑时发送键换成停止键。报告在写时不能提问（一张盘同时只有一个任务），
  *                       发送键禁用、不变成停止键：停报告在报告页，免得在这里一按停掉写了几分钟的报告
  * ================================================================ */
@@ -11683,17 +11968,9 @@ function asSplitAsk(content) {
   return { quote: { label: s.slice(AS_QUOTE_OPEN.length, close), text: rest.slice(0, cut) }, text: rest.slice(cut + 2) };
 }
 
-/* 提问（示例、追问建议、输入框共用）。「讲讲我选的这一宫」在没有别的引用时带上选中宫位的星曜（v5 askQuestion） */
+/* 输入框里的提问（带上还挂着的引用，由 store.ask 处理）。引导问题各自带自己的引用和定位，见 asSuggestItems */
 function asAsk(question) {
-  const store = appStore();
-  const text = String(question == null ? '' : question).trim();
-  const s = store.getState().session;
-  if (text && text === t('asSuggestPalace') && !s.quote) {
-    const chart = store.currentChart();
-    const p = chart ? chart.palaces[s.sel] : null;
-    if (p) return store.ask(text, { quote: { label: t('asQuotePalaceLabel'), text: palaceQuoteText(p, t('asEmptyPalace')) } });
-  }
-  return store.ask(text);
+  return appStore().ask(String(question == null ? '' : question).trim());
 }
 
 function asTrapKey(ev) {
@@ -11733,7 +12010,8 @@ function asThreadOf(s, store) {
     thread: r.thread,
     chat: !!job && job.kind === 'chat',
     report: !!job && job.kind === 'report',
-    thinking: !!job && job.kind === 'chat' && job.thinkChars > 0
+    thinking: !!job && job.kind === 'chat' && job.thinkChars > 0,
+    retried: !!job && job.kind === 'chat' && !!job.retried
   };
 }
 
@@ -11749,12 +12027,20 @@ function asStartsOf(s, store) {
 
 function asErrorOf(s, store) {
   const r = store.reading();
-  return { err: String(r.chatError || ''), cont: !!(r.chatIssue && r.chatIssue.canContinue), busy: !!store.job() };
+  return {
+    err: String(r.chatError || ''), cont: !!(r.chatIssue && r.chatIssue.canContinue),
+    kind: String((r.chatIssue && r.chatIssue.kind) || ''), busy: !!store.job()
+  };
 }
 
+/* 引导问题跟着正在看的东西走：选中的宫、当前页签和日期；对话空不空决定条数 */
 function asSuggestOf(s, store) {
+  const ss = s.session;
   const r = store.reading();
-  return { show: r.thread.length > 0 && asReportDone(r.report), busy: !!store.job() };
+  return {
+    entry: store.currentEntry(), sel: ss.sel, tab: ss.tab, when: ss.tab === 'natal' ? null : ss.when,
+    hasThread: r.thread.length > 0, reportDone: asReportDone(r.report), busy: !!store.job()
+  };
 }
 
 function asQuoteOf(s) {
@@ -11839,7 +12125,7 @@ function AssistantThread(props) {
   useEffect(function () {
     const el = boxRef.current;
     if (el && stick.current && typeof el.scrollHeight === 'number') el.scrollTop = el.scrollHeight;
-  }, [m.thread, m.chat, m.report, m.thinking]);
+  }, [m.thread, m.chat, m.report, m.thinking, m.retried]);
   const onScroll = function (ev) {
     const el = ev.currentTarget;
     if (!el || typeof el.scrollHeight !== 'number') return;
@@ -11857,7 +12143,7 @@ function AssistantThread(props) {
   }),
   m.chat ? h('div', { key: 'typing', className: 'zp-typing' },
     h('span', { className: 'zp-pulse', 'aria-hidden': true }),
-    t(m.thinking ? 'asThinking' : 'asWriting')) : null,
+    t(m.retried ? 'asRetrying' : (m.thinking ? 'asThinking' : 'asWriting'))) : null,
   m.report ? h('div', { key: 'report', className: 'zp-typing' },
     h('span', { className: 'zp-pulse', 'aria-hidden': true }),
     t('asReportRunning')) : null);
@@ -11917,15 +12203,11 @@ function AssistantQuick() {
   return h('section', { className: 'zp-quick' }, rows);
 }
 
-/* 起手动作和示例问题。「写完整报告」只是去报告页（在那里开始写），不在这里发请求；
-   中、窄档下面板浮在上面，去报告页时先收起它 */
+/* 起手动作。「写完整报告」只是去报告页（在那里开始写），不在这里发请求；
+   中、窄档下面板浮在上面，去报告页时先收起它。示例问题在输入框上方那排常驻的引导里（AssistantSuggest） */
 function AssistantStarts(props) {
   const m = useStore(asStartsOf);
   const store = appStore();
-  const ask = function (text) {
-    if (asAsk(text)) props.focusInput();
-  };
-  const examples = [t('asEx1'), t('asEx2'), t('asEx3')];
   return [
     h('div', { key: 'starts', className: 'zp-as-starts' },
       h('button', {
@@ -11938,10 +12220,7 @@ function AssistantStarts(props) {
           store.setStage('report');
           if (props.floating) store.setPanel(false);
         }
-      }, m.hasReport ? t('asOpenReport') : t('asStartReport'))),
-    h('div', { key: 'examples', className: 'zp-suggest' }, examples.map(function (q, i) {
-      return h('button', { key: i, type: 'button', disabled: m.busy ? true : undefined, onClick: function () { ask(q); } }, q);
-    }))
+      }, m.hasReport ? t('asOpenReport') : t('asStartReport')))
   ];
 }
 
@@ -11950,7 +12229,9 @@ function AssistantError(props) {
   const m = useStore(asErrorOf);
   if (!m.err) return null;
   const store = appStore();
-  return h('div', { className: 'zp-as-error' },
+  /* 模型没作答、或者调用失败：除了重试，再给一条换模型的路 */
+  const swap = m.kind === 'empty' || m.kind === 'error';
+  return h('div', { className: 'zp-as-error', role: 'alert' },
     h('span', null, m.err),
     h('button', {
       className: 'zp-btn zp-sm', type: 'button', disabled: m.busy ? true : undefined,
@@ -11958,18 +12239,53 @@ function AssistantError(props) {
         const ok = m.cont ? store.continueChat() : store.retryChat();
         if (ok) props.focusInput();
       }
-    }, m.cont ? t('asContinue') : t('asRetry')));
+    }, m.cont ? t('asContinue') : t('asRetry')),
+    swap ? h('button', {
+      className: 'zp-btn zp-sm', type: 'button', onClick: function () { openModal('model'); }
+    }, t('asSwapModel')) : null);
+}
+
+/* 引导常驻（spec 2026-11-20 §3.7）：输入框上方一直有一排问题，不只在空对话时出现。
+   内容跟着正在看的东西走：选中的宫、当前时间层级；后面是两条通用的。对话为空时最多 4 条，有对话后最多 3 条；
+   报告写完后把第二条通用问题换成「说得再通俗一点」。生成中禁用。 */
+function asSuggestItems(m, chart) {
+  const out = [];
+  const p = chart ? chart.palaces[m.sel] : null;
+  if (p) {
+    out.push({
+      id: 'palace', label: t('asSugPalace', { palace: p.name }),
+      run: function (store) {
+        return store.ask(t('asSugPalace', { palace: p.name }), { quote: { label: t('asQuotePalaceLabel'), text: palaceQuoteText(p, t('asEmptyPalace')) } });
+      }
+    });
+  }
+  if (chart && m.tab !== 'natal' && m.when) {
+    const rel = relWord(chart, m.tab, m.when, appStore().todayOf());
+    if (rel) {
+      const q = t('asSugScope', { rel: rel });
+      out.push({ id: 'scope', label: q, run: function (store) { return store.ask(q, { scope: true, quote: null }); } });
+    }
+  } else {
+    const q = t('asSugDecade');
+    out.push({ id: 'decade', label: q, run: function (store) { return store.ask(q, { quote: null }); } });
+  }
+  [m.reportDone && m.hasThread ? 'asSuggestPlain' : 'asSugCareer', 'asSugLove'].forEach(function (key) {
+    const q = t(key);
+    out.push({ id: key, label: q, run: function (store) { return store.ask(q, { quote: null }); } });
+  });
+  return out.slice(0, m.hasThread ? 3 : 4);
 }
 
 function AssistantSuggest(props) {
   const m = useStore(asSuggestOf);
-  if (!m.show) return null;
-  const list = [t('asSuggestCareer'), t('asSuggestLove'), t('asSuggestPlain'), t('asSuggestPalace')];
-  return h('div', { className: 'zp-suggest' }, list.map(function (q, i) {
+  const chart = useMemo(function () { return m.entry ? appStore().chartOf(m.entry) : null; }, [m.entry]);
+  const items = asSuggestItems(m, chart);
+  if (!items.length) return null;
+  return h('div', { className: 'zp-suggest', role: 'group', 'aria-label': t('asSugLabel') }, items.map(function (it) {
     return h('button', {
-      key: i, type: 'button', disabled: m.busy ? true : undefined,
-      onClick: function () { if (asAsk(q)) props.focusInput(); }
-    }, q);
+      key: it.id, type: 'button', disabled: m.busy ? true : undefined,
+      onClick: function () { if (it.run(appStore())) props.focusInput(); }
+    }, it.label);
   }));
 }
 
@@ -12026,18 +12342,22 @@ function AssistantComposer(props) {
       submit();
     }
   }),
-  chatting
-    ? h('button', {
-      className: 'zp-send zp-stop', type: 'button', title: t('asStop'), 'aria-label': t('asStop'),
-      onClick: function () {
-        store.stop();
-        if (taRef.current) focusQuietly(taRef.current);
-      }
-    }, h(Icon, { name: 'stop' }))
-    : h('button', {
-      className: 'zp-send', type: 'button', title: t('asSend'), 'aria-label': t('asSend'),
-      disabled: canSend ? undefined : true, onClick: submit
-    }, h(Icon, { name: 'send' })));
+  /* 输入框下面一行：左边是模型按钮，右边是发送 / 停止 */
+  h('div', { className: 'zp-as-tools' },
+    h(ModelChip, null),
+    h('span', { className: 'zp-grow' }),
+    chatting
+      ? h('button', {
+        className: 'zp-send zp-stop', type: 'button', title: t('asStop'), 'aria-label': t('asStop'),
+        onClick: function () {
+          store.stop();
+          if (taRef.current) focusQuietly(taRef.current);
+        }
+      }, h(Icon, { name: 'stop' }))
+      : h('button', {
+        className: 'zp-send', type: 'button', title: t('asSend'), 'aria-label': t('asSend'),
+        disabled: canSend ? undefined : true, onClick: submit
+      }, h(Icon, { name: 'send' }))));
 }
 /* ---- src/ui/85-reportview.js ---- */
 /* ================================================================
@@ -12735,6 +13055,7 @@ ZWUI.rvPickPlace = rvPickPlace;
  *       AssistantPanel   （只在命盘页）面板关着时它自己什么都不渲染
  *       SheetHost        session.sheet 有值时才渲染
  *       SettingsModal    session.modal === 'settings' 时才渲染
+ *       ModelModal       session.modal === 'model' 时才渲染（68-models）
  *       Toast
  * 视图组件由后面的任务写：ProApp 用 typeof 判断它存在才渲染，所以那些任务不用改这个文件。
  * 每个视图都收到 props { tier: 'narrow' | 'mid' | 'wide', theme: 'dark' | 'light' }（都不在 store 里），各包一层错误边界：
@@ -12934,6 +13255,7 @@ function ProApp(props) {
     app.sheet && typeof SheetHost === 'function' ? h(Boundary, { key: 'sheet' }, h(SheetHost, viewProps)) : null,
     app.modal === 'settings' && typeof SettingsModal === 'function'
       ? h(Boundary, { key: 'modal' }, h(SettingsModal, { tier: tier, theme: theme, actions: actions })) : null,
+    app.modal === 'model' && typeof ModelModal === 'function' ? h(Boundary, { key: 'modal-model' }, h(ModelModal, viewProps)) : null,
     h(Boundary, { key: 'toast' }, h(Toast))));
 }
 

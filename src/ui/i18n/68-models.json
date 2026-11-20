@@ -1,0 +1,18 @@
+{
+  "mdlTitle": ["模型", "Model"],
+  "mdlChip": ["模型：{model}，点击更换", "Model: {model}. Click to change"],
+  "mdlChipNone": ["选择模型", "Choose a model"],
+  "mdlChipDefault": ["默认模型", "Default model"],
+  "mdlIntro": ["紫微师用哪个模型来回答。换了之后，下一次提问生效。", "Which model answers your questions. A change applies to the next question."],
+  "mdlFollow": ["跟随 DSH 默认", "Follow the DSH default"],
+  "mdlFollowWith": ["跟随 DSH 默认（{model}）", "Follow the DSH default ({model})"],
+  "mdlFollowHint": ["在 DeepSeek Harness 里换了默认模型，这里跟着变。", "Changes with the default model set in DeepSeek Harness."],
+  "mdlLoading": ["正在读取可用模型…", "Loading available models…"],
+  "mdlEmpty": ["DeepSeek Harness 里还没有接入模型提供方。", "No model providers are connected in DeepSeek Harness yet."],
+  "mdlError": ["读不到模型列表（{reason}）。", "Could not load the model list ({reason})."],
+  "mdlErrorHint": ["这一版的模型选择要重启 DeepSeek Harness 之后才能用。现在提问仍然用 DSH 的默认模型。", "Model selection in this version needs a DeepSeek Harness restart. Questions still use the DSH default model for now."],
+  "mdlReload": ["重新读取", "Reload"],
+  "mdlSwitched": ["已切换到 {model}", "Switched to {model}"],
+  "mdlSwitchedDefault": ["已改回跟随 DSH 默认", "Back to following the DSH default"],
+  "mdlMissing": ["现在选的 {model} 不在列表里，提问时可能失败。", "The selected model {model} is not in the list; questions may fail."]
+}

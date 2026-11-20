@@ -15,11 +15,12 @@
  *   AssistantHead       header.zp-as-head：紫微师、上下文行（AssistantContext）、新对话 / 在新会话里继续 / 关闭
  *   AssistantThread     div.zp-chat-thread[role=log]：空态（AssistantEmpty）或消息（AssistantMsg）+ 输入指示；
  *                       离底部 48px 以内才跟随新内容
- *   AssistantEmpty      一句话、速览（AssistantQuick，本地算的，不调模型）、起手动作和示例问题（AssistantStarts）
- *   AssistantError      错误条：可接着写的给「接着写」，其余给「重试」
- *   AssistantSuggest    报告写完、对话不空时的四个追问建议（v5）
+ *   AssistantEmpty      一句话、速览（AssistantQuick，本地算的，不调模型）、起手动作（AssistantStarts）
+ *   AssistantError      错误条：可接着写的给「接着写」，其余给「重试」；模型没作答或调用失败时多一个「换个模型」
+ *   AssistantSuggest    引导问题，常驻在输入框上方（不只在空对话时）：选中的宫、当前时间层级、两条通用问题
  *   AssistantQuote      引用条（session.quote）
- *   AssistantComposer   输入框：草稿在 store 的 drafts 里（按盘、只在内存）；Enter 发送、Shift+Enter 换行、
+ *   AssistantComposer   输入区 form.zp-as-form：上面是输入框，下面一行 div.zp-as-tools 是模型按钮（68-models 的 ModelChip）
+ *                       和发送键。草稿在 store 的 drafts 里（按盘、只在内存）；Enter 发送、Shift+Enter 换行、
  *                       输入法组字时不发；对话在跑时发送键换成停止键。报告在写时不能提问（一张盘同时只有一个任务），
  *                       发送键禁用、不变成停止键：停报告在报告页，免得在这里一按停掉写了几分钟的报告
  * ================================================================ */
@@ -57,17 +58,9 @@ function asSplitAsk(content) {
   return { quote: { label: s.slice(AS_QUOTE_OPEN.length, close), text: rest.slice(0, cut) }, text: rest.slice(cut + 2) };
 }
 
-/* 提问（示例、追问建议、输入框共用）。「讲讲我选的这一宫」在没有别的引用时带上选中宫位的星曜（v5 askQuestion） */
+/* 输入框里的提问（带上还挂着的引用，由 store.ask 处理）。引导问题各自带自己的引用和定位，见 asSuggestItems */
 function asAsk(question) {
-  const store = appStore();
-  const text = String(question == null ? '' : question).trim();
-  const s = store.getState().session;
-  if (text && text === t('asSuggestPalace') && !s.quote) {
-    const chart = store.currentChart();
-    const p = chart ? chart.palaces[s.sel] : null;
-    if (p) return store.ask(text, { quote: { label: t('asQuotePalaceLabel'), text: palaceQuoteText(p, t('asEmptyPalace')) } });
-  }
-  return store.ask(text);
+  return appStore().ask(String(question == null ? '' : question).trim());
 }
 
 function asTrapKey(ev) {
@@ -107,7 +100,8 @@ function asThreadOf(s, store) {
     thread: r.thread,
     chat: !!job && job.kind === 'chat',
     report: !!job && job.kind === 'report',
-    thinking: !!job && job.kind === 'chat' && job.thinkChars > 0
+    thinking: !!job && job.kind === 'chat' && job.thinkChars > 0,
+    retried: !!job && job.kind === 'chat' && !!job.retried
   };
 }
 
@@ -123,12 +117,20 @@ function asStartsOf(s, store) {
 
 function asErrorOf(s, store) {
   const r = store.reading();
-  return { err: String(r.chatError || ''), cont: !!(r.chatIssue && r.chatIssue.canContinue), busy: !!store.job() };
+  return {
+    err: String(r.chatError || ''), cont: !!(r.chatIssue && r.chatIssue.canContinue),
+    kind: String((r.chatIssue && r.chatIssue.kind) || ''), busy: !!store.job()
+  };
 }
 
+/* 引导问题跟着正在看的东西走：选中的宫、当前页签和日期；对话空不空决定条数 */
 function asSuggestOf(s, store) {
+  const ss = s.session;
   const r = store.reading();
-  return { show: r.thread.length > 0 && asReportDone(r.report), busy: !!store.job() };
+  return {
+    entry: store.currentEntry(), sel: ss.sel, tab: ss.tab, when: ss.tab === 'natal' ? null : ss.when,
+    hasThread: r.thread.length > 0, reportDone: asReportDone(r.report), busy: !!store.job()
+  };
 }
 
 function asQuoteOf(s) {
@@ -213,7 +215,7 @@ function AssistantThread(props) {
   useEffect(function () {
     const el = boxRef.current;
     if (el && stick.current && typeof el.scrollHeight === 'number') el.scrollTop = el.scrollHeight;
-  }, [m.thread, m.chat, m.report, m.thinking]);
+  }, [m.thread, m.chat, m.report, m.thinking, m.retried]);
   const onScroll = function (ev) {
     const el = ev.currentTarget;
     if (!el || typeof el.scrollHeight !== 'number') return;
@@ -231,7 +233,7 @@ function AssistantThread(props) {
   }),
   m.chat ? h('div', { key: 'typing', className: 'zp-typing' },
     h('span', { className: 'zp-pulse', 'aria-hidden': true }),
-    t(m.thinking ? 'asThinking' : 'asWriting')) : null,
+    t(m.retried ? 'asRetrying' : (m.thinking ? 'asThinking' : 'asWriting'))) : null,
   m.report ? h('div', { key: 'report', className: 'zp-typing' },
     h('span', { className: 'zp-pulse', 'aria-hidden': true }),
     t('asReportRunning')) : null);
@@ -291,15 +293,11 @@ function AssistantQuick() {
   return h('section', { className: 'zp-quick' }, rows);
 }
 
-/* 起手动作和示例问题。「写完整报告」只是去报告页（在那里开始写），不在这里发请求；
-   中、窄档下面板浮在上面，去报告页时先收起它 */
+/* 起手动作。「写完整报告」只是去报告页（在那里开始写），不在这里发请求；
+   中、窄档下面板浮在上面，去报告页时先收起它。示例问题在输入框上方那排常驻的引导里（AssistantSuggest） */
 function AssistantStarts(props) {
   const m = useStore(asStartsOf);
   const store = appStore();
-  const ask = function (text) {
-    if (asAsk(text)) props.focusInput();
-  };
-  const examples = [t('asEx1'), t('asEx2'), t('asEx3')];
   return [
     h('div', { key: 'starts', className: 'zp-as-starts' },
       h('button', {
@@ -312,10 +310,7 @@ function AssistantStarts(props) {
           store.setStage('report');
           if (props.floating) store.setPanel(false);
         }
-      }, m.hasReport ? t('asOpenReport') : t('asStartReport'))),
-    h('div', { key: 'examples', className: 'zp-suggest' }, examples.map(function (q, i) {
-      return h('button', { key: i, type: 'button', disabled: m.busy ? true : undefined, onClick: function () { ask(q); } }, q);
-    }))
+      }, m.hasReport ? t('asOpenReport') : t('asStartReport')))
   ];
 }
 
@@ -324,7 +319,9 @@ function AssistantError(props) {
   const m = useStore(asErrorOf);
   if (!m.err) return null;
   const store = appStore();
-  return h('div', { className: 'zp-as-error' },
+  /* 模型没作答、或者调用失败：除了重试，再给一条换模型的路 */
+  const swap = m.kind === 'empty' || m.kind === 'error';
+  return h('div', { className: 'zp-as-error', role: 'alert' },
     h('span', null, m.err),
     h('button', {
       className: 'zp-btn zp-sm', type: 'button', disabled: m.busy ? true : undefined,
@@ -332,18 +329,53 @@ function AssistantError(props) {
         const ok = m.cont ? store.continueChat() : store.retryChat();
         if (ok) props.focusInput();
       }
-    }, m.cont ? t('asContinue') : t('asRetry')));
+    }, m.cont ? t('asContinue') : t('asRetry')),
+    swap ? h('button', {
+      className: 'zp-btn zp-sm', type: 'button', onClick: function () { openModal('model'); }
+    }, t('asSwapModel')) : null);
+}
+
+/* 引导常驻（spec 2026-11-20 §3.7）：输入框上方一直有一排问题，不只在空对话时出现。
+   内容跟着正在看的东西走：选中的宫、当前时间层级；后面是两条通用的。对话为空时最多 4 条，有对话后最多 3 条；
+   报告写完后把第二条通用问题换成「说得再通俗一点」。生成中禁用。 */
+function asSuggestItems(m, chart) {
+  const out = [];
+  const p = chart ? chart.palaces[m.sel] : null;
+  if (p) {
+    out.push({
+      id: 'palace', label: t('asSugPalace', { palace: p.name }),
+      run: function (store) {
+        return store.ask(t('asSugPalace', { palace: p.name }), { quote: { label: t('asQuotePalaceLabel'), text: palaceQuoteText(p, t('asEmptyPalace')) } });
+      }
+    });
+  }
+  if (chart && m.tab !== 'natal' && m.when) {
+    const rel = relWord(chart, m.tab, m.when, appStore().todayOf());
+    if (rel) {
+      const q = t('asSugScope', { rel: rel });
+      out.push({ id: 'scope', label: q, run: function (store) { return store.ask(q, { scope: true, quote: null }); } });
+    }
+  } else {
+    const q = t('asSugDecade');
+    out.push({ id: 'decade', label: q, run: function (store) { return store.ask(q, { quote: null }); } });
+  }
+  [m.reportDone && m.hasThread ? 'asSuggestPlain' : 'asSugCareer', 'asSugLove'].forEach(function (key) {
+    const q = t(key);
+    out.push({ id: key, label: q, run: function (store) { return store.ask(q, { quote: null }); } });
+  });
+  return out.slice(0, m.hasThread ? 3 : 4);
 }
 
 function AssistantSuggest(props) {
   const m = useStore(asSuggestOf);
-  if (!m.show) return null;
-  const list = [t('asSuggestCareer'), t('asSuggestLove'), t('asSuggestPlain'), t('asSuggestPalace')];
-  return h('div', { className: 'zp-suggest' }, list.map(function (q, i) {
+  const chart = useMemo(function () { return m.entry ? appStore().chartOf(m.entry) : null; }, [m.entry]);
+  const items = asSuggestItems(m, chart);
+  if (!items.length) return null;
+  return h('div', { className: 'zp-suggest', role: 'group', 'aria-label': t('asSugLabel') }, items.map(function (it) {
     return h('button', {
-      key: i, type: 'button', disabled: m.busy ? true : undefined,
-      onClick: function () { if (asAsk(q)) props.focusInput(); }
-    }, q);
+      key: it.id, type: 'button', disabled: m.busy ? true : undefined,
+      onClick: function () { if (it.run(appStore())) props.focusInput(); }
+    }, it.label);
   }));
 }
 
@@ -400,16 +432,20 @@ function AssistantComposer(props) {
       submit();
     }
   }),
-  chatting
-    ? h('button', {
-      className: 'zp-send zp-stop', type: 'button', title: t('asStop'), 'aria-label': t('asStop'),
-      onClick: function () {
-        store.stop();
-        if (taRef.current) focusQuietly(taRef.current);
-      }
-    }, h(Icon, { name: 'stop' }))
-    : h('button', {
-      className: 'zp-send', type: 'button', title: t('asSend'), 'aria-label': t('asSend'),
-      disabled: canSend ? undefined : true, onClick: submit
-    }, h(Icon, { name: 'send' })));
+  /* 输入框下面一行：左边是模型按钮，右边是发送 / 停止 */
+  h('div', { className: 'zp-as-tools' },
+    h(ModelChip, null),
+    h('span', { className: 'zp-grow' }),
+    chatting
+      ? h('button', {
+        className: 'zp-send zp-stop', type: 'button', title: t('asStop'), 'aria-label': t('asStop'),
+        onClick: function () {
+          store.stop();
+          if (taRef.current) focusQuietly(taRef.current);
+        }
+      }, h(Icon, { name: 'stop' }))
+      : h('button', {
+        className: 'zp-send', type: 'button', title: t('asSend'), 'aria-label': t('asSend'),
+        disabled: canSend ? undefined : true, onClick: submit
+      }, h(Icon, { name: 'send' }))));
 }

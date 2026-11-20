@@ -14,14 +14,16 @@
  *
  * ---------------- 状态（getState() 返回当前快照；每次变化换一个新对象，没变化不换） ----------------
  *   library   命盘库 [{ id, name, input, openedAt? }]（新→旧）
- *   prefs     { autoOpen, showAdj, sky, theme: 'dark' | 'light' | 'auto' }
+ *   prefs     { autoOpen, showAdj, sky, theme: 'dark' | 'light' | 'auto', model: { provider, model } | null（null = 跟随 DSH 默认） }
+ *   models    { status: 'idle'|'loading'|'ready'|'error', providers: [{ id, name, models: [{ id, name }] }], def: { provider, model }|null, error }
  *   session   { view: 'home'|'chart', chartId, tab: 'natal'|'decadal'|'yearly'|'monthly'|'daily', stage: 'board'|'report',
  *               when: { y, m, d }, sel: 0–11, pat, pane: 'scope'|'pats'|'detail', panelOpen, focusId, introPlayed,
  *               onboarding（引导问答的状态，store 不解读）, quote: { label, text }|null,
  *               toast: { text, error, action: { label, run }|null, key }|null, handoff: null|'working'|'done',
  *               drafts: { [命盘 key]: 草稿 }, readPos: { [命盘 key]: 阅读位置 } }   —— 草稿和阅读位置只在内存里
  *   readings  { [命盘 key]: { thread, report, chatError, chatIssue, studioTab, name } }   第一次用到时从 storage 读
- *   jobs      { [命盘 key]: { kind: 'chat'|'report', thinkChars } }   没有任务的 key 不出现
+ *   jobs      { [命盘 key]: { kind: 'chat'|'report', thinkChars, retried } }   没有任务的 key 不出现；
+ *             retried：Host 发现模型没有作答、正在同一个请求里再问一次（收到正文后变回 false）
  * 命盘 key = readingKeyOf(entry.input)。示例盘的 chartId 是 'sample'，不进命盘库。
  * subscribe(fn) → 退订函数。每次变化后同步调用 fn(state)；fn 里再改状态不会重入，排在这一轮之后再通知一轮。
  * 流式增量每秒来很多次：它只换 readings（和那张盘的 reading），jobs 在 kind / thinkChars 没变时还是同一个对象，
@@ -50,6 +52,8 @@
  *   stop(key?)        用户停止：保留已写的部分，可接着写
  *   handoff({ mode }?) → Promise<boolean>   在新会话里继续（v5 的 /ziwei/handoff），成功后交给 openSession
  *   checkVersion() → Promise<{ ok, current, latest, updateAvailable, reason }>   点「检查更新」时请求一次 /ziwei/version
+ *   setModel({ provider, model } | null) → boolean（变了才是 true）   loadModels() → Promise<state.models>（打开模型弹层时读）
+ *                                    session.lastModel 是最近一次回答实际用的模型（来自 SSE 的 start 帧）
  *   configure({ openSession })
  *   flush()           pagehide 时调用：正在写的报告按"中断、可接着写"落盘，对话存下已有的部分；任务不停
  *   abortAll()        插件卸载时调用：静默中止全部任务，各自按中断落盘
@@ -66,7 +70,7 @@ const STORE_HISTORY_MAX = 20;
 const STORE_TOAST_MS = { plain: 3200, undo: 6000, action: 8000 };
 const STORE_HANDOFF_TRIES = 6;
 const STORE_PANES = ['scope', 'pats', 'detail'];
-const STORE_PROTECTED = ['view', 'chartId', 'tab', 'stage', 'when', 'sel', 'toast', 'handoff', 'drafts', 'readPos'];
+const STORE_PROTECTED = ['view', 'chartId', 'tab', 'stage', 'when', 'sel', 'toast', 'handoff', 'drafts', 'readPos', 'lastModel'];
 
 function storeYmd(ms) {
   const dt = new Date(ms);
@@ -143,7 +147,7 @@ function buildInterpretBody(state) {
     chartText += '\n\n' + req.contextBlock;
     question = req.focusLine + (question ? '\n' + question : '');
   }
-  return {
+  const body = {
     chartText: chartText,
     mode: s.mode === 'report' ? 'report' : 'brief',
     question: question,
@@ -156,6 +160,10 @@ function buildInterpretBody(state) {
       decadalFocus: decadalFocus, yearlyFocus: yearlyFocus
     }
   };
+  /* 用户选了模型才带这个字段；不带时 Host 用 DSH 的默认模型（旧 Host 不认识这个字段，会忽略） */
+  const model = modelPrefOf(s.model);
+  if (model) body.model = model;
+  return body;
 }
 
 function storeLastAnswer(thread) {
@@ -199,11 +207,12 @@ function createStore(deps) {
 
   let state = {
     library: api.library.list(),
-    prefs: { autoOpen: api.prefs.autoOpen(), showAdj: api.prefs.showAdj(), sky: api.prefs.sky(), theme: api.prefs.theme() },
+    prefs: { autoOpen: api.prefs.autoOpen(), showAdj: api.prefs.showAdj(), sky: api.prefs.sky(), theme: api.prefs.theme(), model: api.prefs.model() },
+    models: { status: 'idle', providers: [], def: null, error: '' },
     session: {
       view: 'home', chartId: null, tab: 'natal', stage: 'board', when: todayOf(), sel: 0, pat: 0, pane: 'scope',
       panelOpen: false, focusId: startupFocus(), introPlayed: false, onboarding: null, quote: null, toast: null,
-      handoff: null, drafts: {}, readPos: {}
+      handoff: null, drafts: {}, readPos: {}, lastModel: null
     },
     readings: {},
     jobs: {}
@@ -328,17 +337,28 @@ function createStore(deps) {
     let readings = state.readings, jobs = state.jobs;
     if (readingPatch) readings = storeWithKey(readings, key, Object.assign({}, base, readingPatch));
     if (job !== undefined) {
-      /* kind / thinkChars 没变就留着原来的 job 对象（每个 delta 都会走到这里） */
+      /* kind / thinkChars / retried 没变就留着原来的 job 对象（每个 delta 都会走到这里） */
       const prev = jobs[key] || null;
-      const same = job ? (!!prev && prev.kind === job.kind && prev.thinkChars === job.thinkChars) : !prev;
-      if (!same) jobs = storeWithKey(jobs, key, job || undefined);
+      const next = job ? { kind: job.kind, thinkChars: job.thinkChars || 0, retried: !!job.retried } : null;
+      const same = next ? (!!prev && prev.kind === next.kind && prev.thinkChars === next.thinkChars && prev.retried === next.retried) : !prev;
+      if (!same) jobs = storeWithKey(jobs, key, next || undefined);
     }
     if (readings === state.readings && jobs === state.jobs) return;
     commit(Object.assign({}, state, { readings: readings, jobs: jobs }));
   }
   function setThink(key, chars) {
     const j = state.jobs[key];
-    if (j && j.thinkChars !== chars) updateKey(key, null, { kind: j.kind, thinkChars: chars });
+    if (j && j.thinkChars !== chars) updateKey(key, null, { kind: j.kind, thinkChars: chars, retried: j.retried });
+  }
+  /* Host 发现模型没有作答、正在同一个请求里再问一次：对话区把「正在思考」换成「正在再问一次」 */
+  function markRetry(key) {
+    const j = state.jobs[key];
+    if (j && !j.retried) updateKey(key, null, { kind: j.kind, thinkChars: j.thinkChars, retried: true });
+  }
+  /* start 帧里是这次回答实际用的模型 */
+  function noteModel(info) {
+    const m = modelPrefOf(info);
+    if (m && !sameModel(m, state.session.lastModel)) patchSessionRaw({ lastModel: m });
   }
   /* 落盘（v5 规则）：没有一条有字的回答、也没有报告正文 → 删掉这张盘的记录；否则整条写入 */
   function persist(key, entry, override) {
@@ -622,7 +642,7 @@ function createStore(deps) {
     if (!o.cont) lastAsk[key] = { baseLen: baseThread.length, shown: o.shown, question: o.question, scope: o.scope || null };
     const body = buildInterpretBody({
       chart: chart, input: entry.input, now: now(), core: core, engine: engine,
-      mode: 'brief', question: o.question, history: baseThread, scope: o.scope || null
+      mode: 'brief', question: o.question, history: baseThread, scope: o.scope || null, model: state.prefs.model
     });
     const job = { kind: 'chat', entry: entry, handle: null, userStop: false, unload: false };
     running[key] = job;
@@ -631,7 +651,8 @@ function createStore(deps) {
     job.handle = openInterpretStream({
       fetch: fetchFn,
       body: body,
-      onStart: function () { setThink(key, 0); },
+      onStart: function (info) { setThink(key, 0); noteModel(info); },
+      onRetry: function () { markRetry(key); },
       onThinking: function (chars) { setThink(key, chars); },
       onDelta: function (text) {
         const cur = readingRaw(key);
@@ -733,7 +754,8 @@ function createStore(deps) {
     const body = buildInterpretBody({
       chart: chart, input: entry.input, now: now(), core: core, engine: engine, mode: 'report',
       question: cont ? t('aiContinuePrompt') : '',
-      history: cont && base ? [{ role: 'assistant', content: base }] : r.thread.slice()
+      history: cont && base ? [{ role: 'assistant', content: base }] : r.thread.slice(),
+      model: state.prefs.model
     });
     const job = { kind: 'report', entry: entry, handle: null, userStop: false, unload: false, snapshot: snapshot };
     running[key] = job;
@@ -744,7 +766,8 @@ function createStore(deps) {
     job.handle = openInterpretStream({
       fetch: fetchFn,
       body: body,
-      onStart: function () { setThink(key, 0); },
+      onStart: function (info) { setThink(key, 0); noteModel(info); },
+      onRetry: function () { markRetry(key); },
       onThinking: function (chars) { setThink(key, chars); },
       onDelta: function (text) {
         const cur = readingRaw(key).report;
@@ -877,6 +900,51 @@ function createStore(deps) {
       return { ok: false, reason: String((e && e.message) || e) };
     });
   }
+  /* ---------------- 模型选择 ----------------
+     选择存在本机（prefs.model，null = 跟随 DSH 默认），每次提问带在请求体里。
+     列表只在打开模型弹层时读（loadModels()，每次都重读）：打开面板、挂上模型按钮都不发请求——列模型可能要去问提供方。
+     没读过列表、又没回答过时，按钮上只写「默认模型」；读过之后知道 DSH 的默认模型叫什么（models.def）。
+     旧 Host 没有 /ziwei/models（要重启 DSH）：status 是 'error'，提问照常用 DSH 的默认模型。 */
+  function setModel(sel) {
+    const m = modelPrefOf(sel);
+    api.prefs.setModel(m);
+    if (sameModel(m, state.prefs.model)) return false;
+    commit(Object.assign({}, state, { prefs: Object.assign({}, state.prefs, { model: m }) }));
+    return true;
+  }
+  let modelsPending = null;
+  function loadModels() {
+    if (modelsPending) return modelsPending;
+    commit(Object.assign({}, state, { models: Object.assign({}, state.models, { status: 'loading', error: '' }) }));
+    let p;
+    try {
+      p = Promise.resolve(fetchFn('/ziwei/models', { method: 'GET', headers: { accept: 'application/json' } }));
+    } catch (e) {
+      p = Promise.reject(e);
+    }
+    const fail = function (reason) {
+      commit(Object.assign({}, state, { models: { status: 'error', providers: [], def: null, error: String(reason || '') } }));
+      return state.models;
+    };
+    modelsPending = p.then(function (resp) {
+      const http = 'HTTP ' + resp.status;
+      return resp.json().then(function (j) {
+        if (!j || typeof j !== 'object' || !j.ok || !Array.isArray(j.providers)) return fail((j && j.reason) || http);
+        const providers = j.providers.map(function (pv) {
+          return {
+            id: String((pv && pv.id) || ''), name: String((pv && (pv.name || pv.id)) || ''),
+            models: (pv && Array.isArray(pv.models) ? pv.models : []).filter(function (x) { return x && x.id; })
+              .map(function (x) { return { id: String(x.id), name: String(x.name || x.id) }; })
+          };
+        }).filter(function (pv) { return pv.id && pv.models.length; });
+        commit(Object.assign({}, state, { models: { status: 'ready', providers: providers, def: modelPrefOf(j.default), error: '' } }));
+        return state.models;
+      }, function () { return fail(http); });
+    }, function (e) {
+      return fail(String((e && e.message) || e));
+    }).then(function (v) { modelsPending = null; return v; }, function (e) { modelsPending = null; throw e; });
+    return modelsPending;
+  }
   function configure(patch) {
     const p = patch || {};
     if (typeof p.openSession === 'function') openSessionFn = p.openSession;
@@ -956,6 +1024,8 @@ function createStore(deps) {
     stop: stop,
     handoff: handoff,
     checkVersion: checkVersion,
+    setModel: setModel,
+    loadModels: loadModels,
     configure: configure,
     flush: flush,
     abortAll: abortAll

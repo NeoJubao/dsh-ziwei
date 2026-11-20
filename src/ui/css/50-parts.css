@@ -293,6 +293,45 @@
   line-height: 1.6;
 }
 
+/* ---------------- 模型按钮和模型弹层（68-models） ---------------- */
+.zp-model {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 200px;
+  height: 28px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font-size: 12px;
+  white-space: nowrap;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+.zp-root .zp-model { color: var(--zp-ink-3) }
+.zp-root .zp-model:hover { background: var(--zp-hover); color: var(--zp-ink) }
+.zp-model span { min-width: 0; overflow: hidden; text-overflow: ellipsis }
+.zp-model.zp-compact { max-width: 168px }
+/* 窄档的首页提问框放不下模型名：只留图标 */
+.zp-root[data-w="narrow"] .zp-model.zp-compact span { display: none }
+/* 一组可选项（模型弹层里每个提供方一组）：选中的那个是实心的 */
+.zp-opts { display: flex; flex-wrap: wrap; gap: 6px }
+.zp-opt {
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--zp-line-2);
+  border-radius: 8px;
+  background: transparent;
+  font-size: 13px;
+  white-space: nowrap;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+.zp-root .zp-opt { color: var(--zp-ink-2) }
+.zp-root .zp-opt:hover { background: var(--zp-hover); color: var(--zp-ink) }
+.zp-root .zp-opt[aria-pressed="true"] { border-color: transparent; background: var(--zp-primary); color: var(--zp-on-primary) }
+.zp-about + .zp-field { margin-top: 12px }
+
 /* ---------------- 全部命盘 ---------------- */
 .zp-list { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 0; list-style: none }
 .zp-list-item {
