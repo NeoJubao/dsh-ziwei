@@ -374,6 +374,37 @@ const lastText = (opts) => { const m = opts.messages[opts.messages.length - 1]; 
   ok('只给一半、不是字符串、空串、超过 200 字：忽略，用默认模型', got.every((u) => u === 'p/m'), JSON.stringify(got));
 }
 
+/* ---- 场景 14: 模型根本调不通（2026-11-21 真机：DSH 的默认模型是 codex/gpt-6.2-astra，订阅插件当时没有可用的登录，
+   报错是一句英文 "No eligible account for codex/gpt-6.2-astra"）。错误帧要说人话、说清是哪个模型、下一步怎么办，
+   并带上失败码和「这个模型是面板选的还是 DSH 默认的」，面板据此给「换个模型」。 */
+{
+  const failing = (failure) => [{ type: 'finish', reason: { kind: 'error', failure } }];
+  const run = async (failure, model) => {
+    const { ctx, calls } = scripted([failing(failure), ANSWER]);
+    const res = makeRes();
+    await withTimeout(handleInterpret(ctx, core, makeReq(Object.assign({ chartText: '命盘X', mode: 'brief', question: '你好' }, model ? { model } : {})), res, withBudget(5000)), 8000, '模型调不通');
+    const m = /event: error\ndata: (.*)\n/.exec(res.body);
+    let data = null;
+    try { data = m ? JSON.parse(m[1]) : null; } catch (e) { data = null; }
+    return { calls: calls.length, data, body: res.body };
+  };
+  const a = await run({ code: 'NO_ADAPTER', message: 'No eligible account for codex/gpt-6.2-astra' });
+  ok('提供方没有可用的登录（NO_ADAPTER）: 不重试，发 error 帧（kind error）', a.calls === 1 && !!a.data && a.data.kind === 'error' && !/event: done/.test(a.body), a.body.slice(-300));
+  ok('错误帧说人话：哪个模型用不了、为什么、下一步怎么办；原文留在括号里',
+    !!a.data && /模型 p\/m 现在用不了/.test(a.data.reason) && /没有可用的登录或账号/.test(a.data.reason) && /换一个模型/.test(a.data.reason) && /No eligible account for codex\/gpt-6\.2-astra/.test(a.data.reason), a.data && a.data.reason);
+  ok('错误帧带失败码、用的是哪个模型、这个模型是 DSH 默认的', !!a.data && a.data.code === 'NO_ADAPTER' && a.data.provider === 'p' && a.data.model === 'm' && a.data.modelSource === 'default', JSON.stringify(a.data));
+  const b = await run({ code: 'AUTH', message: 'token expired' }, { provider: 'px', model: 'mx' });
+  ok('面板选的模型登录失效（AUTH）: 说密钥或登录无效，modelSource 是 panel', !!b.data && /模型 px\/mx 用不了/.test(b.data.reason) && /密钥或登录无效/.test(b.data.reason) && b.data.code === 'AUTH' && b.data.modelSource === 'panel', JSON.stringify(b.data));
+  const c = await run({ code: 'QUOTA', message: 'insufficient quota' });
+  ok('额度用完（QUOTA）: 说额度用完了', !!c.data && /额度用完了/.test(c.data.reason) && c.data.code === 'QUOTA', c.data && c.data.reason);
+  const d = await run({ code: 'RATE_LIMIT', message: '429' });
+  ok('请求太频繁（RATE_LIMIT）: 说稍后重试', !!d.data && /请求太频繁/.test(d.data.reason) && /稍后重试/.test(d.data.reason), d.data && d.data.reason);
+  const e = await run({ code: 'WHATEVER', message: 'boom' });
+  ok('不认识的失败码: 还是原来那句「模型调用失败: 原文」，失败码照带', !!e.data && e.data.reason === '模型调用失败: boom' && e.data.code === 'WHATEVER', e.data && e.data.reason);
+  const f = await run({});
+  ok('失败信息是空的: 不抛错，说 unknown，不带失败码', !!f.data && f.data.reason === '模型调用失败: unknown' && !('code' in f.data), JSON.stringify(f.data));
+}
+
 console.log(`\n${'='.repeat(52)}`);
 console.log(`SSE 挂起自检: ${pass} 通过, ${fail} 失败`);
 console.log('='.repeat(52));

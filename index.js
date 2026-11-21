@@ -757,6 +757,27 @@ const PLUGIN_SESSION_ID = `ziwei-workbench-${randomUUID()}`;
 /* 空答重试时加在消息末尾的那句话（给模型看的，固定用中文） */
 const EMPTY_RETRY_NUDGE = '（上一次你只做了思考，没有写出回答。请直接给出回答正文。）';
 
+/**
+ * 模型调不通时给面板看的那句话：哪个模型、为什么、下一步怎么办；提供方给的原文留在括号里（排查时要看）。
+ * 2026-11-21 真机：DSH 的默认模型是订阅插件的 codex/gpt-6.2-astra，当时没有可用的登录，面板上只有一句英文
+ * "No eligible account for codex/gpt-6.2-astra"。失败码是 dsh-llm 的稳定码（按码分流，不看原文）；不认识的码照旧。
+ * @returns {Error} 带 code（没有失败码时是空串）
+ */
+function modelFailure(failure, provider, model, prefix) {
+  const f = failure || {};
+  const code = typeof f.code === 'string' ? f.code : '';
+  const raw = String(f.message || f.code || 'unknown');
+  const who = `${provider}/${model}`;
+  let text;
+  if (code === 'NO_ADAPTER') text = `模型 ${who} 现在用不了：这个提供方没有可用的登录或账号（${raw}）。换一个模型，或到 DSH 的设置里重新登录后重试`;
+  else if (code === 'MISSING_CREDENTIAL' || code === 'INVALID_CREDENTIAL' || code === 'AUTH') text = `模型 ${who} 用不了：密钥或登录无效（${raw}）。换一个模型，或到 DSH 的设置里检查后重试`;
+  else if (code === 'QUOTA' || code === 'ACCOUNT_QUOTA') text = `模型 ${who} 的额度用完了（${raw}）。换一个模型，或补充额度后重试`;
+  else if (code === 'RATE_LIMIT') text = `模型 ${who} 请求太频繁（${raw}），稍后重试`;
+  else if (code === 'CONTEXT_WINDOW_EXCEEDED') text = `内容超过了模型 ${who} 的上下文长度（${raw}）。开一个新对话再问`;
+  else text = prefix + raw;
+  return Object.assign(new Error(text), { code });
+}
+
 /** 请求体里的模型选择：{ provider, model } 两个都是 1–200 字的字符串才算数，否则返回 null。 */
 function pickModelOverride(v) {
   if (!v || typeof v !== 'object') return null;
@@ -846,6 +867,8 @@ async function handleInterpret(ctx, core, req, res, budget) {
   /* 面板的模型选择：请求体带 model: { provider, model } 就用它；只给一半、不是字符串、超长都忽略 */
   const override = pickModelOverride(payload.model);
   if (override) { provider = override.provider; model = override.model; }
+  /* 记进诊断日志和错误帧：排查「怎么用的是这个模型」时不用猜 */
+  const modelSource = override ? 'panel' : 'default';
 
   const mode = payload.mode === 'report' ? 'report' : 'brief';
   const built = core.buildRequest({
@@ -999,12 +1022,10 @@ async function handleInterpret(ctx, core, req, res, budget) {
       } else if (chunk.type === 'finish') {
         finishKind = (chunk.reason && chunk.reason.kind) || '';
         if (finishKind === 'error') {
-          const f = chunk.reason.failure || {};
-          throw new Error('模型调用失败: ' + (f.message || f.code || 'unknown'));
+          throw modelFailure(chunk.reason.failure, provider, model, '模型调用失败: ');
         }
         if (finishKind === 'aborted' && !controller.signal.aborted) {
-          const f = chunk.reason.failure || {};
-          throw new Error('模型调用被中断: ' + (f.message || f.code || 'unknown'));
+          throw modelFailure(chunk.reason.failure, provider, model, '模型调用被中断: ');
         }
         if (finishKind === 'max-tokens') truncated = true;
         break;
@@ -1030,7 +1051,7 @@ async function handleInterpret(ctx, core, req, res, budget) {
 
     const elapsedMs = Date.now() - startedAt;
     const stats = { chars: out.length, thinkingChars: thinkChars, elapsedMs, usage: usage || null, attempts };
-    diagInterpret(`interpret mode=${mode} model=${provider}/${model} maxTokens=${maxTokens} finish=${finishKind || '(none)'} timedOut=${timedOut} ${JSON.stringify(stats)}`);
+    diagInterpret(`interpret mode=${mode} model=${provider}/${model} source=${modelSource} maxTokens=${maxTokens} finish=${finishKind || '(none)'} timedOut=${timedOut} ${JSON.stringify(stats)}`);
 
     if (timedOut) {
       const reason = `解读超时（${Math.round(overallMs / 1000)}s）${out.trim() ? '，已保留已生成部分；可点「继续生成」接着写' : '，请重试'}`;
@@ -1058,15 +1079,17 @@ async function handleInterpret(ctx, core, req, res, budget) {
       ? `解读超时（${Math.round(overallMs / 1000)}s）${out.trim() ? '，已保留已生成部分；可点「继续生成」接着写' : '，请重试'}`
       : String((e && e.message) || e);
     const stats = { chars: out.length, thinkingChars: thinkChars, elapsedMs: Date.now() - startedAt, usage: usage || null };
-    diagInterpret(`interpret mode=${mode} model=${provider}/${model} maxTokens=${maxTokens} finish=${finishKind || '(none)'} timedOut=${timedOut} abortByClient=${abortByClient} error=${reason} ${JSON.stringify(stats)}`);
+    diagInterpret(`interpret mode=${mode} model=${provider}/${model} source=${modelSource} maxTokens=${maxTokens} finish=${finishKind || '(none)'} timedOut=${timedOut} abortByClient=${abortByClient} error=${reason} ${JSON.stringify(stats)}`);
+    /* 面板要知道：是哪个模型、它是面板选的还是 DSH 默认的、提供方给的失败码（有才带）——据此给「换个模型」 */
+    const failed = Object.assign({ provider, model, modelSource }, e && e.code ? { code: String(e.code) } : {});
     if (headersSent) {
       sseSend('error', Object.assign({
         reason,
         kind: timedOut ? 'timeout' : (abortByClient ? 'aborted' : 'error'),
         canContinue: !!out.trim() && !abortByClient
-      }, stats));
+      }, failed, stats));
     } else {
-      json(500, { ok: false, reason });
+      json(500, Object.assign({ ok: false, reason }, failed));
     }
   } finally {
     clearTimeout(timer);
