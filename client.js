@@ -2870,6 +2870,8 @@ const DICT = {
     "mdlChipNone": "选择模型",
     "mdlChipDefault": "默认模型",
     "mdlIntro": "紫微师用哪个模型来回答。换了之后，下一次提问生效。",
+    "mdlFailed": "刚才用 {model} 提问失败了。换一个模型，选好后会自动再问一次。",
+    "mdlFailedUnknown": "刚才提问失败了。换一个模型，选好后会自动再问一次。",
     "mdlFollow": "跟随 DSH 默认",
     "mdlFollowWith": "跟随 DSH 默认（{model}）",
     "mdlFollowHint": "在 DeepSeek Harness 里换了默认模型，这里跟着变。",
@@ -3310,6 +3312,8 @@ const DICT = {
     "mdlChipNone": "Choose a model",
     "mdlChipDefault": "Default model",
     "mdlIntro": "Which model answers your questions. A change applies to the next question.",
+    "mdlFailed": "The last question failed on {model}. Pick another model and it will be asked again.",
+    "mdlFailedUnknown": "The last question failed. Pick another model and it will be asked again.",
     "mdlFollow": "Follow the DSH default",
     "mdlFollowWith": "Follow the DSH default ({model})",
     "mdlFollowHint": "Changes with the default model set in DeepSeek Harness.",
@@ -5185,6 +5189,7 @@ ZWUI.linePoints = linePoints;
  *   session   { view: 'home'|'chart', chartId, tab: 'natal'|'decadal'|'yearly'|'monthly'|'daily', stage: 'board'|'report',
  *               when: { y, m, d }, sel: 0–11, pat, pane: 'scope'|'pats'|'detail', panelOpen, focusId, introPlayed,
  *               onboarding（引导问答的状态，store 不解读）, quote: { label, text }|null,
+ *               modelRetry（从错误条点「换个模型」时为真：模型弹层里换了模型就把那一问再问一次，弹层关掉时清掉）,
  *               toast: { text, error, action: { label, run }|null, key }|null, handoff: null|'working'|'done',
  *               drafts: { [命盘 key]: 草稿 }, readPos: { [命盘 key]: 阅读位置 } }   —— 草稿和阅读位置只在内存里
  *   readings  { [命盘 key]: { thread, report, chatError, chatIssue, studioTab, name } }   第一次用到时从 storage 读
@@ -7834,7 +7839,7 @@ html[data-platform="darwin"] .zp-root .zp-overlay-center {
 .zp-root .zp-opt { color: var(--zp-ink-2) }
 .zp-root .zp-opt:hover { background: var(--zp-hover); color: var(--zp-ink) }
 .zp-root .zp-opt[aria-pressed="true"] { border-color: transparent; background: var(--zp-primary); color: var(--zp-on-primary) }
-.zp-about + .zp-field { margin-top: 12px }
+.zp-about + .zp-field, .zp-modal .zp-dialog-b > .zp-field-hint + .zp-field { margin-top: 12px }
 
 /* ---------------- 全部命盘 ---------------- */
 .zp-list { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 0; list-style: none }
@@ -9072,20 +9077,22 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
   font-size: 12px;
 }
 
+/* 错误条：说明占一整行，按钮在它下面。说明可能很长（哪个模型、为什么、下一步怎么办），挤在按钮旁边会折成五六行 */
 .zp-as-error {
   flex: none;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
   margin: 0 12px 8px;
-  padding: 6px 8px 6px 12px;
+  padding: 8px 12px;
   border-radius: 8px;
   background: color-mix(in srgb, var(--zp-mu-ji) 10%, transparent);
   color: var(--zp-mu-ji);
   font-size: 12px;
   line-height: 18px;
 }
-.zp-as-error span { flex: 1; min-width: 0 }
+.zp-as-error span { flex: 1 1 100%; min-width: 0; overflow-wrap: anywhere }
 .zp-suggest {
   flex: none;
   display: flex;
@@ -11661,11 +11668,12 @@ function SettingsModal(props) {
  * ModelModal {}            ProApp 在 session.modal === 'model' 时渲染；外框用 50-parts 的 Modal。
  *   打开时读一次列表（store.loadModels()）。四种状态：读取中、读到了、列表是空的、读不到（旧 Host：要重启 DSH）。
  *   选一项：store.setModel(...)，关掉弹层，变了才提示；下一次提问生效（请求体带 model，见 26-store 的 buildInterpretBody）。
+ *   从错误条的「换个模型」进来时（session.modelRetry）：开头说明刚才用哪个模型失败了；换成别的模型后自动把那一问再问一次。
  * 结构：div.zp-field > span（提供方名）+ div.zp-opts[role=group] > button.zp-opt[aria-pressed]；说明是 p.zp-field-hint。
  * ================================================================ */
 
 function mdlShellOf(s) {
-  return { pref: s.prefs.model, models: s.models, last: s.session.lastModel };
+  return { pref: s.prefs.model, models: s.models, last: s.session.lastModel, retry: !!s.session.modelRetry };
 }
 
 /* 当前生效的模型名；不知道时是空串 */
@@ -11694,13 +11702,22 @@ function ModelChip(props) {
 function ModelModal() {
   const m = useStore(mdlShellOf);
   const store = appStore();
-  /* 每次打开都重读一次：DSH 里可能刚接了新的提供方 */
-  useEffect(function () { store.loadModels(); }, []);
+  /* 每次打开都重读一次：DSH 里可能刚接了新的提供方。关掉时把「选完重问」的标记清掉（不管是选了还是直接关的） */
+  useEffect(function () {
+    store.loadModels();
+    return function () { store.patchSession({ modelRetry: false }); };
+  }, []);
   const st = m.models;
   const pick = function (sel, name) {
+    /* 是从错误条的「换个模型」进来的：换成了别的模型就把刚才那一问自动再问一次，不用回去再点「重试」 */
+    const retry = !!store.getState().session.modelRetry;
     const changed = store.setModel(sel);
     closeLayers();
     if (changed) store.showToast(sel ? t('mdlSwitched', { model: name }) : t('mdlSwitchedDefault'));
+    if (retry && changed) {
+      const issue = store.reading().chatIssue;
+      if (issue && issue.canContinue) store.continueChat(); else store.retryChat();
+    }
   };
   const isOn = function (providerId, modelId) {
     return !!m.pref && m.pref.provider === providerId && m.pref.model === modelId;
@@ -11732,7 +11749,9 @@ function ModelModal() {
     status = h('p', { key: 'empty', className: 'zp-field-hint' }, t('mdlEmpty'));
   }
   return h(Modal, { title: t('mdlTitle'), onClose: closeLayers },
-    h('p', { key: 'intro', className: 'zp-about' }, t('mdlIntro')),
+    m.retry
+      ? h('p', { key: 'failed', className: 'zp-field-hint zp-err' }, m.last ? t('mdlFailed', { model: m.last.model }) : t('mdlFailedUnknown'))
+      : h('p', { key: 'intro', className: 'zp-about' }, t('mdlIntro')),
     h('div', { key: 'follow', className: 'zp-field' },
       h('div', { className: 'zp-opts' },
         h('button', {
@@ -12694,7 +12713,9 @@ function AssistantError(props) {
       }
     }, m.cont ? t('asContinue') : t('asRetry')),
     swap ? h('button', {
-      className: 'zp-btn zp-sm', type: 'button', onClick: function () { openModal('model'); }
+      className: 'zp-btn zp-sm', type: 'button',
+      /* 带上「选完重问」的标记：在弹层里换成别的模型后，这一问自动再问一次（68-models 的 ModelModal） */
+      onClick: function () { store.patchSession({ modelRetry: true }); openModal('model'); }
     }, t('asSwapModel')) : null);
 }
 

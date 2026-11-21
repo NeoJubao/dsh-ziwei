@@ -4,6 +4,8 @@
   "mdlChipNone": ["选择模型", "Choose a model"],
   "mdlChipDefault": ["默认模型", "Default model"],
   "mdlIntro": ["紫微师用哪个模型来回答。换了之后，下一次提问生效。", "Which model answers your questions. A change applies to the next question."],
+  "mdlFailed": ["刚才用 {model} 提问失败了。换一个模型，选好后会自动再问一次。", "The last question failed on {model}. Pick another model and it will be asked again."],
+  "mdlFailedUnknown": ["刚才提问失败了。换一个模型，选好后会自动再问一次。", "The last question failed. Pick another model and it will be asked again."],
   "mdlFollow": ["跟随 DSH 默认", "Follow the DSH default"],
   "mdlFollowWith": ["跟随 DSH 默认（{model}）", "Follow the DSH default ({model})"],
   "mdlFollowHint": ["在 DeepSeek Harness 里换了默认模型，这里跟着变。", "Changes with the default model set in DeepSeek Harness."],

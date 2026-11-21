@@ -9,11 +9,12 @@
  * ModelModal {}            ProApp 在 session.modal === 'model' 时渲染；外框用 50-parts 的 Modal。
  *   打开时读一次列表（store.loadModels()）。四种状态：读取中、读到了、列表是空的、读不到（旧 Host：要重启 DSH）。
  *   选一项：store.setModel(...)，关掉弹层，变了才提示；下一次提问生效（请求体带 model，见 26-store 的 buildInterpretBody）。
+ *   从错误条的「换个模型」进来时（session.modelRetry）：开头说明刚才用哪个模型失败了；换成别的模型后自动把那一问再问一次。
  * 结构：div.zp-field > span（提供方名）+ div.zp-opts[role=group] > button.zp-opt[aria-pressed]；说明是 p.zp-field-hint。
  * ================================================================ */
 
 function mdlShellOf(s) {
-  return { pref: s.prefs.model, models: s.models, last: s.session.lastModel };
+  return { pref: s.prefs.model, models: s.models, last: s.session.lastModel, retry: !!s.session.modelRetry };
 }
 
 /* 当前生效的模型名；不知道时是空串 */
@@ -42,13 +43,22 @@ function ModelChip(props) {
 function ModelModal() {
   const m = useStore(mdlShellOf);
   const store = appStore();
-  /* 每次打开都重读一次：DSH 里可能刚接了新的提供方 */
-  useEffect(function () { store.loadModels(); }, []);
+  /* 每次打开都重读一次：DSH 里可能刚接了新的提供方。关掉时把「选完重问」的标记清掉（不管是选了还是直接关的） */
+  useEffect(function () {
+    store.loadModels();
+    return function () { store.patchSession({ modelRetry: false }); };
+  }, []);
   const st = m.models;
   const pick = function (sel, name) {
+    /* 是从错误条的「换个模型」进来的：换成了别的模型就把刚才那一问自动再问一次，不用回去再点「重试」 */
+    const retry = !!store.getState().session.modelRetry;
     const changed = store.setModel(sel);
     closeLayers();
     if (changed) store.showToast(sel ? t('mdlSwitched', { model: name }) : t('mdlSwitchedDefault'));
+    if (retry && changed) {
+      const issue = store.reading().chatIssue;
+      if (issue && issue.canContinue) store.continueChat(); else store.retryChat();
+    }
   };
   const isOn = function (providerId, modelId) {
     return !!m.pref && m.pref.provider === providerId && m.pref.model === modelId;
@@ -80,7 +90,9 @@ function ModelModal() {
     status = h('p', { key: 'empty', className: 'zp-field-hint' }, t('mdlEmpty'));
   }
   return h(Modal, { title: t('mdlTitle'), onClose: closeLayers },
-    h('p', { key: 'intro', className: 'zp-about' }, t('mdlIntro')),
+    m.retry
+      ? h('p', { key: 'failed', className: 'zp-field-hint zp-err' }, m.last ? t('mdlFailed', { model: m.last.model }) : t('mdlFailedUnknown'))
+      : h('p', { key: 'intro', className: 'zp-about' }, t('mdlIntro')),
     h('div', { key: 'follow', className: 'zp-field' },
       h('div', { className: 'zp-opts' },
         h('button', {

@@ -176,20 +176,22 @@
   font-size: 12px;
 }
 
+/* 错误条：说明占一整行，按钮在它下面。说明可能很长（哪个模型、为什么、下一步怎么办），挤在按钮旁边会折成五六行 */
 .zp-as-error {
   flex: none;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
   margin: 0 12px 8px;
-  padding: 6px 8px 6px 12px;
+  padding: 8px 12px;
   border-radius: 8px;
   background: color-mix(in srgb, var(--zp-mu-ji) 10%, transparent);
   color: var(--zp-mu-ji);
   font-size: 12px;
   line-height: 18px;
 }
-.zp-as-error span { flex: 1; min-width: 0 }
+.zp-as-error span { flex: 1 1 100%; min-width: 0; overflow-wrap: anywhere }
 .zp-suggest {
   flex: none;
   display: flex;

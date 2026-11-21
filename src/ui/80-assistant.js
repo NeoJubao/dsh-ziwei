@@ -331,7 +331,9 @@ function AssistantError(props) {
       }
     }, m.cont ? t('asContinue') : t('asRetry')),
     swap ? h('button', {
-      className: 'zp-btn zp-sm', type: 'button', onClick: function () { openModal('model'); }
+      className: 'zp-btn zp-sm', type: 'button',
+      /* 带上「选完重问」的标记：在弹层里换成别的模型后，这一问自动再问一次（68-models 的 ModelModal） */
+      onClick: function () { store.patchSession({ modelRetry: true }); openModal('model'); }
     }, t('asSwapModel')) : null);
 }
 

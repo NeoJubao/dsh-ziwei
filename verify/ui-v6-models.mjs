@@ -156,9 +156,9 @@ export default async function modelChecks(t) {
     const btns = () => find(errBar(), (n) => n.type === 'button').map(text);
     eq('两次都空：错误条说明原因（role=alert），给「重试」和「换个模型」', [text(find(errBar(), (n) => n.type === 'span')[0]), attr(errBar(), 'role'), btns()], ['模型只做了思考，没有给出回答', 'alert', ['重试', '换个模型']]);
     rt.click(find(errBar(), (n) => n.type === 'button' && text(n) === '换个模型')[0]);
-    eq('点「换个模型」：打开模型弹层', [!!modal(), attr(modal(), 'aria-label')], [true, '模型']);
-    P.closeLayers();
-    rt.flush();
+    eq('点「换个模型」：打开模型弹层，开头说明刚才用哪个模型失败了、选好后会自动再问', [!!modal(), attr(modal(), 'aria-label'), /刚才用 deepseek-flash 提问失败了。换一个模型，选好后会自动再问一次。/.test(text(modal()))], [true, '模型', true]);
+    rt.key(modal(), 'Escape');
+    eq('没选就关掉：不重问，「选完重问」的标记清掉', [!!modal(), askCalls().length, store.getState().session.modelRetry], [false, askCalls().length, false]);
     const n1 = askCalls().length;
     rt.click(find(errBar(), (n) => n.type === 'button' && text(n) === '重试')[0]);
     await step();
@@ -166,6 +166,42 @@ export default async function modelChecks(t) {
     askCalls().pop().send('error', { reason: '命中长度上限', kind: 'max-tokens', canContinue: true });
     await step();
     eq('别的错误（长度上限）：只有「接着写」或「重试」，没有「换个模型」', btns().includes('换个模型'), false);
+    store.clearThread();
+    store.dismissToast();
+    rt.flush();
+
+    /* 2026-11-21 真机：DSH 的默认模型调不通（订阅插件没有可用的登录）。换个模型之后那一问自动再问一次 */
+    store.ask('你好');
+    await step();
+    const q = askCalls().pop();
+    q.send('start', { provider: 'codex', model: 'gpt-6.2-astra' });
+    q.send('error', {
+      reason: '模型 codex/gpt-6.2-astra 现在用不了：这个提供方没有可用的登录或账号（No eligible account for codex/gpt-6.2-astra）。换一个模型，或到 DSH 的设置里重新登录后重试',
+      kind: 'error', code: 'NO_ADAPTER', provider: 'codex', model: 'gpt-6.2-astra', modelSource: 'default', canContinue: false
+    });
+    await step();
+    eq('模型调不通：错误条原样显示 Host 给的那句话，给「重试」和「换个模型」', [/模型 codex\/gpt-6\.2-astra 现在用不了/.test(text(errBar())), btns()], [true, ['重试', '换个模型']]);
+    rt.click(find(errBar(), (n) => n.type === 'button' && text(n) === '换个模型')[0]);
+    await step();
+    eq('弹层开头说的是刚才失败的那个模型', /刚才用 gpt-6\.2-astra 提问失败了/.test(text(modal())), true);
+    const n2 = askCalls().length;
+    rt.click(opts().find((b) => text(b) === 'M One'));
+    await step();
+    eq('选了别的模型：弹层关掉，同一个问题用新模型自动再问一次（不用再点「重试」），气泡不重复',
+      [!!modal(), askCalls().length - n2, askCalls().pop().body.question, askCalls().pop().body.model, findByClass(log(), 'zp-me').map(text), errBar()],
+      [false, 1, '你好', { provider: 'other', model: 'm-1' }, ['你好'], null]);
+    askCalls().pop().send('done', { text: '你好，想看哪方面？' });
+    await step();
+    eq('这次答上来了（一问一答，失败的那一轮没有留下半截）', [store.reading().thread.map((x) => x.content), findByClass(log(), 'zp-bot').length, errBar()], [['你好', '你好，想看哪方面？'], 1, null]);
+    const n3 = askCalls().length;
+    rt.click(one(one(tree(), 'zp-as-form'), 'zp-model'));
+    await step();
+    eq('平时从模型按钮进来：开头是普通的说明', [/紫微师用哪个模型来回答/.test(text(modal())), /提问失败/.test(text(modal()))], [true, false]);
+    rt.click(opts().find((b) => text(b) === 'DeepSeek Pro'));
+    await step();
+    eq('平时换模型不会自己发问', askCalls().length - n3, 0);
+    store.setModel(null);
+    store.dismissToast();
   }
   rt.unmount();
 
