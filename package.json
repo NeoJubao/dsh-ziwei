@@ -54,8 +54,7 @@
     "scripts/audit-ui.mjs",
     "scripts/vendor-lunar-data.mjs",
     "docs/ui-contract/audit-baseline.json",
-    "docs/ui-contract/*.md",
-    "docs/assets"
+    "docs/ui-contract/*.md"
   ],
   "icon": "./icon.svg",
   "scripts": {

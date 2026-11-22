@@ -73,6 +73,10 @@ for (const f of REQUIRED) {
 /* 运行期诊断文件不应进入分发包 */
 ok('包内不含 host-diag.log', !files.has('host-diag.log'));
 ok('包内不含 interpret-diag.log（诊断日志不随包分发）', !files.has('interpret-diag.log'));
+/* 截图不随包分发：README 里的图片指向仓库，包里用不上。v5 dogfood 时 docs/assets 进过 files，
+   包从 1.6.0 的 255 KB 涨到 3.3 MB，其中 2.9 MB 是旧界面的截图。 */
+const images = [...files].filter((f) => f.startsWith('docs/assets/') || /\.(png|jpe?g|gif|webp)$/i.test(f)).sort();
+ok('包内不含截图（docs/assets 和位图不随包分发）', images.length === 0, `混进了 ${images.length} 个：${images.slice(0, 4).join(', ')}${images.length > 4 ? ' …' : ''}`);
 
 console.log(`\n包内文件共 ${files.size} 个：${[...files].sort().join(', ')}`);
 console.log(`\n${'='.repeat(52)}`);
