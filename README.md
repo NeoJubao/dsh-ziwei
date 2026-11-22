@@ -24,13 +24,11 @@ official DeepSeek product.
 
 ---
 
-## v6 dogfood：界面重做（2.0.0-dogfood.2）
+## 2.0.0：界面重做（v6）
 
-> 这一节只属于分支 `feature/v6-redesign`，不是 main 的发布状态。
-> 用 `git switch feature/v6-redesign` 进入，`git switch main` 回到稳定版，`git switch feat/v5-ux-polish` 回到 v5；
-> 切换后刷新 GUI 即可（`2.0.0-dogfood.2` 改了 Host 半，模型选择和「模型没作答时自动再问一次」要重启 DSH 才生效）。
-> v6 沿用 v5 的本机记录（键和结构不变，只新增 `ziwei-pro.sky`、`ziwei-pro.v6`、`ziwei-pro.theme`、`ziwei-pro.model` 四个键）；
-> 解读记录写在 `ziwei-pro.readings.v2`，切回 main 不会读取。
+> 从 1.x 升级：`dsh plugin --profile <profile> add dsh-ziwei@2.0.0`，装完手动重启 DSH（见 [docs/INSTALL.md](docs/INSTALL.md) 的「更新」）。
+> 1.6.0 存在本机的命盘库、表单和设置照常读出；v6 新增 `ziwei-pro.sky`、`ziwei-pro.v6`、`ziwei-pro.theme`、`ziwei-pro.model` 四个键，
+> 每张盘的对话和报告写在 `ziwei-pro.readings.v2`。上一版界面是 1.6.0（tag `v1.6.0`）；完整的变化见 [CHANGELOG.md](CHANGELOG.md)。
 
 v6 把面板整个重做（spec 见 [docs/specs/2026-11-19_v6-redesign.md](docs/specs/2026-11-19_v6-redesign.md)，
 设计稿在 [docs/design/v6-prototype/](docs/design/v6-prototype/)）：
@@ -47,8 +45,8 @@ v6 把面板整个重做（spec 见 [docs/specs/2026-11-19_v6-redesign.md](docs/
 - **外观**：面板自带深浅两套配色，默认深色；设置里可以切到浅色或跟随 DSH。
 - **设置**：「启动时自动打开工作台」现在在插件加载时生效（v5 里不起作用）；顶栏不再有「返回会话」按钮，出口在设置的最后一行。
 
-`2.0.0-dogfood.1` 在 DSH 里用过一轮，`2.0.0-dogfood.2` 是按那一轮的反馈改的（见 [docs/specs/2026-11-20_v6-polish.md](docs/specs/2026-11-20_v6-polish.md)），
-改完之后还没有在 DSH 里复核，也还没有截图；下面「界面预览」和各节的截图都是 v6 之前的界面。
+发布前作者在真实 DSH 里用过两轮（`2.0.0-dogfood.1`、`2.0.0-dogfood.2`），反馈都已改（见 [docs/specs/2026-11-20_v6-polish.md](docs/specs/2026-11-20_v6-polish.md)）；
+之后的两处修复（模型调不通时的说明、换模型后自动重问）没有再在 DSH 里看过。v6 还没有截图：下面「界面预览」和各节的截图都是 v6 之前的界面。
 
 ## 界面预览
 

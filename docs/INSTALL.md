@@ -62,7 +62,7 @@ dsh --profile <profile> --dump-config | grep -F "# == @local/ziwei-workbench"
 ```text
 plugin_manager({
   action: 'install_bundle',
-  target: '/绝对路径/dist/dsh-ziwei/dsh-ziwei-1.6.0.tgz'
+  target: '/绝对路径/dist/dsh-ziwei/dsh-ziwei-2.0.0.tgz'
 })
 ```
 
@@ -82,7 +82,7 @@ plugin_manager({
 ### 3.1 从 npm 安装
 
 ```bash
-dsh plugin --profile <profile> add dsh-ziwei@1.6.0
+dsh plugin --profile <profile> add dsh-ziwei@2.0.0
 ```
 
 或在 DSH Web **Settings → Plugins → Add plugin** 里输入包名安装。装完**手动重启 DSH**，
@@ -108,9 +108,12 @@ dsh plugin --profile <profile> add dsh-ziwei@1.6.0
 # 更新到当前主版本内的最新补丁/次版本（profile 里存的是 ^1.3.x 时）
 dsh plugin --profile <profile> update dsh-ziwei
 
-# 指定版本（强制装到某一版）
-dsh plugin --profile <profile> add dsh-ziwei@1.6.0
+# 指定版本（强制装到某一版）；跨大版本时用这一条，例如从 1.x 升到 2.0.0
+dsh plugin --profile <profile> add dsh-ziwei@2.0.0
 ```
+
+> **从 1.x 升到 2.0.0**：`update` 按 profile 里记下的版本范围取新版，记的是 `^1.x` 时它停在 1.x（这一点没有在真实 profile 上实测过）。
+> 用上面第二条显式安装，装完手动重启 DSH。2.0.0 换了整个界面，本机存的命盘库、表单和设置照常读出，见 `CHANGELOG.md`。
 
 也可以在 **DSH Web → Settings → Plugins** 里看到已装版本；插件市场/Discover 有新版时会提供
 更新入口（取决于你配置的索引源）。

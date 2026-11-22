@@ -37,9 +37,10 @@
 - [ ] **v1.6.0 界面真机走查**：解读抽屉「打开不自动解读 + 空态动作卡」只在无头 Chrome
       （源码 CSS + 等效标记的静态渲染）与自动断言里验过，**未在真实 DSH 宿主点过**。
       发布前需作者点一遍：亮/暗色、464 宽与窄屏满宽、键盘 Tab、两个动作真的发起请求。
-- [ ] **v6 界面真机走查（2.0.0-dogfood.1 起）**：`client.js` 已换成 v6 界面（含 Three.js 3D 星图），
-      只在 Node 的 vm / 假 DOM 自检里验过，**还没在真实 DSH 宿主打开过**。发布前需作者在 DSH 里看
-      浅色和深色、窄 / 中 / 宽三档、首页 3D 与无 WebGL 时的静态星图。
+- [ ] **v6 界面真机走查（2.0.0）**：作者在真实 DSH 桌面端用过 `2.0.0-dogfood.1`（2026-11-20）和
+      `2.0.0-dogfood.2`（2026-11-21）两轮，反馈都已改（记录在 `docs/plans/2026-11-20_v6-polish-plan.md`）；
+      2026-11-22 作者决定发布 2.0.0。**没有记录的**：浅色和深色、窄 / 中 / 宽三档、首页 3D 与静态星图的逐项走查；
+      第二轮之后的两处修复（模型调不通时的说明、换模型后自动重问）没有在真实 DSH 里看过。这一格由作者勾。
 - [x] **干净环境安装冒烟（配置层）**：2026-11-08 用 `DSH_HOME=/tmp/dsh-smoke-home` 新建 `smoke` profile，
       对发布 tarball 执行 `dsh plugin --profile smoke add <tgz>`，`dsh --profile smoke --dump-config`
       已出现 `# == dsh-ziwei` 与 bundle 行；**未做 GUI 启动/点击**。
@@ -56,14 +57,14 @@
   GitHub Release 齐全，`v1.5.2` 为 npm 与 Release 的 Latest。
 - **npm 已发布 `dsh-ziwei@1.5.2`**（latest，2026-11-08，publisher `neomemoryai`，周下载约 1.1k）：
   含 1.3.3 旧缓存月柱迁移、1.4.0 手动「检查更新」、1.5.0 格局摘要、1.5.1/1.5.2 左栏顺序修复。
-- **`dsh-ziwei@1.6.0` 待发布**：tarball `dist/dsh-ziwei/dsh-ziwei-1.6.0.tgz`（2026-11-15 生成），
-  含界面 v3.2 / v3.3（抽屉不再自动解读、空态动作卡、报告表格渲染）与关于 / README / 报告落款署名。
-  sha256：`4f1fdcbfd40c9e296c4d5d8979d130e2905dfa930d76333f18ab4f6a70918bf0`（2026-11-15 生成）。
-  发布命令：`npm publish dist/dsh-ziwei/dsh-ziwei-1.6.0.tgz --access public`（需 2FA）。
-- **git / 远端现状（2026-11-15）**：远端已有 `v1.3.0`…`v1.5.2` 全部 tag 与 Release；
-  但本机仓库只 fetch 到 `v1.3.0` / `v1.3.1` / `v1.3.2`，且本地 `main` 领先 `origin/main`
-  3 个提交（界面 v3.2 / v4 / v4 revert），1.6.0 的全部改动仍是未提交的工作区变更。
-  发 1.6.0 前：先 `git fetch --tags` 对齐远端、提交并推送 `main`，再打 `v1.6.0` 与 Release。
+- **npm 已发布 `dsh-ziwei@1.6.0`**（latest，2026-11-15；tag `v1.6.0` 与 GitHub Release 齐全）：
+  界面 v3.2 / v3.3（抽屉不再自动解读、空态动作卡、报告表格渲染）与关于 / README / 报告落款署名。
+- **`dsh-ziwei@2.0.0` 待发布（2026-11-22）**：界面 v6。发布提交在 `feature/v6-redesign`，`main` 快进到它之后打 `v2.0.0`、
+  建 GitHub Release（附 tarball，sha256 写在 Release 说明里）。最后一步由作者执行：
+  `npm publish dist/dsh-ziwei/dsh-ziwei-2.0.0.tgz --access public`（需 2FA。2026-11-22 这台机器的 npm 没有登录，仓库也没有配置 `release.yml` 要的 `RELEASE_ENABLED` 变量和 `npm-publish` 环境，所以只有这一条路）。
+  发布后按 §4 验证，并把本条改成「已发布」。
+- **从 1.x 升到 2.0.0 的路径没有实测**：1.6.0 面板里「检查更新」给的命令是 `dsh plugin … update dsh-ziwei`，
+  它会不会越过 profile 里记下的 1.x 范围不确定；README、INSTALL、CHANGELOG 里写的是显式安装 `dsh-ziwei@2.0.0`。
 - **CI 已绿**：三平台 × Node 22/24（run `42480774977`，workflow `ci.yml`）；
   Windows 的两处兼容问题（动态 import 的 file:// URL、npm.cmd 调用）已在主分支修复。
 - 已加 topics：`dsh-plugin`、`dsh`、`deepseek-harness`、`ziwei`、`ziwei-doushu`。
@@ -131,6 +132,10 @@ node scripts/release-pack.mjs
   （`solarlunar`/`ISC`/`yize`/`3.1.0`）、README 与 docs 无本机绝对路径、
   `dsh.bundle`/`dsh.client`/`dsh.manifestVersion` 齐全；
 - 执行 `npm pack` 生成 tarball（**不执行 `npm publish`**）。
+
+> **在干净的检出里打包。** 脚本从工作区拷文件，不看 git：工作区有没提交的改动时，它们会一起进发布包，
+> 包就和 tag 上的提交对不上了。稳妥的做法是另外克隆一份（或 `git worktree add`）到 tag 上，在那里
+> `node build.mjs && node verify/all.mjs && node scripts/release-pack.mjs`，再把 `dist/<包名>/` 拷回来。
 
 产物示例：
 
