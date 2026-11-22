@@ -429,6 +429,29 @@ export default async function store(t) {
     const second = mk({ storage });
     eq('启动时恢复上次命盘：首页聚焦它', [second.st.getState().session.view, second.st.getState().session.focusId], ['home', a.id]);
   }
+  {
+    /* 1.6.0（上一个公开版本）写下的命盘库：input 没有 city 字段，经度和籍贯是两个字段（v1.6.0 的 src/ui-pro.js saveChart）。
+       从 npm 升级上来的人带着的是这种记录；fixtures/storage-v5.json 是 v5 的形状，没有这一种。期望值是黄金用例的既有口径。 */
+    const V160 = { name: '', calendar: 'solar', year: 1992, month: 5, day: 3, isLeap: false, hour: 9, minute: 30, gender: 'male',
+      longitude: '105.97', place: '', occupation: '', settings: { yearDivide: 'normal', monthDivide: 'exact', dayDivide: 'current', fixLeap: true } };
+    const V160_NOLON = Object.assign({}, V160, { name: '乙', gender: 'female', longitude: '', place: '成都', occupation: '设计' });
+    const seed = [{ id: 'lib-1762600000002', name: '甲', input: V160 }, { id: 'lib-1762600000001', name: '乙', input: V160_NOLON }];
+    const storage = memoryStorage({ 'ziwei-pro.library': J(seed), 'ziwei-pro.form': J(V160), 'ziwei-pro.formV133': '1', 'ziwei-pro.focus': '1', 'ziwei-pro.rail': '0' });
+    const { st } = mk({ storage });
+    eq('1.6.0 的命盘库：两张盘都在，次序和名字不变', st.getState().library.map((e) => [e.id, e.name]), [['lib-1762600000002', '甲'], ['lib-1762600000001', '乙']]);
+    ok('1.6.0 的记录能打开', st.openChart('lib-1762600000002') === true);
+    const c = st.currentChart();
+    const soul = c && c.palaces ? c.palaces[c.soulIndex] : null;
+    const fix = c && c.meta ? c.meta.solarCorrection : null;
+    eq('1.6.0 的黄金用例：按记录里的经度校正到 08:37 辰时，命宫癸丑、太阳太阴，木三局',
+      soul && [fix ? fix.solarTime : null, c.timeName, soul.stem + soul.branch, soul.major.map((x) => x.name), c.fiveElementsClass],
+      ['08:37', '辰时', '癸丑', ['太阳', '太阴'], '木三局']);
+    eq('1.6.0 的记录和 v6 里新录的同一生辰是同一个命盘 key（解读记录对得上）', st.keyOf(st.currentEntry()), KEY_A);
+    ok('没填经度的 1.6.0 记录也能打开、排出十二宫', st.openChart('lib-1762600000001') === true && !!st.currentChart() && st.currentChart().palaces.length === 12);
+    const kept = JSON.parse(storage.getItem('ziwei-pro.library') || '[]');
+    eq('打开之后原记录的字段一个不少（退回 1.6.0 还能读）',
+      seed.map((e) => { const k = kept.find((x) => x && x.id === e.id); return !!k && Object.keys(e.input).every((f) => J(k.input[f]) === J(e.input[f])); }), [true, true]);
+  }
 
   section('v6 store：对话');
   {
