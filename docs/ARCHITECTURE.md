@@ -135,9 +135,11 @@
   面板自身上下文，避免盖住 frame 的 `shell.leading` 退出控件。
 - **浏览器 localStorage 存偏好、命盘库与解读记录**：`ziwei-pro.form`（表单）、
   `ziwei-pro.library`（命盘库）、`ziwei-pro.lastChart.v1`（上次命盘）、
-  `ziwei-pro.readings.v2`（按命盘保存的对话/报告，最多 8 张盘；旧版 `ziwei-pro.readings.v1` 读到时迁过来）、
+  `ziwei-pro.readings.v2`（按命盘保存的当前对话/报告，最多 20 张盘；旧版 `ziwei-pro.readings.v1` 读到时迁过来）、
+  `ziwei-pro.chats.v1`（按命盘保存的历史对话，每张盘最多 20 条；2026-11-24 新增）、
   `ziwei-pro.autopen`、`ziwei-pro.showadj`、`ziwei-pro.sky`（首页 3D 星图）、`ziwei-pro.v6`（一次性导入的标记）。
-  均只在本机浏览器，不上传。键和记录结构沿用 v5，v6 只新增了 `sky` 和 `v6` 两个键。
+  均只在本机浏览器，不上传。键和记录结构沿用 v5；v6 新增了 `sky`、`v6`、`theme`、`model` 和 `chats.v1`，
+  命盘库条目在不做真太阳时校正时多一个 `settings.trueSolar: false`。
   **不存 API Key**；旧版本遗留的 `ziwei-workbench.apikey` 会在初始化时被清理。
 
 ## 4. 构建链（`build.mjs`）

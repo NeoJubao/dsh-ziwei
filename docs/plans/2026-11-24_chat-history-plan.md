@@ -36,20 +36,38 @@ Plan mode 里说的是两个分支都从 `main` 起。实际改成叠在 `feat/s
 每个任务都是：先写失败的断言 → 运行确认失败 → 实现 → `node build.mjs && node verify/all.mjs` 全绿 → 提交。
 
 ### 任务 1：存储
-- [ ] 断言（`ui-v6-storage.mjs`）：spec §3.1
-- [ ] `api.chats`、`clearLocalRecords`、`READINGS_MAX`
+- [x] 断言（`ui-v6-storage.mjs`）：spec §3.1
+- [x] `api.chats`、`clearLocalRecords`、`READINGS_MAX`
 
 ### 任务 2：store
-- [ ] 断言（`ui-v6-store.mjs`）：spec §3.2
-- [ ] reading 的 `chats`、三个动作、`session.asHistory`
+- [x] 断言（`ui-v6-store.mjs`）：spec §3.2
+- [x] reading 的 `chats`、三个动作、`session.asHistory`
 
 ### 任务 3：界面
-- [ ] 断言（`ui-v6-assistant.mjs`）：spec §3.3
-- [ ] 图标、头部按钮、`AssistantHistory`、样式、文案、`docs/ui-contract/layout.md`
+- [x] 断言（`ui-v6-assistant.mjs`）：spec §3.3
+- [x] 图标、头部按钮、`AssistantHistory`、样式、文案、`docs/ui-contract/layout.md`
 
 ### 任务 4：收尾
-- [ ] `CHANGELOG.md`
-- [ ] 预览壳里看历史列表：浅色和深色、窄中宽
+- [x] `CHANGELOG.md`
+- [x] 预览壳里看历史列表：浅色和深色、窄中宽
+
+## 执行记录（2026-11-24）
+
+- 任务 1–4 都做完了，每个任务一个提交，每次提交前 `node build.mjs && node verify/all.mjs` 全绿（唯一的 ⚠️ 是本机没有独立版
+  `run-paipan.js`，原本就是可选的）；`node verify/pack.mjs` 9 项通过，`node scripts/audit-ui.mjs` 18 项通过
+  （它拦下过一处不在间距档位里的 10px，改成了 8px）。
+- 和 spec 相比多做的两处，都是写的时候想到的失败情况：
+  - 历史怎么都写不下时（配额满），已经存好的别的盘的历史原样不动，`save` 返回 false。一开始的写法会把它们一条条去掉、最后连键都删了。
+  - 历史写不进去时「新对话」照样能开，那条对话留在本次会话里，提示里明说没存下来。
+- 另外改了：头部的「历史对话」开着时有按下的样子；点开时焦点留在这个按钮上（输入框连同里面的焦点一起卸掉了）。
+- README 和 `docs/ARCHITECTURE.md` 里「最多 8 张盘」「新对话清空对话」的说法改了；README 里出生城市和真太阳时可选的说明是功能一的，
+  也在这个分支的同一个文档提交里补上了。
+- 视觉：在本机预览壳里看过历史列表（当前和历史各一条、长标题截断、按下状态、空列表之前的各个状态），深色宽 / 中、浅色窄截图看过；
+  浅色宽 / 中、深色窄没有单独看。在预览壳里实际走过一遍：提问 → 新对话 → 再提问 → 历史对话 → 切回旧的那条 → 刷新页面后历史还在。
+- 一件没查清的事：中档下有一次截图时紫微师面板是关着的（脚本结束时它还开着、列表也在）。之后带着事件记录按同样的步骤重跑了两次
+  （一次从头加载，一次原地），面板都一直开着，记录里也没有多余的点击、按键或尺寸变化。没能复现，原因不明；
+  那个浏览器窗口是可见的，不排除当时有真实的点击或按键落在遮罩上。
+- **没验证的**：未在 DSH 真机复核（不重启 DSH）。这个功能只改了 Client 半，重新加载面板就能看到。
 
 ## 审查重点
 
