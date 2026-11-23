@@ -1265,6 +1265,32 @@ function __ziweiBootstrapKernel() {
     '- [ ] 免责声明在报告末尾'
   ].join('\n');
 
+  /* ---------------- 没做真太阳时校正的盘（面板里） ----------------
+     真太阳时校正是每张盘的可选口径：没填出生城市、直接给了时辰、或选了不校正的盘，命盘文本里写「真太阳时: 未校正」。
+     2026-11-24 真机：这样一张盘点「生成报告」，模型两次只回了约 300 字要经度（interpret-diag.log，mode=report，
+     chars=321 / 291）。它是照着上面的自检清单（经度 ≠120° 必做）和人设里的「信息不全时一次性列出所缺项」做的，
+     但面板里的报告是一次性生成，命主没法在那里回答。所以面板的请求（buildRequest）遇到未校正的盘时：
+     自检清单第一条换成「注明口径」，system 末尾加一节「时间口径」。
+     PERSONA 和 SELFCHECK 本身不动：DSH 会话里的 agent 可以来回问，照旧核对经度。 */
+  var SELFCHECK_UNCORRECTED = SELFCHECK.replace(
+    '- [ ] 真太阳时已校正（出生地经度 ≠120° 必做，且已核对校正后时辰）',
+    '- [ ] 时间口径已注明（本盘按钟表时间排盘、未做真太阳时校正：在第 1 部分用一句话注明，不因此中止或追问）');
+
+  var TIME_BASIS = [
+    '## 时间口径',
+    '这张盘按钟表时间排盘（命主直接给了时辰，或选择不做真太阳时校正），命盘里的「真太阳时: 未校正」就是这个意思。',
+    '这是命主在工作台里确认过的口径，不是资料不全：',
+    '- 不要因此追问出生地或经度，不要拒绝、中止，也不要只给提纲或只写一部分；照常完成本次交付。',
+    '- 上文关于真太阳时校正、出生地经度和「信息不全时列出所缺项」的要求，对这张盘的经度不适用。'
+  ];
+  var TIME_BASIS_REPORT = '- 报告在第 1 部分用一句话注明「本盘按钟表时间排盘，未做真太阳时校正」即可，不要展开。';
+  /* 报告和速览是一次性生成；定向问答可以来回问，不加这一句 */
+  var TIME_BASIS_ONE_SHOT = '- 这是面板里的一次性生成，命主在这里无法回答追问：有别的疑点（例如时辰边界）就在正文里注明，然后照常写完。';
+
+  function isUncorrected(chartText) {
+    return /真太阳时[:：]\s*未校正/.test(String(chartText || ''));
+  }
+
   var BRIEF_SHAPE = [
     '请输出 800-1200 字的速览解读，结构固定：',
     '一、命格总纲（格局定性）；二、三方四正要点；三、四化分布；四、大限走势；五、中肯建议（三条）。',
@@ -1599,17 +1625,25 @@ function __ziweiBootstrapKernel() {
       ? fullChartText(o.chart, { currentAge: currentAge, currentYear: currentYear })
       : String(o.chartText || '');
     var asked = question.length > 0;
+    /* 没做真太阳时校正的盘：见上面「没做真太阳时校正的盘」。已校正的盘走的还是原来的字句，一个字不变 */
+    var uncorrected = isUncorrected(chart);
 
     var system;
     if (mode === 'report') {
       system = PERSONA + '\n\n## 本次交付形态：完整鲲鹏报告\n' +
         '请基于下方确定性排盘输出完整鲲鹏报告（14 部分 + 致命主书 + 十二字心法，markdown 格式）。\n' +
         '全文用 markdown：## 章节（编号+名称）、### 小节、**加粗**、- 列表、> 格言引用（须确凿可查）。\n' +
-        '文末必附免责声明：' + DISCLAIMER_REPORT + '\n\n' + SELFCHECK;
+        '文末必附免责声明：' + DISCLAIMER_REPORT + '\n\n' + (uncorrected ? SELFCHECK_UNCORRECTED : SELFCHECK);
     } else if (asked) {
       system = PERSONA + '\n\n## 本次交付形态：定向问答\n' + QA_RULES;
     } else {
       system = PERSONA + '\n\n## 本次交付形态：速览解读\n' + BRIEF_SHAPE;
+    }
+    if (uncorrected) {
+      var basis = TIME_BASIS.slice();
+      if (mode === 'report') basis.push(TIME_BASIS_REPORT);
+      if (mode === 'report' || !asked) basis.push(TIME_BASIS_ONE_SHOT);
+      system += '\n\n' + basis.join('\n');
     }
 
     var metaLines = [];

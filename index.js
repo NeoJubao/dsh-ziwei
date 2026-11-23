@@ -221,7 +221,7 @@ function makeGuard(ctx) {
  * 插件本体
  * ------------------------------------------------------------------ */
 /* 供 verify/sse-hang.mjs 直接驱动 SSE 核心（含可注入超时预算） */
-export { handleInterpret, listModelChoices, pickModelOverride };
+export { handleInterpret, listModelChoices, pickModelOverride, handoffPrompt };
 
 export function apply(ctx) {
   diag('=== apply start ===');
@@ -706,13 +706,19 @@ function rememberContext(payload) {
  * 交给新会话时灌入的首条消息。
  * 命盘正文由面板直接带上，所以新会话不依赖 ziwei_context 是否已就绪；
  * 但工具名照旧点名，agent 仍会自己跑黄金自检。
+ *
+ * 真太阳时校正是每张盘的可选口径（2026-11-24）：没填出生城市、直接给了时辰、或选了不校正的盘，命盘文本里写
+ * 「真太阳时: 未校正」。那是命主在工作台里选定的，不让新会话把它当成「缺少经度」再去追问。已校正的盘字句不变。
  */
 function handoffPrompt(stored, mode) {
+  const uncorrected = /真太阳时[:：]\s*未校正/.test(String((stored && stored.fullText) || ''));
   const head = [
     '【紫微师 · 工作台交接】',
     `我已经在紫微斗数工作台排好了盘${stored.name ? `，命主称呼：${stored.name}` : ''}${stored.place ? `，出生地：${stored.place}` : ''}${stored.occupation ? `，职业/诉求：${stored.occupation}` : ''}。`,
     '',
-    '命盘数据（确定性引擎排盘，含真太阳时校正；这是唯一来源，不要再自己排一次，也不要手工推算）：',
+    uncorrected
+      ? '命盘数据（确定性引擎排盘，按钟表时间排、未做真太阳时校正；这是唯一来源，不要再自己排一次，也不要手工推算）：'
+      : '命盘数据（确定性引擎排盘，含真太阳时校正；这是唯一来源，不要再自己排一次，也不要手工推算）：',
     '',
     stored.fullText
   ];
@@ -725,7 +731,9 @@ function handoffPrompt(stored, mode) {
     mode === 'report'
       ? '按紫微师标准产出**完整鲲鹏报告**：先调用 `ziwei_check` 确认排盘工具完好，再用 `ziwei_templates` 取九诀与 14 部分方法论，然后交付 14 部分 + 致命主书 + 十二字心法，文末附免责声明。'
       : '先调用 `ziwei_check` 确认排盘工具完好，再用 `ziwei_templates` 取方法论，然后按紫微师标准做结构化解读（九诀至少用 6 诀、每诀至少 1 条命盘证据），需要完整报告就直接产出 14 部分 + 致命主书 + 十二字心法，文末附免责声明。',
-    '若这份命盘的数据有疑点（例如时辰边界、缺少经度），先向我确认，不要静默假设。'
+    uncorrected
+      ? '若这份命盘的数据有疑点（例如时辰边界），先向我确认，不要静默假设。按钟表时间排、不做真太阳时校正是我在工作台里选定的口径，不用再问经度，也不用重排。'
+      : '若这份命盘的数据有疑点（例如时辰边界、缺少经度），先向我确认，不要静默假设。'
   );
   return head.join('\n');
 }

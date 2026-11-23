@@ -143,6 +143,40 @@ ok('速览和报告的提示词没有被这次改动带到（寒暄规则只在�
 const reqReport = core.buildRequest({ chart: ch, mode: 'report' });
 ok('buildRequest(report): system 含 14 部分与自检清单', /鲲鹏报告/.test(reqReport.system) && /交付前自检/.test(reqReport.system));
 
+/* 2026-11-24（spec 2026-11-24_solar-time-option §3.6）：真太阳时是可选口径。没校正的盘在面板里照常出报告，不再停下来要经度。
+   真机：两次 mode=report 只回了 321 / 291 字（interpret-diag.log，2026-11-23T18:22Z），模型照着自检清单里的
+   「经度 ≠120° 必做」和「信息不全时一次性列出所缺项」停下来要经度，而面板里的报告是一次性生成，没法回答追问。 */
+{
+  const fx = JSON.parse(readFileSync(join(root, 'verify', 'fixtures', 'build-request-corrected.json'), 'utf8'));
+  for (const c of fx.cases) {
+    const r = core.buildRequest(Object.assign({ chart: ch }, c.opts));
+    const sameSystem = r.system === c.system;
+    const sameMessages = JSON.stringify(r.messages) === JSON.stringify(c.messages);
+    ok(`已校正的盘：buildRequest(${c.name}) 和改提示词之前逐字相同`, sameSystem && sameMessages,
+      sameSystem ? 'messages 不同' : `system 不同（现在 ${r.system.length} 字，原来 ${c.system.length} 字）`);
+  }
+  const plain = noLon.chart;
+  const meta = { name: '甲', gender: 'male', currentAge: 35, currentYear: 2026 };
+  const uRep = core.buildRequest({ chart: plain, mode: 'report', meta });
+  const uBrief = core.buildRequest({ chart: plain, mode: 'brief', meta });
+  const uAsk = core.buildRequest({ chart: plain, mode: 'brief', question: '事业怎么样', meta });
+  ok('未校正的盘：命盘文本里写着「真太阳时: 未校正」', /真太阳时: 未校正/.test(uRep.messages[0].content));
+  ok('未校正的盘：三种模式的 system 都多一节「时间口径」（确认过的口径，不追问经度，不拒绝不中止）',
+    [uRep, uBrief, uAsk].every((r) => /## 时间口径/.test(r.system) && /命主在工作台里确认过的口径/.test(r.system) &&
+      /不要因此追问出生地或经度/.test(r.system) && /不要拒绝、中止/.test(r.system)));
+  ok('未校正的盘：报告的自检清单里不再有「经度 ≠120° 必做」，换成注明口径',
+    !/经度 ≠120° 必做/.test(uRep.system) && /交付前自检/.test(uRep.system) && /- \[ \] 时间口径已注明/.test(uRep.system) && /第 1 部分用一句话注明/.test(uRep.system));
+  ok('未校正的盘：自检清单还是 12 条', (uRep.system.match(/- \[ \] /g) || []).length === 12, String((uRep.system.match(/- \[ \] /g) || []).length));
+  ok('未校正的盘：报告和速览是一次性生成，写明命主在这里无法回答追问；定向问答可以来回问，不写',
+    /无法回答追问/.test(uRep.system) && /无法回答追问/.test(uBrief.system) && !/无法回答追问/.test(uAsk.system));
+  ok('未校正的盘：模式各自的形态还在（报告 14 部分、速览五段式、定向问答的规则）',
+    /完整鲲鹏报告/.test(uRep.system) && /一、命格总纲/.test(uBrief.system) && /直接回答用户这一次的问题/.test(uAsk.system));
+  ok('用 chartText 传进来的未校正命盘也一样（面板走的是这条路）',
+    /## 时间口径/.test(core.buildRequest({ chartText: core.fullChartText(plain, { currentAge: 35, currentYear: 2026 }), mode: 'report' }).system));
+  ok('导出的 PERSONA / SELFCHECK 没变（DSH 会话里的 agent 照旧核对经度）',
+    /经度 ≠120° 必做/.test(core.SELFCHECK) && !/时间口径/.test(core.PERSONA) && !/时间口径/.test(core.SELFCHECK));
+}
+
 /* ================================================================== *
  * 2. host 插件
  * ================================================================== */
@@ -178,6 +212,20 @@ const fakeCtx = {
 
 const plugin = await import(pathToFileURL(join(root, 'index.js')).href + '?v=' + Date.now());
 plugin.apply(fakeCtx);
+
+/* 2026-11-24：交给新会话的首条消息。未校正的盘不再把「缺少经度」列为疑点（那是命主选定的口径），已校正的盘照旧 */
+{
+  const hp = typeof plugin.handoffPrompt === 'function' ? plugin.handoffPrompt : null;
+  const fullOf = (c) => core.fullChartText(c, { currentAge: 35, currentYear: 2026 });
+  const on = hp ? hp({ name: '甲', place: '', occupation: '', fullText: fullOf(ch), interpretation: '' }, 'report') : '';
+  const off = hp ? hp({ name: '甲', place: '', occupation: '', fullText: fullOf(noLon.chart), interpretation: '' }, 'report') : '';
+  ok('index.js 导出 handoffPrompt（供自检直接调）', !!hp);
+  ok('交接首条消息（已校正）：和原来一样，说含真太阳时校正，疑点举时辰边界和缺少经度',
+    /含真太阳时校正/.test(on) && /例如时辰边界、缺少经度/.test(on) && !/选定的口径/.test(on));
+  ok('交接首条消息（未校正）：说明按钟表时间排是选定的口径、不用再问经度，疑点只举时辰边界',
+    /按钟表时间排、未做真太阳时校正/.test(off) && /选定的口径/.test(off) && /不用再问经度/.test(off) && /例如时辰边界）/.test(off) &&
+    !/缺少经度/.test(off) && !/含真太阳时校正/.test(off));
+}
 
 ok('注册 4 个工具', registered.size === 4 && ['ziwei_paipan', 'ziwei_check', 'ziwei_context', 'ziwei_templates'].every((n) => registered.has(n)),
   [...registered.keys()].join(','));
