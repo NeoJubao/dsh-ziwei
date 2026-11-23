@@ -79,18 +79,36 @@ function sheetInputOf(f) {
   return check.error ? { error: check.error } : { input: input };
 }
 
+/* 这张盘是不是选了不校正（settings.trueSolar === false；没写就是校正） */
+function sheetSolarOff(f) {
+  return !!(f && f.settings && f.settings.trueSolar === false);
+}
+
+/* 填的是省名时举几个这个省的城市 */
+const SHEET_PROVINCE_SAMPLES = 4;
+
 function sheetCityHint(f) {
   const cityText = f.city != null ? String(f.city) : (f.place || (f.longitude === '' || f.longitude == null ? '' : String(f.longitude)));
   const parsed = parseBirthplace(cityText);
   const hasLon = !(f.longitude === '' || f.longitude == null);
   if (hasLon) {
+    /* 选了不校正：经度照常记下，但不拿去校正，城市只作出生地 */
+    if (sheetSolarOff(f)) {
+      return { text: cityText, warn: false, hint: parsed.kind === 'city' ? t('sheetCityHintOffCity', { city: parsed.city }) : t('sheetCityHintOffLon') };
+    }
     return {
       text: cityText, warn: false,
       hint: parsed.kind === 'city' ? t('sheetCityHintCity', { city: parsed.city, lon: f.longitude }) : t('sheetCityHintLon', { lon: f.longitude })
     };
   }
-  /* 只认出了省（范围太大，不给经度）：先和查不到一样提示，任务 4 再换成「请填到市」 */
-  if (parsed.kind === 'unknown' || parsed.kind === 'province') return { text: cityText, warn: true, hint: t('sheetCityHintUnknown', { text: cityText.trim() }) };
+  /* 只认出了省：范围太大，定不了经度，请填到市 */
+  if (parsed.kind === 'province') {
+    return {
+      text: cityText, warn: true,
+      hint: t('sheetCityHintProvince', { province: parsed.province, cities: parsed.cities.slice(0, SHEET_PROVINCE_SAMPLES).join(t('sheetStarSep')) })
+    };
+  }
+  if (parsed.kind === 'unknown') return { text: cityText, warn: true, hint: t('sheetCityHintUnknown', { text: cityText.trim() }) };
   return { text: cityText, warn: false, hint: t('sheetCityHintEmpty') };
 }
 
@@ -121,6 +139,13 @@ function BirthFormFields(props) {
   const setSetting = function (k, v) {
     const next = Object.assign({}, settings);
     next[k] = v;
+    set({ settings: next });
+  };
+  /* 真太阳时校正：只在不校正时写 trueSolar: false，校正时不留这个字段（校正的条目和以前一个样） */
+  const solarOff = sheetSolarOff(f);
+  const setSolar = function (v) {
+    const next = Object.assign({}, settings);
+    if (v === 'off') next.trueSolar = false; else delete next.trueSolar;
     set({ settings: next });
   };
   const onCity = function (v) {
@@ -175,6 +200,12 @@ function BirthFormFields(props) {
     /* 候选只列不带省也能认的名字（青海的海南州要写成「青海海南」，单写「海南」是省） */
     h('datalist', { key: 'list', id: SHEET_CITY_LIST }, CITY_NAMES_BARE.map(function (nm) { return h('option', { key: nm, value: nm }); }))
   ], city.hint, city.warn),
+  /* 和年界、月界那几项一样是这张盘的口径，但放在主区域：它直接决定时辰 */
+  sheetField('solar', t('sheetSolar'), h(Seg, {
+    radio: true, label: t('sheetSolar'), value: solarOff ? 'off' : 'on',
+    items: [{ id: 'on', label: t('sheetSolarOn') }, { id: 'off', label: t('sheetSolarOff') }],
+    onChange: setSolar
+  }), t('sheetSolarHint')),
   h('details', { className: 'zp-more' },
     h('summary', null, t('sheetMoreOptions')),
     sheetField('occupation', t('sheetOccupation'), h('input', {

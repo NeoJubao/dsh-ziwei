@@ -624,6 +624,36 @@ export default async function onboardingChecks(t) {
     eq('经度数字', text(hintOf()), '按东经 105.97° 校正真太阳时');
   });
 
+  /* 2026-11-24（spec 2026-11-24_solar-time-option §3.3）：表单里的校正开关和省名提示。进来时城市框里是 105.97 */
+  safe('新建：真太阳时开关', () => {
+    const city = () => inputByLabel(sheet(), '出生城市（选填）');
+    const hintOf = () => findByClass(fieldOf(sheet(), '出生城市（选填）'), 'zp-field-hint')[0];
+    const grp = () => tablist(sheet(), '真太阳时');
+    const radios = () => find(grp(), (n) => attr(n, 'role') === 'radio');
+    const pick = (label) => { rt3.click(radios().find((n) => text(n) === label)); };
+    const draftSettings = () => (JSON.parse(storage3.getItem('ziwei-pro.form') || '{}').settings) || {};
+    ok('表单有「真太阳时」单选组', !!grp());
+    ok('它在主区域，不在「更多选项」里', !!grp() && !tablist(find(sheet(), (n) => n.type === 'details')[0], '真太阳时'));
+    eq('选项是校正 / 不校正，默认校正', radios().map((n) => [text(n), attr(n, 'aria-checked')]), [['校正', 'true'], ['不校正', 'false']]);
+    eq('单选组下面有一行说明', text(findByClass(fieldOf(sheet(), '真太阳时'), 'zp-field-hint')[0]),
+      '按出生地的经度把钟表时间换成当地的太阳时间。只知道时辰、不知道钟点的，选不校正');
+    pick('不校正');
+    eq('选不校正：选中的换过来，城市下面的说明换成按钟表时间排', [radios().map((n) => attr(n, 'aria-checked')), text(hintOf()), classesOf(hintOf()).includes('zp-err')],
+      [['false', 'true'], '按钟表时间排盘，不按经度校正', false]);
+    eq('草稿里记下 trueSolar: false', draftSettings().trueSolar, false);
+    type3(city(), '成都');
+    eq('不校正 + 城市名：城市只作出生地记录', text(hintOf()), '按钟表时间排盘，成都只作出生地记录');
+    pick('校正');
+    eq('选回校正：说明换回来，草稿里不留 trueSolar', [text(hintOf()), 'trueSolar' in draftSettings()], ['按成都（东经 104.1°）校正真太阳时', false]);
+    type3(city(), '四川');
+    eq('填的是省名：提示填到市，举出这个省的几个城市（zp-err），不给经度',
+      [text(hintOf()), classesOf(hintOf()).includes('zp-err'), JSON.parse(storage3.getItem('ziwei-pro.form') || '{}').longitude],
+      ['「四川」是省，范围太大，定不了经度。请填到市，如 成都、自贡、攀枝花、泸州', true, '']);
+    type3(city(), '105.97');
+    eq('填回经度：按经度校正', text(hintOf()), '按东经 105.97° 校正真太阳时');
+    eq('每个输入控件有名字', unnamedControls(sheet()), 0);
+  });
+
   safe('新建：出错留在表单里', () => {
     const before = st3.getState().library.length;
     type3(inputByLabel(sheet(), '时'), '');
@@ -691,6 +721,33 @@ export default async function onboardingChecks(t) {
     const ss = st3.getState().session;
     eq('改生辰：同一个 id、盘名不变、生辰换了、条数不变', [after.name, after.input.day, after.input.hour, st3.getState().library.length], ['甲', 4, 9, n]);
     eq('浮层关上、打开这张盘', [ss.sheet, ss.view, ss.chartId], [null, 'chart', jia.id]);
+    st3.goHome();
+  });
+
+  /* 改生辰里拨开关：不校正的条目带 trueSolar: false、经度还在；改回校正后 settings 里不留这个字段。
+     这张盘现在是 1992-05-04 09:30 男 经度 105.97（黄金用例的合成变体）：不校正是巳时，校正落在辰时 */
+  safe('改生辰：真太阳时开关', () => {
+    const jia = st3.getState().library.find((e) => e.name === '甲');
+    const radios = () => find(tablist(sheet(), '真太阳时'), (n) => attr(n, 'role') === 'radio');
+    const view = (e) => { const c = st3.chartOf(e); return [c.timeName, !!(c.meta && c.meta.solarCorrection)]; };
+    eq('改之前：校正着，辰时', view(jia), ['辰时', true]);
+    env3.P.openSheet('birth', jia.id);
+    rt3.flush();
+    eq('旧条目（没有 trueSolar）打开表单：停在校正', radios().map((n) => attr(n, 'aria-checked')), ['true', 'false']);
+    rt3.click(radios().find((n) => text(n) === '不校正'));
+    submit3();
+    const off = st3.getState().library.find((e) => e.id === jia.id);
+    eq('改成不校正：条目带 trueSolar: false，经度和城市框里的字都还在', [off.input.settings.trueSolar, off.input.longitude, off.input.city], [false, '105.97', '105.97']);
+    eq('排出来是钟表时间的巳时，没有校正记录', view(off), ['巳时', false]);
+    st3.goHome();
+    env3.P.openSheet('birth', jia.id);
+    rt3.flush();
+    eq('再打开表单：停在不校正', radios().map((n) => attr(n, 'aria-checked')), ['false', 'true']);
+    rt3.click(radios().find((n) => text(n) === '校正'));
+    submit3();
+    const on = st3.getState().library.find((e) => e.id === jia.id);
+    eq('改回校正：settings 还是原来的四项，不留 trueSolar', on.input.settings, SETTINGS);
+    eq('排出来又是校正后的辰时', view(on), ['辰时', true]);
     st3.goHome();
   });
 

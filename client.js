@@ -2811,7 +2811,14 @@ const DICT = {
     "sheetCityHintEmpty": "不填就按钟表时间排盘",
     "sheetCityHintCity": "按{city}（东经 {lon}°）校正真太阳时",
     "sheetCityHintLon": "按东经 {lon}° 校正真太阳时",
+    "sheetCityHintOffCity": "按钟表时间排盘，{city}只作出生地记录",
+    "sheetCityHintOffLon": "按钟表时间排盘，不按经度校正",
+    "sheetCityHintProvince": "「{province}」是省，范围太大，定不了经度。请填到市，如 {cities}",
     "sheetCityHintUnknown": "没找到「{text}」，先按钟表时间排盘。可以换个写法，或直接填经度（如 116.4）",
+    "sheetSolar": "真太阳时",
+    "sheetSolarOn": "校正",
+    "sheetSolarOff": "不校正",
+    "sheetSolarHint": "按出生地的经度把钟表时间换成当地的太阳时间。只知道时辰、不知道钟点的，选不校正",
     "sheetMoreOptions": "更多选项",
     "sheetOccupation": "职业 / 想问的方向",
     "sheetOccupationPh": "选填，会写进完整报告",
@@ -2944,6 +2951,7 @@ const DICT = {
     "chartFactAge": "{age} 岁",
     "chartFactSolarTime": "真太阳时",
     "chartFactUncorrected": "未校正",
+    "chartFactSolarOff": "不校正",
     "chartBoundaryWarn": "出生时间离两个时辰的交界很近，请确认钟表时间是否准确",
     "asTitle": "紫微师",
     "asContext": "{name} · {cls}",
@@ -3261,7 +3269,14 @@ const DICT = {
     "sheetCityHintEmpty": "Leave empty to use clock time",
     "sheetCityHintCity": "True solar time from {city} ({lon}°E)",
     "sheetCityHintLon": "True solar time from {lon}°E",
+    "sheetCityHintOffCity": "Using clock time; {city} is only kept as the birthplace",
+    "sheetCityHintOffLon": "Using clock time; the longitude is not used",
+    "sheetCityHintProvince": "\"{province}\" is a province, too wide to set a longitude from. Enter a city, e.g. {cities}",
     "sheetCityHintUnknown": "No match for \"{text}\", using clock time. Try another spelling or enter a longitude (e.g. 116.4)",
+    "sheetSolar": "True solar time",
+    "sheetSolarOn": "Correct",
+    "sheetSolarOff": "Don't correct",
+    "sheetSolarHint": "Converts the clock time to local solar time from the birthplace's longitude. If you know the two-hour period rather than a clock time, don't correct",
     "sheetMoreOptions": "More options",
     "sheetOccupation": "Occupation / focus",
     "sheetOccupationPh": "Optional, goes into the full report",
@@ -3394,6 +3409,7 @@ const DICT = {
     "chartFactAge": "age {age}",
     "chartFactSolarTime": "True solar time",
     "chartFactUncorrected": "uncorrected",
+    "chartFactSolarOff": "not corrected",
     "chartBoundaryWarn": "The birth time is close to the boundary between two double-hours; please check the clock time",
     "asTitle": "Reader",
     "asContext": "{name} · {cls}",
@@ -11485,18 +11501,36 @@ function sheetInputOf(f) {
   return check.error ? { error: check.error } : { input: input };
 }
 
+/* 这张盘是不是选了不校正（settings.trueSolar === false；没写就是校正） */
+function sheetSolarOff(f) {
+  return !!(f && f.settings && f.settings.trueSolar === false);
+}
+
+/* 填的是省名时举几个这个省的城市 */
+const SHEET_PROVINCE_SAMPLES = 4;
+
 function sheetCityHint(f) {
   const cityText = f.city != null ? String(f.city) : (f.place || (f.longitude === '' || f.longitude == null ? '' : String(f.longitude)));
   const parsed = parseBirthplace(cityText);
   const hasLon = !(f.longitude === '' || f.longitude == null);
   if (hasLon) {
+    /* 选了不校正：经度照常记下，但不拿去校正，城市只作出生地 */
+    if (sheetSolarOff(f)) {
+      return { text: cityText, warn: false, hint: parsed.kind === 'city' ? t('sheetCityHintOffCity', { city: parsed.city }) : t('sheetCityHintOffLon') };
+    }
     return {
       text: cityText, warn: false,
       hint: parsed.kind === 'city' ? t('sheetCityHintCity', { city: parsed.city, lon: f.longitude }) : t('sheetCityHintLon', { lon: f.longitude })
     };
   }
-  /* 只认出了省（范围太大，不给经度）：先和查不到一样提示，任务 4 再换成「请填到市」 */
-  if (parsed.kind === 'unknown' || parsed.kind === 'province') return { text: cityText, warn: true, hint: t('sheetCityHintUnknown', { text: cityText.trim() }) };
+  /* 只认出了省：范围太大，定不了经度，请填到市 */
+  if (parsed.kind === 'province') {
+    return {
+      text: cityText, warn: true,
+      hint: t('sheetCityHintProvince', { province: parsed.province, cities: parsed.cities.slice(0, SHEET_PROVINCE_SAMPLES).join(t('sheetStarSep')) })
+    };
+  }
+  if (parsed.kind === 'unknown') return { text: cityText, warn: true, hint: t('sheetCityHintUnknown', { text: cityText.trim() }) };
   return { text: cityText, warn: false, hint: t('sheetCityHintEmpty') };
 }
 
@@ -11527,6 +11561,13 @@ function BirthFormFields(props) {
   const setSetting = function (k, v) {
     const next = Object.assign({}, settings);
     next[k] = v;
+    set({ settings: next });
+  };
+  /* 真太阳时校正：只在不校正时写 trueSolar: false，校正时不留这个字段（校正的条目和以前一个样） */
+  const solarOff = sheetSolarOff(f);
+  const setSolar = function (v) {
+    const next = Object.assign({}, settings);
+    if (v === 'off') next.trueSolar = false; else delete next.trueSolar;
     set({ settings: next });
   };
   const onCity = function (v) {
@@ -11581,6 +11622,12 @@ function BirthFormFields(props) {
     /* 候选只列不带省也能认的名字（青海的海南州要写成「青海海南」，单写「海南」是省） */
     h('datalist', { key: 'list', id: SHEET_CITY_LIST }, CITY_NAMES_BARE.map(function (nm) { return h('option', { key: nm, value: nm }); }))
   ], city.hint, city.warn),
+  /* 和年界、月界那几项一样是这张盘的口径，但放在主区域：它直接决定时辰 */
+  sheetField('solar', t('sheetSolar'), h(Seg, {
+    radio: true, label: t('sheetSolar'), value: solarOff ? 'off' : 'on',
+    items: [{ id: 'on', label: t('sheetSolarOn') }, { id: 'off', label: t('sheetSolarOff') }],
+    onChange: setSolar
+  }), t('sheetSolarHint')),
   h('details', { className: 'zp-more' },
     h('summary', null, t('sheetMoreOptions')),
     sheetField('occupation', t('sheetOccupation'), h('input', {
@@ -12530,7 +12577,9 @@ function BoardCenter() {
     h('span', null, h('b', null, chart.fiveElementsClass), ' · ', t(chartYinYangKey(chart))),
     h('span', null, t('chartFactSoulMaster'), ' ', h('b', null, chart.soulMaster), ' · ', t('chartFactBodyMaster'), ' ', h('b', null, chart.bodyMaster)),
     h('span', null, t('chartFactStart'), ' ', h('b', null, t('chartFactAge', { age: chart.startAge }))),
-    h('span', null, t('chartFactSolarTime'), ' ', h('b', null, sc && sc.solarTime ? sc.solarTime : t('chartFactUncorrected')))
+    /* 校正后的钟点；这张盘选了不校正写「不校正」；没填城市、没东西可校正写「未校正」 */
+    h('span', null, t('chartFactSolarTime'), ' ', h('b', null, sc && sc.solarTime ? sc.solarTime
+      : t(input.settings && input.settings.trueSolar === false ? 'chartFactSolarOff' : 'chartFactUncorrected')))
   ];
   if (scope) facts.push(h('span', null, scopeTabName(m.tab), ' ', h('b', null, scope.stem + scope.branch)));
   /* 字都放在一块牌子（div.zp-plate）上：三方四正的连线从牌子下面穿过，不压在字上 */

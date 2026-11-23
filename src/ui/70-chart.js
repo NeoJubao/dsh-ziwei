@@ -530,7 +530,9 @@ function BoardCenter() {
     h('span', null, h('b', null, chart.fiveElementsClass), ' · ', t(chartYinYangKey(chart))),
     h('span', null, t('chartFactSoulMaster'), ' ', h('b', null, chart.soulMaster), ' · ', t('chartFactBodyMaster'), ' ', h('b', null, chart.bodyMaster)),
     h('span', null, t('chartFactStart'), ' ', h('b', null, t('chartFactAge', { age: chart.startAge }))),
-    h('span', null, t('chartFactSolarTime'), ' ', h('b', null, sc && sc.solarTime ? sc.solarTime : t('chartFactUncorrected')))
+    /* 校正后的钟点；这张盘选了不校正写「不校正」；没填城市、没东西可校正写「未校正」 */
+    h('span', null, t('chartFactSolarTime'), ' ', h('b', null, sc && sc.solarTime ? sc.solarTime
+      : t(input.settings && input.settings.trueSolar === false ? 'chartFactSolarOff' : 'chartFactUncorrected')))
   ];
   if (scope) facts.push(h('span', null, scopeTabName(m.tab), ' ', h('b', null, scope.stem + scope.branch)));
   /* 字都放在一块牌子（div.zp-plate）上：三方四正的连线从牌子下面穿过，不压在字上 */

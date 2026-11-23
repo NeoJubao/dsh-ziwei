@@ -231,6 +231,19 @@ async function deepChecks(t, ok, eq, section) {
   const uncorrected = facts(page());
   chart.meta.solarCorrection = sc;
   eq('没校正真太阳时：写「未校正」', uncorrected[3], '真太阳时 未校正');
+  /* 2026-11-24（spec 2026-11-24_solar-time-option §3.5）：这张盘选了不校正（settings.trueSolar === false）→ 写「不校正」。
+     黄金用例不校正就是钟表时间 09:30，巳时 */
+  {
+    const offEntry = store.addChart(Object.assign({}, GOLDEN, { settings: Object.assign({}, GOLDEN.settings, { trueSolar: false }) }), '乙');
+    store.openChart(offEntry.id);
+    const offPage = page();
+    eq('选了不校正的盘：底数里写「不校正」，生日行是钟表时间的时辰',
+      [facts(offPage)[3], text(first(centerOf(offPage), 'zp-birth'))], ['真太阳时 不校正', '1992.05.03 · 农历四月初一 · 巳时']);
+    store.openChart(entry.id);
+    store.removeChart(offEntry.id);
+    store.dismissToast();
+    eq('回到黄金用例：还是校正后的 08:37', facts(page())[3], '真太阳时 08:37');
+  }
 
   /* ---------- 时间卡（本命） ---------- */
   const sc0 = scopeCard(tree);

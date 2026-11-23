@@ -52,5 +52,6 @@
   "chartFactAge": ["{age} 岁", "age {age}"],
   "chartFactSolarTime": ["真太阳时", "True solar time"],
   "chartFactUncorrected": ["未校正", "uncorrected"],
+  "chartFactSolarOff": ["不校正", "not corrected"],
   "chartBoundaryWarn": ["出生时间离两个时辰的交界很近，请确认钟表时间是否准确", "The birth time is close to the boundary between two double-hours; please check the clock time"]
 }
