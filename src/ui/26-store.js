@@ -98,13 +98,15 @@ function storeWithKey(map, key, value) {
   return next;
 }
 
-/* 库条目的 input → 引擎的入参（和 v5 computeFrom 一样；口径缺项按默认值补，和命盘 key 的归一化一致） */
+/* 库条目的 input → 引擎的入参（和 v5 computeFrom 一样；口径缺项按默认值补，和命盘 key 的归一化一致）。
+   经度用 effectiveLongitude：这张盘选了不校正就不交给引擎（引擎没有经度就按钟表时间排）。 */
 function storeEngineInput(input) {
   const x = readingInput(input);
+  const lon = effectiveLongitude(x);
   return {
     calendar: x.calendar, year: x.year, month: x.month, day: x.day, isLeapMonth: x.isLeap,
     hour: x.hour, minute: x.minute, gender: x.gender,
-    longitude: x.longitude === '' ? undefined : +x.longitude,
+    longitude: lon === '' ? undefined : +lon,
     settings: Object.assign({}, DEFAULT_FORM.settings, x.settings)
   };
 }

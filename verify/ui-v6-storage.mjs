@@ -251,6 +251,38 @@ export default async function storageChecks(t) {
     () => ui.readingKeyOf(Object.assign({}, GOLDEN, { longitude: 105.97, year: '1992', name: '甲' })) === GOLDEN_KEY);
   check('readingKeyOf：没有 settings 时按默认口径（normal,exact,current,1）',
     () => ui.readingKeyOf({ calendar: 'solar', year: 1990, month: 6, day: 15, hour: 15, minute: 30, gender: 'male', longitude: '' }) === DEFAULT_KEY);
+
+  /* 2026-11-24：真太阳时校正是每张盘的口径（spec 2026-11-24_solar-time-option §3.1）。settings.trueSolar === false = 不校正。
+     不校正的盘和「同生辰、没填城市」的盘是同一张盘，key 也相同；key 的格式不变。 */
+  {
+    const OFF = Object.assign({}, GOLDEN, { settings: Object.assign({}, GOLDEN.settings, { trueSolar: false }) });
+    const ON = Object.assign({}, GOLDEN, { settings: Object.assign({}, GOLDEN.settings, { trueSolar: true }) });
+    check('effectiveLongitude：校正的盘是归一化后的经度，不校正的盘是空的，没填经度也是空的', () => {
+      const f = ui.effectiveLongitude;
+      const got = typeof f === 'function'
+        ? [f(GOLDEN), f(ON), f(Object.assign({}, GOLDEN, { longitude: 105.97 })), f(OFF), f(Object.assign({}, GOLDEN, { longitude: '' })), f(null)] : null;
+      return [json(got) === json(['105.97', '105.97', '105.97', '', '', '']), json(got)];
+    });
+    check('readingKeyOf：不校正的盘 = 没填经度的那个 key；trueSolar 是 true 或没写 = 原来的 key',
+      () => [ui.readingKeyOf(OFF) === V1_AS_V2_KEY && ui.readingKeyOf(ON) === GOLDEN_KEY, ui.readingKeyOf(OFF) + ' / ' + ui.readingKeyOf(ON)]);
+    check('readingInput：原始经度和口径都留着（不校正只影响交给引擎的经度）', () => {
+      const r = ui.readingInput(OFF);
+      return [r.longitude === '105.97' && r.settings.trueSolar === false, json(r)];
+    });
+    /* 黄金用例的合成变体：1992-02-03 06:00 男 经度 105.97。校正到 04:50 是寅时，不校正是卯时（spec §3.1 的表） */
+    const DAWN = Object.assign({}, GOLDEN, { month: 2, day: 3, hour: 6, minute: 0 });
+    const DAWN_OFF = Object.assign({}, DAWN, { settings: Object.assign({}, DAWN.settings, { trueSolar: false }) });
+    check('自动盘名：校正的盘按校正后的时辰（寅时），不校正的盘按钟表时间的时辰（卯时）',
+      () => [ui.defaultChartName(DAWN) === '1992-02-03 寅时 男' && ui.defaultChartName(DAWN_OFF) === '1992-02-03 卯时 男',
+        ui.defaultChartName(DAWN) + ' / ' + ui.defaultChartName(DAWN_OFF)]);
+    check('命盘库：不校正的条目存下 settings.trueSolar === false；校正的条目 settings 还是原来的四项', () => {
+      const api = ui.createStorageApi(memoryStorage(), { now: () => 1763000000000 });
+      const off = api.library.add(OFF, '乙').entry;
+      const on = api.library.add(GOLDEN, '甲').entry;
+      return [off.input.settings.trueSolar === false && off.input.longitude === '105.97' &&
+        Object.keys(on.input.settings).join(',') === 'yearDivide,monthDivide,dayDivide,fixLeap', json([off.input.settings, on.input.settings])];
+    });
+  }
   check('readingInput 的字段和归一化（v5 原样：不含 city，经度是字符串）', () => {
     const x = ui.readingInput(Object.assign({}, GOLDEN, { longitude: 105.97, city: '某城' }));
     return [Object.keys(x).join(',') === 'name,calendar,year,month,day,isLeap,hour,minute,gender,longitude,place,occupation,settings' &&

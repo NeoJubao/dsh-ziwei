@@ -430,6 +430,21 @@ export default async function store(t) {
     eq('启动时恢复上次命盘：首页聚焦它', [second.st.getState().session.view, second.st.getState().session.focusId], ['home', a.id]);
   }
   {
+    /* 2026-11-24：不校正的盘（settings.trueSolar === false）按钟表时间排，经度和出生地照常留着。
+       黄金用例的合成变体 1992-02-03 06:00 男 经度 105.97：校正是寅时、命宫亥；不校正是卯时、命宫戌（spec §3.1 的表）。 */
+    const DAWN = Object.assign({}, GOLDEN, { month: 2, day: 3, hour: 6, minute: 0, place: '甲地' });
+    const DAWN_OFF = Object.assign({}, DAWN, { settings: Object.assign({}, DAWN.settings, { trueSolar: false }) });
+    const { st } = mk({ storage: memoryStorage() });
+    const on = st.addChart(DAWN, '校正');
+    const off = st.addChart(DAWN_OFF, '不校正');
+    const view = (e) => { const c = st.chartOf(e); return c ? [c.timeName, c.soulBranch, c.meta && c.meta.solarCorrection ? c.meta.solarCorrection.solarTime : null] : null; };
+    eq('校正的盘：按经度校正到 04:50，寅时，命宫亥', view(on), ['寅时', '亥', '04:50']);
+    eq('不校正的盘：按钟表时间，卯时，命宫戌，没有校正记录', view(off), ['卯时', '戌', null]);
+    eq('不校正的盘：经度、出生地和口径都留在条目里', [off.input.longitude, off.input.place, off.input.settings.trueSolar], ['105.97', '甲地', false]);
+    eq('不校正的盘和没填经度的同生辰是同一个命盘 key', st.keyOf(off), 'solar|1992|2|3|0|6|0|male||normal,exact,current,1');
+    ok('校正和不校正是两张盘（key 不同）', st.keyOf(on) !== st.keyOf(off));
+  }
+  {
     /* 1.6.0（上一个公开版本）写下的命盘库：input 没有 city 字段，经度和籍贯是两个字段（v1.6.0 的 src/ui-pro.js saveChart）。
        从 npm 升级上来的人带着的是这种记录；fixtures/storage-v5.json 是 v5 的形状，没有这一种。期望值是黄金用例的既有口径。 */
     const V160 = { name: '', calendar: 'solar', year: 1992, month: 5, day: 3, isLeap: false, hour: 9, minute: 30, gender: 'male',

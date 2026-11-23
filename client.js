@@ -3882,14 +3882,24 @@ function readingInput(input) {
 }
 ZWUI.readingInput = readingInput;
 
+/* 真太阳时校正是每张盘的口径：settings.trueSolar === false 是不校正，没写或是别的值都是校正（有经度才校正得了）。
+   这里是交给引擎、也是进命盘 key 的经度：不校正时是空的。条目里原始的 longitude / city / place 照常留着，
+   只是不拿去校正。不校正的盘和「同生辰、没填城市」的盘算出来是同一张盘，所以 key 也相同。 */
+function effectiveLongitude(input) {
+  const x = readingInput(input);
+  return x.settings && x.settings.trueSolar === false ? '' : x.longitude;
+}
+ZWUI.effectiveLongitude = effectiveLongitude;
+
 /* 命盘 key：生辰 + 排盘口径，不含称呼。
-   calendar|year|month|day|leap|hour|minute|gender|longitude|yearDivide,monthDivide,dayDivide,fixLeap */
+   calendar|year|month|day|leap|hour|minute|gender|longitude|yearDivide,monthDivide,dayDivide,fixLeap
+   longitude 那一段是 effectiveLongitude（不校正的盘是空的）；格式没变。 */
 function readingKeyOf(input) {
   const x = readingInput(input);
   const st = x.settings || {};
   /* 排盘设置会改变命盘（月柱口径 / 晚子时 / 闰月），必须进 key，否则换设置会套回旧解读 */
   const settingsKey = [st.yearDivide || 'normal', st.monthDivide || 'exact', st.dayDivide || 'current', st.fixLeap === false ? 0 : 1].join(',');
-  return [x.calendar, x.year, x.month, x.day, x.isLeap ? 1 : 0, x.hour, x.minute, x.gender, x.longitude, settingsKey].join('|');
+  return [x.calendar, x.year, x.month, x.day, x.isLeap ? 1 : 0, x.hour, x.minute, x.gender, effectiveLongitude(x), settingsKey].join('|');
 }
 ZWUI.readingKeyOf = readingKeyOf;
 
@@ -3948,18 +3958,19 @@ function libraryInput(input) {
   };
 }
 
-/* 不填名时的盘名：和 v5 saveChart 一样，用引擎算出公历日期和时辰（真太阳时校正后），
+/* 不填名时的盘名：和 v5 saveChart 一样，用引擎算出公历日期和时辰（这张盘校正的话是校正后的），
    交给 autoChartName；引擎不可用时按输入的日期、不带时辰。labels 是性别的叫法，默认男 / 女。 */
 function defaultChartName(input, labels) {
   const x = readingInput(input);
   const named = { name: x.name, year: x.year, month: x.month, day: x.day, gender: x.gender };
   let timeName = '';
+  const lon = effectiveLongitude(x);
   try {
     if (E && typeof E.computeChart === 'function') {
       const c = E.computeChart({
         calendar: x.calendar, year: x.year, month: x.month, day: x.day, isLeapMonth: x.isLeap,
         hour: x.hour, minute: x.minute, gender: x.gender,
-        longitude: x.longitude === '' ? undefined : +x.longitude,
+        longitude: lon === '' ? undefined : +lon,
         settings: x.settings
       });
       if (c && !c.error) {
@@ -5411,13 +5422,15 @@ function storeWithKey(map, key, value) {
   return next;
 }
 
-/* 库条目的 input → 引擎的入参（和 v5 computeFrom 一样；口径缺项按默认值补，和命盘 key 的归一化一致） */
+/* 库条目的 input → 引擎的入参（和 v5 computeFrom 一样；口径缺项按默认值补，和命盘 key 的归一化一致）。
+   经度用 effectiveLongitude：这张盘选了不校正就不交给引擎（引擎没有经度就按钟表时间排）。 */
 function storeEngineInput(input) {
   const x = readingInput(input);
+  const lon = effectiveLongitude(x);
   return {
     calendar: x.calendar, year: x.year, month: x.month, day: x.day, isLeapMonth: x.isLeap,
     hour: x.hour, minute: x.minute, gender: x.gender,
-    longitude: x.longitude === '' ? undefined : +x.longitude,
+    longitude: lon === '' ? undefined : +lon,
     settings: Object.assign({}, DEFAULT_FORM.settings, x.settings)
   };
 }
