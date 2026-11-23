@@ -6,7 +6,10 @@
  *
  * 键和记录结构沿用 v5，含义不变（spec §4.3）：
  *   ziwei-pro.library        命盘库 [{ id: 'lib-<毫秒>', name, input, openedAt? }]，最多 60 条，新→旧
- *   ziwei-pro.readings.v2    { [命盘 key]: { thread, report, studioTab, name, updatedAt } }，最多 8 张盘
+ *   ziwei-pro.readings.v2    { [命盘 key]: { thread, report, studioTab, name, updatedAt } }，最多 20 张盘（v5 是 8 张）。
+ *                            thread 是这张盘当前的对话
+ *   ziwei-pro.chats.v1（新） { [命盘 key]: [{ id: 'c-<毫秒>', thread, updatedAt }] }：这张盘的历史对话，新→旧，每张盘最多 20 条。
+ *                            当前对话不在这里；旧版本不读不写这个键，所以升级、降级都不用迁移
  *   ziwei-pro.readings.v1    旧版记录（9 段 key），读到时迁进 v2
  *   ziwei-pro.lastChart.v1   上次打开的盘（readingInput 的形状）
  *   ziwei-pro.form / ziwei-pro.formV133   生辰表单草稿 / v1.3.3 的一次性迁移标记
@@ -23,14 +26,18 @@ const READINGS_V1_KEY = 'ziwei-pro.readings.v1';
 const LAST_CHART_KEY = 'ziwei-pro.lastChart.v1';
 const LIBRARY_KEY = 'ziwei-pro.library';
 const V6_IMPORT_KEY = 'ziwei-pro.v6';
-const READINGS_MAX = 8;
+const CHATS_KEY = 'ziwei-pro.chats.v1';
+/* 2026-11-24：8 → 20。按命盘存历史对话之后，「第 9 张盘把最旧一张的对话和报告挤掉」就说不过去了；写不下时照旧先挤最旧的 */
+const READINGS_MAX = 20;
+const CHATS_PER_CHART = 20;
+const CHAT_ID_MAX = 40;
 const LIBRARY_MAX = 60;
 const LIBRARY_NAME_MAX = 12;
 const LIBRARY_RECENT = 8;
 
 /* ---------------- 解读记录的纯函数（v5 原样） ----------------
    同一生辰 + 同一排盘设置视为同一张盘；聊天、完整报告、最后停留的页签一起保存。
-   只写浏览器本地，不上传；最多 8 张盘，每张最多 24 条消息。 */
+   只写浏览器本地，不上传；最多 20 张盘，每条对话最多 24 条消息。 */
 function emptyReport() {
   return { status: 'idle', text: '', startedAt: 0, finishedAt: 0, error: '', issue: null };
 }
@@ -104,6 +111,24 @@ function cleanThread(thread) {
   }).filter(function (m) { return m.role === 'user' || m.content; });
 }
 ZWUI.cleanThread = cleanThread;
+
+/* 历史对话列表的清理：每条 { id, thread, updatedAt }，thread 走 cleanThread；没有 id、id 重复、清理后没有消息的去掉；
+   顺序不变（新→旧），只留前 20 条。 */
+function cleanChats(list) {
+  const seen = {};
+  const out = [];
+  (Array.isArray(list) ? list : []).forEach(function (c) {
+    if (!c || typeof c !== 'object') return;
+    const id = String(c.id == null ? '' : c.id).slice(0, CHAT_ID_MAX);
+    if (!id || seen[id]) return;
+    const thread = cleanThread(c.thread);
+    if (!thread.length) return;
+    seen[id] = true;
+    out.push({ id: id, thread: thread, updatedAt: +c.updatedAt || 0 });
+  });
+  return out.slice(0, CHATS_PER_CHART);
+}
+ZWUI.cleanChats = cleanChats;
 
 function trimReadings(map) {
   const keys = Object.keys(map).sort(function (a, b) { return (map[b].updatedAt || 0) - (map[a].updatedAt || 0); });
@@ -311,10 +336,52 @@ function createStorageApi(storage, opts) {
     });
     if (legacyChanged) set(READINGS_V1_KEY, JSON.stringify(legacy));
   }
-  /* 「清除本机记录」：所有对话和报告（v2 + v1）和上次命盘；命盘库不动 */
+  /* ---------------- 历史对话（spec 2026-11-24_chat-history） ----------------
+     每张盘一个列表，新→旧。当前对话在 readings.v2 的 thread 里，不在这儿。 */
+  function loadChatMap() {
+    const map = readStorageMap(CHATS_KEY);
+    return Array.isArray(map) ? {} : map;
+  }
+  function loadChats(key) {
+    if (!key) return [];
+    return cleanChats(loadChatMap()[key]);
+  }
+  /* 整个换掉这张盘的列表（空列表 = 删掉这张盘的历史）。写不下（配额满）就去掉所有盘里最旧的一条再试，
+     直到写进去；写进去返回 true。去到一条不剩还是写不下，就什么都不动、返回 false：
+     写失败不能把已经存好的历史毁掉（不外抛，也不留半截）。 */
+  function saveChats(key, list) {
+    if (!key) return false;
+    const map = loadChatMap();
+    const clean = cleanChats(list);
+    /* 要存的是不是空列表先记下：下面去掉最旧的那一步改的就是 clean 这个数组 */
+    const emptied = !clean.length;
+    if (clean.length) map[key] = clean; else delete map[key];
+    for (;;) {
+      if (!Object.keys(map).length) {
+        if (!emptied) return false;
+        remove(CHATS_KEY);
+        return true;
+      }
+      if (set(CHATS_KEY, JSON.stringify(map))) return true;
+      let oldKey = null, oldAt = -1, oldTime = Infinity;
+      Object.keys(map).forEach(function (k) {
+        if (!Array.isArray(map[k]) || !map[k].length) { delete map[k]; return; }
+        map[k].forEach(function (c, i) {
+          const tm = +(c && c.updatedAt) || 0;
+          if (tm < oldTime) { oldTime = tm; oldKey = k; oldAt = i; }
+        });
+      });
+      if (oldKey === null) continue;
+      map[oldKey].splice(oldAt, 1);
+      if (!map[oldKey].length) delete map[oldKey];
+    }
+  }
+
+  /* 「清除本机记录」：所有对话（当前的和历史的）和报告（v2 + v1）和上次命盘；命盘库不动 */
   function clearLocalRecords() {
     remove(READINGS_KEY);
     remove(READINGS_V1_KEY);
+    remove(CHATS_KEY);
     remove(LAST_CHART_KEY);
   }
   function saveLastChart(input) {
@@ -598,6 +665,7 @@ function createStorageApi(storage, opts) {
       save: saveReadingRecord,
       clear: clearReadingRecord
     },
+    chats: { load: loadChats, save: saveChats },
     lastChart: { load: loadLastChart, save: saveLastChart },
     clearLocalRecords: clearLocalRecords,
     form: { load: loadForm, save: saveForm },

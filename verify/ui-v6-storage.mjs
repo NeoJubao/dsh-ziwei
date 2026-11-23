@@ -374,9 +374,10 @@ export default async function storageChecks(t) {
       api.readings.save(GOLDEN_KEY, { thread: [{ role: 'user', content: '问' }], studioTab: 'chart' });
       return JSON.parse(s.getItem('ziwei-pro.readings.v2'))[GOLDEN_KEY].studioTab === 'chat';
     });
-    check('最多留 8 张盘，挤掉最久没更新的', () => {
+    /* 2026-11-24：上限从 8 张提到 20 张（spec 2026-11-24_chat-history §3.1） */
+    check('最多留 20 张盘，挤掉最久没更新的', () => {
       const keys = [];
-      for (let i = 0; i < 9; i++) {
+      for (let i = 0; i < 21; i++) {
         now.tick(1000);
         const k = `solar|1990|6|${i + 1}|0|15|30|male||normal,exact,current,1`;
         keys.push(k);
@@ -384,8 +385,8 @@ export default async function storageChecks(t) {
       }
       const map = JSON.parse(s.getItem('ziwei-pro.readings.v2'));
       const left = Object.keys(map);
-      /* 循环前已有一张（GOLDEN），共 10 张：留最新的 8 张，GOLDEN 和循环里的第一张被挤掉 */
-      return [left.length === 8 && !map[GOLDEN_KEY] && !map[keys[0]] && keys.slice(1).every((k) => !!map[k]), left.join(' ')];
+      /* 循环前已有一张（GOLDEN），共 22 张：留最新的 20 张，GOLDEN 和循环里的第一张被挤掉 */
+      return [left.length === 20 && !map[GOLDEN_KEY] && !map[keys[0]] && keys.slice(1).every((k) => !!map[k]), left.join(' ')];
     });
     check('每张盘最多 24 条消息（留最后 24 条）', () => {
       const thread = Array.from({ length: 30 }, (_, i) => ({ role: i % 2 ? 'assistant' : 'user', content: '第' + i + '条' }));
@@ -448,6 +449,108 @@ export default async function storageChecks(t) {
       const map = JSON.parse(s.getItem('ziwei-pro.readings.v2') || '{}');
       return [!!map[GOLDEN_KEY] && !map[keys[0]], Object.keys(map).join(' ')];
     });
+  }
+
+  /* ---------------------------------------------------------------- */
+  section('v6 本机存储：历史对话（spec 2026-11-24_chat-history §3.1）');
+  {
+    const CHATS = 'ziwei-pro.chats.v1';
+    const T = (q, a) => [{ role: 'user', content: q }, { role: 'assistant', content: a }];
+    const hasChats = !!(mk(memoryStorage()).chats && typeof mk(memoryStorage()).chats.load === 'function' && typeof mk(memoryStorage()).chats.save === 'function');
+    check('存储 API 有 chats.load / chats.save', () => hasChats);
+    if (hasChats) {
+      const now = clock(1763700000000);
+      const s = memoryStorage();
+      const api = mk(s, now);
+      check('没存过：读出来是空数组，不写任何键', () => [json(api.chats.load(GOLDEN_KEY)) === '[]' && s.getItem(CHATS) === null, json(api.chats.load(GOLDEN_KEY))]);
+      check('存两条：写进 ziwei-pro.chats.v1，键是命盘 key，每条恰好是 id, thread, updatedAt，顺序不变（新的在前）', () => {
+        const saved = api.chats.save(GOLDEN_KEY, [{ id: 'c-2', thread: T('问二', '答二'), updatedAt: 2000, extra: 1 }, { id: 'c-1', thread: T('问一', '答一'), updatedAt: 1000 }]);
+        const raw = JSON.parse(s.getItem(CHATS));
+        const list = raw[GOLDEN_KEY] || [];
+        return [saved === true && Object.keys(raw).join() === GOLDEN_KEY && list.length === 2 && list.every((c) => Object.keys(c).join(',') === 'id,thread,updatedAt') &&
+          list[0].id === 'c-2' && list[0].updatedAt === 2000 && list[1].thread[0].content === '问一', json(raw)];
+      });
+      check('读回来和存进去的一样；改读回来的对象不影响下一次读', () => {
+        const a = api.chats.load(GOLDEN_KEY);
+        a[0].thread[0].content = '被改了';
+        a.pop();
+        const b = api.chats.load(GOLDEN_KEY);
+        return [b.length === 2 && b[0].thread[0].content === '问二' && b[1].id === 'c-1', json(b)];
+      });
+      check('历史是另一个键：readings.v2 没有被写', () => s.getItem('ziwei-pro.readings.v2') === null);
+      check('消息按现有规则清理（留最后 24 条、去掉空的回答）；清理后没有消息的对话不存', () => {
+        const long = Array.from({ length: 30 }, (_, i) => ({ role: i % 2 ? 'assistant' : 'user', content: '第' + i + '条' }));
+        api.chats.save(DEFAULT_KEY, [{ id: 'c-a', thread: long, updatedAt: 5 }, { id: 'c-b', thread: [{ role: 'assistant', content: '' }], updatedAt: 4 }, { id: 'c-c', thread: [], updatedAt: 3 }]);
+        const list = api.chats.load(DEFAULT_KEY);
+        return [list.length === 1 && list[0].id === 'c-a' && list[0].thread.length === 24 && list[0].thread[0].content === '第6条', json(list.map((c) => [c.id, c.thread.length]))];
+      });
+      check('同一个 id 只留前面那条；没有 id 的不存', () => {
+        api.chats.save(DEFAULT_KEY, [{ id: 'c-x', thread: T('前', '答'), updatedAt: 9 }, { id: 'c-x', thread: T('后', '答'), updatedAt: 8 }, { thread: T('没有 id', '答'), updatedAt: 7 }]);
+        const list = api.chats.load(DEFAULT_KEY);
+        return [list.length === 1 && list[0].thread[0].content === '前', json(list)];
+      });
+      check('每张盘最多 20 条，去掉排在后面的（最旧的）', () => {
+        const many = Array.from({ length: 23 }, (_, i) => ({ id: 'c-' + (100 - i), thread: T('问' + i, '答'), updatedAt: 100 - i }));
+        api.chats.save(DEFAULT_KEY, many);
+        const list = api.chats.load(DEFAULT_KEY);
+        return [list.length === 20 && list[0].id === 'c-100' && list[19].id === 'c-81', list.map((c) => c.id).join(' ')];
+      });
+      check('存空数组：这张盘从键里删掉，别的盘不动', () => {
+        api.chats.save(DEFAULT_KEY, []);
+        const raw = JSON.parse(s.getItem(CHATS));
+        return [!(DEFAULT_KEY in raw) && raw[GOLDEN_KEY].length === 2, json(Object.keys(raw))];
+      });
+      check('key 为空时什么都不做', () => {
+        const before = s.getItem(CHATS);
+        const r = api.chats.save('', [{ id: 'c-9', thread: T('问', '答'), updatedAt: 1 }]);
+        return r === false && s.getItem(CHATS) === before && json(api.chats.load('')) === '[]';
+      });
+      check('清除本机记录：历史对话也清掉', () => {
+        api.clearLocalRecords();
+        return [s.getItem(CHATS) === null && api.chats.load(GOLDEN_KEY).length === 0, String(s.getItem(CHATS))];
+      });
+      check('存的值读不出来（不是 JSON、不是对象、这张盘不是数组）：当成没有历史，之后还能正常存', () => {
+        const out = ['{oops', '[1,2]', '"x"', json({ [GOLDEN_KEY]: 'x' }), json({ [GOLDEN_KEY]: [null, 3, { id: 'c-1' }] })].map((bad) => {
+          const st = memoryStorage({ [CHATS]: bad });
+          const a = mk(st);
+          const empty = a.chats.load(GOLDEN_KEY).length === 0;
+          a.chats.save(GOLDEN_KEY, [{ id: 'c-1', thread: T('问', '答'), updatedAt: 1 }]);
+          return empty && a.chats.load(GOLDEN_KEY).length === 1;
+        });
+        return [out.every(Boolean), json(out)];
+      });
+      check('setItem 抛错：保存不外抛、返回 false；getItem 抛错：读出来是空数组', () => {
+        const a = mk(throwingSetStorage());
+        const r = a.chats.save(GOLDEN_KEY, [{ id: 'c-1', thread: T('问', '答'), updatedAt: 1 }]);
+        const bad = { getItem() { throw new Error('SecurityError'); }, setItem() { throw new Error('SecurityError'); }, removeItem() { throw new Error('SecurityError'); } };
+        return [r === false && json(mk(bad).chats.load(GOLDEN_KEY)) === '[]', String(r)];
+      });
+      check('配额不够：去掉所有盘里最旧的一条历史再试，直到写得下', () => {
+        const st = quotaStorage(1000);
+        const a = mk(st);
+        const okA = a.chats.save(GOLDEN_KEY, [{ id: 'c-2', thread: T('问'.repeat(100), '答'.repeat(100)), updatedAt: 2000 }, { id: 'c-1', thread: T('问'.repeat(100), '答'.repeat(100)), updatedAt: 1000 }]);
+        const okB = a.chats.save(DEFAULT_KEY, [{ id: 'c-9', thread: T('问'.repeat(150), '答'.repeat(150)), updatedAt: 3000 }]);
+        const raw = JSON.parse(st.getItem(CHATS) || '{}');
+        /* 两张盘的三条一起写不下（约 1150 字）：最旧的是黄金用例那张盘的 c-1，去掉它就写得下（约 850 字） */
+        return [okA === true && okB === true && json((raw[GOLDEN_KEY] || []).map((c) => c.id)) === '["c-2"]' && json((raw[DEFAULT_KEY] || []).map((c) => c.id)) === '["c-9"]',
+          json([okA, okB, Object.keys(raw), (st.getItem(CHATS) || '').length])];
+      });
+      check('怎么去都写不下：返回 false，已经存好的别的盘的历史原样不动', () => {
+        const st = quotaStorage(400);
+        const a = mk(st);
+        a.chats.save(DEFAULT_KEY, [{ id: 'c-old', thread: T('早先的一问', '早先的一答'), updatedAt: 500 }]);
+        const before = st.getItem(CHATS);
+        const r = a.chats.save(GOLDEN_KEY, [{ id: 'c-big', thread: T('问'.repeat(600), '答'), updatedAt: 9000 }]);
+        return [r === false && before !== null && st.getItem(CHATS) === before && a.chats.load(DEFAULT_KEY).length === 1 && a.chats.load(GOLDEN_KEY).length === 0,
+          json([r, st.getItem(CHATS) === before])];
+      });
+      check('一条就超过配额：存不进去，返回 false，原来的不留半截', () => {
+        const st = quotaStorage(200);
+        const a = mk(st);
+        const r = a.chats.save(GOLDEN_KEY, [{ id: 'c-1', thread: T('问'.repeat(300), '答'), updatedAt: 1 }]);
+        return [r === false && st.getItem(CHATS) === null, String(st.getItem(CHATS))];
+      });
+    }
   }
 
   /* ---------------------------------------------------------------- */

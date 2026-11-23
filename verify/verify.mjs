@@ -933,13 +933,13 @@ ok('client 提供「返回会话」出口：官方 selectPanel(null)', /selectPa
       ok('v1.3.3: localStorage 旧默认一次性迁移到节气（迁移之后用户自己选的农历月保留）', migrated && kept, detail.slice(0, 200));
     }
 
-    /* v1.7: 解读记录按命盘保存：最多 8 张盘、每张 24 条；key 含排盘口径 */
+    /* v1.7: 解读记录按命盘保存：每张 24 条；key 含排盘口径。盘数上限 2026-11-24 从 8 张提到 20 张（spec 2026-11-24_chat-history） */
     {
       let t = 1763600000000;
       const s = memoryStorage();
       const api = ZW.createStorageApi(s, { now: () => t });
       const keys = [];
-      for (let i = 0; i < 9; i++) {
+      for (let i = 0; i < 21; i++) {
         t += 1000;
         const k = `solar|1990|6|${i + 1}|0|15|30|male||normal,exact,current,1`;
         keys.push(k);
@@ -947,10 +947,10 @@ ok('client 提供「返回会话」出口：官方 selectPanel(null)', /selectPa
       }
       const left = Object.keys(JSON.parse(s.getItem('ziwei-pro.readings.v2') || '{}'));
       t += 1000;
-      api.readings.save(keys[8], { thread: Array.from({ length: 30 }, (_, i) => ({ role: i % 2 ? 'assistant' : 'user', content: '第' + i + '条' })) });
-      const rec = JSON.parse(s.getItem('ziwei-pro.readings.v2'))[keys[8]];
-      ok('v1.7: 解读记录按命盘持久化（最多 8 张，挤掉最久没更新的；每张留最后 24 条）',
-        left.length === 8 && !left.includes(keys[0]) && rec.thread.length === 24 && rec.thread[0].content === '第6条',
+      api.readings.save(keys[20], { thread: Array.from({ length: 30 }, (_, i) => ({ role: i % 2 ? 'assistant' : 'user', content: '第' + i + '条' })) });
+      const rec = JSON.parse(s.getItem('ziwei-pro.readings.v2'))[keys[20]];
+      ok('v1.7: 解读记录按命盘持久化（最多 20 张，挤掉最久没更新的；每张留最后 24 条）',
+        left.length === 20 && !left.includes(keys[0]) && rec.thread.length === 24 && rec.thread[0].content === '第6条',
         `${left.length} 张；第一条 ${rec && rec.thread[0].content}，共 ${rec && rec.thread.length} 条`);
       const k0 = ZW.readingKeyOf(GOLDEN);
       const withSetting = (patch) => ZW.readingKeyOf(Object.assign({}, GOLDEN, { settings: Object.assign({}, GOLDEN.settings, patch) }));
