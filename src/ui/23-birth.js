@@ -84,7 +84,7 @@ function parseBirthDate(text, opts) {
 ZWUI.parseBirthDate = parseBirthDate;
 
 /* 出生时间：15:30 / 下午三点半 / 3点半 / 上午9点一刻 / 申时 / 晚子时；"不确定"不给默认时间。
- * 时辰取中间的钟点（丑时 = 2:00）；子时分早晚：早子时 0:30，晚子时 23:30。 */
+ * 时辰取中间的钟点（丑时 = 2:00）；子时分早晚：早子时 0:30，晚子时 23:30。时辰的结果多一个 shichen: true。 */
 function parseBirthTime(text) {
   const v = String(text == null ? '' : text).replace(/\s+/g, '');
   if (/不确定|不知道|不清楚|不记得|记不清|不详/.test(v)) return { unsure: true, error: t('birthTimeUnsure') };
@@ -95,7 +95,8 @@ function parseBirthTime(text) {
     const name = (idx === 0 && mm[1] ? mm[1] : '') + mm[2] + '时';
     const range = idx === 0 ? '23–1' : (idx * 2 - 1) + '–' + (idx * 2 + 1);
     const show = t('birthTimeShowShichen', { name: name, range: range });
-    return { value: { h: idx === 0 ? (late ? 23 : 0) : idx * 2, m: idx === 0 ? 30 : 0 }, show: show, short: show };
+    /* shichen：用户直接给的是时辰，不是钟点（引导问答据此不做真太阳时校正）。value 的形状不变 */
+    return { value: { h: idx === 0 ? (late ? 23 : 0) : idx * 2, m: idx === 0 ? 30 : 0 }, show: show, short: show, shichen: true };
   }
   const PERIOD = '(凌晨|早上|早晨|上午|中午|下午|傍晚|晚上|夜里)?';
   mm = v.match(new RegExp('^' + PERIOD + '(\\d{1,2})(?:[:：点时](\\d{1,2}|半|一刻|三刻)?分?)?$'));

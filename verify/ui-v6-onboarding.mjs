@@ -180,6 +180,29 @@ export default async function onboardingChecks(t) {
     eq('读不懂的时间：留在第 2 步', [bad.step, bad.error], [2, '没读懂这个时间。试试「15:30」「下午三点半」，或点一个时辰']);
   });
 
+  /* 2026-11-24（spec 2026-11-24_solar-time-option §3.2）：时辰不校正、确认步的校正开关、省名 */
+  safe('reducer 时辰、校正开关、省名', () => {
+    const atTime = Object.assign({}, s5, { step: 2, data: { name: s5.data.name, date: s5.data.date, gender: s5.data.gender, city: s5.data.city } });
+    const sc = A(atTime, '卯时');
+    eq('时间答的是时辰：记下「是时辰」，value 还是钟点', [sc.step, sc.data.time.value, sc.data.time.shichen], [5, { h: 6, m: 0 }, true]);
+    eq('时间答的是钟点：没有时辰标记', 'shichen' in s5.data.time, false);
+    const off = R(s5, { type: 'setSolar', on: false });
+    eq('setSolar(false)：记下不校正，留在确认步', [off.step, off.data.solar], [5, { value: false, show: '' }]);
+    const on = R(off, { type: 'setSolar', on: true });
+    eq('setSolar(true)：恢复校正，data 里不留这一项', [on.step, Object.keys(on.data)], [5, ['name', 'date', 'time', 'gender', 'city']]);
+    eq('setSolar 不改传进来的状态', 'solar' in s5.data, false);
+    const kept = A(R(off, { type: 'editStep', step: 2 }), '10:30');
+    eq('关掉校正之后回去改时间：关掉的还关着', [kept.step, kept.data.solar], [5, { value: false, show: '' }]);
+    const p1 = A(Object.assign({}, s5, { step: 4 }), '四川');
+    eq('城市答的是省名：留在第 4 步，说明定不了经度，记下是哪个省', [p1.step, p1.error, p1.province],
+      [4, '「四川」是省，范围太大，定不了经度。选一个城市，或直接填经度', '四川']);
+    const p2 = A(p1, '四川泸州');
+    eq('再答到市：前进，状态里不再留着省', [p2.step, p2.data.city, 'province' in p2], [5, { value: { lon: 105.4, place: '泸州', text: '四川泸州' }, show: '泸州' }, false]);
+    eq('省名之后换步：不再留着省', 'province' in R(p1, { type: 'editStep', step: 2 }), false);
+    const p3 = A(p1, '火星');
+    eq('省名之后又答了查不到的：换成查不到的说明，不再留着省', [p3.step, p3.error, 'province' in p3], [4, '没找到「火星」。换个写法，或直接填经度（如 116.4）；也可以跳过', false]);
+  });
+
   safe('reducer 重来与取消', () => {
     eq('restart：回到第 0 步、清空答案、保留公历 / 农历开关', R(Object.assign({}, s5, { calMode: 'lunar' }), { type: 'restart' }), { step: 0, data: {}, calMode: 'lunar', error: '' });
     eq('确认步回答「重新填」等于 restart', [A(s5, '重新填').step, J(A(s5, '重新填').data)], [0, '{}']);
@@ -203,6 +226,24 @@ export default async function onboardingChecks(t) {
     eq('成都（08:30 辰时）：按城市名说', OB.confirmModel(cd).shift, '按成都（东经 104.1°）校正后是 08:30，落在辰时（钟表时间 09:30 是巳时）');
     const noName = Object.assign({}, s5.data, { name: { value: '', show: '未填称呼' } });
     eq('没填称呼：句子里不写', OB.confirmModel(noName).summary, '1992年5月3日 09:30 巳时，男，东经 105.97°');
+    /* 2026-11-24：填了城市就总是写出校正结果（note）；shift 的含义不变（时辰换了才有）。solar 是开关的状态 */
+    eq('黄金用例：校正着（solar = on），note 就是时辰换了的那句', [m.solar, m.note], ['on', '按东经 105.97° 校正后是 08:37，落在辰时（钟表时间 09:30 是巳时）']);
+    eq('北京：时辰没变也写出校正结果', [OB.confirmModel(bj).solar, OB.confirmModel(bj).note], ['on', '按北京（东经 116.4°）校正后是 09:19，仍是巳时']);
+    eq('没填出生城市：没有 note，没有开关', [m2.solar, m2.note], ['none', '']);
+    const offData = Object.assign({}, s5.data, { solar: { value: false, show: '' } });
+    const mOff = OB.confirmModel(offData);
+    eq('关掉校正：说明按钟表时间排，不提时辰换了', [mOff.solar, mOff.note, mOff.shift, mOff.summary],
+      ['off', '按钟表时间 09:30 巳时排盘，不做真太阳时校正', '', '甲，1992年5月3日 09:30 巳时，男，东经 105.97°']);
+    /* 黄金用例的合成变体：1992-02-03，卯时，男，经度 105.97。当成 06:00 去校正会落到寅时；直接给的时辰不校正 */
+    const dawn = Object.assign({}, s5.data, {
+      date: { value: { lunar: false, y: 1992, m: 2, d: 3, leap: false }, show: '1992年2月3日' },
+      time: { value: { h: 6, m: 0 }, show: '卯时', short: '卯时', shichen: true }
+    });
+    const mDawn = OB.confirmModel(dawn);
+    eq('直接给的时辰 + 城市：按这个时辰排，不校正，没有开关', [mDawn.solar, mDawn.note, mDawn.shift, mDawn.summary],
+      ['shichen', '按卯时排盘，不做真太阳时校正', '', '甲，1992年2月3日 卯时，男，东经 105.97°']);
+    const dawnNoCity = Object.assign({}, dawn, { city: { value: null, show: '未填出生地' } });
+    eq('直接给的时辰、没填城市：没什么可校正的，不提', [OB.confirmModel(dawnNoCity).solar, OB.confirmModel(dawnNoCity).note], ['none', '']);
     const bad = Object.assign({}, s5.data, { date: { value: { lunar: false, y: 1900, m: 1, d: 15, leap: false }, show: '1900年1月15日' } });
     eq('排不出来的生辰：带上引擎的原因', OB.confirmModel(bad).error, '这个生辰排不出来：公历日期需在 1900-01-31 至 2100-12-31 之间');
   });
@@ -213,6 +254,13 @@ export default async function onboardingChecks(t) {
       longitude: '105.97', city: '105.97', place: '', occupation: '', settings: DEFAULT_SETTINGS
     });
     eq('DEFAULT_FORM 的口径就是 v5 的那四项', DEFAULT_SETTINGS, SETTINGS);
+    const OFF_SETTINGS = Object.assign({}, SETTINGS, { trueSolar: false });
+    const asShichen = Object.assign({}, s5.data, { time: { value: { h: 6, m: 0 }, show: '卯时', short: '卯时', shichen: true } });
+    eq('inputOf：时间是时辰 → settings.trueSolar === false，经度照常记下',
+      [OB.inputOf(asShichen).settings, OB.inputOf(asShichen).longitude, OB.inputOf(asShichen).hour], [OFF_SETTINGS, '105.97', 6]);
+    eq('inputOf：钟点 + 关掉校正 → settings.trueSolar === false',
+      OB.inputOf(Object.assign({}, s5.data, { solar: { value: false, show: '' } })).settings, OFF_SETTINGS);
+    eq('inputOf：钟点、没关校正 → settings 里没有 trueSolar', 'trueSolar' in OB.inputOf(s5.data).settings, false);
   });
 
   /* ---------------------------------------------------------------- */
@@ -261,6 +309,18 @@ export default async function onboardingChecks(t) {
     eq('确认步 submit：完成，返回 { ok, entry }', [r.ok, !!r.entry, lib.length, lib[0].id === (r.entry && r.entry.id)], [true, true, 2, true]);
     eq('没填称呼、没填城市：自动盘名，经度空', [lib[0].name, lib[0].input.longitude, lib[0].input.city, lib[0].input.hour, lib[0].input.minute],
       ['1992-05-03 辰时 女', '', '', 8, 0]);
+  });
+
+  safe('直接给的时辰不校正', () => {
+    OB.start();
+    for (const a of ['', '1992-2-3', '卯时', '男', '105.97']) OB.submit(a);
+    const r = OB.submit('排盘');
+    const e = r.entry;
+    const c = e ? store.chartOf(e) : null;
+    eq('1992-02-03 卯时 男 经度 105.97：条目带 trueSolar: false，经度照常记下', e && [e.input.settings.trueSolar, e.input.longitude, e.input.hour, e.input.minute], [false, '105.97', 6, 0]);
+    eq('排出来是卯时、命宫戌，没有校正记录（当成 06:00 去校正会是寅时、命宫亥）',
+      c && [c.timeName, c.soulBranch, !!(c.meta && c.meta.solarCorrection)], ['卯时', '戌', false]);
+    eq('自动盘名用的也是卯时', e && e.name, '1992-02-03 卯时 男');
   });
 
   safe('排不出来时留在确认步', () => {
@@ -358,8 +418,8 @@ export default async function onboardingChecks(t) {
     const draw = btn(col(), '排盘');
     eq('排盘是 zp-chip zp-primary', classesOf(draw), ['zp-chip', 'zp-primary']);
     eq('输入框和发送按钮在确认步禁用', [!!attr(askInput(), 'disabled'), !!attr(findByClass(col(), 'zp-send')[0], 'disabled')], [true, true]);
-    eq('状态句：将要排的生辰（巳时 10:00 @ 成都校正后 09:20 仍是巳时：不提校正）',
-      text(findByClass(col(), 'zp-status')[0]), '好，我来排这张盘：乙，1992年5月3日 巳时，男，成都');
+    eq('状态句：将要排的生辰（直接选的巳时 + 成都：按巳时排，写明不校正）',
+      text(findByClass(col(), 'zp-status')[0]), '好，我来排这张盘：乙，1992年5月3日 巳时，男，成都按巳时排盘，不做真太阳时校正');
     eq('五个已答项都能点', findByClass(col(), 'zp-receipt').map(text), ['称呼 乙', '生日 1992年5月3日', '时间 巳时', '性别 男', '城市 成都']);
     rt.doc.activeElement = rt.doc.body;
     rt.click(findByClass(col(), 'zp-receipt')[1]);
@@ -397,6 +457,67 @@ export default async function onboardingChecks(t) {
     rt.unmount();
     store.goHome();
     store.setPanel(false);
+  });
+
+  safe('省名：留在城市这步，chip 换成这个省的城市', () => {
+    OB.start();
+    for (const a of ['', '1992-2-3', '06:00', '男']) OB.submit(a);
+    rt.mount(h(Col, {}));
+    eq('钟点答完到城市这步：说明是用来校正的', text(findByClass(col(), 'zp-status')[0]), '在哪个城市出生？用来校正出生时间，不填也行。');
+    typeInto(askInput(), '四川');
+    submitForm();
+    const hint = findByClass(col(), 'zp-hint')[0];
+    eq('答「四川」：不前进，提示是省（zp-err）', [store.getState().session.onboarding.step, text(hint), classesOf(hint).includes('zp-err')],
+      [4, '「四川」是省，范围太大，定不了经度。选一个城市，或直接填经度', true]);
+    eq('chip 换成四川的 21 个城市，后面还是跳过、直接填表、取消', chips(), [
+      '成都', '自贡', '攀枝花', '泸州', '德阳', '绵阳', '广元', '遂宁', '内江', '乐山', '南充', '眉山', '宜宾', '广安', '达州', '雅安', '巴中', '资阳', '阿坝', '甘孜', '凉山',
+      '跳过', '直接填表', '取消']);
+    rt.click(btn(col(), '泸州'));
+    const ob = store.getState().session.onboarding;
+    eq('点泸州：到确认步，经度 105.4', [ob.step, ob.data.city.value.lon, ob.data.city.value.place, ob.data.city.show], [5, 105.4, '泸州', '泸州']);
+    rt.click(find(col(), (n) => n.type === 'button' && text(n) === '城市 泸州')[0]);
+    eq('回到城市这步：chip 恢复成常用城市', chips(), ['北京', '上海', '广州', '深圳', '成都', '杭州', '武汉', '西安', '跳过', '直接填表', '取消']);
+    rt.unmount();
+    store.patchSession({ onboarding: null });
+  });
+
+  safe('确认步的校正开关', () => {
+    OB.start();
+    for (const a of ['', '1992-2-3', '06:00', '男', '105.97']) OB.submit(a);
+    rt.mount(h(Col, {}));
+    eq('钟点 + 经度：写出校正结果', text(findByClass(col(), 'zp-status')[0]),
+      '好，我来排这张盘：1992年2月3日 06:00 卯时，男，东经 105.97°按东经 105.97° 校正后是 04:50，落在寅时（钟表时间 06:00 是卯时）');
+    eq('chip 里多一个「不校正」', chips(), ['排盘', '不校正', '重新填', '直接填表', '取消']);
+    rt.doc.activeElement = rt.doc.body;
+    rt.click(btn(col(), '不校正'));
+    eq('点不校正：说明换成按钟表时间排', text(findByClass(col(), 'zp-status')[0]),
+      '好，我来排这张盘：1992年2月3日 06:00 卯时，男，东经 105.97°按钟表时间 06:00 卯时排盘，不做真太阳时校正');
+    eq('chip 换成「按真太阳时校正」', chips(), ['排盘', '按真太阳时校正', '重新填', '直接填表', '取消']);
+    ok('点完开关焦点不掉到 body 上', rt.doc.activeElement !== rt.doc.body);
+    rt.click(btn(col(), '按真太阳时校正'));
+    eq('再点：回到校正', chips(), ['排盘', '不校正', '重新填', '直接填表', '取消']);
+    rt.click(btn(col(), '不校正'));
+    rt.click(btn(col(), '排盘'));
+    const e = store.getState().library[0];
+    const c = store.chartOf(e);
+    eq('关着校正排盘：条目带 trueSolar: false，排出来是卯时、命宫戌', [e.input.settings.trueSolar, c.timeName, c.soulBranch], [false, '卯时', '戌']);
+    rt.unmount();
+    store.goHome();
+    store.setPanel(false);
+  });
+
+  safe('直接给时辰：城市只作记录，确认步没有开关', () => {
+    OB.start();
+    for (const a of ['', '1992-2-3', '卯时', '男']) OB.submit(a);
+    rt.mount(h(Col, {}));
+    eq('时辰答完到城市这步：说明城市只作出生地记录', text(findByClass(col(), 'zp-status')[0]), '在哪个城市出生？你给的是时辰，城市只作出生地记录，不填也行。');
+    typeInto(askInput(), '105.97');
+    submitForm();
+    eq('确认步：写明按卯时排、不校正', text(findByClass(col(), 'zp-status')[0]),
+      '好，我来排这张盘：1992年2月3日 卯时，男，东经 105.97°按卯时排盘，不做真太阳时校正');
+    eq('没有校正开关', chips(), ['排盘', '重新填', '直接填表', '取消']);
+    rt.unmount();
+    store.patchSession({ onboarding: null });
   });
 
   safe('取消、直接填表、重新填', () => {

@@ -2748,9 +2748,16 @@ const DICT = {
     "obAskGender": "男生还是女生？",
     "obAskCity": "在哪个城市出生？",
     "obAskCityNote": "用来校正出生时间，不填也行。",
+    "obAskCityNoteShichen": "你给的是时辰，城市只作出生地记录，不填也行。",
     "obConfirmIntro": "好，我来排这张盘：",
     "obShiftCity": "按{city}（东经 {lon}°）校正后是 {solar}，落在{corrected}（钟表时间 {clock} 是{clockName}）",
     "obShiftLon": "按东经 {lon}° 校正后是 {solar}，落在{corrected}（钟表时间 {clock} 是{clockName}）",
+    "obSameCity": "按{city}（东经 {lon}°）校正后是 {solar}，仍是{corrected}",
+    "obSameLon": "按东经 {lon}° 校正后是 {solar}，仍是{corrected}",
+    "obSolarOffNote": "按钟表时间 {clock} {clockName}排盘，不做真太阳时校正",
+    "obShichenNote": "按{name}排盘，不做真太阳时校正",
+    "obSolarOff": "不校正",
+    "obSolarOn": "按真太阳时校正",
     "obPhName": "称呼，比如 小林",
     "obPhDate": "比如 1990年6月15日，或 农历1990年五月廿三",
     "obPhTime": "比如 下午三点半、15:30、申时",
@@ -2772,6 +2779,7 @@ const DICT = {
     "obNameTooLong": "称呼短一点，12 个字以内",
     "obGenderAsk": "点一下「男」或「女」",
     "obCityUnknown": "没找到「{text}」。换个写法，或直接填经度（如 116.4）；也可以跳过",
+    "obCityProvince": "「{province}」是省，范围太大，定不了经度。选一个城市，或直接填经度",
     "obLonRange": "经度要在 60 到 140 之间",
     "obCannotChart": "这个生辰排不出来：{reason}",
     "obSolar": "公历",
@@ -3190,9 +3198,16 @@ const DICT = {
     "obAskGender": "Male or female?",
     "obAskCity": "Which city were you born in?",
     "obAskCityNote": "It corrects the birth time for longitude. You can skip it.",
+    "obAskCityNoteShichen": "You gave a two-hour period, so the city is only kept as the birthplace. You can skip it.",
     "obConfirmIntro": "Good. I'll draw this chart:",
     "obShiftCity": "Corrected for {city} ({lon}°E), the time is {solar}, which falls in {corrected} (the clock time {clock} is in {clockName}).",
     "obShiftLon": "Corrected for {lon}°E, the time is {solar}, which falls in {corrected} (the clock time {clock} is in {clockName}).",
+    "obSameCity": "Corrected for {city} ({lon}°E), the time is {solar}, still in {corrected}.",
+    "obSameLon": "Corrected for {lon}°E, the time is {solar}, still in {corrected}.",
+    "obSolarOffNote": "Using the clock time {clock} ({clockName}), with no true solar time correction.",
+    "obShichenNote": "Using {name} as you gave it, with no true solar time correction.",
+    "obSolarOff": "Don't correct",
+    "obSolarOn": "Correct for true solar time",
     "obPhName": "A name, for example Lin",
     "obPhDate": "For example 1990-6-15, or a lunar date such as 农历1990年五月廿三",
     "obPhTime": "For example 15:30",
@@ -3214,6 +3229,7 @@ const DICT = {
     "obNameTooLong": "Keep the name to 12 characters or fewer.",
     "obGenderAsk": "Pick \"Male\" or \"Female\".",
     "obCityUnknown": "No match for \"{text}\". Try another spelling, enter a longitude (e.g. 116.4), or skip.",
+    "obCityProvince": "\"{province}\" is a province, too wide to set a longitude from. Pick a city or enter a longitude.",
     "obLonRange": "The longitude must be between 60 and 140.",
     "obCannotChart": "This birth can't be charted: {reason}",
     "obSolar": "Solar",
@@ -4633,7 +4649,7 @@ function parseBirthDate(text, opts) {
 ZWUI.parseBirthDate = parseBirthDate;
 
 /* 出生时间：15:30 / 下午三点半 / 3点半 / 上午9点一刻 / 申时 / 晚子时；"不确定"不给默认时间。
- * 时辰取中间的钟点（丑时 = 2:00）；子时分早晚：早子时 0:30，晚子时 23:30。 */
+ * 时辰取中间的钟点（丑时 = 2:00）；子时分早晚：早子时 0:30，晚子时 23:30。时辰的结果多一个 shichen: true。 */
 function parseBirthTime(text) {
   const v = String(text == null ? '' : text).replace(/\s+/g, '');
   if (/不确定|不知道|不清楚|不记得|记不清|不详/.test(v)) return { unsure: true, error: t('birthTimeUnsure') };
@@ -4644,7 +4660,8 @@ function parseBirthTime(text) {
     const name = (idx === 0 && mm[1] ? mm[1] : '') + mm[2] + '时';
     const range = idx === 0 ? '23–1' : (idx * 2 - 1) + '–' + (idx * 2 + 1);
     const show = t('birthTimeShowShichen', { name: name, range: range });
-    return { value: { h: idx === 0 ? (late ? 23 : 0) : idx * 2, m: idx === 0 ? 30 : 0 }, show: show, short: show };
+    /* shichen：用户直接给的是时辰，不是钟点（引导问答据此不做真太阳时校正）。value 的形状不变 */
+    return { value: { h: idx === 0 ? (late ? 23 : 0) : idx * 2, m: idx === 0 ? 30 : 0 }, show: show, short: show, shichen: true };
   }
   const PERIOD = '(凌晨|早上|早晨|上午|中午|下午|傍晚|晚上|夜里)?';
   mm = v.match(new RegExp('^' + PERIOD + '(\\d{1,2})(?:[:：点时](\\d{1,2}|半|一刻|三刻)?分?)?$'));
@@ -10932,10 +10949,13 @@ function HomeView(props) {
  * 状态在 session.onboarding（store.patchSession 写；store 不解读它）：
  *   null                              不在引导里。命盘库为空时首页照样渲染 OnboardingTalk：它把 null 当成第 0 步，
  *                                     第一次回答时才写进 session（所以首页不用在 effect 里先"开始"）。
- *   { step: 0–5, data, calMode: 'solar'|'lunar', error }
+ *   { step: 0–5, data, calMode: 'solar'|'lunar', error, province? }
  *     step   OB_STEPS 的下标：0 称呼、1 生日、2 时间、3 性别、4 城市、5 确认
- *     data   已答的项 { name?, date?, time?, gender?, city? }，每项 { value, show, short? }；改前面的项时后面的留着
+ *     data   已答的项 { name?, date?, time?, gender?, city? }，每项 { value, show, short? }；改前面的项时后面的留着。
+ *            time 是直接给的时辰时多一个 shichen: true。另有一项不是步骤：solar = { value: false, show: '' }，
+ *            用户在确认步关掉了真太阳时校正时才有（改回校正就删掉）
  *     error  上一次回答被拒的原因（解析器或引擎的说明），提示行显示它；答对了清空
+ *     province  城市这一步刚答了一个省名（范围太大，定不了经度）时才有：chip 换成这个省的城市；答对、换步就没有了
  * obStart()                        开始（或重新开始）引导：session.onboarding = 第 0 步。首页「排一张新盘」调它。
  * function OnboardingTalk({ tier, onDone })
  *   首页对话列（div.zp-col，HOME_TALK）里、日期行（p.zp-date-line）下面的全部内容。首页只要在
@@ -10945,7 +10965,8 @@ function HomeView(props) {
  *   （自己的输入框：正在打的字是组件内状态；占位文字按步换；确认步禁用；提交调 onboardingSubmit）、
  *   p.zp-hint（被拒时加 zp-err）、div.zp-chips > button.zp-chip（这一步的快捷项，见下）。
  *   chip：生日步「公历 / 农历」开关；时间步十二时辰（small 里是起止钟点）+「不确定」；性别步「男 / 女」；
- *   城市步常用城市 +「跳过」；称呼步「跳过」；确认步「排盘」（zp-chip zp-primary）+「重新填」；
+ *   城市步常用城市（刚答了省名时是这个省的城市）+「跳过」；称呼步「跳过」；
+ *   确认步「排盘」（zp-chip zp-primary）+ 校正开关（钟点 + 城市时才有：「不校正」/「按真太阳时校正」）+「重新填」；
  *   每一步都有「直接填表」（openSheet('birth')）；命盘库为空时「看示例盘」（store.openSample()），否则「取消」
  *   （session.onboarding = null）。这几项都不需要首页做什么。
  *   「排盘」成功（命盘库里已经有了这一条）：session.onboarding 清空、focusId 指向新盘，然后调 onDone(entry)，
@@ -10959,7 +10980,11 @@ function HomeView(props) {
  *
  * ---------------- 规则（spec §3.2 和项目历史） ----------------
  * - 时辰不替用户默认：「不确定」（及「不知道」等）不前进，提示「时辰决定命宫，请选一个最可能的时辰」。
- * - 填了出生城市、真太阳时校正让时辰换了：确认步明说（obConfirmModel 用引擎算一遍，比较 chart.timeName）。
+ * - 真太阳时校正是每张盘的口径（spec 2026-11-24_solar-time-option）。直接给的时辰就按这个时辰排，不校正：
+ *   把「卯时」当成 06:00 再按经度往前推，部分日期会排成寅时的盘。钟点 + 城市默认校正，确认步总是写出校正结果
+ *   （时辰换了要明说：obConfirmModel 用引擎算一遍，比较 chart.timeName），并且可以一键改成不校正。
+ *   不校正的条目带 settings.trueSolar === false，经度照常记下（见 21-storage 的 effectiveLongitude）。
+ * - 城市答的是省名：留在这一步，说明定不了经度，把这个省的城市给成 chip。
  * - 生辰排不出来（引擎拒绝）：留在当前这一步并说明原因；生日这一步答完就先用引擎验一遍。
  * - 条目是 v5 的形状（store.addChart → libraryInput：id = lib-<毫秒>、input.isLeap、settings 取 DEFAULT_FORM），
  *   不直接写 storage。
@@ -11013,6 +11038,8 @@ function obInputOf(data) {
   const dv = d.date && d.date.value;
   const tv = d.time && d.time.value;
   const cv = d.city && d.city.value;
+  /* 不校正：直接给的时辰，或用户在确认步关掉了校正。只在不校正时写 trueSolar（校正的条目和以前一个样） */
+  const solarOff = !!(d.time && d.time.shichen) || !!(d.solar && d.solar.value === false);
   return {
     name: d.name ? String(d.name.value || '') : '',
     calendar: dv && dv.lunar ? 'lunar' : 'solar',
@@ -11021,7 +11048,7 @@ function obInputOf(data) {
     gender: d.gender && d.gender.value === 'female' ? 'female' : 'male',
     longitude: cv ? String(cv.lon) : '', city: cv ? String(cv.text || '') : '', place: cv ? String(cv.place || '') : '',
     occupation: '',
-    settings: Object.assign({}, DEFAULT_FORM.settings)
+    settings: solarOff ? Object.assign({}, DEFAULT_FORM.settings, { trueSolar: false }) : Object.assign({}, DEFAULT_FORM.settings)
   };
 }
 
@@ -11054,7 +11081,9 @@ function obParseTime(text) {
   if (obIsWord(text, 'obUnsure')) return { error: t('birthTimeUnsure') };
   const r = parseBirthTime(text);
   if (r.error || !r.value) return { error: r.error || t('birthTimeUnreadable') };
-  return { value: r.value, show: r.show, short: r.short || r.show };
+  const out = { value: r.value, show: r.show, short: r.short || r.show };
+  if (r.shichen) out.shichen = true;
+  return out;
 }
 
 function obParseGender(text) {
@@ -11075,6 +11104,7 @@ function obParseCity(text) {
   const r = parseBirthplace(raw);
   if (r.kind === 'city') return { value: { lon: r.lon, place: r.city, text: raw }, show: r.city };
   if (r.kind === 'number') return { value: { lon: r.lon, place: '', text: raw }, show: t('obLonShow', { lon: r.lon }) };
+  if (r.kind === 'province') return { error: t('obCityProvince', { province: r.province }), province: r.province };
   if (/^-?\d+(\.\d+)?$/.test(raw)) return { error: t('obLonRange') };
   return { error: t('obCityUnknown', { text: raw }) };
 }
@@ -11089,8 +11119,13 @@ function obParse(key, text, calMode) {
 
 /* ---------------- reducer（纯函数） ----------------
  * action：{ type: 'start' } | { type: 'answer', text } | { type: 'editStep', step } | { type: 'setCalendar', mode }
- *       | { type: 'restart' } | { type: 'cancel' } | { type: 'fail', error }
+ *       | { type: 'setSolar', on } | { type: 'restart' } | { type: 'cancel' } | { type: 'fail', error }
  * state 为 null 时按第 0 步算（start / cancel 除外）。cancel 返回 null。 */
+/* 下一个状态：只带四个固定字段。province 是「刚答了省名」这一刻的事，任何变化之后都不留（要留的那一处自己加） */
+function obNext(s, patch) {
+  return Object.assign({ step: s.step, data: s.data, calMode: s.calMode, error: s.error }, patch || null);
+}
+
 function obReduce(state, action) {
   const a = action || {};
   if (a.type === 'start') return obFresh('solar');
@@ -11099,19 +11134,24 @@ function obReduce(state, action) {
   if (a.type === 'restart') return obFresh(s.calMode);
   if (a.type === 'setCalendar') {
     const mode = a.mode === 'lunar' ? 'lunar' : 'solar';
-    return mode === s.calMode ? s : Object.assign({}, s, { calMode: mode });
+    return mode === s.calMode ? s : obNext(s, { calMode: mode });
+  }
+  if (a.type === 'setSolar') {
+    const data = Object.assign({}, s.data);
+    if (a.on === false) data.solar = { value: false, show: '' }; else delete data.solar;
+    return obNext(s, { data: data });
   }
   if (a.type === 'editStep') {
     const i = Math.floor(+a.step);
     if (!(i >= 0 && i < OB_CONFIRM) || !(i <= s.step || s.data[OB_STEPS[i]])) return s;
-    return Object.assign({}, s, { step: i, error: '' });
+    return obNext(s, { step: i, error: '' });
   }
-  if (a.type === 'fail') return Object.assign({}, s, { error: String(a.error || '') });
+  if (a.type === 'fail') return obNext(s, { error: String(a.error || '') });
   if (a.type !== 'answer') return s;
   if (s.step >= OB_CONFIRM) return obIsWord(a.text, 'obRestart') ? obFresh(s.calMode) : s;
   const key = OB_STEPS[s.step];
   const r = obParse(key, a.text, s.calMode);
-  if (r.error) return Object.assign({}, s, { error: r.error });
+  if (r.error) return obNext(s, r.province ? { error: r.error, province: r.province } : { error: r.error });
   const data = Object.assign({}, s.data);
   data[key] = r;
   /* 改前面的项时后面的答案留着：跳到下一个还没答的步，都答了就回到确认步 */
@@ -11121,11 +11161,15 @@ function obReduce(state, action) {
 }
 
 /* ---------------- 确认句 ----------------
- * { summary, shift, error }：summary 是将要排的生辰（称呼、日期 时间、性别、城市）；
- * shift 在填了城市、校正后的时辰（chart.timeName）和按钟表时间的不一样时才有；error 是引擎排不出来的原因。 */
+ * { summary, shift, note, solar, error }：summary 是将要排的生辰（称呼、日期 时间、性别、城市）；
+ * solar 是校正的状态：'none'（没填城市，没什么可校正的）/ 'on'（钟点 + 城市，校正着）/ 'off'（用户关掉了）/
+ *   'shichen'（直接给的时辰，不校正，也没有开关）；
+ * note 是说明校正情况的那句（solar 是 none 时没有）：校正着就写出校正后的钟点和时辰，关掉或时辰就写明不校正；
+ * shift 在校正着、校正后的时辰（chart.timeName）和按钟表时间的不一样时才有（这时 note 就是它）；
+ * error 是引擎排不出来的原因。 */
 function obConfirmModel(data) {
   const d = data || {};
-  const out = { summary: '', shift: '', error: '' };
+  const out = { summary: '', shift: '', note: '', solar: 'none', error: '' };
   if (!d.date || !d.time || !d.gender) return out;
   const parts = [];
   if (d.name && d.name.value) parts.push(String(d.name.value));
@@ -11140,15 +11184,31 @@ function obConfirmModel(data) {
     return out;
   }
   const cv = d.city && d.city.value;
+  if (!cv) return out;
+  const clockText = obPad2(input.hour) + ':' + obPad2(input.minute);
+  if (d.time.shichen) {
+    out.solar = 'shichen';
+    out.note = t('obShichenNote', { name: corrected.chart.timeName });
+    return out;
+  }
+  if (d.solar && d.solar.value === false) {
+    out.solar = 'off';
+    out.note = t('obSolarOffNote', { clock: clockText, clockName: corrected.chart.timeName });
+    return out;
+  }
   const sc = corrected.chart.meta && corrected.chart.meta.solarCorrection;
-  if (cv && sc) {
-    const clock = obChartOf(Object.assign({}, input, { longitude: '' }));
-    if (clock.chart && clock.chart.timeName !== corrected.chart.timeName) {
-      out.shift = t(cv.place ? 'obShiftCity' : 'obShiftLon', {
-        city: cv.place, lon: cv.lon, solar: sc.solarTime, corrected: corrected.chart.timeName,
-        clock: obPad2(input.hour) + ':' + obPad2(input.minute), clockName: clock.chart.timeName
-      });
-    }
+  if (!sc) return out;
+  out.solar = 'on';
+  const clock = obChartOf(Object.assign({}, input, { longitude: '' }));
+  const vars = {
+    city: cv.place, lon: cv.lon, solar: sc.solarTime, corrected: corrected.chart.timeName,
+    clock: clockText, clockName: clock.chart ? clock.chart.timeName : ''
+  };
+  if (clock.chart && clock.chart.timeName !== corrected.chart.timeName) {
+    out.shift = t(cv.place ? 'obShiftCity' : 'obShiftLon', vars);
+    out.note = out.shift;
+  } else {
+    out.note = t(cv.place ? 'obSameCity' : 'obSameLon', vars);
   }
   return out;
 }
@@ -11206,9 +11266,9 @@ function obQuestion(step, data, model) {
     case 'date': return [d.name && d.name.value ? t('obAskDateTo', { name: d.name.value }) : null, strong(t('obAskDate')), br('b1'), t('obAskDateNote')];
     case 'time': return [strong(t('obAskTime')), br('b1'), t('obAskTimeNote')];
     case 'gender': return [strong(t('obAskGender'))];
-    case 'city': return [strong(t('obAskCity')), br('b1'), t('obAskCityNote')];
+    case 'city': return [strong(t('obAskCity')), br('b1'), t(d.time && d.time.shichen ? 'obAskCityNoteShichen' : 'obAskCityNote')];
     /* 校正说明用小字另起一行（small）：它是一句补充，和问题同样大会把对话栏顶得很高 */
-    default: return [t('obConfirmIntro'), br('b1'), strong(model ? model.summary : ''), model && model.shift ? h('small', { key: 'shift' }, model.shift) : null];
+    default: return [t('obConfirmIntro'), br('b1'), strong(model ? model.summary : ''), model && model.note ? h('small', { key: 'shift' }, model.note) : null];
   }
 }
 
@@ -11225,6 +11285,7 @@ function OnboardingTalk(props) {
   const [text, setText] = useState('');
   const inputRef = useRef(null);
   const drawRef = useRef(null);
+  const solarRef = useRef(null);
   const mounted = useRef(false);
   const active = !!m.ob;
   const model = useMemo(function () { return confirm ? obConfirmModel(ob.data) : null; }, [ob.data, confirm]);
@@ -11278,14 +11339,28 @@ function OnboardingTalk(props) {
     chips.push(chip('female', t('obFemale'), function () { answer(t('obFemale')); }));
   }
   if (kind === 'city') {
-    const values = obZhList('obQuickCities');
-    const shown = String(t('obQuickCities')).split('|');
-    const labels = shown.length === values.length ? shown : values;
-    values.forEach(function (v, i) { chips.push(chip('city-' + i, labels[i], function () { answer(v); })); });
+    const inProvince = ob.province && CITY_TABLE[ob.province] ? Object.keys(CITY_TABLE[ob.province]) : null;
+    if (inProvince) {
+      /* 刚答了省名：给这个省的城市。带着省去答（青海的海南州单写「海南」是省） */
+      inProvince.forEach(function (nm) { chips.push(chip('pcity-' + nm, nm, function () { answer(ob.province + nm); })); });
+    } else {
+      const values = obZhList('obQuickCities');
+      const shown = String(t('obQuickCities')).split('|');
+      const labels = shown.length === values.length ? shown : values;
+      values.forEach(function (v, i) { chips.push(chip('city-' + i, labels[i], function () { answer(v); })); });
+    }
     chips.push(chip('skip', t('obSkip'), function () { answer(t('obSkip')); }));
   }
   if (confirm) {
     chips.push(chip('draw', t('obDraw'), function () { finishWith(obFinish()); }, { className: 'zp-chip zp-primary', ref: drawRef }));
+    /* 校正开关：钟点 + 城市时才有。两种状态是同一个按钮（key 不变），点完焦点还在它上面 */
+    if (model && (model.solar === 'on' || model.solar === 'off')) {
+      const turnOff = model.solar === 'on';
+      chips.push(chip('solar', t(turnOff ? 'obSolarOff' : 'obSolarOn'), function () {
+        dispatch({ type: 'setSolar', on: !turnOff });
+        if (solarRef.current) focusQuietly(solarRef.current);
+      }, { ref: solarRef }));
+    }
     chips.push(chip('restart', t('obRestart'), function () { dispatch({ type: 'restart' }); }));
   }
   chips.push(chip('form', t('obForm'), function () { openSheet('birth'); }));

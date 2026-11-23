@@ -55,7 +55,7 @@
 ### 3.2 引导问答
 
 - 当时间这一步答的是时辰时，排出的条目应带 `settings.trueSolar: false`；1992-02-03、卯时、男、经度 105.97 排出来是卯时、命宫戌。
-- 当时间答的是时辰时，城市这一步的说明应改成「城市只作出生地记录」，确认步应写明按这个时辰排、不做校正，并且没有校正开关。
+- 当时间答的是时辰时，城市这一步的说明应改成「城市只作出生地记录」；填了城市的话，确认步应写明按这个时辰排、不做校正，并且没有校正开关（没填城市就没什么可校正的，不提）。
 - 当时间答的是钟表时间并且填了城市时，确认步应总是写出校正后的时间和时辰，并给一个「不校正」的选项；点了之后说明换成按钟表时间排，选项换成「按真太阳时校正」，排出的条目带 `settings.trueSolar: false`。
 - 当城市这一步答的是省名时，系统应留在这一步，说明范围太大，并把这个省的城市作为可点的选项；答对或换步后恢复常用城市。
 
@@ -106,7 +106,7 @@
 - `src/ui/20-util.js`：`CITY_TABLE`（省 → 城市 → 经度）；`CITY_LON` / `CITY_NAMES` 由它派生；`parseBirthplace` 多一个 `province` 结果，城市结果多一个 `province` 字段。
 - `src/ui/21-storage.js`：`effectiveLongitude(input)`，`readingKeyOf` 和 `defaultChartName` 用它。
 - `src/ui/26-store.js`：`storeEngineInput` 用它。
-- `src/ui/23-birth.js`：`parseBirthTime` 的时辰结果带 `shichen: true`。
+- `src/ui/23-birth.js`：`parseBirthTime` 的时辰结果在顶层带 `shichen: true`（`value` 仍是 `{ h, m }`，形状不变）。
 - `src/ui/62-onboarding.js`：`data.solar`（`{ value: false }` 表示用户关掉了校正）、reducer 的 `setSolar`、状态里的 `province`。
 - `src/ui/64-sheets.js`、`70-chart.js`、`85-reportview.js`：界面。
 - `src/ziwei-core.js` 的 `buildRequest`、`index.js` 的 `handoffPrompt`：提示词。
