@@ -417,6 +417,11 @@ export default async function onboardingChecks(t) {
     eq('确认步的 chip：排盘、重新填、直接填表、取消', c, ['排盘', '重新填', '直接填表', '取消']);
     const draw = btn(col(), '排盘');
     eq('排盘是 zp-chip zp-primary', classesOf(draw), ['zp-chip', 'zp-primary']);
+    /* 2026-11-24 预览壳窄档：这句生辰是一整句话，不折行就被裁掉了。状态句里的 strong 默认不折行（给宫名、星名用的） */
+    const sum = find(findByClass(col(), 'zp-status')[0], (n) => n.type === 'strong')[0];
+    const homeCss = ((sources && sources.css) || []).map((f) => f.text).join('\n');
+    ok('确认步的那句生辰可以折行（strong.zp-wrap，样式里有对应的规则）',
+      !!sum && classesOf(sum).includes('zp-wrap') && /\.zp-status strong\.zp-wrap\s*\{\s*white-space:\s*normal/.test(homeCss), J(sum && classesOf(sum)));
     eq('输入框和发送按钮在确认步禁用', [!!attr(askInput(), 'disabled'), !!attr(findByClass(col(), 'zp-send')[0], 'disabled')], [true, true]);
     eq('状态句：将要排的生辰（直接选的巳时 + 成都：按巳时排，写明不校正）',
       text(findByClass(col(), 'zp-status')[0]), '好，我来排这张盘：乙，1992年5月3日 巳时，男，成都按巳时排盘，不做真太阳时校正');

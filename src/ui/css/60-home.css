@@ -99,6 +99,8 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
 /* 宫名、星名不从中间断行 */
 .zp-status strong { color: var(--zp-ink); font-weight: 600; white-space: nowrap }
 .zp-status .zp-st { color: var(--zp-c, var(--zp-ink)); font-weight: 600; white-space: nowrap }
+/* 引导问答确认步的那句生辰（称呼、日期、时间、性别、城市）是一整句话：窄档里放不下一行，要能折 */
+.zp-status strong.zp-wrap { white-space: normal }
 .zp-status > span { display: block; animation: zp-rise 240ms ease both }
 /* 状态句里的补充说明（引导问答确认步的真太阳时校正）：小一号，另起一行 */
 .zp-status small {

@@ -8213,6 +8213,8 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
 /* 宫名、星名不从中间断行 */
 .zp-status strong { color: var(--zp-ink); font-weight: 600; white-space: nowrap }
 .zp-status .zp-st { color: var(--zp-c, var(--zp-ink)); font-weight: 600; white-space: nowrap }
+/* 引导问答确认步的那句生辰（称呼、日期、时间、性别、城市）是一整句话：窄档里放不下一行，要能折 */
+.zp-status strong.zp-wrap { white-space: normal }
 .zp-status > span { display: block; animation: zp-rise 240ms ease both }
 /* 状态句里的补充说明（引导问答确认步的真太阳时校正）：小一号，另起一行 */
 .zp-status small {
@@ -11322,7 +11324,9 @@ function obQuestion(step, data, model) {
     case 'gender': return [strong(t('obAskGender'))];
     case 'city': return [strong(t('obAskCity')), br('b1'), t(d.time && d.time.shichen ? 'obAskCityNoteShichen' : 'obAskCityNote')];
     /* 校正说明用小字另起一行（small）：它是一句补充，和问题同样大会把对话栏顶得很高 */
-    default: return [t('obConfirmIntro'), br('b1'), strong(model ? model.summary : ''), model && model.note ? h('small', { key: 'shift' }, model.note) : null];
+    /* 这句生辰是一整句话，窄档里要能折行（.zp-status strong 默认不折行，那是给宫名、星名用的）：加 zp-wrap */
+    default: return [t('obConfirmIntro'), br('b1'), h('strong', { key: 'q', className: 'zp-wrap' }, model ? model.summary : ''),
+      model && model.note ? h('small', { key: 'shift' }, model.note) : null];
   }
 }
 

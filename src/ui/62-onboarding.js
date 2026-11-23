@@ -324,7 +324,9 @@ function obQuestion(step, data, model) {
     case 'gender': return [strong(t('obAskGender'))];
     case 'city': return [strong(t('obAskCity')), br('b1'), t(d.time && d.time.shichen ? 'obAskCityNoteShichen' : 'obAskCityNote')];
     /* 校正说明用小字另起一行（small）：它是一句补充，和问题同样大会把对话栏顶得很高 */
-    default: return [t('obConfirmIntro'), br('b1'), strong(model ? model.summary : ''), model && model.note ? h('small', { key: 'shift' }, model.note) : null];
+    /* 这句生辰是一整句话，窄档里要能折行（.zp-status strong 默认不折行，那是给宫名、星名用的）：加 zp-wrap */
+    default: return [t('obConfirmIntro'), br('b1'), h('strong', { key: 'q', className: 'zp-wrap' }, model ? model.summary : ''),
+      model && model.note ? h('small', { key: 'shift' }, model.note) : null];
   }
 }
 
