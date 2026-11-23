@@ -592,6 +592,147 @@ export default async function store(t) {
     eq('点"查看"打开面板', st.getState().session.panelOpen, true);
   }
 
+  section('v6 store：历史对话（spec 2026-11-24_chat-history §3.2）');
+  {
+    const CHATS = 'ziwei-pro.chats.v1';
+    const { st, fetch, storage } = mk();
+    const chatsIn = (k) => (JSON.parse(storage.getItem(CHATS) || '{}')[k] || []);
+    const firstAsks = (list) => list.map((c) => c.thread[0].content);
+    const qa = async (q, ans) => { st.ask(q); await settle(); last(fetch).send('done', { text: ans }); await settle(); };
+    const a = st.addChart(GOLDEN, '甲');
+    st.openChart(a.id);
+    st.setPanel(true);
+    const fns = ['newChat', 'openChat', 'removeChat'].filter((k) => typeof st[k] === 'function');
+    eq('store 有 newChat / openChat / removeChat', fns, ['newChat', 'openChat', 'removeChat']);
+    if (fns.length === 3) {
+      eq('一张新盘：reading 带着 chats，是空的', st.reading().chats, []);
+      ok('newChat：当前对话为空 → false，什么都不变', st.newChat() === false && st.getState().session.toast === null && storage.getItem(CHATS) === null);
+      await qa('事业如何', '事业答');
+      const first = clone(st.reading().thread);
+      st.setQuote({ label: '这一宫', text: '命宫' });
+      ok('newChat → true', st.newChat() === true);
+      const r1 = st.reading();
+      eq('newChat：当前对话清空、引用清掉，原来那条在历史最前面', [r1.thread, st.getState().session.quote, r1.chats.length, r1.chats[0] && r1.chats[0].thread], [[], null, 1, first]);
+      eq('历史条目恰好是 id, thread, updatedAt；id 形如 c-<毫秒>，updatedAt 是现在',
+        r1.chats[0] && [Object.keys(r1.chats[0]).join(','), /^c-\d+$/.test(r1.chats[0].id), r1.chats[0].updatedAt], ['id,thread,updatedAt', true, NOW]);
+      const t1 = st.getState().session.toast;
+      eq('提示「已存到历史对话」，不带撤销（没有删东西）', [t1 && t1.text, t1 && t1.action, t1 && !!t1.error], ['已存到历史对话', null, false]);
+      eq('落盘：历史写进 ziwei-pro.chats.v1；当前对话空了、又没有报告，readings.v2 里这张盘的记录删掉',
+        [chatsIn(KEY_A).map((c) => c.thread), !!readMap(storage)[KEY_A]], [[first], false]);
+      st.dismissToast();
+
+      await qa('感情如何', '感情答');
+      st.newChat();
+      eq('再开一条：两条历史，新的在前，id 不重复（同一毫秒也不重复）',
+        [firstAsks(st.reading().chats), new Set(st.reading().chats.map((c) => c.id)).size], [['感情如何', '事业如何'], 2]);
+      const idCareer = st.reading().chats[1].id;
+      await qa('财运如何', '财运答');
+      ok('openChat(不存在的 id) → false，什么都不变', st.openChat('c-nope') === false && st.reading().thread[0].content === '财运如何');
+      ok('openChat → true', st.openChat(idCareer) === true);
+      const r2 = st.reading();
+      eq('openChat：那条历史成了当前对话；原来的当前对话进了历史最前面；取出来的那条不在历史里了', [r2.thread, firstAsks(r2.chats)], [first, ['财运如何', '感情如何']]);
+      eq('落盘：当前对话写回 readings.v2，历史也跟着改', [readMap(storage)[KEY_A].thread, firstAsks(chatsIn(KEY_A))], [first, ['财运如何', '感情如何']]);
+      st.ask('接着问');
+      await settle();
+      eq('切回来接着聊：发给模型的上文是这条对话的', last(fetch).body.history, first);
+      ok('任务在跑：newChat / openChat 都返回 false', st.newChat() === false && st.openChat(st.reading().chats[0].id) === false);
+      last(fetch).send('done', { text: '接着答' });
+      await settle();
+
+      const idLove = st.reading().chats[1].id;
+      ok('removeChat(不存在的 id) → false', st.removeChat('c-nope') === false);
+      ok('removeChat → true', st.removeChat(idLove) === true);
+      const t2 = st.getState().session.toast;
+      eq('removeChat：这条没了，落盘，提示可撤销', [firstAsks(st.reading().chats), firstAsks(chatsIn(KEY_A)), t2 && t2.text, t2 && t2.action && t2.action.label],
+        [['财运如何'], ['财运如何'], '已删除这条对话', ZH.undo]);
+      t2.action.run();
+      eq('撤销：回到原来的位置，落盘', [firstAsks(st.reading().chats), firstAsks(chatsIn(KEY_A))], [['财运如何', '感情如何'], ['财运如何', '感情如何']]);
+      t2.action.run();
+      eq('同一条再撤销一次：不会出现两份', firstAsks(st.reading().chats), ['财运如何', '感情如何']);
+      st.removeChat(idLove);
+      const t3 = st.getState().session.toast;
+      const b = st.addChart(GOLDEN_F, '乙');
+      st.openChart(b.id);
+      t3.action.run();
+      eq('换了盘再撤销 → 不动；另一张盘的历史是空的（各管各的）', [firstAsks(st.reading(KEY_A).chats), st.reading(KEY_B).chats], [['财运如何'], []]);
+
+      st.patchSession({ asHistory: true });
+      st.openChart(a.id);
+      const afterOpen = st.getState().session.asHistory;
+      st.setPanel(true);
+      st.patchSession({ asHistory: true });
+      st.setPanel(false);
+      const afterClose = st.getState().session.asHistory;
+      st.patchSession({ asHistory: true });
+      st.goHome();
+      eq('历史列表在换盘、关面板、回首页时收起', [afterOpen, afterClose, st.getState().session.asHistory], [false, false, false]);
+
+      st.openChart(a.id);
+      ok('clearLocalRecords → true', st.clearLocalRecords() === true);
+      eq('清除本机记录之后：当前对话和历史都空了，键也没了', [st.reading().thread, st.reading().chats, storage.getItem(CHATS)], [[], [], null]);
+    }
+  }
+  {
+    /* 只有历史、没有当前对话和报告的盘：readings.v2 里没有它的记录，重开之后历史照样读得回来 */
+    const storage = memoryStorage();
+    const one = mk({ storage });
+    if (typeof one.st.newChat === 'function') {
+      const a = one.st.addChart(GOLDEN, '甲');
+      one.st.openChart(a.id);
+      one.st.ask('事业如何');
+      await settle();
+      last(one.fetch).send('done', { text: '事业答' });
+      await settle();
+      one.st.newChat();
+      const two = mk({ storage });
+      two.st.openChart(a.id);
+      eq('重开之后：没有当前对话、只有历史的盘，历史读得回来', [two.st.reading().thread, two.st.reading().chats.map((c) => c.thread.map((m) => m.content))], [[], [['事业如何', '事业答']]]);
+      ok('读回来的历史能切回去接着聊', two.st.openChat(two.st.reading().chats[0].id) === true && two.st.reading().thread.length === 2 && two.st.reading().chats.length === 0);
+    }
+  }
+  {
+    /* 每张盘最多 20 条：已经有 20 条时再开新对话，最旧的那条去掉 */
+    const seed = Array.from({ length: 20 }, (_, i) => ({ id: 'c-' + (1000 - i), thread: [{ role: 'user', content: '旧' + i }, { role: 'assistant', content: '答' }], updatedAt: 1000 - i }));
+    const storage = memoryStorage({ 'ziwei-pro.chats.v1': J({ [KEY_A]: seed }) });
+    const { st, fetch } = mk({ storage });
+    if (typeof st.newChat === 'function') {
+      const a = st.addChart(GOLDEN, '甲');
+      st.openChart(a.id);
+      eq('已有的 20 条历史读进来', st.reading().chats.length, 20);
+      st.ask('第二十一条');
+      await settle();
+      last(fetch).send('done', { text: '答' });
+      await settle();
+      st.newChat();
+      const list = st.reading().chats;
+      eq('再开新对话：还是 20 条，新的在最前，最旧的（旧19）去掉了', [list.length, list[0].thread[0].content, list[19].thread[0].content], [20, '第二十一条', '旧18']);
+    }
+  }
+  {
+    /* 历史写不进去（配额满、隐私模式）：新对话照样能开，那条留在本次会话里，并明说没存下来 */
+    const inner = memoryStorage();
+    const storage = Object.assign(Object.create(null), {
+      getItem: inner.getItem, removeItem: inner.removeItem, dump: inner.dump,
+      setItem: (k, v) => { if (k === 'ziwei-pro.chats.v1') throw new Error('QuotaExceededError'); inner.setItem(k, v); }
+    });
+    const { st, fetch } = mk({ storage });
+    if (typeof st.newChat === 'function') {
+      const a = st.addChart(GOLDEN, '甲');
+      st.openChart(a.id);
+      st.setPanel(true);
+      st.ask('事业如何');
+      await settle();
+      last(fetch).send('done', { text: '事业答' });
+      await settle();
+      const r = st.newChat();
+      const tt = st.getState().session.toast;
+      eq('写不进去：newChat 仍然 true，对话清空，那条在本次会话的历史里，提示说明没存下来（错误样式）',
+        [r, st.reading().thread, st.reading().chats.length, tt && tt.text, tt && !!tt.error],
+        [true, [], 1, '已开新对话。本机存不下了，刚才那条只留到关掉 DSH 为止；先删几条历史对话就能存', true]);
+      ok('留在本次会话里的那条照样能切回去', st.openChat(st.reading().chats[0].id) === true && st.reading().thread.length === 2);
+    }
+  }
+
   section('v6 store：报告');
   {
     const { st, fetch, storage, timers } = mk();

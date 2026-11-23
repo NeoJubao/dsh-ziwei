@@ -21,8 +21,10 @@
  *               onboarding（引导问答的状态，store 不解读）, quote: { label, text }|null,
  *               modelRetry（从错误条点「换个模型」时为真：模型弹层里换了模型就把那一问再问一次，弹层关掉时清掉）,
  *               toast: { text, error, action: { label, run }|null, key }|null, handoff: null|'working'|'done',
+ *               asHistory（紫微师面板里正开着历史对话列表；界面自己的字段，换盘、关面板、回首页时收起）,
  *               drafts: { [命盘 key]: 草稿 }, readPos: { [命盘 key]: 阅读位置 } }   —— 草稿和阅读位置只在内存里
- *   readings  { [命盘 key]: { thread, report, chatError, chatIssue, studioTab, name } }   第一次用到时从 storage 读
+ *   readings  { [命盘 key]: { thread, chats, report, chatError, chatIssue, studioTab, name } }   第一次用到时从 storage 读。
+ *             thread 是当前对话；chats 是这张盘的历史对话 [{ id, thread, updatedAt }]（新→旧，另存在 ziwei-pro.chats.v1）
  *   jobs      { [命盘 key]: { kind: 'chat'|'report', thinkChars, retried } }   没有任务的 key 不出现；
  *             retried：Host 发现模型没有作答、正在同一个请求里再问一次（收到正文后变回 false）
  * 命盘 key = readingKeyOf(entry.input)。示例盘的 chartId 是 'sample'，不进命盘库。
@@ -51,6 +53,9 @@
  *   ask(question, { scope, quote }?) → boolean   空问题 = 速览（没有用户气泡）。scope: true 带上当前页签的定位
  *                                    （ZWUI.scopeRequest）；引用默认取 session.quote，按 v5 的格式拼进问题，发出后清掉
  *   continueChat() / retryChat() / clearThread()（可撤销）/ startReport() / continueReport() / regenerateReport()
+ *   newChat() → boolean          把当前对话存进历史、开一条空的（不删东西，所以不用撤销）；当前对话为空时 false
+ *   openChat(id) → boolean       把一条历史取出来作为当前对话；原来的当前对话有消息就先存进历史
+ *   removeChat(id) → boolean     删一条历史（可撤销）。这三个都只动当前这张盘；前两个在任务跑着时返回 false
  *   stop(key?)        用户停止：保留已写的部分，可接着写
  *   handoff({ mode }?) → Promise<boolean>   在新会话里继续（v5 的 /ziwei/handoff），成功后交给 openSession
  *   checkVersion() → Promise<{ ok, current, latest, updateAvailable, reason }>   点「检查更新」时请求一次 /ziwei/version
@@ -199,7 +204,7 @@ function createStore(deps) {
   let toastSeq = 0;
   let sampleMemo = null;
   let horoMemo = { k: '', h: null };
-  const BLANK = { thread: [], report: emptyReport(), chatError: '', chatIssue: null, studioTab: 'chat', name: '' };
+  const BLANK = { thread: [], chats: [], report: emptyReport(), chatError: '', chatIssue: null, studioTab: 'chat', name: '' };
 
   function startupFocus() {
     const last = api.lastChart.load();
@@ -216,7 +221,7 @@ function createStore(deps) {
     session: {
       view: 'home', chartId: null, tab: 'natal', stage: 'board', when: todayOf(), sel: 0, pat: 0, pane: 'scope',
       panelOpen: false, focusId: startupFocus(), introPlayed: false, onboarding: null, quote: null, toast: null,
-      handoff: null, drafts: {}, readPos: {}, lastModel: null
+      handoff: null, drafts: {}, readPos: {}, lastModel: null, asHistory: false
     },
     readings: {},
     jobs: {}
@@ -322,10 +327,12 @@ function createStore(deps) {
   }
 
   /* ---------------- 解读数据 ---------------- */
+  /* 历史对话另存一个键：这张盘没有当前对话和报告（readings.v2 里没有记录）时也可能有历史 */
   function loadReading(key) {
     const rec = api.readings.load(key);
-    if (!rec) return Object.assign({}, BLANK, { report: emptyReport() });
-    return { thread: rec.thread, report: rec.report, chatError: '', chatIssue: null, studioTab: rec.studioTab, name: rec.name };
+    const chats = api.chats.load(key);
+    if (!rec) return Object.assign({}, BLANK, { report: emptyReport(), chats: chats });
+    return { thread: rec.thread, chats: chats, report: rec.report, chatError: '', chatIssue: null, studioTab: rec.studioTab, name: rec.name };
   }
   /* 第一次用到时从 storage 读进快照（不通知：内容和读之前看到的一样） */
   function readingRaw(key) {
@@ -532,6 +539,8 @@ function createStore(deps) {
       /* 引导问答做到一半去看了命盘库里的盘：引导到此为止，回首页时看到的是平时的首页。
          看示例盘不算（空库时引导本来就常在，回来接着答） */
       onboarding: entry.sample ? cur.onboarding : null,
+      /* 历史对话列表是上一张盘的，收起来 */
+      asHistory: false,
       /* 换盘时带动作的提示（撤销、查看）作废，和 v5 一样 */
       toast: cur.toast && cur.toast.action ? null : cur.toast
     };
@@ -543,7 +552,7 @@ function createStore(deps) {
     return openChart(SAMPLE_ID, opts);
   }
   function goHome() {
-    return patchSessionRaw({ view: 'home', panelOpen: false });
+    return patchSessionRaw({ view: 'home', panelOpen: false, asHistory: false });
   }
   function setStage(stage) {
     if (stage !== 'board' && stage !== 'report') return false;
@@ -620,8 +629,9 @@ function createStore(deps) {
     if (!(n >= 0) || Math.floor(n) !== n) return false;
     return patchSessionRaw({ pat: n });
   }
+  /* 关面板时把历史对话列表收起：下次打开看到的是对话 */
   function setPanel(open) {
-    return patchSessionRaw({ panelOpen: !!open });
+    return patchSessionRaw(open ? { panelOpen: true } : { panelOpen: false, asHistory: false });
   }
   function setQuote(q) {
     if (!q) return patchSessionRaw({ quote: null });
@@ -758,6 +768,84 @@ function createStore(deps) {
         if (currentKey() !== key || running[key] || readingRaw(key).thread.length) return;
         updateKey(key, { thread: prev });
         persist(key, entry);
+        showToastRaw(t('undoDone'));
+      }
+    });
+    return true;
+  }
+
+  /* ---------------- 历史对话（spec 2026-11-24_chat-history） ----------------
+     当前对话在 reading.thread（落在 readings.v2），历史在 reading.chats（落在 ziwei-pro.chats.v1）。
+     一条对话只在一个地方：进历史就从当前对话里拿走，切回来就从历史里取出。 */
+  function chatIdFor(list) {
+    const taken = {};
+    list.forEach(function (c) { taken[c.id] = true; });
+    let n = Math.max(0, Math.floor(+now() || 0));
+    while (taken['c-' + n]) n++;
+    return 'c-' + n;
+  }
+  /* 当前对话放到历史最前面（空的不放） */
+  function withCurrentArchived(thread, chats) {
+    if (!thread.length) return chats;
+    return [{ id: chatIdFor(chats), thread: thread, updatedAt: now() }].concat(chats);
+  }
+  /* 写这张盘的历史。写进去了：以存下来的为准（清理、每张盘 20 条、配额回退都可能改了它）。
+     写不进去（配额满、隐私模式）：列表留在本次会话里照样能用，saved 为 false，由调用的地方决定要不要说。 */
+  function saveChats(key, list) {
+    if (api.chats.save(key, list)) return { chats: api.chats.load(key), saved: true };
+    return { chats: cleanChats(list), saved: false };
+  }
+  function newChat() {
+    const entry = currentEntry();
+    const key = keyOf(entry);
+    if (!entry || running[key]) return false;
+    const r = readingRaw(key);
+    if (!r.thread.length) return false;
+    const out = saveChats(key, withCurrentArchived(r.thread, r.chats));
+    delete lastAsk[key];
+    updateKey(key, { thread: [], chats: out.chats, chatError: '', chatIssue: null });
+    if (state.session.quote) patchSessionRaw({ quote: null });
+    persist(key, entry);
+    if (out.saved) showToastRaw(t('aiChatArchived'));
+    else showToastRaw(t('aiChatNotSaved'), { error: true });
+    return true;
+  }
+  function openChat(id) {
+    const entry = currentEntry();
+    const key = keyOf(entry);
+    if (!entry || running[key]) return false;
+    const r = readingRaw(key);
+    const hit = r.chats.filter(function (c) { return c.id === id; })[0];
+    if (!hit) return false;
+    const rest = r.chats.filter(function (c) { return c.id !== id; });
+    const out = saveChats(key, withCurrentArchived(r.thread, rest));
+    delete lastAsk[key];
+    updateKey(key, { thread: hit.thread, chats: out.chats, chatError: '', chatIssue: null });
+    if (state.session.quote) patchSessionRaw({ quote: null });
+    persist(key, entry);
+    return true;
+  }
+  function removeChat(id) {
+    const entry = currentEntry();
+    const key = keyOf(entry);
+    if (!entry) return false;
+    const list = readingRaw(key).chats;
+    let at = -1;
+    for (let i = 0; i < list.length; i++) { if (list[i].id === id) { at = i; break; } }
+    if (at < 0) return false;
+    const removed = list[at];
+    const next = list.slice();
+    next.splice(at, 1);
+    updateKey(key, { chats: saveChats(key, next).chats });
+    showToastRaw(t('aiChatRemoved'), {
+      undo: function () {
+        /* 撤销只回到被删的那张盘；已经换盘、或者这一条已经在列表里了（撤销点了两次），都不动 */
+        if (currentKey() !== key) return;
+        const cur = readingRaw(key).chats;
+        if (cur.some(function (c) { return c.id === removed.id; })) return;
+        const back = cur.slice();
+        back.splice(Math.min(at, back.length), 0, removed);
+        updateKey(key, { chats: saveChats(key, back).chats });
         showToastRaw(t('undoDone'));
       }
     });
@@ -1042,6 +1130,9 @@ function createStore(deps) {
     continueChat: continueChat,
     retryChat: retryChat,
     clearThread: clearThread,
+    newChat: newChat,
+    openChat: openChat,
+    removeChat: removeChat,
     startReport: startReport,
     continueReport: continueReport,
     regenerateReport: startReport,
