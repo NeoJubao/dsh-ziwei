@@ -18,6 +18,8 @@
   "rvStop": ["停止", "Stop"],
   "rvBarWriting": ["正在写第 {n} / {total} 部分 · {name}", "Writing part {n} of {total} · {name}"],
   "rvBarStopped": ["写到第 {n} 部分停了，已经写的都在下面。", "Stopped at part {n}. What was written is below."],
+  "rvBarUnwritten": ["紫微师没有写成报告，只回了下面这段话。", "The reader didn't write the report; it only replied with the text below."],
+  "rvRegenerate": ["重新生成", "Try again"],
   "rvBarStoppedWhy": ["写到第 {n} 部分停了：{reason}", "Stopped at part {n}: {reason}"],
   "rvDocLabel": ["报告正文", "Report text"],
   "rvTopTitle": ["{name} · 完整报告", "{name} · Full report"],

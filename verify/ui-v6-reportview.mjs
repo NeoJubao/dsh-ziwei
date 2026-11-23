@@ -644,6 +644,63 @@ export default async function reportView(t) {
   });
 
   /* ---------------------------------------------------------------- */
+  section('v6 报告页：没写成报告');
+  /* 2026-11-24 真机：模型没写报告，只回了约 300 字要出生地经度，这段话被当成写完的报告存了下来
+     （spec 2026-11-24_solar-time-option §3.7）。报告页要认得出来，给「重新生成」。 */
+  await guard('没写成报告', async () => {
+    const REFUSAL = '在动笔之前，需要先和您确认一件事：这张盘没有提供出生地的经度，真太阳时还没有校正。请告诉我出生的城市，我核对时辰之后再写完整报告。';
+    ok('ZWUi 暴露 rvUnwritten', typeof U.rvUnwritten === 'function');
+    if (typeof U.rvUnwritten !== 'function') return;
+    eq('rvUnwritten：写完、不到 1500 字、没有「## 」标题才算没写成；有标题、够长、还在写、出错、空的都不算',
+      [U.rvUnwritten({ status: 'done', text: REFUSAL }), U.rvUnwritten({ status: 'done', text: REFUSAL + '\n\n### 小标题\n\n一句。' }),
+        U.rvUnwritten({ status: 'done', text: REPORT }), U.rvUnwritten({ status: 'done', text: '## 一、命盘总览\n\n短短一段。' }),
+        U.rvUnwritten({ status: 'done', text: '字'.repeat(1500) }), U.rvUnwritten({ status: 'done', text: '字'.repeat(1499) }),
+        U.rvUnwritten({ status: 'running', text: REFUSAL }), U.rvUnwritten({ status: 'error', text: REFUSAL }),
+        U.rvUnwritten({ status: 'done', text: '  ' }), U.rvUnwritten(null)],
+      [true, true, false, false, false, true, false, false, false, false]);
+
+    const env2 = bootRuntime(t.client, { now: NOW, width: 1300 });
+    const st2 = env2.store;
+    const rt2 = env2.rt;
+    const e2 = st2.addChart(GOLDEN, '乙');
+    st2.openChart(e2.id);
+    st2.setStage('report');
+    rt2.mount(env2.h(env2.Main));
+    const main2 = () => findByClass(findByClass(rt2.tree(), 'zp-rbody')[0], 'zp-rmain')[0];
+    const bar2 = () => findByClass(main2(), 'zp-rbar')[0];
+    const last2 = () => env2.pipe.calls[env2.pipe.calls.length - 1];
+    st2.startReport();
+    await settle();
+    rt2.flush();
+    last2().send('done', { text: REFUSAL }).end();
+    await settle(6);
+    st2.dismissToast();
+    rt2.flush();
+    const rep = st2.reading().report;
+    eq('模型只回了一小段话：report.status 是 done，正文原样留着', [rep.status, rep.text], ['done', REFUSAL]);
+    const bar = bar2();
+    eq('状态栏（role=status）：说明没写成报告，给「重新生成」（一点就写，不用二次确认）',
+      [attr(bar, 'role'), text(findByClass(bar, 'zp-rbar-text')[0]), find(bar, (n) => n.type === 'button').map((n) => [text(n), classesOf(n)])],
+      ['status', '紫微师没有写成报告，只回了下面这段话。', [['重新生成', ['zp-btn']]]]);
+    /* 正文各部分是 dangerouslySetInnerHTML，树里的文字读不到，直接看 HTML */
+    const shown = find(main2(), (n) => n.type === 'section').map((n) => (attr(n, 'dangerouslySetInnerHTML') || {}).__html || '').join('');
+    ok('那段话还在正文里（看得到它说了什么）', shown.includes('需要先和您确认一件事'), shown.slice(0, 80));
+    const before = env2.pipe.calls.length;
+    rt2.click(find(bar2(), (n) => n.type === 'button' && text(n) === '重新生成')[0]);
+    await settle();
+    rt2.flush();
+    eq('点重新生成：发出一次 mode=report 的请求，状态栏回到正在写',
+      [env2.pipe.calls.length - before, last2().body && last2().body.mode, text(findByClass(bar2(), 'zp-rbar-text')[0])],
+      [1, 'report', '正在写第 1 / 14 部分 · 命盘总览']);
+    last2().send('done', { text: REPORT }).end();
+    await settle(6);
+    st2.dismissToast();
+    rt2.flush();
+    eq('这次写出了完整报告：没有状态栏', [st2.reading().report.status, !!bar2()], ['done', false]);
+    rt2.unmount();
+  });
+
+  /* ---------------------------------------------------------------- */
   section('v6 报告页：文案和源码');
   await guard('源码', () => {
     const src = readFileSync(join(t.root, 'src', 'ui', '85-reportview.js'), 'utf8');

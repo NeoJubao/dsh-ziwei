@@ -14,7 +14,7 @@
  * - 下载 / 复制 / 问这段：下载用临时 <a download> + blob 链接（宿主不让 window.open 或跳转到 blob），
  *   文件名「人生鲲鹏计划_<称呼>_<yyyymmdd>.html」。品牌名只在导出文件里，面板上叫「完整报告」。
  * 组件：ReportStage（舞台）> ReportToc、ReportBar、ReportDoc（> ReportTop、ReportSections > ReportSection）或 ReportEmpty。
- * 自检用的纯函数挂在 ZWUI 上：rvShouldStick、rvChunks、rvSectionView、rvOutline、rvSafeName、rvFileName、rvPickPlace。
+ * 自检用的纯函数挂在 ZWUI 上：rvShouldStick、rvChunks、rvSectionView、rvOutline、rvSafeName、rvFileName、rvPickPlace、rvUnwritten。
  * ================================================================ */
 
 const RV_STICK_PX = 80;      /* 离底部不到这么多才跟随 */
@@ -141,6 +141,17 @@ function rvPhaseOf(rep) {
   return rep.status === 'done' ? 'done' : 'stopped';
 }
 
+/* 写完了，但写出来的不是一份报告：模型有时不写报告，只回一小段话（2026-11-24 真机：约 300 字，问出生地的经度），
+   这段话照样按「写完」存了下来。正文不到 RV_UNWRITTEN_MAX 个字、又没有一个「## 」标题，就算没写成：
+   正文照常显示（看得到它说了什么），状态栏说明情况并给「重新生成」。按正文判断，所以以前存下的也认得出来。 */
+const RV_UNWRITTEN_MAX = 1500;
+function rvUnwritten(rep) {
+  if (!rep || rep.status !== 'done') return false;
+  const text = String(rep.text || '').trim();
+  if (!text || text.length >= RV_UNWRITTEN_MAX) return false;
+  return !text.split('\n').some(function (line) { return RV_HEADING.test(line); });
+}
+
 /* 中断的原因：用户自己停的、写到一半被打断的不用再说；断连、出错要说 */
 function rvWhyOf(rep) {
   const kind = rep && rep.issue ? rep.issue.kind : '';
@@ -181,6 +192,7 @@ function rvTocOf(s, store) {
 function rvBarOf(s, store) {
   const c = rvCurrentOf(store);
   const phase = rvPhaseOf(c.rep);
+  if (phase === 'done' && rvUnwritten(c.rep)) return { phase: phase, unwritten: true, busy: rvBusyOf(s, c.key) };
   if (phase !== 'writing' && phase !== 'stopped') return { phase: phase };
   const o = rvOutlineOf(c.rep.text);
   return {
@@ -474,6 +486,15 @@ function ReportBar() {
         onConfirm: function () { store.regenerateReport(); }
       }));
   }
+  /* 没写成报告：那一小段话没什么可丢的，重新生成不用二次确认 */
+  if (b.unwritten) {
+    return h('div', { className: 'zp-rbar', role: 'status' },
+      h('span', { className: 'zp-rbar-text' }, t('rvBarUnwritten')),
+      h('button', {
+        className: 'zp-btn', type: 'button', disabled: b.busy ? true : undefined, title: b.busy ? t('rvBusyChat') : undefined,
+        onClick: function () { store.regenerateReport(); }
+      }, t('rvRegenerate')));
+  }
   return null;
 }
 
@@ -674,3 +695,4 @@ ZWUI.rvOutline = rvOutlineOf;
 ZWUI.rvSafeName = rvSafeName;
 ZWUI.rvFileName = rvFileName;
 ZWUI.rvPickPlace = rvPickPlace;
+ZWUI.rvUnwritten = rvUnwritten;
