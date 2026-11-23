@@ -111,4 +111,20 @@ THE SOFTWARE.
 
 ---
 
+## 6. GeoNames — CC BY 4.0（出生城市的经度，数据随包分发）
+
+- 来源：GeoNames 地名数据库 <https://www.geonames.org/>，国家导出文件 `CN.zip` 和 `TW.zip`
+  （<https://download.geonames.org/export/dump/>，2026-11-23 的导出，2026-11-24 取得）
+- 在本仓库的位置：`src/ui/20-util.js` 的 `CITY_TABLE`（出生城市 → 东经），构建后在 `client.js` 里
+- 用了什么：表里比 v5 多出来的 262 个城市的经度。取各地级单位驻地那条记录（GeoNames 的
+  PPLC / PPLA / PPLA2 等）的经度，四舍五入到 0.1°
+- 做了哪些改动：只取经度一项并四舍五入；城市名单、省份分组和中文简称是本项目自己列的；
+  本溪、潜江、天门三处按名字自动匹配到的是同名的县驻地或区划中心点，改用 GeoNames 里市区那条记录的值
+- 没用它的部分：v5 就有的 94 个城市是此前自编的值，没有取自 GeoNames（只拿它核对过，差都在 0.2° 以内）
+- 仓库和分发包里都不包含 GeoNames 的原始文件
+- 许可：Creative Commons Attribution 4.0 <https://creativecommons.org/licenses/by/4.0/>。
+  GeoNames 按「现状」提供数据，不对准确性、时效性和完整性作任何担保
+
+---
+
 *本文件随 npm 分发包一起发布（发布脚本会把本文件加入包内文件清单）。*

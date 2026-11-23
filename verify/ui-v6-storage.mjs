@@ -158,6 +158,60 @@ export default async function storageChecks(t) {
         return [cities.length === 94 && bad.length === 0, `v5 表 ${cities.length} 城；不一致：${bad.map((c) => c[0]).join(',')}`];
       });
     }
+
+    /* 2026-11-24：表扩到全部地级单位，按省分组（spec 2026-11-24_solar-time-option §3.4）。
+       经度的期望值是 GeoNames 驻地记录四舍五入到 0.1° 的字面量，不用被测代码重算。 */
+    const got = (x) => { const r = P(x) || {}; return [r.kind, r.city, r.province, r.lon]; };
+    const same = (a, b) => [json(a) === json(b), `got ${json(a)} want ${json(b)}`];
+    check('出生城市：新增的地级市能认（泸州 105.4、自贡 104.8、内江 105.1）',
+      () => same([got('泸州'), got('自贡'), got('内江')],
+        [['city', '泸州', '四川', 105.4], ['city', '自贡', '四川', 104.8], ['city', '内江', '四川', 105.1]]));
+    check('出生城市：自治州、盟、地区用简称（凉山 102.3、延边 129.5、锡林郭勒 116.1、阿里 80.1）',
+      () => same([got('凉山'), got('延边'), got('锡林郭勒'), got('阿里')],
+        [['city', '凉山', '四川', 102.3], ['city', '延边', '吉林', 129.5], ['city', '锡林郭勒', '内蒙古', 116.1], ['city', '阿里', '西藏', 80.1]]));
+    check('出生城市：带着省写 → 省里的那个城市（四川泸州、四川省内江市、新疆维吾尔自治区伊犁）',
+      () => same([got('四川泸州'), got('四川省内江市'), got('新疆维吾尔自治区伊犁')],
+        [['city', '泸州', '四川', 105.4], ['city', '内江', '四川', 105.1], ['city', '伊犁', '新疆', 81.3]]));
+    check('出生城市：只写省名 → province，带这个省的城市，不给经度', () => {
+      const r = P('四川') || {};
+      return [r.kind === 'province' && r.province === '四川' && r.lon === null && r.city === null &&
+        Array.isArray(r.cities) && r.cities.length === 21 && r.cities[0] === '成都' && r.cities.includes('内江'), json(r)];
+    });
+    check('出生城市：「海南」是省，不是青海的海南州；「青海海南」才是海南州 100.6',
+      () => same([got('海南'), got('青海海南')], [['province', null, '海南', null], ['city', '海南', '青海', 100.6]]));
+    check('出生城市：「吉林省」是省；「吉林」「吉林市」「吉林省吉林市」是吉林市 126.6',
+      () => same([got('吉林省'), got('吉林'), got('吉林市'), got('吉林省吉林市')],
+        [['province', null, '吉林', null], ['city', '吉林', '吉林', 126.6], ['city', '吉林', '吉林', 126.6], ['city', '吉林', '吉林', 126.6]]));
+    check('出生城市：「北京朝阳」是北京，不是辽宁的朝阳；「辽宁朝阳」是朝阳 120.5',
+      () => same([got('北京朝阳'), got('辽宁朝阳')], [['city', '北京', '北京', 116.4], ['city', '朝阳', '辽宁', 120.5]]));
+    check('出生城市：直辖市、港澳只写名字就是它（重庆 106.5、香港 114.2）',
+      () => same([got('重庆'), got('重庆市'), got('香港')], [['city', '重庆', '重庆', 106.5], ['city', '重庆', '重庆', 106.5], ['city', '香港', '香港', 114.2]]));
+    check('出生城市：省写错了不借用别省的城市（「四川长春」→ 省）', () => same(got('四川长春'), ['province', null, '四川', null]));
+    check('出生城市：句子里只提到省 → 省（「老家在云南」）', () => same(got('老家在云南'), ['province', null, '云南', null]));
+    check('出生城市：按名字匹配错过的三处用的是市区的值（本溪 123.8、潜江 112.9、天门 113.2）',
+      () => same([P('本溪').lon, P('潜江').lon, P('天门').lon], [123.8, 112.9, 113.2]));
+    check('出生城市：各地抽查（鄂尔多斯 109.8、齐齐哈尔 124.0、湘西 109.7、黔东南 108.0、日喀则 88.9、三沙 112.3、石河子 86.0、高雄 120.3）',
+      () => same(['鄂尔多斯', '齐齐哈尔', '湘西', '黔东南', '日喀则', '三沙', '石河子', '高雄'].map((n) => P(n).lon),
+        [109.8, 124, 109.7, 108, 88.9, 112.3, 86, 120.3]));
+    check('出生城市：34 个省级分组共 356 城，名字不重复，带着省都能认回自己', () => {
+      const PROVS = ['北京', '天津', '上海', '重庆', '河北', '山西', '内蒙古', '辽宁', '吉林', '黑龙江', '江苏', '浙江', '安徽', '福建', '江西',
+        '山东', '河南', '湖北', '湖南', '广东', '广西', '海南', '四川', '贵州', '云南', '西藏', '陕西', '甘肃', '青海', '宁夏', '新疆', '香港', '澳门', '台湾'];
+      const all = [];
+      const bad = [];
+      for (const p of PROVS) {
+        /* 「X省」一定落到省（直辖市、港澳只有一个城市，直接是它） */
+        const r = P(p + '省') || {};
+        const names = r.kind === 'province' ? r.cities : (r.kind === 'city' ? [r.city] : []);
+        if (!names.length) bad.push(p);
+        for (const c of names) {
+          all.push(c);
+          const back = P(p + c) || {};
+          if (back.kind !== 'city' || back.city !== c || back.province !== p || !(back.lon >= 60 && back.lon <= 140)) bad.push(p + c);
+        }
+      }
+      return [PROVS.length === 34 && all.length === 356 && new Set(all).size === 356 && bad.length === 0,
+        `共 ${all.length} 城，去重后 ${new Set(all).size}；有问题：${bad.slice(0, 12).join(',')}`];
+    });
   }
 
   check('不再有「专注看盘」（并入左栏开关）', () => !/toggleFocus/.test(client) && !/data-focus/.test(client) && !/focusOn/.test(client));

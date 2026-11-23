@@ -89,7 +89,8 @@ function sheetCityHint(f) {
       hint: parsed.kind === 'city' ? t('sheetCityHintCity', { city: parsed.city, lon: f.longitude }) : t('sheetCityHintLon', { lon: f.longitude })
     };
   }
-  if (parsed.kind === 'unknown') return { text: cityText, warn: true, hint: t('sheetCityHintUnknown', { text: cityText.trim() }) };
+  /* 只认出了省（范围太大，不给经度）：先和查不到一样提示，任务 4 再换成「请填到市」 */
+  if (parsed.kind === 'unknown' || parsed.kind === 'province') return { text: cityText, warn: true, hint: t('sheetCityHintUnknown', { text: cityText.trim() }) };
   return { text: cityText, warn: false, hint: t('sheetCityHintEmpty') };
 }
 
@@ -127,7 +128,7 @@ function BirthFormFields(props) {
     set({
       city: v,
       longitude: r.lon == null ? '' : String(r.lon),
-      place: r.kind === 'city' ? r.city : (r.kind === 'unknown' ? String(v).trim() : '')
+      place: r.kind === 'city' ? r.city : (r.kind === 'unknown' || r.kind === 'province' ? String(v).trim() : '')
     });
   };
   const choice = function (key, labelKey, hintKey, value, items) {
@@ -171,7 +172,8 @@ function BirthFormFields(props) {
       key: 'in', className: 'zp-input', type: 'text', value: city.text, maxLength: 30, list: SHEET_CITY_LIST,
       placeholder: t('sheetCityPh'), 'aria-label': t('sheetCity'), onChange: function (ev) { onCity(ev.target.value); }
     }),
-    h('datalist', { key: 'list', id: SHEET_CITY_LIST }, CITY_NAMES.map(function (nm) { return h('option', { key: nm, value: nm }); }))
+    /* 候选只列不带省也能认的名字（青海的海南州要写成「青海海南」，单写「海南」是省） */
+    h('datalist', { key: 'list', id: SHEET_CITY_LIST }, CITY_NAMES_BARE.map(function (nm) { return h('option', { key: nm, value: nm }); }))
   ], city.hint, city.warn),
   h('details', { className: 'zp-more' },
     h('summary', null, t('sheetMoreOptions')),
