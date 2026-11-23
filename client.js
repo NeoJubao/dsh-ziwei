@@ -2994,6 +2994,15 @@ const DICT = {
     "asContext": "{name} · {cls}",
     "asContextPalace": "{name} · {cls} · {palace}",
     "asNewChat": "新对话",
+    "asHistory": "历史对话",
+    "asHistoryBack": "返回对话",
+    "asHistoryCurrent": "当前 · {n} 条",
+    "asHistoryMeta": "{date} · {n} 条",
+    "asHistoryDate": "{m}月{d}日 {hh}:{mi}",
+    "asHistoryQuick": "速览解读",
+    "asHistoryDelete": "删除对话：{title}",
+    "asHistoryBusy": "紫微师正在回答，答完再切换",
+    "asHistoryEmpty": "这张盘还没有历史对话。点「新对话」时，当前这条会存到这里。",
     "asHandoff": "在新会话里继续",
     "asHandoffHint": "把这张盘和已有解读交给一个新的 DSH 会话，在那里接着聊",
     "asEmptyLine": "想问什么，直接说。",
@@ -3457,6 +3466,15 @@ const DICT = {
     "asContext": "{name} · {cls}",
     "asContextPalace": "{name} · {cls} · {palace}",
     "asNewChat": "New chat",
+    "asHistory": "Past conversations",
+    "asHistoryBack": "Back to chat",
+    "asHistoryCurrent": "Current · {n} messages",
+    "asHistoryMeta": "{date} · {n} messages",
+    "asHistoryDate": "{y}-{mm}-{dd} {hh}:{mi}",
+    "asHistoryQuick": "Quick reading",
+    "asHistoryDelete": "Delete conversation: {title}",
+    "asHistoryBusy": "The reader is answering; switch when it finishes",
+    "asHistoryEmpty": "No past conversations for this chart yet. Starting a new chat saves the current one here.",
     "asHandoff": "Continue in a new session",
     "asHandoffHint": "Hand this chart and the reading so far to a new DSH session and keep talking there",
     "asEmptyLine": "Ask whatever you want to know.",
@@ -9299,7 +9317,13 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
  * 结构（80-assistant.js 渲染）：
  *   div.zp-as-mask                            只在中、窄档且面板打开时渲染；点了关闭
  *   aside.zp-assistant                        ASSISTANT；中、窄档下带 role=dialog aria-modal
- *     header.zp-as-head > b, small, div.zp-as-actions（新对话、在新会话里继续、关闭）
+ *     header.zp-as-head > b, small, div.zp-as-actions（历史对话、新对话、在新会话里继续、关闭）
+ *     div.zp-as-history[role=region]            历史对话列表：「历史对话」开着时换掉下面从对话区到输入区的几块
+ *       div.zp-as-history-h > b + button.zp-btn.zp-sm（返回对话）
+ *       ul.zp-as-chats > li.zp-as-chat（当前对话加 zp-now）
+ *         button.zp-as-chat-open > span.zp-as-chat-title + small.zp-as-chat-meta
+ *         button.zp-icon-btn.zp-plain            删除这一条
+ *       p.zp-as-history-empty                    一条都没有时
  *     div.zp-chat-thread[role=log][aria-live=polite]
  *       div.zp-as-empty                       面板空着时：一句话 + 速览 + 起手动作 + 示例问题
  *         p.zp-l1, section.zp-quick > h4 + p（速览，本地算的）, div.zp-as-starts > button.zp-btn
@@ -9540,6 +9564,75 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
 }
 .zp-root .zp-quote button { color: var(--zp-ink-3) }
 .zp-root .zp-quote button:hover { background: var(--zp-hover); color: var(--zp-ink) }
+/* 头部的「历史对话」是开关：开着时和悬停一个样（底色加深、字变实） */
+.zp-root .zp-as-actions .zp-icon-btn[aria-pressed="true"] { background: var(--zp-hover); color: var(--zp-ink) }
+/* 历史对话列表：占掉对话区到输入区的位置，自己滚动 */
+.zp-as-history {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px 12px 16px;
+}
+.zp-as-history-h {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 4px 8px;
+}
+.zp-as-history-h b { font-size: 13px; font-weight: 600 }
+.zp-root .zp-as-history-h b { color: var(--zp-ink-2) }
+.zp-as-history-h .zp-btn { margin-left: auto }
+.zp-as-chats {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.zp-as-chat {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-right: 6px;
+  border: 1px solid var(--zp-line-2);
+  border-radius: 12px;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+.zp-as-chat:hover { background: var(--zp-hover) }
+/* 当前对话：和输入框聚焦时同一个紫色描边 */
+.zp-as-chat.zp-now { border-color: color-mix(in srgb, var(--zp-zi) 55%, var(--zp-line-2)) }
+.zp-as-chat-open {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 6px 8px 12px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+}
+.zp-as-chat-open:disabled { opacity: 0.55; cursor: default }
+.zp-as-chat-title {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 14px;
+  line-height: 20px;
+}
+.zp-as-chat-meta { font-size: 12px; line-height: 18px }
+.zp-root .zp-as-chat-title { color: var(--zp-ink) }
+.zp-root .zp-as-chat-meta { color: var(--zp-ink-3) }
+.zp-as-chat .zp-icon-btn { flex: none }
+.zp-as-history-empty {
+  margin: 24px 4px;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.zp-root .zp-as-history-empty { color: var(--zp-ink-2) }
 /* 输入区：上面是输入框，下面一行是模型按钮和发送键 */
 .zp-as-form {
   flex: none;
@@ -10027,7 +10120,7 @@ html[data-platform="darwin"] .zp-root .zp-sky { top: calc(-1 * var(--dsh-frame-t
  * Icon { name, size = 16 }
  *   svg.zp-icon（aria-hidden，线色随文字）。name 是 ICON_PATHS 的键（ZWUi.iconNames 列出全部）：
  *   exit back close more list gear settings caret chevronLeft chevronRight chevronDown send stop sparkle newChat handoff
- *   copy download export report quote refresh check。新图标先加进表里再用。
+ *   copy download export report quote refresh check history。新图标先加进表里再用。
  *
  * Seg { items, value, onChange(id), label, className?, region?, radio? }
  *   分段页签：div.zp-seg[role=tablist][aria-label=label]（className 追加在 zp-seg 后面，region → data-region）。
@@ -10371,6 +10464,12 @@ const ICON_PATHS = {
   refresh: [
     ['path', { d: 'M13 7.6A5 5 0 1 1 11.4 4' }],
     ['path', { d: 'M13.2 2.6v3.2H10' }]
+  ],
+  /* 历史对话：往回走的圆弧箭头（refresh 的镜像）里一个表针 */
+  history: [
+    ['path', { d: 'M3 7.6A5 5 0 1 0 4.6 4' }],
+    ['path', { d: 'M2.8 2.6v3.2H6' }],
+    ['path', { d: 'M8 5.7V8l1.7 1.1' }]
   ]
 };
 
@@ -12883,7 +12982,10 @@ function BoardLines() {
  * 订阅拆得很细：流式增量每秒换很多次 readings，只有对话区（AssistantThread）跟着重画；每条消息一个组件
  * （key = 序号），回答的 HTML 按正文 useMemo，所以一次增量只重新解析最后一条，前面几条的 { __html } 对象不变。
  * 头部、上下文行、输入框、速览选出来的值不随增量变，所以不跟着重渲染。
- *   AssistantHead       header.zp-as-head：紫微师、上下文行（AssistantContext）、新对话 / 在新会话里继续 / 关闭
+ *   AssistantHead       header.zp-as-head：紫微师、上下文行（AssistantContext）、历史对话 / 新对话 / 在新会话里继续 / 关闭
+ *   AssistantHistory    这张盘的历史对话列表（spec 2026-11-24_chat-history）。头部的「历史对话」是开关（session.asHistory）：
+ *                       开着时列表换掉对话区、错误条、引导问题、引用条和输入区，头部和免责声明留着。
+ *                       「新对话」把当前对话存进历史（store.newChat），不是清空；清空当前对话在列表里当前那一行的删除上
  *   AssistantThread     div.zp-chat-thread[role=log]：空态（AssistantEmpty）或消息（AssistantMsg）+ 输入指示；
  *                       离底部 48px 以内才跟随新内容
  *   AssistantEmpty      一句话、速览（AssistantQuick，本地算的，不调模型）、起手动作（AssistantStarts）
@@ -12900,6 +13002,7 @@ const AS_STICK_PX = 48;
 const AS_TEXTAREA_MAX = 120;
 const AS_CHIP_CLIP = 60;
 const AS_BUBBLE_CLIP = 90;
+const AS_TITLE_CLIP = 40;
 /* 引用拼进问题的格式和 26-store 的 ask（也是 v5）一致：'【引用：' + 标签 + '】\n' + 内容 + '\n\n' + 问题。
    这是协议记号，不是界面文字，所以写成转义（60–90 的源码注释以外不放中文字面量）。 */
 const AS_QUOTE_OPEN = '\u3010\u5f15\u7528\uff1a';
@@ -12929,6 +13032,28 @@ function asSplitAsk(content) {
   return { quote: { label: s.slice(AS_QUOTE_OPEN.length, close), text: rest.slice(0, cut) }, text: rest.slice(cut + 2) };
 }
 
+/* 一条对话在历史列表里的标题：第一句提问（带引用的只取问的那句，换行并成空格，太长截断）；
+   以速览开头的（第一条是回答）写「速览解读」；空对话是空串。标题不存，显示时现算。 */
+function asChatTitle(thread) {
+  const first = Array.isArray(thread) ? thread[0] : null;
+  if (!first) return '';
+  if (first.role !== 'user') return t('asHistoryQuick');
+  return asClip(String(asSplitAsk(first.content).text).replace(/\s+/g, ' ').trim(), AS_TITLE_CLIP);
+}
+
+function asPad2(n) {
+  return (n < 10 ? '0' : '') + n;
+}
+
+/* 历史列表里的日期：这条对话最后一次动的时间 */
+function asChatDate(ms) {
+  const d = new Date(+ms || 0);
+  return t('asHistoryDate', {
+    y: d.getFullYear(), m: d.getMonth() + 1, d: d.getDate(),
+    mm: asPad2(d.getMonth() + 1), dd: asPad2(d.getDate()), hh: asPad2(d.getHours()), mi: asPad2(d.getMinutes())
+  });
+}
+
 /* 输入框里的提问（带上还挂着的引用，由 store.ask 处理）。引导问题各自带自己的引用和定位，见 asSuggestItems */
 function asAsk(question) {
   return appStore().ask(String(question == null ? '' : question).trim());
@@ -12943,6 +13068,10 @@ function asOpenOf(s) {
   return !!s.session.panelOpen;
 }
 
+function asHistoryOpenOf(s) {
+  return !!s.session.asHistory;
+}
+
 function asReportDone(rep) {
   return !!rep && rep.status === 'done' && !!rep.text;
 }
@@ -12951,10 +13080,19 @@ function asHeadOf(s, store) {
   const r = store.reading();
   return {
     hasThread: r.thread.length > 0,
+    hasHistory: r.chats.length > 0,
+    history: !!s.session.asHistory,
     busy: !!store.job(),
     handoff: s.session.handoff === 'working',
     hasReport: asReportDone(r.report)
   };
+}
+
+/* 历史列表：当前对话只选条数和标题（都是原始值），历史选 state 里原有的数组。
+   流式增量只改最后一条回答的正文，这几样都不变，所以列表不跟着重画 */
+function asHistoryOf(s, store) {
+  const r = store.reading();
+  return { chats: r.chats, curCount: r.thread.length, curTitle: asChatTitle(r.thread), busy: !!store.job() };
 }
 
 function asContextOf(s, store) {
@@ -13016,6 +13154,7 @@ function asComposerOf(s, store) {
 /* ---------------- 面板 ---------------- */
 function AssistantPanel(props) {
   const open = useStore(asOpenOf);
+  const history = useStore(asHistoryOpenOf);
   const floating = props.tier !== 'wide';
   const boxRef = useDialogFocus(open && floating);
   const inputRef = useRef(null);
@@ -13031,13 +13170,15 @@ function AssistantPanel(props) {
     'data-dsh-automatic-focus': floating ? '' : undefined, tabIndex: floating ? -1 : undefined,
     onKeyDown: floating ? asTrapKey : undefined
   },
-  h(AssistantHead, { focusInput: focusInput }),
-  h(AssistantThread, { floating: floating, focusInput: focusInput }),
-  h(AssistantError, { focusInput: focusInput }),
-  h(AssistantSuggest, { focusInput: focusInput }),
-  h(AssistantQuote),
-  h(AssistantComposer, { inputRef: inputRef }),
-  h('div', { className: 'zp-as-foot' }, t('asDisclaimer')));
+  h(AssistantHead, { key: 'head', focusInput: focusInput }),
+  /* 历史对话列表开着：它换掉中间这几块。回到对话时输入区重新挂上，自己把焦点拿回去（AssistantComposer 挂载时的 effect） */
+  history ? h(AssistantHistory, { key: 'history' }) : null,
+  history ? null : h(AssistantThread, { key: 'thread', floating: floating, focusInput: focusInput }),
+  history ? null : h(AssistantError, { key: 'error', focusInput: focusInput }),
+  history ? null : h(AssistantSuggest, { key: 'suggest', focusInput: focusInput }),
+  history ? null : h(AssistantQuote, { key: 'quote' }),
+  history ? null : h(AssistantComposer, { key: 'composer', inputRef: inputRef }),
+  h('div', { key: 'foot', className: 'zp-as-foot' }, t('asDisclaimer')));
   if (!floating) return [aside];
   return [
     h('div', { key: 'mask', className: 'zp-as-mask', 'aria-hidden': true, onClick: function () { store.setPanel(false); } }),
@@ -13053,10 +13194,25 @@ function AssistantHead(props) {
     h('b', null, t('asTitle')),
     h(AssistantContext),
     h('div', { className: 'zp-as-actions' },
+      /* 历史对话：开关。有历史、或当前对话有消息时才出现（都没有就没东西可看） */
+      m.hasThread || m.hasHistory ? h('button', {
+        key: 'history', className: 'zp-icon-btn', type: 'button', title: t('asHistory'), 'aria-label': t('asHistory'),
+        'aria-pressed': m.history ? 'true' : 'false',
+        /* 点开时输入框连同里面的焦点一起卸掉了：焦点留在这个按钮上，不掉到 body（中、窄档的焦点陷阱要焦点在面板里） */
+        onClick: function (ev) {
+          store.patchSession({ asHistory: !m.history });
+          if (ev && ev.currentTarget) focusQuietly(ev.currentTarget);
+        }
+      }, h(Icon, { name: 'history' })) : null,
+      /* 新对话：把当前对话存进历史，再开一条空的（不是清空） */
       m.hasThread ? h('button', {
         key: 'new', className: 'zp-icon-btn', type: 'button', title: t('asNewChat'), 'aria-label': t('asNewChat'),
         disabled: m.busy ? true : undefined,
-        onClick: function () { if (store.clearThread()) props.focusInput(); }
+        onClick: function () {
+          if (!store.newChat()) return;
+          store.patchSession({ asHistory: false });
+          props.focusInput();
+        }
       }, h(Icon, { name: 'newChat' })) : null,
       h('button', {
         key: 'handoff', className: 'zp-icon-btn', type: 'button', title: t('asHandoffHint'), 'aria-label': t('asHandoff'),
@@ -13067,6 +13223,53 @@ function AssistantHead(props) {
         key: 'close', className: 'zp-icon-btn', type: 'button', title: t('dialogClose'), 'aria-label': t('dialogClose'),
         onClick: function () { store.setPanel(false); }
       }, h(Icon, { name: 'close' }))));
+}
+
+/* ---------------- 历史对话 ---------------- */
+/* 这张盘聊过的对话：当前对话（有消息时）排第一，后面是历史，新的在前。点一行切过去，每行可以删（都可撤销）。
+   任务在跑时不能切（一张盘同一时间只有一个任务，回答要写进当前对话）。 */
+function AssistantHistory() {
+  const m = useStore(asHistoryOf);
+  const store = appStore();
+  const backRef = useRef(null);
+  const back = function () { store.patchSession({ asHistory: false }); };
+  /* 删掉的那一行连同按钮都没了：焦点交给「返回对话」，免得掉到 body 上 */
+  const afterRemove = function () { if (backRef.current) focusQuietly(backRef.current); };
+  const row = function (o) {
+    return h('li', { key: o.key, className: 'zp-as-chat' + (o.current ? ' zp-now' : '') },
+      h('button', {
+        className: 'zp-as-chat-open', type: 'button', disabled: o.disabled ? true : undefined, title: o.disabled ? t('asHistoryBusy') : undefined,
+        onClick: o.open
+      },
+      h('span', { className: 'zp-as-chat-title' }, o.title),
+      h('small', { className: 'zp-as-chat-meta' }, o.meta)),
+      h('button', {
+        className: 'zp-icon-btn zp-plain', type: 'button', title: t('asHistoryDelete', { title: o.title }),
+        'aria-label': t('asHistoryDelete', { title: o.title }), disabled: o.noRemove ? true : undefined,
+        onClick: function () { if (o.remove()) afterRemove(); }
+      }, h(Icon, { name: 'close', size: 12 })));
+  };
+  const rows = [];
+  if (m.curCount > 0) {
+    rows.push(row({
+      key: 'current', current: true, title: m.curTitle, meta: t('asHistoryCurrent', { n: m.curCount }),
+      open: back, noRemove: m.busy, remove: function () { return store.clearThread(); }
+    }));
+  }
+  m.chats.forEach(function (c) {
+    rows.push(row({
+      key: c.id, title: asChatTitle(c.thread), meta: t('asHistoryMeta', { date: asChatDate(c.updatedAt), n: c.thread.length }),
+      disabled: m.busy, open: function () { if (store.openChat(c.id)) back(); },
+      remove: function () { return store.removeChat(c.id); }
+    }));
+  });
+  return h('div', { className: 'zp-as-history', role: 'region', 'aria-label': t('asHistory') },
+    h('div', { className: 'zp-as-history-h' },
+      h('b', null, t('asHistory')),
+      h('button', { className: 'zp-btn zp-sm', type: 'button', ref: backRef, onClick: back }, t('asHistoryBack'))),
+    rows.length
+      ? h('ul', { className: 'zp-as-chats' }, rows)
+      : h('p', { className: 'zp-as-history-empty' }, t('asHistoryEmpty')));
 }
 
 /* 上下文行：盘名 · 五行局 · 选中的宫（选宫只让这一行重画） */
@@ -13322,6 +13525,8 @@ function AssistantComposer(props) {
         disabled: canSend ? undefined : true, onClick: submit
       }, h(Icon, { name: 'send' }))));
 }
+
+ZWUI.asChatTitle = asChatTitle;
 /* ---- src/ui/85-reportview.js ---- */
 /* ================================================================
  * 85-reportview：报告页（T7）。左边目录（REPORT_TOC），右边阅读栏（REPORT_DOC）；结构见 css/86-reportview.css 开头。

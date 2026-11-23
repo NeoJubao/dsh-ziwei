@@ -71,6 +71,12 @@ const ZH = {
   continuePrompt: '请接着上文继续写：从断处接着写，不要重复已写内容，也不要重新开头。',
   quoteDefault: '请针对这段展开说说。',
   cleared: '已清空对话',
+  history: '历史对话',
+  historyBack: '返回对话',
+  archived: '已存到历史对话',
+  chatRemoved: '已删除这条对话',
+  historyBusy: '紫微师正在回答，答完再切换',
+  historyEmpty: '这张盘还没有历史对话。点「新对话」时，当前这条会存到这里。',
   undo: '撤销',
   answerReady: '紫微师回答好了',
   view: '查看'
@@ -423,23 +429,163 @@ export default async function assistantChecks(t) {
     rt.flush();
   });
 
+  /* 2026-11-24（spec 2026-11-24_chat-history）：「新对话」不再清空，而是把当前对话存进历史。
+     真机反馈：点了新对话，以前的对话直接没了。 */
   await safe('新对话', async () => {
     const before = store.reading().thread.length;
-    const btn = byLabel(one(panel(), 'zp-as-actions'), ZH.newChat);
+    const actions = () => one(panel(), 'zp-as-actions');
+    const btn = byLabel(actions(), ZH.newChat);
     ok('有对话时头部有「新对话」', !!btn && before > 0);
+    eq('有对话时头部动作：历史对话、新对话、在新会话里继续、关闭', buttons(actions()).map(labelOf), [ZH.history, ZH.newChat, ZH.handoff, ZH.close]);
+    rt.doc.activeElement = rt.doc.body;
     rt.click(btn);
-    eq('点「新对话」：对话清空、回到空态，提示可撤销',
-      [store.reading().thread.length, !!one(log(), 'zp-as-empty'), store.getState().session.toast && store.getState().session.toast.text,
-        buttons(one(tree(), 'zp-toast')).map(text)], [0, true, ZH.cleared, [ZH.undo]]);
-    eq('清空后头部没有「新对话」', byLabel(one(panel(), 'zp-as-actions'), ZH.newChat), null);
-    rt.click(byLabel(one(tree(), 'zp-toast'), ZH.undo));
-    eq('点「撤销」：对话回来', store.reading().thread.length, before);
+    eq('点「新对话」：对话进了历史（没有删）、面板回到空态，提示「已存到历史对话」，不带撤销',
+      [store.reading().thread.length, store.reading().chats.length, store.reading().chats[0] && store.reading().chats[0].thread.length, !!one(log(), 'zp-as-empty'),
+        store.getState().session.toast && store.getState().session.toast.text, buttons(one(tree(), 'zp-toast')).map(text)],
+      [0, 1, before, true, ZH.archived, []]);
+    ok('点完焦点在输入框（按钮自己消失了）', rt.doc.activeElement === ta().node);
+    eq('开了新对话后头部：没有「新对话」，「历史对话」还在', buttons(actions()).map(labelOf), [ZH.history, ZH.handoff, ZH.close]);
     store.dismissToast();
+    /* 后面的用例接着用原来那条对话：从历史里取回来 */
+    ok('从历史里取回来', store.openChat(store.reading().chats[0].id) === true);
+    rt.flush();
+    eq('取回来：对话和原来一样长，历史空了', [store.reading().thread.length, store.reading().chats.length], [before, 0]);
     store.ask('再问一句');
     await step();
     eq('生成中：「新对话」和「在新会话里继续」都禁用',
       [!!attr(byLabel(panel(), ZH.newChat), 'disabled'), !!attr(byLabel(panel(), ZH.handoff), 'disabled')], [true, true]);
     await finish(last());
+  });
+
+  /* ---------------------------------------------------------------- */
+  section('紫微师：历史对话（spec 2026-11-24_chat-history §3.3）');
+  await safe('历史对话的标题', async () => {
+    ok('ZWUi 暴露 asChatTitle', typeof ZW.asChatTitle === 'function');
+    if (typeof ZW.asChatTitle !== 'function') return;
+    const A = { role: 'assistant', content: '答' };
+    eq('标题：第一句提问；带引用的只取问的那句；以速览开头的是「速览解读」；换行并成空格；超过 40 字截断；空对话是空串',
+      [ZW.asChatTitle([{ role: 'user', content: '事业如何' }, A]),
+        ZW.asChatTitle([{ role: 'user', content: '【引用：这一宫】\n命宫 癸丑 · 太阳、太阴\n\n怎么看' }, A]),
+        ZW.asChatTitle([{ role: 'assistant', content: '速览正文' }, { role: 'user', content: '后来问的' }]),
+        ZW.asChatTitle([{ role: 'user', content: '第一行\n第二行' }]),
+        ZW.asChatTitle([{ role: 'user', content: '字'.repeat(50) }]),
+        ZW.asChatTitle([])],
+      ['事业如何', '怎么看', '速览解读', '第一行 第二行', '字'.repeat(40) + '…', '']);
+  });
+
+  await safe('历史对话的列表', async () => {
+    /* 自己起一个环境：两条对话的内容都由这里定，不依赖前面的用例聊了什么。时间固定在 2026-11-19 10:00 */
+    const e2 = bootRuntime(t.client, { now: NOW, storage: memoryStorage() });
+    const st2 = e2.store;
+    const rt2 = e2.rt;
+    const en2 = st2.addChart(GOLDEN, '甲');
+    st2.openChart(en2.id);
+    rt2.width = 1300;
+    rt2.mount(e2.h(e2.Main));
+    st2.setPanel(true);
+    rt2.flush();
+    await settle(6);
+    rt2.flush();
+    const pn = () => one(rt2.tree(), 'zp-assistant');
+    const acts = () => buttons(one(pn(), 'zp-as-actions')).map(labelOf);
+    const hv = () => one(pn(), 'zp-as-history');
+    const rows = () => findByClass(hv(), 'zp-as-chat');
+    const rowText = (r) => [text(one(r, 'zp-as-chat-title')), text(one(r, 'zp-as-chat-meta')), classesOf(r).includes('zp-now')];
+    const openBtn = (r) => one(r, 'zp-as-chat-open');
+    const delBtn = (r) => buttons(r).find((n) => n !== openBtn(r) && !classesOf(n).includes('zp-as-chat-open'));
+    const ta2 = () => find(pn(), (n) => n.type === 'textarea')[0] || null;
+    const last2 = () => e2.pipe.calls[e2.pipe.calls.length - 1];
+    const step2 = async () => { await settle(6); rt2.flush(); };
+    const qa = async (q, ans) => { st2.ask(q); await step2(); last2().send('done', { text: ans }).end(); await step2(); };
+    const histBtn = () => byLabel(one(pn(), 'zp-as-actions'), ZH.history);
+
+    eq('没有对话也没有历史：头部没有「历史对话」', acts(), [ZH.handoff, ZH.close]);
+    await qa('事业如何', '事业答');
+    eq('有对话：头部多了「历史对话」和「新对话」', acts(), [ZH.history, ZH.newChat, ZH.handoff, ZH.close]);
+    rt2.click(byLabel(one(pn(), 'zp-as-actions'), ZH.newChat));
+    st2.dismissToast();
+    rt2.flush();
+    await qa('感情如何', '感情答');
+
+    eq('「历史对话」是个开关：没点开时 aria-pressed=false', attr(histBtn(), 'aria-pressed'), 'false');
+    rt2.doc.activeElement = rt2.doc.body;
+    rt2.click(histBtn());
+    ok('点开后焦点在「历史对话」按钮上（输入框卸掉了，焦点不能掉到 body）', rt2.doc.activeElement === histBtn().node);
+    eq('点开：面板里换成列表 div.zp-as-history[role=region][aria-label=历史对话]；头部和免责声明留着，对话区、引导问题、输入框不在',
+      [!!hv(), attr(hv(), 'role'), attr(hv(), 'aria-label'), !!one(pn(), 'zp-as-head'), text(one(pn(), 'zp-as-foot')),
+        !!one(pn(), 'zp-chat-thread'), !!one(pn(), 'zp-suggest'), !!ta2(), attr(histBtn(), 'aria-pressed')],
+      [true, 'region', ZH.history, true, ZH.disclaimer, false, false, false, 'true']);
+    eq('列表是 ul.zp-as-chats > li.zp-as-chat；当前对话排第一并标出，后面是历史；每行有标题、日期和条数',
+      [one(hv(), 'zp-as-chats') && one(hv(), 'zp-as-chats').type, rows().map((r) => r.type), rows().map(rowText)],
+      ['ul', ['li', 'li'], [['感情如何', '当前 · 2 条', true], ['事业如何', '11月19日 10:00 · 2 条', false]]]);
+    eq('每行两个按钮：打开（button.zp-as-chat-open）和删除（名字里带着是哪一条）',
+      rows().map((r) => [openBtn(r).type, attr(delBtn(r), 'aria-label')]), [['button', '删除对话：感情如何'], ['button', '删除对话：事业如何']]);
+    ok('列表里每个按钮都有文字或 aria-label', buttons(hv()).length > 0 && buttons(hv()).every((n) => text(n).trim() || attr(n, 'aria-label')));
+
+    /* 任务在跑：历史行不能点；流式增量不让列表重画 */
+    st2.ask('再问一句');
+    await step2();
+    eq('紫微师在回答：历史那一行不能点（title 说明原因），当前这一行的条数跟着变', [attr(openBtn(rows()[1]), 'disabled'), attr(openBtn(rows()[1]), 'title'), rowText(rows()[0])[1]],
+      [true, ZH.historyBusy, '当前 · 3 条']);
+    last2().send('delta', { text: '第一段' });
+    await step2();
+    const c0 = rt2.count('AssistantHistory');
+    last2().send('delta', { text: '第二段' }).send('delta', { text: '第三段' });
+    await step2();
+    eq('流式增量到来：列表不重画', rt2.count('AssistantHistory') - c0, 0);
+    last2().send('done', { text: '第一段第二段第三段' }).end();
+    await step2();
+    eq('答完：历史那一行又能点了', attr(openBtn(rows()[1]), 'disabled'), undefined);
+
+    /* 切到一条历史 */
+    rt2.doc.activeElement = rt2.doc.body;
+    rt2.click(openBtn(rows()[1]));
+    await step2();
+    eq('点一条历史：切到那条对话、回到对话视图，原来的当前对话进了历史',
+      [!!hv(), st2.reading().thread.map((m) => m.content), st2.reading().chats.map((c) => c.thread[0].content), attr(histBtn(), 'aria-pressed')],
+      [false, ['事业如何', '事业答'], ['感情如何'], 'false']);
+    ok('切过去之后焦点在输入框', !!ta2() && rt2.doc.activeElement === ta2().node);
+    eq('对话区里是那条对话的气泡', findByClass(one(pn(), 'zp-chat-thread'), 'zp-me').map((n) => text(n)), ['事业如何']);
+
+    /* 删除和撤销 */
+    rt2.click(histBtn());
+    rt2.doc.activeElement = rt2.doc.body;
+    rt2.click(delBtn(rows()[1]));
+    const tt = () => st2.getState().session.toast;
+    eq('删一条历史：这一行没了，提示可撤销', [rows().map((r) => rowText(r)[0]), tt() && tt().text, buttons(one(rt2.tree(), 'zp-toast')).map(text)],
+      [['事业如何'], ZH.chatRemoved, [ZH.undo]]);
+    ok('删完焦点不掉到 body 上（那个按钮已经不在了）', rt2.doc.activeElement !== rt2.doc.body);
+    rt2.click(byLabel(one(rt2.tree(), 'zp-toast'), ZH.undo));
+    eq('撤销：那一行回来', rows().map((r) => rowText(r)[0]), ['事业如何', '感情如何']);
+    st2.dismissToast();
+    rt2.flush();
+    rt2.click(delBtn(rows()[0]));
+    eq('删当前对话：清空当前对话（可撤销），列表里只剩历史', [st2.reading().thread.length, rows().map((r) => rowText(r)[0]), tt() && tt().text, buttons(one(rt2.tree(), 'zp-toast')).map(text)],
+      [0, ['感情如何'], ZH.cleared, [ZH.undo]]);
+    st2.dismissToast();
+    rt2.flush();
+
+    /* 返回对话、空列表 */
+    rt2.click(byLabel(hv(), ZH.historyBack));
+    eq('点「返回对话」：回到对话视图', [!!hv(), !!one(pn(), 'zp-chat-thread'), attr(histBtn(), 'aria-pressed')], [false, true, 'false']);
+    rt2.click(histBtn());
+    rt2.click(delBtn(rows()[0]));
+    st2.dismissToast();
+    rt2.flush();
+    eq('一条都没有了：列表换成一句说明', [rows().length, text(one(hv(), 'zp-as-history-empty'))], [0, ZH.historyEmpty]);
+    rt2.click(byLabel(hv(), ZH.historyBack));
+    eq('没有对话也没有历史了：头部的「历史对话」也不在了', acts(), [ZH.handoff, ZH.close]);
+
+    /* 关面板再开：看到的是对话，不是列表 */
+    await qa('财运如何', '财运答');
+    rt2.click(histBtn());
+    st2.setPanel(false);
+    rt2.flush();
+    st2.setPanel(true);
+    rt2.flush();
+    await step2();
+    eq('列表开着时关面板，再打开：回到对话', [!!hv(), !!one(pn(), 'zp-chat-thread')], [false, true]);
+    rt2.unmount();
   });
 
   /* ---------------------------------------------------------------- */

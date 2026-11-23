@@ -24,7 +24,7 @@
  * Icon { name, size = 16 }
  *   svg.zp-icon（aria-hidden，线色随文字）。name 是 ICON_PATHS 的键（ZWUi.iconNames 列出全部）：
  *   exit back close more list gear settings caret chevronLeft chevronRight chevronDown send stop sparkle newChat handoff
- *   copy download export report quote refresh check。新图标先加进表里再用。
+ *   copy download export report quote refresh check history。新图标先加进表里再用。
  *
  * Seg { items, value, onChange(id), label, className?, region?, radio? }
  *   分段页签：div.zp-seg[role=tablist][aria-label=label]（className 追加在 zp-seg 后面，region → data-region）。
@@ -368,6 +368,12 @@ const ICON_PATHS = {
   refresh: [
     ['path', { d: 'M13 7.6A5 5 0 1 1 11.4 4' }],
     ['path', { d: 'M13.2 2.6v3.2H10' }]
+  ],
+  /* 历史对话：往回走的圆弧箭头（refresh 的镜像）里一个表针 */
+  history: [
+    ['path', { d: 'M3 7.6A5 5 0 1 0 4.6 4' }],
+    ['path', { d: 'M2.8 2.6v3.2H6' }],
+    ['path', { d: 'M8 5.7V8l1.7 1.1' }]
   ]
 };
 

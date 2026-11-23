@@ -4,7 +4,13 @@
  * 结构（80-assistant.js 渲染）：
  *   div.zp-as-mask                            只在中、窄档且面板打开时渲染；点了关闭
  *   aside.zp-assistant                        ASSISTANT；中、窄档下带 role=dialog aria-modal
- *     header.zp-as-head > b, small, div.zp-as-actions（新对话、在新会话里继续、关闭）
+ *     header.zp-as-head > b, small, div.zp-as-actions（历史对话、新对话、在新会话里继续、关闭）
+ *     div.zp-as-history[role=region]            历史对话列表：「历史对话」开着时换掉下面从对话区到输入区的几块
+ *       div.zp-as-history-h > b + button.zp-btn.zp-sm（返回对话）
+ *       ul.zp-as-chats > li.zp-as-chat（当前对话加 zp-now）
+ *         button.zp-as-chat-open > span.zp-as-chat-title + small.zp-as-chat-meta
+ *         button.zp-icon-btn.zp-plain            删除这一条
+ *       p.zp-as-history-empty                    一条都没有时
  *     div.zp-chat-thread[role=log][aria-live=polite]
  *       div.zp-as-empty                       面板空着时：一句话 + 速览 + 起手动作 + 示例问题
  *         p.zp-l1, section.zp-quick > h4 + p（速览，本地算的）, div.zp-as-starts > button.zp-btn
@@ -245,6 +251,75 @@
 }
 .zp-root .zp-quote button { color: var(--zp-ink-3) }
 .zp-root .zp-quote button:hover { background: var(--zp-hover); color: var(--zp-ink) }
+/* 头部的「历史对话」是开关：开着时和悬停一个样（底色加深、字变实） */
+.zp-root .zp-as-actions .zp-icon-btn[aria-pressed="true"] { background: var(--zp-hover); color: var(--zp-ink) }
+/* 历史对话列表：占掉对话区到输入区的位置，自己滚动 */
+.zp-as-history {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px 12px 16px;
+}
+.zp-as-history-h {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 4px 8px;
+}
+.zp-as-history-h b { font-size: 13px; font-weight: 600 }
+.zp-root .zp-as-history-h b { color: var(--zp-ink-2) }
+.zp-as-history-h .zp-btn { margin-left: auto }
+.zp-as-chats {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.zp-as-chat {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-right: 6px;
+  border: 1px solid var(--zp-line-2);
+  border-radius: 12px;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+.zp-as-chat:hover { background: var(--zp-hover) }
+/* 当前对话：和输入框聚焦时同一个紫色描边 */
+.zp-as-chat.zp-now { border-color: color-mix(in srgb, var(--zp-zi) 55%, var(--zp-line-2)) }
+.zp-as-chat-open {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 6px 8px 12px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+}
+.zp-as-chat-open:disabled { opacity: 0.55; cursor: default }
+.zp-as-chat-title {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 14px;
+  line-height: 20px;
+}
+.zp-as-chat-meta { font-size: 12px; line-height: 18px }
+.zp-root .zp-as-chat-title { color: var(--zp-ink) }
+.zp-root .zp-as-chat-meta { color: var(--zp-ink-3) }
+.zp-as-chat .zp-icon-btn { flex: none }
+.zp-as-history-empty {
+  margin: 24px 4px;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.zp-root .zp-as-history-empty { color: var(--zp-ink-2) }
 /* 输入区：上面是输入框，下面一行是模型按钮和发送键 */
 .zp-as-form {
   flex: none;
