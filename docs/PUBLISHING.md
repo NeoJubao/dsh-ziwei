@@ -63,15 +63,16 @@
   含 1.3.3 旧缓存月柱迁移、1.4.0 手动「检查更新」、1.5.0 格局摘要、1.5.1/1.5.2 左栏顺序修复。
 - **npm 已发布 `dsh-ziwei@1.6.0`**（latest，2026-11-15；tag `v1.6.0` 与 GitHub Release 齐全）：
   界面 v3.2 / v3.3（抽屉不再自动解读、空态动作卡、报告表格渲染）与关于 / README / 报告落款署名。
-- **`dsh-ziwei@2.0.0` 待发布（2026-11-22）**：界面 v6。发布提交在 `feature/v6-redesign`，`main` 快进到它之后打 `v2.0.0`、
+- **npm 已发布 `dsh-ziwei@2.0.0`**（2026-11-22；tag `v2.0.0` 与 GitHub Release 齐全）：界面 v6。发布提交在 `feature/v6-redesign`，`main` 快进到它之后打 `v2.0.0`、
   建 GitHub Release（附 tarball，sha256 写在 Release 说明里）。最后一步由作者执行：
   `npm publish dist/dsh-ziwei/dsh-ziwei-2.0.0.tgz --access public`（需 2FA。2026-11-22 这台机器的 npm 没有登录，仓库也没有配置 `release.yml` 要的 `RELEASE_ENABLED` 变量和 `npm-publish` 环境，所以只有这一条路）。
-  发布后按 §4 验证，并把本条改成「已发布」。
-- **`dsh-ziwei@2.1.0` 待发布（2026-11-26）**：真太阳时可选、出生城市补全、按命盘的历史对话。发布提交在 `feat/chat-history`
-  （它叠在 `feat/solar-time-option` 上，两个功能都在）。顺序和 2.0.0 一样：推分支、跑 CI，`main` 快进到发布提交，
-  打 `v2.1.0`、建 GitHub Release（附 tarball，sha256 写在 Release 说明里），最后由作者执行
-  `npm publish dist/dsh-ziwei/dsh-ziwei-2.1.0.tgz --access public`。发布后按 §4 验证，并把本条改成「已发布」。
-  写这一条时没有去查 2.0.0 在 npm 上的状态，上一条照原样留着。
+  registry 记录的发布时间是 2026-11-22T04:25Z（2026-11-26 查到的）；§4 的第 2、3 步有没有做没有记录。
+- **npm 已发布 `dsh-ziwei@2.1.0`**（latest，2026-11-26；tag `v2.1.0` 与 GitHub Release 齐全）：真太阳时可选、出生城市补全、按命盘的历史对话。
+  发布提交在 `feat/chat-history`（它叠在 `feat/solar-time-option` 上，两个功能都在）。顺序和 2.0.0 一样：推分支、手动触发 CI
+  （三平台 × Node 22/24 全绿，run `45792378022`），`main` 快进到发布提交，打 `v2.1.0`、建 GitHub Release（附 tarball，sha256 写在
+  Release 说明里），最后作者在本机 `npm publish dist/dsh-ziwei/dsh-ziwei-2.1.0.tgz --access public`。
+  发布后查过：registry 上 `latest` 是 2.1.0，包的 shasum 和 integrity 与本机打出的 tarball（也就是 Release 的附件）一致。
+  §4 的第 2、3 步（装进一次性 profile、启动确认）没有做；§0.5 的「2.1.0 真机走查」也还没有勾。
 - **从 1.x 升到 2.0.0 的路径没有实测**：1.6.0 面板里「检查更新」给的命令是 `dsh plugin … update dsh-ziwei`，
   它会不会越过 profile 里记下的 1.x 范围不确定；README、INSTALL、CHANGELOG 里写的是显式安装 `dsh-ziwei@2.0.0`。
 - **CI 已绿**：三平台 × Node 22/24（run `42480774977`，workflow `ci.yml`）；
@@ -205,6 +206,13 @@ npm publish "./dist/dsh-ziwei" --access public
 
 > 手动发布没有 `--provenance` 证明，安全性弱于 OIDC；发布后建议在 npm 页面补上
 > Trusted Publishing，后续版本走 workflow。
+
+两处容易看错的现象（2026-11-26 发 2.1.0 时遇到）：
+
+- `npm publish` 报 `E404 … PUT https://registry.npmjs.org/dsh-ziwei`，说包不存在或没有权限：多半是本机 npm 的登录失效了。
+  `npm whoami` 返回 401 就是这种情况（registry 对没有权限的发布请求回 404）。重新 `npm login` 再发。
+- 发布命令成功退出之后，registry 上不一定马上查得到：那次发布请求拿到的是 `202`，新版本大约两分半钟后才出现在
+  `npm view` 和 registry 接口里。先等几分钟再判断有没有发上去。
 
 ## 4. 发布后验证
 
