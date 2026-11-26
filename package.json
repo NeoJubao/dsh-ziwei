@@ -1,6 +1,6 @@
 {
   "name": "@local/ziwei-workbench",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "private": true,
   "type": "module",
   "description": "紫微斗数排盘工作台（DSH 插件）：确定性排盘、十二宫/四化/大限与面板内解读。A Zi Wei Dou Shu (Purple Star Astrology) workbench plugin for DeepSeek Harness.",

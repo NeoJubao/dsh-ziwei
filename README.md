@@ -26,7 +26,10 @@ official DeepSeek product.
 
 ## 2.0.0：界面重做（v6）
 
-> 从 1.x 升级：`dsh plugin --profile <profile> add dsh-ziwei@2.0.0`，装完手动重启 DSH（见 [docs/INSTALL.md](docs/INSTALL.md) 的「更新」）。
+> **2.1.0**（2026-11-26）在 v6 上加了：真太阳时校正可以按盘关掉、出生城市认得全部地级市、每张盘的历史对话（存在 `ziwei-pro.chats.v1`），
+> 没做校正的盘也能生成报告。这一版没有在真实 DSH 里看过，见 [CHANGELOG.md](CHANGELOG.md) 的「验证」。
+>
+> 安装或从旧版升级：`dsh plugin --profile <profile> add dsh-ziwei@2.1.0`，装完手动重启 DSH（见 [docs/INSTALL.md](docs/INSTALL.md) 的「更新」）。
 > 1.6.0 存在本机的命盘库、表单和设置照常读出；v6 新增 `ziwei-pro.sky`、`ziwei-pro.v6`、`ziwei-pro.theme`、`ziwei-pro.model` 四个键，
 > 每张盘的对话和报告写在 `ziwei-pro.readings.v2`。上一版界面是 1.6.0（tag `v1.6.0`）；完整的变化见 [CHANGELOG.md](CHANGELOG.md)。
 

@@ -41,6 +41,10 @@
       `2.0.0-dogfood.2`（2026-11-21）两轮，反馈都已改（记录在 `docs/plans/2026-11-20_v6-polish-plan.md`）；
       2026-11-22 作者决定发布 2.0.0。**没有记录的**：浅色和深色、窄 / 中 / 宽三档、首页 3D 与静态星图的逐项走查；
       第二轮之后的两处修复（模型调不通时的说明、换模型后自动重问）没有在真实 DSH 里看过。这一格由作者勾。
+- [ ] **2.1.0 真机走查**：这一版（真太阳时可选、城市表、历史对话、没校正的盘出报告）只在本机预览壳和自动断言里验过，
+      **没有在真实 DSH 里看过**。要看的：重启 DSH 后在一张没校正的盘上点「重新生成」，报告能不能写完
+      （真实模型会不会照新的提示词写，没有实测）；引导确认步的校正开关、生辰表单的「真太阳时」、历史对话列表，
+      浅色和深色、窄 / 中 / 宽三档。这一格由作者勾。
 - [x] **干净环境安装冒烟（配置层）**：2026-11-08 用 `DSH_HOME=/tmp/dsh-smoke-home` 新建 `smoke` profile，
       对发布 tarball 执行 `dsh plugin --profile smoke add <tgz>`，`dsh --profile smoke --dump-config`
       已出现 `# == dsh-ziwei` 与 bundle 行；**未做 GUI 启动/点击**。
@@ -63,6 +67,11 @@
   建 GitHub Release（附 tarball，sha256 写在 Release 说明里）。最后一步由作者执行：
   `npm publish dist/dsh-ziwei/dsh-ziwei-2.0.0.tgz --access public`（需 2FA。2026-11-22 这台机器的 npm 没有登录，仓库也没有配置 `release.yml` 要的 `RELEASE_ENABLED` 变量和 `npm-publish` 环境，所以只有这一条路）。
   发布后按 §4 验证，并把本条改成「已发布」。
+- **`dsh-ziwei@2.1.0` 待发布（2026-11-26）**：真太阳时可选、出生城市补全、按命盘的历史对话。发布提交在 `feat/chat-history`
+  （它叠在 `feat/solar-time-option` 上，两个功能都在）。顺序和 2.0.0 一样：推分支、跑 CI，`main` 快进到发布提交，
+  打 `v2.1.0`、建 GitHub Release（附 tarball，sha256 写在 Release 说明里），最后由作者执行
+  `npm publish dist/dsh-ziwei/dsh-ziwei-2.1.0.tgz --access public`。发布后按 §4 验证，并把本条改成「已发布」。
+  写这一条时没有去查 2.0.0 在 npm 上的状态，上一条照原样留着。
 - **从 1.x 升到 2.0.0 的路径没有实测**：1.6.0 面板里「检查更新」给的命令是 `dsh plugin … update dsh-ziwei`，
   它会不会越过 profile 里记下的 1.x 范围不确定；README、INSTALL、CHANGELOG 里写的是显式安装 `dsh-ziwei@2.0.0`。
 - **CI 已绿**：三平台 × Node 22/24（run `42480774977`，workflow `ci.yml`）；
